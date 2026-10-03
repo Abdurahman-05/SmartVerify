@@ -1,0 +1,40 @@
+{
+  "common": {
+    "verify": "ማረጋገጥ",
+    "cancel": "ስረዝ",
+    "save": "ማስቀመጥ",
+    "delete": "삭제",
+    "edit": "ማርትዖ",
+    "done": "ተጠናቅቅ",
+    "loading": "በሚጫን...",
+    "error": "ስህተት",
+    "success": "ስኬት"
+  },
+  "auth": {
+    "signIn": "ወደ ውስጥ ይግቡ",
+    "signUp": "ሂሳብ ይፍጠሩ",
+    "email": "ኢሜይል",
+    "password": "የይለፍ ቃል",
+    "rememberMe": "ማስታወስ",
+    "forgotPassword": "የይለፍ ቃልን ረስተው?"
+  },
+  "verify": {
+    "enterAmount": "መጠን ያስገቡ",
+    "scanPayment": "ጭነት QR ያስ್ካን",
+    "verified": "ታወቀ",
+    "notMatching": "አልተመሳሰለም",
+    "pending": "በመጠባበቅ ላይ",
+    "mismatch": "አለመመሳሰል",
+    "duplicate": "ተክርር"
+  },
+  "plans": {
+    "normal": "ተራ ማረጋገጥ",
+    "restaurant": "ሬስቶራንት ፕላስ"
+  },
+  "roles": {
+    "owner": "ባለቤት",
+    "manager": "ሥራ አስኪያጅ",
+    "waiter": "ሰርቫር",
+    "chef": "ምግብ ባሌ"
+  }
+}

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Verification Failed</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#FAF5F3}
+button{font-family:'DM Sans',sans-serif}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #FAF5F3; color: #14201B; display: flex; flex-direction: column; padding: 56px 24px 32px 24px">
+<div style="display: flex; flex-direction: column; align-items: center; padding-top: 24px">
+<div style="position: relative; width: 200px; height: 200px; display: flex; align-items: center; justify-content: center">
+<svg width="200" height="200" viewBox="0 0 200 200" style="position: absolute; left: 0; top: 0" aria-hidden="true">
+<circle cx="100" cy="100" r="98" fill="none" stroke="#B3261E" stroke-width="1.5" opacity="0.18"></circle>
+<circle cx="100" cy="100" r="76" fill="none" stroke="#B3261E" stroke-width="1.5" opacity="0.32"></circle>
+<circle cx="100" cy="100" r="56" fill="#B3261E" opacity="0.14"></circle>
+</svg>
+<div style="position: relative; width: 84px; height: 84px; border-radius: 42px; background: #B3261E; display: flex; align-items: center; justify-content: center">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"></path></svg>
+</div>
+</div>
+<h1 style="margin: 20px 0 0 0; font-family: 'Sora', sans-serif; font-size: 26px; line-height: 1.2; font-weight: 700; text-align: center">Account name doesn't match</h1>
+<p style="margin: 10px 0 0 0; font-size: 16px; line-height: 1.5; color: #4A5A53; text-align: center; max-width: 300px">The name on this payment is different from the name on your account.</p>
+</div>
+<div style="margin-top: 32px; background: #FFFFFF; border: 1px solid #DDE5E1; border-radius: 20px; padding: 4px 20px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid #E8EEEB"><span style="font-size: 14px; color: #4A5A53">Registered name</span><span style="font-size: 15px; font-weight: 600; text-align: right">[ACCOUNT NAME]</span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid #E8EEEB"><span style="font-size: 14px; color: #4A5A53">Name on payment</span><span style="font-size: 15px; font-weight: 600; text-align: right">[PAYER NAME]</span></div>
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 0"><span style="font-size: 14px; color: #4A5A53">Reference</span><span style="font-size: 15px; font-weight: 600; text-align: right">[REFERENCE NO.]</span></div>
+</div>
+<div style="margin-top: 16px; display: flex; align-items: flex-start; gap: 10px; padding: 0 4px; color: #4A5A53; font-size: 14px; line-height: 1.45">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B3261E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16.5v.01"></path></svg>
+<span>No money was taken from your account for this attempt.</span>
+</div>
+<div style="flex-grow: 1"></div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<button style="height: 56px; border: 0; border-radius: 16px; background: #B3261E; color: #FFFFFF; font-size: 17px; font-weight: 600; cursor: pointer">Try again</button>
+<button style="height: 52px; border: 1.5px solid #C9D4CF; border-radius: 16px; background: transparent; color: #14201B; font-size: 16px; font-weight: 600; cursor: pointer">Contact support</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

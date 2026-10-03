@@ -1,0 +1,40 @@
+{
+  "common": {
+    "verify": "Verify",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "done": "Done",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Create Account",
+    "email": "Email",
+    "password": "Password",
+    "rememberMe": "Remember Me",
+    "forgotPassword": "Forgot Password?"
+  },
+  "verify": {
+    "enterAmount": "Enter Amount",
+    "scanPayment": "Scan Payment QR",
+    "verified": "Verified",
+    "notMatching": "Not Matching",
+    "pending": "Pending",
+    "mismatch": "Mismatch",
+    "duplicate": "Duplicate"
+  },
+  "plans": {
+    "normal": "Normal Verify",
+    "restaurant": "Restaurant Plus"
+  },
+  "roles": {
+    "owner": "Owner",
+    "manager": "Manager",
+    "waiter": "Waiter",
+    "chef": "Chef"
+  }
+}

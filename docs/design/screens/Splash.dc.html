@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Splash</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F8F6}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; background: #F4F8F6; color: #14201B; overflow: hidden">
+<svg width="390" height="844" viewBox="0 0 390 844" style="position: absolute; left: 0; top: 0" aria-hidden="true">
+<defs>
+<radialGradient id="glow" cx="195" cy="190" r="170" gradientUnits="userSpaceOnUse">
+<stop offset="0" stop-color="#2E8C66" stop-opacity="0.95"/>
+<stop offset="0.55" stop-color="#1B6A4B" stop-opacity="0.6"/>
+<stop offset="1" stop-color="#0D4A36" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<path d="M0 0H390V330C330 300 270 310 200 338C130 366 60 372 0 340Z" fill="#0D4A36"/>
+<circle cx="195" cy="190" r="170" fill="url(#glow)"/>
+<circle cx="195" cy="190" r="120" fill="none" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="1.5"/>
+<circle cx="195" cy="190" r="190" fill="none" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="1.5"/>
+</svg>
+<div style="position: absolute; left: 131px; top: 318px; width: 128px; height: 128px; border-radius: 34px; background: #FFFFFF; box-shadow: 0 12px 30px rgba(13,74,54,0.28); display: flex; align-items: center; justify-content: center">
+<svg width="84" height="84" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+<path d="M12 2.5l8.5 3.2v6.3c0 5.2-3.6 8.6-8.5 9.9-4.9-1.3-8.5-4.7-8.5-9.9V5.7z" fill="#0D4A36"/>
+<path d="M8 12.2l2.9 2.9 5.3-5.8" stroke="#3DDC97" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+</div>
+<div style="position: absolute; left: 0; right: 0; top: 474px; text-align: center">
+<div style="font-family: 'Sora', sans-serif; font-size: 36px; font-weight: 700; display: inline-flex; align-items: flex-start; gap: 6px">Smart Verify<span style="width: 10px; height: 10px; border-radius: 5px; background: #1FA971; margin-top: 12px"></span></div>
+<div style="font-size: 19px; font-weight: 500; color: #3B4A44; margin-top: 8px">Every payment. Verified.</div>
+</div>
+<div style="position: absolute; left: 0; right: 0; top: 716px; display: flex; justify-content: center; gap: 10px">
+<span style="width: 11px; height: 11px; border-radius: 6px; background: #0D4A36"></span>
+<span style="width: 11px; height: 11px; border-radius: 6px; background: #0D4A36"></span>
+<span style="width: 11px; height: 11px; border-radius: 6px; background: #3DDC97; border: 1.5px solid #1FA971; box-sizing: border-box"></span>
+</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 36px; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; color: #3B4A44">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D6B47" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>SECURE PAYMENT VERIFICATION
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
