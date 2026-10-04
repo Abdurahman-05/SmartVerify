@@ -1,48 +1,58 @@
-import { Pressable, Text } from 'react-native';
-import { useReducedMotion } from '@/hooks/useReducedMotion';
+import type { LucideIcon } from 'lucide-react-native';
+import { Pressable, View } from 'react-native';
 
-type ButtonVariant = 'primary' | 'outline' | 'amber';
+import { colors } from '@/theme/tokens';
+
+import { Text } from './Text';
+
+type Variant = 'primary' | 'outline' | 'amber';
+type Size = 'lg' | 'md';
 
 interface ButtonProps {
+  label: string;
   onPress: () => void;
-  children: string;
-  variant?: ButtonVariant;
+  variant?: Variant;
+  size?: Size;
+  icon?: LucideIcon;
   disabled?: boolean;
 }
 
-export const Button = ({
+const containers: Record<Variant, string> = {
+  primary: 'bg-primary',
+  outline: 'bg-surface border-[2.5px] border-text',
+  amber: 'bg-amber',
+};
+
+const textColor: Record<Variant, string> = {
+  primary: colors.surface,
+  outline: colors.text,
+  amber: colors.text,
+};
+
+const heights: Record<Size, string> = { lg: 'h-16', md: 'h-[52px]' };
+
+export function Button({
+  label,
   onPress,
-  children,
   variant = 'primary',
+  size = 'lg',
+  icon: Icon,
   disabled = false,
-}: ButtonProps) => {
-  const reducedMotion = useReducedMotion();
-
-  const variantStyles = {
-    primary: 'bg-primary',
-    outline: 'bg-surface border-2 border-primary',
-    amber: 'bg-amber',
-  };
-
-  const textColors = {
-    primary: 'text-surface',
-    outline: 'text-primary',
-    amber: 'text-text',
-  };
-
+}: ButtonProps) {
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled}
-      className={`rounded-button min-h-primaryButton justify-center items-center px-6 ${variantStyles[variant]} ${disabled ? 'opacity-50' : ''}`}
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      className={`w-full rounded-button ${heights[size]} ${containers[variant]} ${disabled ? 'opacity-50' : 'active:opacity-80'}`}
     >
-      {({ pressed }) => (
-        <Text
-          className={`text-base font-semibold ${textColors[variant]} ${!reducedMotion && pressed ? 'scale-95' : ''}`}
-        >
-          {children}
+      <View className="flex-1 flex-row items-center justify-center gap-2 px-4">
+        <Text font="bold" className="text-[19px]" style={{ color: textColor[variant] }}>
+          {label}
         </Text>
-      )}
+        {Icon ? <Icon size={22} color={textColor[variant]} strokeWidth={2.4} /> : null}
+      </View>
     </Pressable>
   );
-};
+}

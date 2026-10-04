@@ -22,7 +22,7 @@ export const MoneyText = ({
   const display = showCurrency ? `ETB ${formatted}` : formatted;
 
   return (
-    <Text className={`font-sora text-lg font-semibold text-primary ${className || ''}`} {...props}>
+    <Text className={`font-heading text-lg text-primary ${className || ''}`} {...props}>
       {display}
     </Text>
   );

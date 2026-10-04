@@ -1,40 +1,103 @@
 {
+  "brand": {
+    "name": "Smart Verify",
+    "tagline": "እያንዳንዱ ክፍያ። የተረጋገጠ።",
+    "secure": "ደህንነቱ የተጠበቀ የክፍያ ማረጋገጫ"
+  },
   "common": {
-    "verify": "ማረጋገጥ",
-    "cancel": "ስረዝ",
-    "save": "ማስቀመጥ",
-    "delete": "삭제",
-    "edit": "ማርትዖ",
-    "done": "ተጠናቅቅ",
-    "loading": "በሚጫን...",
+    "back": "ተመለስ",
+    "or": "ወይም",
+    "etb": "ብር",
+    "verify": "አረጋግጥ",
+    "cancel": "ሰርዝ",
+    "save": "አስቀምጥ",
+    "delete": "አጥፋ",
+    "edit": "አስተካክል",
+    "done": "ተጠናቋል",
     "error": "ስህተት",
-    "success": "ስኬት"
+    "success": "ተሳክቷል",
+    "showPin": "PIN አሳይ",
+    "hidePin": "PIN ደብቅ",
+    "somethingWrong": "ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።"
+  },
+  "loading": {
+    "title": "እባክዎ ይጠብቁ",
+    "subtitle": "በማዘጋጀት ላይ"
   },
   "auth": {
-    "signIn": "ወደ ውስጥ ይግቡ",
-    "signUp": "ሂሳብ ይፍጠሩ",
-    "email": "ኢሜይል",
-    "password": "የይለፍ ቃል",
-    "rememberMe": "ማስታወስ",
-    "forgotPassword": "የይለፍ ቃልን ረስተው?"
+    "welcomeBack": "እንኳን ደህና መጡ",
+    "signInSubtitle": "ክፍያዎችዎን ለማየት ይግቡ",
+    "phone": "ስልክ ቁጥር",
+    "phonePlaceholder": "9XX XXX XXX",
+    "pin": "የሚስጥር ቁጥር (PIN)",
+    "pinPlaceholder": "PIN ያስገቡ",
+    "forgotPin": "PIN ረሱ?",
+    "rememberMe": "አስታውሰኝ",
+    "signIn": "ግባ",
+    "signInFingerprint": "በጣት አሻራ ግባ",
+    "noAccount": "መለያ የለዎትም?",
+    "signUp": "ይመዝገቡ",
+    "createAccount": "መለያ ክፈት",
+    "step": "ደረጃ {{current}} ከ {{total}}",
+    "fullName": "ሙሉ ስም",
+    "fullNamePlaceholder": "ሙሉ ስምዎ",
+    "businessName": "የድርጅት ስም",
+    "businessNamePlaceholder": "ለምሳሌ፦ ቦሌ ፍሬሽ ማርት",
+    "newPin": "PIN ({{count}} አሃዝ)",
+    "newPinPlaceholder": "{{count}} አሃዝ ይምረጡ",
+    "agreePrefix": "",
+    "agreeLink": "ውሎችንና ግላዊነትን",
+    "agreeSuffix": " እቀበላለሁ",
+    "haveAccount": "መለያ አለዎት?",
+    "errors": {
+      "phone": "በ9 ወይም በ7 የሚጀምር 9 አሃዝ ያስገቡ",
+      "pin": "PIN {{count}} አሃዝ መሆን አለበት",
+      "fullName": "ሙሉ ስምዎን ያስገቡ",
+      "businessName": "የድርጅቱን ስም ያስገቡ",
+      "terms": "ለመቀጠል እባክዎ ውሎቹን ይቀበሉ"
+    }
+  },
+  "plan": {
+    "title": "እቅድዎን ይምረጡ",
+    "subtitle": "የሚያስፈልግዎትን ይምረጡ። መጀመሪያ መቃኘት ይችላሉ።",
+    "normalFeatures": "ክፍያ ማረጋገጥ · ግብይቶች · ሪፖርቶች",
+    "oneMonth": "1 ወር",
+    "threeMonths": "3 ወር",
+    "mostFlexible": "በጣም ተለዋዋጭ",
+    "bestValue": "ምርጥ ዋጋ",
+    "save": "{{amount}} ብር ይቆጥቡ",
+    "exploreNormal": "Normal ይቃኙ",
+    "restaurantSubtitle": "ለምግብ ቤቶች የተሟላ የንግድ መፍትሄ",
+    "perMonth": "ብር / በወር",
+    "exploreRestaurant": "Restaurant Plus ይቃኙ",
+    "exploreFirst": "መጀመሪያ መተግበሪያውን ይቃኙ",
+    "noPayment": "አሁን ክፍያ አያስፈልግም። ወዲያውኑ መቃኘት ይጀምሩ።",
+    "features": {
+      "cashBank": "ጥሬ ገንዘብ + ባንክ",
+      "bankOnly": "ባንክ ብቻ",
+      "cashOnly": "ጥሬ ገንዘብ ብቻ",
+      "tips": "የተለየ ቲፕ",
+      "ledger": "የዕለት መዝገብ",
+      "chef": "የሼፍ ትዕዛዞች"
+    }
   },
   "verify": {
     "enterAmount": "መጠን ያስገቡ",
-    "scanPayment": "ጭነት QR ያስ್ካን",
-    "verified": "ታወቀ",
-    "notMatching": "አልተመሳሰለም",
+    "scanPayment": "የክፍያ QR ይቃኙ",
+    "verified": "ተረጋግጧል",
+    "notMatching": "አይዛመድም",
     "pending": "በመጠባበቅ ላይ",
-    "mismatch": "አለመመሳሰል",
-    "duplicate": "ተክርር"
+    "mismatch": "አይዛመድም",
+    "duplicate": "ተደጋጋሚ"
   },
   "plans": {
-    "normal": "ተራ ማረጋገጥ",
-    "restaurant": "ሬስቶራንት ፕላስ"
+    "normal": "Normal Verify",
+    "restaurant": "Restaurant Plus"
   },
   "roles": {
     "owner": "ባለቤት",
     "manager": "ሥራ አስኪያጅ",
-    "waiter": "ሰርቫር",
-    "chef": "ምግብ ባሌ"
+    "waiter": "አስተናጋጅ",
+    "chef": "ሼፍ"
   }
 }

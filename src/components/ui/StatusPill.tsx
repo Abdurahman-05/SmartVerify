@@ -1,5 +1,6 @@
 import { View, Text } from 'react-native';
 import { CheckCircle, AlertCircle, Copy, Clock } from 'lucide-react-native';
+import { colors } from '@/theme/tokens';
 
 type StatusType = 'verified' | 'pending' | 'mismatch' | 'duplicate';
 
@@ -40,7 +41,7 @@ export const StatusPill = ({ status }: StatusPillProps) => {
 
   return (
     <View className={`flex-row items-center gap-2 rounded-chip px-3 py-2 ${config.bg}`}>
-      <IconComponent size={16} color={config.text.replace('text-', '')} />
+      <IconComponent size={16} color={colors[config.text.replace('text-', '') as keyof typeof colors]} />
       <Text className={`text-sm font-medium ${config.text}`}>{config.label}</Text>
     </View>
   );

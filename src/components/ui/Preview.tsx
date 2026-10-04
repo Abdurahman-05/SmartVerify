@@ -22,15 +22,9 @@ export const ComponentPreview = () => {
         {/* Buttons */}
         <View className="gap-3">
           <Text className="text-lg font-semibold text-text">Buttons</Text>
-          <Button onPress={() => {}} variant="primary">
-            Primary Button
-          </Button>
-          <Button onPress={() => {}} variant="outline">
-            Outline Button
-          </Button>
-          <Button onPress={() => {}} variant="amber">
-            Amber Button
-          </Button>
+          <Button label="Primary Button" onPress={() => {}} />
+          <Button label="Outline Button" variant="outline" onPress={() => {}} />
+          <Button label="Amber Button" variant="amber" size="md" onPress={() => {}} />
         </View>
 
         {/* Cards */}

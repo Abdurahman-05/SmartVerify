@@ -1,22 +1,85 @@
 {
+  "brand": {
+    "name": "Smart Verify",
+    "tagline": "Every payment. Verified.",
+    "secure": "SECURE PAYMENT VERIFICATION"
+  },
   "common": {
+    "back": "Back",
+    "or": "OR",
+    "etb": "ETB",
     "verify": "Verify",
     "cancel": "Cancel",
     "save": "Save",
     "delete": "Delete",
     "edit": "Edit",
     "done": "Done",
-    "loading": "Loading...",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "showPin": "Show PIN",
+    "hidePin": "Hide PIN",
+    "somethingWrong": "Something went wrong. Please try again."
+  },
+  "loading": {
+    "title": "Please wait",
+    "subtitle": "Getting things ready"
   },
   "auth": {
-    "signIn": "Sign In",
-    "signUp": "Create Account",
-    "email": "Email",
-    "password": "Password",
-    "rememberMe": "Remember Me",
-    "forgotPassword": "Forgot Password?"
+    "welcomeBack": "Welcome back",
+    "signInSubtitle": "Sign in to check your payments",
+    "phone": "Phone number",
+    "phonePlaceholder": "9XX XXX XXX",
+    "pin": "Security PIN",
+    "pinPlaceholder": "Enter your PIN",
+    "forgotPin": "Forgot PIN?",
+    "rememberMe": "Remember me",
+    "signIn": "Sign in",
+    "signInFingerprint": "Sign in with fingerprint",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "createAccount": "Create account",
+    "step": "Step {{current}} of {{total}}",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "Your full name",
+    "businessName": "Business name",
+    "businessNamePlaceholder": "e.g. Bole Fresh Mart PLC",
+    "newPin": "PIN ({{count}} digits)",
+    "newPinPlaceholder": "Choose {{count}} digits",
+    "agreePrefix": "I agree to the ",
+    "agreeLink": "Terms & Privacy",
+    "agreeSuffix": "",
+    "haveAccount": "Already have an account?",
+    "errors": {
+      "phone": "Enter 9 digits starting with 9 or 7",
+      "pin": "PIN must be {{count}} digits",
+      "fullName": "Enter your full name",
+      "businessName": "Enter your business name",
+      "terms": "Please accept the terms to continue"
+    }
+  },
+  "plan": {
+    "title": "Choose your plan",
+    "subtitle": "Pick what you need. You can look around first.",
+    "normalFeatures": "Verify Payment · Transactions · Reports",
+    "oneMonth": "1 month",
+    "threeMonths": "3 months",
+    "mostFlexible": "Most flexible",
+    "bestValue": "Best value",
+    "save": "Save {{amount}} ETB",
+    "exploreNormal": "Explore Normal",
+    "restaurantSubtitle": "Complete business suite for restaurants",
+    "perMonth": "ETB / month",
+    "exploreRestaurant": "Explore Restaurant Plus",
+    "exploreFirst": "Explore app first",
+    "noPayment": "No payment needed now. Start exploring right away.",
+    "features": {
+      "cashBank": "Cash + Bank",
+      "bankOnly": "Bank only",
+      "cashOnly": "Cash only",
+      "tips": "Separate tips",
+      "ledger": "Daily ledger",
+      "chef": "Chef orders"
+    }
   },
   "verify": {
     "enterAmount": "Enter Amount",
