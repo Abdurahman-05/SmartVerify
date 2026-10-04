@@ -99,5 +99,47 @@
     "manager": "Manager",
     "waiter": "Waiter",
     "chef": "Chef"
+  },
+  "home": {
+    "exploring": "Exploring",
+    "welcome": "Welcome back, {{name}}!",
+    "heroSubtitle": "Verify every payment with confidence.",
+    "verifyPayment": "Verify payment",
+    "tablesWaiting": "{{count}} tables waiting",
+    "whatToDo": "What do you want to do?",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "today": "Today",
+    "live": "Live",
+    "verified": "Verified",
+    "pending": "Pending",
+    "duplicate": "Duplicate",
+    "actions": {
+      "verify": "Verify payment",
+      "verifySub": "Check a payment",
+      "verifySubTables": "{{count}} tables waiting to pay",
+      "newOrder": "New order",
+      "newOrderSub": "Send to kitchen",
+      "tips": "Tips",
+      "tipsSub": "Handle tips",
+      "tipsSubToday": "My tips today",
+      "transactions": "Transactions",
+      "transactionsSub": "Payment records",
+      "reports": "Reports",
+      "reportsSub": "Daily and more",
+      "bankAccount": "Bank account",
+      "bankAccountSub": "Receiving accounts",
+      "subscription": "Subscription",
+      "subscriptionSubNone": "Choose a plan"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "verify": "Verify",
+    "history": "History",
+    "profile": "Profile"
+  },
+  "placeholder": {
+    "comingSoon": "This page is coming in a later phase."
   }
 }

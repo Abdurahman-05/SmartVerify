@@ -71,7 +71,7 @@ export default function ChoosePlanScreen() {
 
   const explore = (plan?: Plan) => {
     if (plan) setPlan(plan);
-    router.replace('/home');
+    router.dismissTo('/home');
   };
 
   return (

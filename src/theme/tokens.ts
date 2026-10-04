@@ -20,6 +20,9 @@ export const colors = {
   dangerBg: '#FBE0DD',
   dangerFg: '#8C1D18',
   tipBg: '#FFF4D1',
+  neutralBg: '#E6EBE8',
+  navInactive: '#4A5A53',
+  alert: '#B3261E',
 } as const;
 
 export const radii = {

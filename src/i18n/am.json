@@ -99,5 +99,47 @@
     "manager": "ሥራ አስኪያጅ",
     "waiter": "አስተናጋጅ",
     "chef": "ሼፍ"
+  },
+  "home": {
+    "exploring": "በመቃኘት ላይ",
+    "welcome": "እንኳን ደህና መጡ፣ {{name}}!",
+    "heroSubtitle": "እያንዳንዱን ክፍያ በእርግጠኝነት ያረጋግጡ።",
+    "verifyPayment": "ክፍያ አረጋግጥ",
+    "tablesWaiting": "{{count}} ጠረጴዛዎች እየጠበቁ",
+    "whatToDo": "ምን ማድረግ ይፈልጋሉ?",
+    "notifications": "ማሳወቂያዎች",
+    "profile": "መገለጫ",
+    "today": "ዛሬ",
+    "live": "ቀጥታ",
+    "verified": "ተረጋግጧል",
+    "pending": "በመጠባበቅ ላይ",
+    "duplicate": "ተደጋጋሚ",
+    "actions": {
+      "verify": "ክፍያ አረጋግጥ",
+      "verifySub": "ክፍያ ይፈትሹ",
+      "verifySubTables": "{{count}} ጠረጴዛዎች ለመክፈል እየጠበቁ",
+      "newOrder": "አዲስ ትዕዛዝ",
+      "newOrderSub": "ወደ ማብሰያ ቤት ይላኩ",
+      "tips": "ቲፕ",
+      "tipsSub": "ቲፕ ያስተዳድሩ",
+      "tipsSubToday": "የዛሬ ቲፖቼ",
+      "transactions": "ግብይቶች",
+      "transactionsSub": "የክፍያ መዝገቦች",
+      "reports": "ሪፖርቶች",
+      "reportsSub": "ዕለታዊ እና ሌሎች",
+      "bankAccount": "የባንክ ሂሳብ",
+      "bankAccountSub": "ገንዘብ የሚቀበሉ ሂሳቦች",
+      "subscription": "የደንበኝነት ምዝገባ",
+      "subscriptionSubNone": "እቅድ ይምረጡ"
+    }
+  },
+  "nav": {
+    "home": "መነሻ",
+    "verify": "አረጋግጥ",
+    "history": "ታሪክ",
+    "profile": "መገለጫ"
+  },
+  "placeholder": {
+    "comingSoon": "ይህ ገጽ በሚቀጥለው ደረጃ ይመጣል።"
   }
 }

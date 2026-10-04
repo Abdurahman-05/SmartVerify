@@ -17,10 +17,22 @@ export interface CreateAccountInput {
 
 export async function signIn(_input: SignInInput): Promise<SessionUser> {
   await mockDelay();
-  return { userId: 'mock-user-1', role: 'owner', plan: 'normal' };
+  return {
+    userId: 'mock-user-1',
+    displayName: 'Abebe',
+    businessName: 'Abebe Coffee',
+    role: 'owner',
+    plan: 'normal',
+  };
 }
 
-export async function createAccount(_input: CreateAccountInput): Promise<SessionUser> {
+export async function createAccount(input: CreateAccountInput): Promise<SessionUser> {
   await mockDelay();
-  return { userId: 'mock-user-new', role: 'owner', plan: null };
+  return {
+    userId: 'mock-user-new',
+    displayName: input.fullName.trim().split(/\s+/)[0],
+    businessName: input.businessName.trim(),
+    role: 'owner',
+    plan: null,
+  };
 }
