@@ -8,6 +8,9 @@ export default function AppLayout() {
       screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
     >
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="scan" options={{ animation: 'fade' }} />
+      <Stack.Screen name="checking" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="payment-result" options={{ gestureEnabled: false }} />
       <Stack.Screen name="orders" />
       <Stack.Screen name="tips" />
       <Stack.Screen name="reports" />

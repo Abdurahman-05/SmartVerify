@@ -1,11 +1,16 @@
 import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
+
+interface FormScreenProps {
+  children: ReactNode;
+  edges?: Edge[];
+}
 
 /** Full-height scrolling screen that keeps inputs visible above the keyboard. */
-export function FormScreen({ children }: { children: ReactNode }) {
+export function FormScreen({ children, edges }: FormScreenProps) {
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView edges={edges} className="flex-1 bg-background">
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1"

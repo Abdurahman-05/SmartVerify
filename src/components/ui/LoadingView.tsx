@@ -12,12 +12,13 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Circle, Path } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { colors } from '@/theme/tokens';
 
 import { SecureFooter } from './SecureFooter';
+import { SpinnerRing } from './Spinner';
 import { Text } from './Text';
 
 interface LoadingViewProps {
@@ -58,38 +59,6 @@ function LoadingDot({ delay, animate }: { delay: number; animate: boolean }) {
 export function LoadingView({ title, subtitle }: LoadingViewProps) {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotion();
-  const rotation = useSharedValue(0);
-  const pulse = useSharedValue(0);
-
-  useEffect(() => {
-    if (reducedMotion) {
-      cancelAnimation(rotation);
-      cancelAnimation(pulse);
-      return;
-    }
-    rotation.value = withRepeat(withTiming(360, { duration: 1100, easing: Easing.linear }), -1);
-    pulse.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 1400, easing: Easing.out(Easing.ease) }),
-        withTiming(1, { duration: 600 }),
-        withTiming(0, { duration: 0 })
-      ),
-      -1
-    );
-    return () => {
-      cancelAnimation(rotation);
-      cancelAnimation(pulse);
-    };
-  }, [reducedMotion, rotation, pulse]);
-
-  const ringStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${rotation.value}deg` }],
-  }));
-
-  const pulseStyle = useAnimatedStyle(() => ({
-    opacity: reducedMotion ? 0.55 : 0.55 * (1 - pulse.value),
-    transform: [{ scale: reducedMotion ? 1 : 0.9 + pulse.value * 0.35 }],
-  }));
 
   return (
     <SafeAreaView
@@ -98,23 +67,7 @@ export function LoadingView({ title, subtitle }: LoadingViewProps) {
       accessibilityLabel={title ?? t('loading.title')}
     >
       <View className="flex-1 items-center justify-center gap-7">
-        <View className="h-[190px] w-[190px] items-center justify-center">
-          <Animated.View
-            className="absolute bottom-[22px] left-[22px] right-[22px] top-[22px] rounded-full bg-successBg"
-            style={pulseStyle}
-          />
-          <Animated.View className="absolute inset-0" style={ringStyle}>
-            <Svg width={190} height={190} viewBox="0 0 100 100">
-              <Circle cx={50} cy={50} r={46} fill="none" stroke={colors.border} strokeWidth={4} />
-              <Path
-                d="M50 4a46 46 0 0 1 46 46"
-                fill="none"
-                stroke={colors.primary}
-                strokeWidth={4}
-                strokeLinecap="round"
-              />
-            </Svg>
-          </Animated.View>
+        <SpinnerRing size={190}>
           <View className="h-[92px] w-[92px] items-center justify-center rounded-[28px] bg-primary">
             <Svg
               width={54}
@@ -130,7 +83,7 @@ export function LoadingView({ title, subtitle }: LoadingViewProps) {
               <Path d="M8.5 12l2.5 2.5 4.5-5" />
             </Svg>
           </View>
-        </View>
+        </SpinnerRing>
 
         <View className="items-center px-6">
           <Text font="heading" className="text-center text-[26px]">

@@ -23,6 +23,9 @@ export const colors = {
   neutralBg: '#E6EBE8',
   navInactive: '#4A5A53',
   alert: '#B3261E',
+  success: '#0E7A4E',
+  dangerSurface: '#FAF5F3',
+  divider: '#E8EEEB',
 } as const;
 
 export const radii = {

@@ -17,7 +17,7 @@ import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
 import { useSession } from '@/store/session';
 
 import { AuthHeader } from './AuthHeader';
-import { FormScreen } from './FormScreen';
+import { FormScreen } from '@/components/ui/FormScreen';
 import { PinVisibilityButton } from './PinVisibilityButton';
 import { PIN_LENGTH, signInSchema, type SignInValues } from './schemas';
 

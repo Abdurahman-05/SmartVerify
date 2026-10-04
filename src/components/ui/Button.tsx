@@ -5,7 +5,7 @@ import { colors } from '@/theme/tokens';
 
 import { Text } from './Text';
 
-type Variant = 'primary' | 'outline' | 'amber';
+type Variant = 'primary' | 'outline' | 'amber' | 'success' | 'danger' | 'secondary';
 type Size = 'lg' | 'md';
 
 interface ButtonProps {
@@ -21,12 +21,18 @@ const containers: Record<Variant, string> = {
   primary: 'bg-primary',
   outline: 'bg-surface border-[2.5px] border-text',
   amber: 'bg-amber',
+  success: 'bg-success',
+  danger: 'bg-alert',
+  secondary: 'bg-transparent border-[1.5px] border-borderMid',
 };
 
 const textColor: Record<Variant, string> = {
   primary: colors.surface,
   outline: colors.text,
   amber: colors.text,
+  success: colors.surface,
+  danger: colors.surface,
+  secondary: colors.text,
 };
 
 const heights: Record<Size, string> = { lg: 'h-16', md: 'h-[52px]' };
