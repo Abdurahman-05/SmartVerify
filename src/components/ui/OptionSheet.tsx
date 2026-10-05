@@ -1,6 +1,7 @@
 import { Check } from 'lucide-react-native';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Pressable, View } from 'react-native';
+import { Modal, Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -11,6 +12,7 @@ import { Text } from './Text';
 export interface SheetOption<T extends string> {
   value: T;
   label: string;
+  leading?: ReactNode;
 }
 
 interface OptionSheetProps<T extends string> {
@@ -33,6 +35,7 @@ export function OptionSheet<T extends string>({
 }: OptionSheetProps<T>) {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotion();
+  const { height } = useWindowDimensions();
 
   return (
     <Modal
@@ -50,7 +53,7 @@ export function OptionSheet<T extends string>({
         <Text font="heading" className="pb-3 text-xl" accessibilityRole="header">
           {title}
         </Text>
-        <View className="gap-2 pb-3">
+        <ScrollView style={{ maxHeight: height * 0.6 }} contentContainerStyle={{ gap: 8, paddingBottom: 12 }}>
           {options.map((option) => {
             const isSelected = option.value === selected;
             return (
@@ -62,18 +65,19 @@ export function OptionSheet<T extends string>({
                 }}
                 accessibilityRole="radio"
                 accessibilityState={{ selected: isSelected }}
-                className={`min-h-14 flex-row items-center justify-between rounded-[18px] border-2 px-4 ${
+                className={`min-h-14 flex-row items-center gap-3 rounded-[18px] border-2 px-4 py-2 ${
                   isSelected ? 'border-primary bg-primarySoft' : 'border-border bg-surface'
                 }`}
               >
-                <Text font="bold" className="text-lg">
+                {option.leading}
+                <Text font="bold" className="flex-1 text-lg">
                   {option.label}
                 </Text>
                 {isSelected ? <Check size={24} color={colors.primary} strokeWidth={3} /> : null}
               </Pressable>
             );
           })}
-        </View>
+        </ScrollView>
       </SafeAreaView>
     </Modal>
   );

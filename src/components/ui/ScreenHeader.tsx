@@ -9,11 +9,12 @@ import { Text } from './Text';
 
 interface ScreenHeaderProps {
   title: string;
+  subtitle?: string;
   onBack?: () => void;
   right?: ReactNode;
 }
 
-export function ScreenHeader({ title, onBack, right }: ScreenHeaderProps) {
+export function ScreenHeader({ title, subtitle, onBack, right }: ScreenHeaderProps) {
   const { t } = useTranslation();
 
   return (
@@ -28,9 +29,16 @@ export function ScreenHeader({ title, onBack, right }: ScreenHeaderProps) {
           <ChevronLeft size={28} color={colors.text} strokeWidth={2} />
         </Pressable>
       ) : null}
-      <Text font="heading" className="flex-1 text-[22px]" accessibilityRole="header" numberOfLines={1}>
-        {title}
-      </Text>
+      <View className="flex-1">
+        <Text font="heading" className="text-[22px] leading-tight" accessibilityRole="header" numberOfLines={1}>
+          {title}
+        </Text>
+        {subtitle ? (
+          <Text tone="muted" className="text-sm" numberOfLines={1}>
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
       {right}
     </View>
   );

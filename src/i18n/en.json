@@ -270,5 +270,44 @@
       "amount": "Amount (ETB)"
     },
     "openBank": "Open {{bank}} transactions"
+  },
+  "bankAccounts": {
+    "title": "Bank accounts",
+    "subtitle": "Accounts used to check payments",
+    "add": "Add",
+    "connected": "Connected accounts",
+    "used": "{{count}} of {{max}} used",
+    "statusConnected": "Connected",
+    "moreOptions": "More options for {{bank}}",
+    "addAccount": "Add bank account",
+    "limitReached": "You have used all {{max}} accounts in your plan.",
+    "empty": "No bank accounts yet. Add one to start checking payments.",
+    "remove": "Remove account",
+    "removeTitle": "Remove this account?",
+    "removeBody": "{{bank}} ••••{{last4}} will no longer be used to check payments. Past payments stay in your history.",
+    "cancel": "Cancel",
+    "add_title": "Add bank account",
+    "add_subtitle": "So we can check payments sent to it",
+    "bank": "Bank",
+    "country": "Ethiopia",
+    "chooseBank": "Choose bank",
+    "bankNote": "We can check payments directly with Ethiopian banks and Telebirr.",
+    "accountNumber": "Account number",
+    "accountNumberHint": "10 to 13 digits",
+    "accountNumberPlaceholder": "e.g. 1000293884758",
+    "holderName": "Account holder name",
+    "optional": "Optional",
+    "holderPlaceholder": "e.g. Abebe Bikila",
+    "holderNote": "Leave this empty and we will find the name from the bank.",
+    "connect": "Connect account",
+    "connecting": "Connecting account",
+    "connectingSubtitle": "Checking the account with the bank",
+    "errors": {
+      "accountNumber": "Enter 10 to 13 digits",
+      "duplicate": "This account is already connected.",
+      "limit": "You have used all accounts in your plan.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "noAccountsVerify": "Add a bank account first so we know where the money should arrive."
   }
 }

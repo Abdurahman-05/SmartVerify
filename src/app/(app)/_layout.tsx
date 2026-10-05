@@ -16,6 +16,7 @@ export default function AppLayout() {
       <Stack.Screen name="reports" />
       <Stack.Screen name="transaction/[id]" />
       <Stack.Screen name="bank-accounts" />
+      <Stack.Screen name="add-bank-account" />
       <Stack.Screen name="subscription" />
       <Stack.Screen name="bills" />
       <Stack.Screen name="chef" />

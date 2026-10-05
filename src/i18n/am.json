@@ -270,5 +270,44 @@
       "amount": "መጠን (ብር)"
     },
     "openBank": "የ{{bank}} ግብይቶችን ክፈት"
+  },
+  "bankAccounts": {
+    "title": "የባንክ ሂሳቦች",
+    "subtitle": "ክፍያዎችን ለማረጋገጥ የሚያገለግሉ ሂሳቦች",
+    "add": "ጨምር",
+    "connected": "የተገናኙ ሂሳቦች",
+    "used": "ከ{{max}} {{count}} ጥቅም ላይ ውለዋል",
+    "statusConnected": "ተገናኝቷል",
+    "moreOptions": "ለ{{bank}} ተጨማሪ አማራጮች",
+    "addAccount": "የባንክ ሂሳብ ጨምር",
+    "limitReached": "በእቅድዎ ያሉትን {{max}} ሂሳቦች በሙሉ ተጠቅመዋል።",
+    "empty": "እስካሁን የባንክ ሂሳብ የለም። ክፍያዎችን ለማረጋገጥ አንድ ይጨምሩ።",
+    "remove": "ሂሳቡን አስወግድ",
+    "removeTitle": "ይህን ሂሳብ ያስወግዱ?",
+    "removeBody": "{{bank}} ••••{{last4}} ከዚህ በኋላ ክፍያዎችን ለማረጋገጥ አይውልም። ያለፉ ክፍያዎች በታሪክዎ ውስጥ ይቆያሉ።",
+    "cancel": "ሰርዝ",
+    "add_title": "የባንክ ሂሳብ ጨምር",
+    "add_subtitle": "ወደዚህ ሂሳብ የሚላኩ ክፍያዎችን ለማረጋገጥ",
+    "bank": "ባንክ",
+    "country": "ኢትዮጵያ",
+    "chooseBank": "ባንክ ይምረጡ",
+    "bankNote": "ክፍያዎችን በቀጥታ ከኢትዮጵያ ባንኮች እና ከቴሌብር ጋር ማረጋገጥ እንችላለን።",
+    "accountNumber": "የሂሳብ ቁጥር",
+    "accountNumberHint": "ከ10 እስከ 13 አሃዝ",
+    "accountNumberPlaceholder": "ለምሳሌ፦ 1000293884758",
+    "holderName": "የሂሳብ ባለቤት ስም",
+    "optional": "አማራጭ",
+    "holderPlaceholder": "ለምሳሌ፦ አበበ ቢቂላ",
+    "holderNote": "ባዶ ከተዉት ስሙን ከባንኩ እናገኛለን።",
+    "connect": "ሂሳቡን አገናኝ",
+    "connecting": "ሂሳቡን በማገናኘት ላይ",
+    "connectingSubtitle": "ሂሳቡን ከባንኩ ጋር በማረጋገጥ ላይ",
+    "errors": {
+      "accountNumber": "ከ10 እስከ 13 አሃዝ ያስገቡ",
+      "duplicate": "ይህ ሂሳብ አስቀድሞ ተገናኝቷል።",
+      "limit": "በእቅድዎ ያሉትን ሂሳቦች በሙሉ ተጠቅመዋል።",
+      "generic": "ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።"
+    },
+    "noAccountsVerify": "ገንዘቡ የት መድረስ እንዳለበት እንድናውቅ መጀመሪያ የባንክ ሂሳብ ይጨምሩ።"
   }
 }

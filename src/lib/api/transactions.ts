@@ -1,6 +1,6 @@
 import { periodRange, type Period } from '@/lib/period';
 
-import { mockAccounts, type BankAccount } from './bankAccounts';
+import { activeAccounts, findAccount, type BankAccount } from './bankAccounts';
 import { mockDelay } from './mock';
 
 export type TransactionStatus = 'verified' | 'pending' | 'mismatch' | 'duplicate';
@@ -61,9 +61,10 @@ function seededRandom(seed: number) {
 function buildMockTransactions(): Transaction[] {
   const random = seededRandom(42);
   const pick = <T>(items: T[]) => items[Math.floor(random() * items.length)];
+  const [cbe, telebirr, awash] = activeAccounts();
   const weightedAccount = () => {
     const r = random();
-    return r < 0.6 ? mockAccounts[0] : r < 0.87 ? mockAccounts[1] : mockAccounts[2];
+    return r < 0.6 ? cbe : r < 0.87 ? telebirr : awash;
   };
   const weightedStatus = (): TransactionStatus => {
     const r = random();
@@ -113,8 +114,17 @@ function inPeriod(tx: Transaction, period: Period) {
   return time >= from.getTime() && time <= to.getTime();
 }
 
-export function accountFor(tx: Transaction) {
-  return mockAccounts.find((a) => a.id === tx.accountId) ?? mockAccounts[0];
+const unknownAccount: BankAccount = {
+  id: 'unknown',
+  bankCode: '—',
+  bankName: '—',
+  shortName: '—',
+  last4: '----',
+  holderName: '',
+};
+
+export function accountFor(tx: Transaction): BankAccount {
+  return findAccount(tx.accountId) ?? unknownAccount;
 }
 
 export async function getTransactions(filter: TransactionFilter): Promise<Transaction[]> {
@@ -137,7 +147,10 @@ export async function getBankReport(period: Period): Promise<BankReport> {
   const verified = transactions.filter((tx) => tx.status === 'verified' && inPeriod(tx, period));
   const total = verified.reduce((sum, tx) => sum + tx.receivedAmount, 0);
 
-  const rows = mockAccounts
+  // Removed accounts still appear when they received money in this period.
+  const accountIds = new Set([...activeAccounts().map((a) => a.id), ...verified.map((tx) => tx.accountId)]);
+  const rows = [...accountIds]
+    .map((id) => findAccount(id) ?? unknownAccount)
     .map((account) => {
       const own = verified.filter((tx) => tx.accountId === account.id);
       const accountTotal = own.reduce((sum, tx) => sum + tx.receivedAmount, 0);

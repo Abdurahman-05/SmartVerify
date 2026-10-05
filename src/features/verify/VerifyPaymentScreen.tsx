@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { QrCode } from 'lucide-react-native';
+import { Plus, QrCode } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 
+import { Button } from '@/components/ui/Button';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
@@ -28,11 +29,12 @@ export default function VerifyPaymentScreen() {
 
   if (isPending || !accounts) return <LoadingView />;
 
-  const account = chosenAccount ?? accounts[0];
+  const account = accounts.find((a) => a.id === chosenAccount?.id) ?? accounts[0];
   const amount = parseAmount(amountInput);
   const canScan = Boolean(account) && amount > 0;
 
   const startScan = () => {
+    if (!account) return;
     setAccount(account);
     router.push('/scan');
   };
@@ -51,9 +53,21 @@ export default function VerifyPaymentScreen() {
               accounts={accounts}
               selected={account}
               onSelect={setAccount}
-              onAddAccount={() => router.push('/bank-accounts')}
+              onAddAccount={() => router.push('/add-bank-account')}
             />
-          ) : null}
+          ) : (
+            <View className="gap-3 rounded-[18px] border-2 border-dashed border-borderStrong bg-surface p-4">
+              <Text tone="muted" className="text-base">
+                {t('bankAccounts.noAccountsVerify')}
+              </Text>
+              <Button
+                label={t('bankAccounts.addAccount')}
+                icon={Plus}
+                size="md"
+                onPress={() => router.push('/add-bank-account')}
+              />
+            </View>
+          )}
         </View>
 
         <View className="gap-2">

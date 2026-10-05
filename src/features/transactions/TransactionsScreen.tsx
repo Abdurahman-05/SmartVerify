@@ -11,7 +11,7 @@ import { LoadingView } from '@/components/ui/LoadingView';
 import { OptionSheet } from '@/components/ui/OptionSheet';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { mockAccounts } from '@/lib/api/bankAccounts';
+import { findAccount, getBankAccounts } from '@/lib/api/bankAccounts';
 import { getTransactions, type TransactionStatus } from '@/lib/api/transactions';
 import { sharePdf } from '@/lib/export';
 import { formatAmount } from '@/lib/format';
@@ -67,7 +67,7 @@ export default function TransactionsScreen() {
   const businessName = useSession((s) => s.user?.businessName ?? '');
   const params = useLocalSearchParams<{ accountId?: string; period?: string }>();
   const period: Period = isPeriod(params.period) ? params.period : 'today';
-  const account = mockAccounts.find((a) => a.id === params.accountId);
+  const account = params.accountId ? findAccount(params.accountId) : null;
   const [status, setStatus] = useState<StatusFilter>('all');
   const [sheet, setSheet] = useState<'period' | 'status' | null>(null);
   const [downloading, setDownloading] = useState(false);
@@ -76,8 +76,9 @@ export default function TransactionsScreen() {
     queryKey: ['transactions', period],
     queryFn: () => getTransactions({ period }),
   });
+  const { data: accounts } = useQuery({ queryKey: ['bank-accounts'], queryFn: getBankAccounts });
 
-  if (isPending || !all) return <LoadingView />;
+  if (isPending || !all || !accounts) return <LoadingView />;
 
   const verifiedAll = all.filter((tx) => tx.status === 'verified');
   const inBank = account ? all.filter((tx) => tx.accountId === account.id) : all;
@@ -128,7 +129,7 @@ export default function TransactionsScreen() {
             selected={!account}
             onPress={() => selectBank(undefined)}
           />
-          {mockAccounts.map((a) => (
+          {accounts.map((a) => (
             <BankChip
               key={a.id}
               label={a.shortName}
