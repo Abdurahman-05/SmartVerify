@@ -23,6 +23,13 @@ export async function signIn(_input: SignInInput): Promise<SessionUser> {
     businessName: 'Abebe Coffee',
     role: 'owner',
     plan: 'normal',
+    subscription: {
+      plan: 'normal',
+      period: 'monthly',
+      priceEtb: 700,
+      startedAt: new Date(Date.now() - 10 * 86400_000).toISOString(),
+      endsAt: new Date(Date.now() + 20 * 86400_000).toISOString(),
+    },
   };
 }
 
@@ -34,5 +41,6 @@ export async function createAccount(input: CreateAccountInput): Promise<SessionU
     businessName: input.businessName.trim(),
     role: 'owner',
     plan: null,
+    subscription: null,
   };
 }

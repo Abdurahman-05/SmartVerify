@@ -1,12 +1,12 @@
 import { Redirect, useRouter } from 'expo-router';
-import { Check, CircleAlert, X } from 'lucide-react-native';
+import { CircleAlert } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, Share, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Circle } from 'react-native-svg';
 
 import { Button } from '@/components/ui/Button';
+import { ResultBadge } from '@/components/ui/ResultBadge';
 import { Text } from '@/components/ui/Text';
 import type { VerificationResult } from '@/lib/api/verify';
 import { formatAmount, formatDateTime } from '@/lib/format';
@@ -17,26 +17,6 @@ import { useVerifyFlow } from './verifyFlow';
 interface Row {
   label: string;
   value: string;
-}
-
-function ResultBadge({ success }: { success: boolean }) {
-  const tint = success ? colors.success : colors.alert;
-  const Icon = success ? Check : X;
-  return (
-    <View className="h-[200px] w-[200px] items-center justify-center">
-      <Svg width={200} height={200} viewBox="0 0 200 200" style={{ position: 'absolute' }}>
-        <Circle cx={100} cy={100} r={98} fill="none" stroke={tint} strokeWidth={1.5} opacity={0.18} />
-        <Circle cx={100} cy={100} r={76} fill="none" stroke={tint} strokeWidth={1.5} opacity={0.32} />
-        <Circle cx={100} cy={100} r={56} fill={tint} opacity={0.14} />
-      </Svg>
-      <View
-        className="h-[84px] w-[84px] items-center justify-center rounded-full"
-        style={{ backgroundColor: tint }}
-      >
-        <Icon size={40} color={colors.surface} strokeWidth={2.6} />
-      </View>
-    </View>
-  );
 }
 
 function DetailsCard({ rows }: { rows: Row[] }) {

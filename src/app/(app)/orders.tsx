@@ -1,5 +1,1 @@
-import { PlaceholderScreen } from '@/components/ui/PlaceholderScreen';
-
-export default function OrdersScreen() {
-  return <PlaceholderScreen titleKey="home.actions.newOrder" />;
-}
+export { default } from '@/features/orders/NewOrderScreen';

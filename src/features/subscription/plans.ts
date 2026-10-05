@@ -1,4 +1,6 @@
-export type BillingPeriod = 'monthly' | 'quarterly';
+import type { BillingPeriod, Plan } from '@/store/session';
+
+export type { BillingPeriod };
 
 export const normalPricing: Record<BillingPeriod, { months: number; priceEtb: number }> = {
   monthly: { months: 1, priceEtb: 700 },
@@ -18,3 +20,9 @@ export const restaurantFeatureKeys = [
   'ledger',
   'chef',
 ] as const;
+
+export const periodMonths = (period: BillingPeriod) => normalPricing[period].months;
+
+export function priceFor(plan: Plan, period: BillingPeriod) {
+  return plan === 'restaurant' ? restaurantMonthlyEtb : normalPricing[period].priceEtb;
+}
