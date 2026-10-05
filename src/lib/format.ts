@@ -37,3 +37,15 @@ export const formatDateTime = (iso: string) =>
     hour: '2-digit',
     minute: '2-digit',
   });
+
+/** "10:42 AM" */
+export const formatTime = (iso: string) =>
+  new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+/** "30 Sep 2026" or "30 Sep" */
+export const formatDay = (iso: string, withYear = true) =>
+  new Date(iso).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    ...(withYear ? { year: 'numeric' } : {}),
+  });

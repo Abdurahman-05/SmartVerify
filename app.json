@@ -41,7 +41,8 @@
           "cameraPermission": "Smart Verify uses the camera to scan customers' payment QR codes.",
           "recordAudioAndroid": false
         }
-      ]
+      ],
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true,

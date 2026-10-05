@@ -197,5 +197,78 @@
   },
   "placeholder": {
     "comingSoon": "This page is coming in a later phase."
+  },
+  "status": {
+    "verified": "Verified",
+    "pending": "Pending",
+    "mismatch": "Mismatch",
+    "duplicate": "Duplicate"
+  },
+  "period": {
+    "today": "Today",
+    "7d": "7 days",
+    "30d": "30 days",
+    "custom": "Custom",
+    "choose": "Choose date"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "summary_today": "Verified today · {{count}} payments",
+    "summary_7d": "Verified · last 7 days · {{count}} payments",
+    "summary_30d": "Verified · last 30 days · {{count}} payments",
+    "chooseBank": "Choose a bank",
+    "allBanks": "All banks",
+    "filter": "Filter",
+    "filterTitle": "Show payments",
+    "allStatuses": "All payments",
+    "empty": "No payments here yet.",
+    "downloadBank": "Download {{bank}} statement (PDF)",
+    "downloadAll": "Download statement (PDF)",
+    "statementTitle": "{{bank}} statement",
+    "columns": {
+      "date": "Date",
+      "payer": "Paid by",
+      "bank": "Bank",
+      "reference": "Reference",
+      "expected": "Expected",
+      "received": "Received",
+      "status": "Status"
+    },
+    "totalVerified": "Total verified: {{amount}} ETB",
+    "downloadFailed": "Could not create the file. Please try again."
+  },
+  "transaction": {
+    "title": "Transaction details",
+    "heading_verified": "Payment verified",
+    "heading_pending": "Waiting for the bank",
+    "heading_mismatch": "Payment doesn't match",
+    "heading_duplicate": "Payment already used",
+    "receivingAccount": "Receiving account ••••{{last4}}",
+    "reference": "Reference",
+    "paidBy": "Paid by",
+    "expected": "Expected amount",
+    "received": "Received amount",
+    "result": "Result",
+    "exactMatch": "Exact match",
+    "share": "Share receipt",
+    "back": "Back to transactions",
+    "notFound": "This payment could not be found.",
+    "shareMessage": "{{heading}}\nAmount: {{amount}} ETB\nBank: {{bank}}\nReference: {{reference}}\nDate: {{date}}"
+  },
+  "report": {
+    "title": "Report by bank",
+    "totalAll": "Total verified · all banks",
+    "byBank": "Money by bank",
+    "payments": "{{count}} payments · {{share}}%",
+    "downloadPdf": "Download PDF",
+    "downloadCsv": "Download CSV",
+    "fileTitle": "Report by bank",
+    "columns": {
+      "bank": "Bank",
+      "payments": "Payments",
+      "share": "Share",
+      "amount": "Amount (ETB)"
+    },
+    "openBank": "Open {{bank}} transactions"
   }
 }

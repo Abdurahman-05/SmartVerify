@@ -1,48 +1,34 @@
-import { View, Text } from 'react-native';
-import { CheckCircle, AlertCircle, Copy, Clock } from 'lucide-react-native';
+import { Check, Clock, Copy, X, type LucideIcon } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
+import { View } from 'react-native';
+
+import type { TransactionStatus } from '@/lib/api/transactions';
 import { colors } from '@/theme/tokens';
 
-type StatusType = 'verified' | 'pending' | 'mismatch' | 'duplicate';
+import { Text } from './Text';
+
+const config: Record<TransactionStatus, { bg: string; fg: string; icon: LucideIcon }> = {
+  verified: { bg: 'bg-successBg', fg: colors.successFg, icon: Check },
+  pending: { bg: 'bg-warnBg', fg: colors.warnFg, icon: Clock },
+  mismatch: { bg: 'bg-dangerBg', fg: colors.dangerFg, icon: X },
+  duplicate: { bg: 'bg-neutralBg', fg: colors.muted, icon: Copy },
+};
 
 interface StatusPillProps {
-  status: StatusType;
+  status: TransactionStatus;
+  label?: string;
 }
 
-const statusConfig = {
-  verified: {
-    bg: 'bg-successBg',
-    text: 'text-successFg',
-    icon: CheckCircle,
-    label: 'Verified',
-  },
-  pending: {
-    bg: 'bg-warnBg',
-    text: 'text-warnFg',
-    icon: Clock,
-    label: 'Pending',
-  },
-  mismatch: {
-    bg: 'bg-dangerBg',
-    text: 'text-dangerFg',
-    icon: AlertCircle,
-    label: 'Mismatch',
-  },
-  duplicate: {
-    bg: 'bg-dangerBg',
-    text: 'text-dangerFg',
-    icon: Copy,
-    label: 'Duplicate',
-  },
-};
-
-export const StatusPill = ({ status }: StatusPillProps) => {
-  const config = statusConfig[status];
-  const IconComponent = config.icon;
+export function StatusPill({ status, label }: StatusPillProps) {
+  const { t } = useTranslation();
+  const { bg, fg, icon: Icon } = config[status];
 
   return (
-    <View className={`flex-row items-center gap-2 rounded-chip px-3 py-2 ${config.bg}`}>
-      <IconComponent size={16} color={colors[config.text.replace('text-', '') as keyof typeof colors]} />
-      <Text className={`text-sm font-medium ${config.text}`}>{config.label}</Text>
+    <View className={`flex-row items-center gap-1 self-end rounded-[14px] py-[3px] pl-2 pr-2.5 ${bg}`}>
+      <Icon size={14} color={fg} strokeWidth={2.6} />
+      <Text font="bold" className="text-sm" style={{ color: fg }}>
+        {label ?? t(`status.${status}`)}
+      </Text>
     </View>
   );
-};
+}

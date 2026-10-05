@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { Redirect, useRouter } from 'expo-router';
 import { Check, Landmark } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
@@ -47,6 +48,7 @@ function Step({ state, label, detail }: { state: StepState; label: string; detai
 export default function CheckingScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { account, amountInput, qrData, setResult } = useVerifyFlow();
   const amount = parseAmount(amountInput);
   const [stage, setStage] = useState<Stage>('bank');
@@ -63,6 +65,7 @@ export default function CheckingScreen() {
         await mockDelay(700);
         if (cancelled) return;
         setResult(result);
+        queryClient.invalidateQueries();
         router.replace('/payment-result');
       })
       .catch(() => {
@@ -72,7 +75,7 @@ export default function CheckingScreen() {
     return () => {
       cancelled = true;
     };
-  }, [account, amount, qrData, attempt, router, setResult]);
+  }, [account, amount, qrData, attempt, router, setResult, queryClient]);
 
   if (!account || !qrData) return <Redirect href="/verify" />;
 

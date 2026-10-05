@@ -1,5 +1,6 @@
 import type { BankAccount } from './bankAccounts';
 import { mockDelay } from './mock';
+import { recordTransaction, type TransactionStatus } from './transactions';
 
 export interface VerifyPaymentInput {
   account: BankAccount;
@@ -44,8 +45,27 @@ const mockReference = () => `FT${Date.now().toString().slice(-10)}`;
  * Mock: the last whole digit of the amount picks the outcome so every screen can be tested.
  * 1 = name mismatch, 2 = amount mismatch, 3 = duplicate, anything else = verified.
  */
-export async function verifyPayment({ account, amount }: VerifyPaymentInput): Promise<VerificationResult> {
+export async function verifyPayment(input: VerifyPaymentInput): Promise<VerificationResult> {
   await mockDelay(2200);
+  const result = mockResult(input);
+  recordTransaction({
+    accountId: input.account.id,
+    payerName: result.status === 'failed' && result.reason === 'nameMismatch' ? result.payerName : 'Customer',
+    reference: result.reference,
+    expectedAmount: input.amount,
+    receivedAmount: result.status === 'failed' && result.reason === 'amountMismatch' ? result.paidAmount : input.amount,
+    status: statusOf(result),
+    createdAt: new Date().toISOString(),
+  });
+  return result;
+}
+
+function statusOf(result: VerificationResult): TransactionStatus {
+  if (result.status === 'verified') return 'verified';
+  return result.reason === 'duplicate' ? 'duplicate' : 'mismatch';
+}
+
+function mockResult({ account, amount }: VerifyPaymentInput): VerificationResult {
   const reference = mockReference();
 
   switch (Math.floor(amount) % 10) {

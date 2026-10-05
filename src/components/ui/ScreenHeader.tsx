@@ -1,4 +1,5 @@
 import { ChevronLeft } from 'lucide-react-native';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
@@ -9,9 +10,10 @@ import { Text } from './Text';
 interface ScreenHeaderProps {
   title: string;
   onBack?: () => void;
+  right?: ReactNode;
 }
 
-export function ScreenHeader({ title, onBack }: ScreenHeaderProps) {
+export function ScreenHeader({ title, onBack, right }: ScreenHeaderProps) {
   const { t } = useTranslation();
 
   return (
@@ -29,6 +31,7 @@ export function ScreenHeader({ title, onBack }: ScreenHeaderProps) {
       <Text font="heading" className="flex-1 text-[22px]" accessibilityRole="header" numberOfLines={1}>
         {title}
       </Text>
+      {right}
     </View>
   );
 }

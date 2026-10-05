@@ -197,5 +197,78 @@
   },
   "placeholder": {
     "comingSoon": "ይህ ገጽ በሚቀጥለው ደረጃ ይመጣል።"
+  },
+  "status": {
+    "verified": "ተረጋግጧል",
+    "pending": "በመጠባበቅ ላይ",
+    "mismatch": "አይዛመድም",
+    "duplicate": "ተደጋጋሚ"
+  },
+  "period": {
+    "today": "ዛሬ",
+    "7d": "7 ቀናት",
+    "30d": "30 ቀናት",
+    "custom": "ሌላ ቀን",
+    "choose": "ቀን ይምረጡ"
+  },
+  "transactions": {
+    "title": "ግብይቶች",
+    "summary_today": "ዛሬ የተረጋገጠ · {{count}} ክፍያዎች",
+    "summary_7d": "ባለፉት 7 ቀናት የተረጋገጠ · {{count}} ክፍያዎች",
+    "summary_30d": "ባለፉት 30 ቀናት የተረጋገጠ · {{count}} ክፍያዎች",
+    "chooseBank": "ባንክ ይምረጡ",
+    "allBanks": "ሁሉም ባንኮች",
+    "filter": "አጣራ",
+    "filterTitle": "ክፍያዎችን አሳይ",
+    "allStatuses": "ሁሉም ክፍያዎች",
+    "empty": "እዚህ እስካሁን ምንም ክፍያ የለም።",
+    "downloadBank": "የ{{bank}} መግለጫ አውርድ (PDF)",
+    "downloadAll": "መግለጫ አውርድ (PDF)",
+    "statementTitle": "የ{{bank}} መግለጫ",
+    "columns": {
+      "date": "ቀን",
+      "payer": "የከፈለው",
+      "bank": "ባንክ",
+      "reference": "ማጣቀሻ",
+      "expected": "የሚጠበቀው",
+      "received": "የተቀበለው",
+      "status": "ሁኔታ"
+    },
+    "totalVerified": "ጠቅላላ የተረጋገጠ: {{amount}} ብር",
+    "downloadFailed": "ፋይሉን መፍጠር አልተቻለም። እባክዎ እንደገና ይሞክሩ።"
+  },
+  "transaction": {
+    "title": "የግብይት ዝርዝር",
+    "heading_verified": "ክፍያው ተረጋግጧል",
+    "heading_pending": "ባንኩን በመጠባበቅ ላይ",
+    "heading_mismatch": "ክፍያው አይዛመድም",
+    "heading_duplicate": "ክፍያው ቀድሞ ጥቅም ላይ ውሏል",
+    "receivingAccount": "ተቀባይ ሂሳብ ••••{{last4}}",
+    "reference": "ማጣቀሻ ቁጥር",
+    "paidBy": "የከፈለው",
+    "expected": "የሚጠበቀው መጠን",
+    "received": "የተቀበለው መጠን",
+    "result": "ውጤት",
+    "exactMatch": "ሙሉ በሙሉ ተዛምዷል",
+    "share": "ደረሰኝ አጋራ",
+    "back": "ወደ ግብይቶች ተመለስ",
+    "notFound": "ይህ ክፍያ አልተገኘም።",
+    "shareMessage": "{{heading}}\nመጠን: {{amount}} ብር\nባንክ: {{bank}}\nማጣቀሻ: {{reference}}\nቀን: {{date}}"
+  },
+  "report": {
+    "title": "ሪፖርት በባንክ",
+    "totalAll": "ጠቅላላ የተረጋገጠ · ሁሉም ባንኮች",
+    "byBank": "ገንዘብ በባንክ",
+    "payments": "{{count}} ክፍያዎች · {{share}}%",
+    "downloadPdf": "PDF አውርድ",
+    "downloadCsv": "CSV አውርድ",
+    "fileTitle": "ሪፖርት በባንክ",
+    "columns": {
+      "bank": "ባንክ",
+      "payments": "ክፍያዎች",
+      "share": "ድርሻ",
+      "amount": "መጠን (ብር)"
+    },
+    "openBank": "የ{{bank}} ግብይቶችን ክፈት"
   }
 }

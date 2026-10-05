@@ -4,20 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BankBadge } from '@/components/ui/BankBadge';
 import { Text } from '@/components/ui/Text';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { BankAccount } from '@/lib/api/bankAccounts';
 import { colors } from '@/theme/tokens';
-
-function BankBadge({ code }: { code: string }) {
-  return (
-    <View className="h-12 w-12 items-center justify-center rounded-[14px] bg-successBg">
-      <Text font="bold" className="text-sm text-primary">
-        {code}
-      </Text>
-    </View>
-  );
-}
 
 function AccountText({ account }: { account: BankAccount }) {
   const { t } = useTranslation();

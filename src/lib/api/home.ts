@@ -1,4 +1,5 @@
 import { mockDelay } from './mock';
+import { getTodayCounts } from './transactions';
 
 export interface TodaySummary {
   verified: number;
@@ -9,5 +10,5 @@ export interface TodaySummary {
 
 export async function getTodaySummary(): Promise<TodaySummary> {
   await mockDelay(800);
-  return { verified: 24, pending: 2, duplicate: 1, tablesWaiting: 3 };
+  return { ...(await getTodayCounts()), tablesWaiting: 3 };
 }
