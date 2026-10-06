@@ -16,7 +16,7 @@ import { LoadingView } from '@/components/ui/LoadingView';
 import { OptionSheet } from '@/components/ui/OptionSheet';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { addBankAccount, BankAccountError, banks } from '@/lib/api/bankAccounts';
+import { addBankAccount, BankAccountError, banks } from '@/lib/mock/bankAccounts';
 import { digitsOnly } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 

@@ -17,7 +17,7 @@ import {
   MAX_BANK_ACCOUNTS,
   removeBankAccount,
   type BankAccount,
-} from '@/lib/api/bankAccounts';
+} from '@/lib/mock/bankAccounts';
 import { colors } from '@/theme/tokens';
 
 function UsageCard({ count }: { count: number }) {

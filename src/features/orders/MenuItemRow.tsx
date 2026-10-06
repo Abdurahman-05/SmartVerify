@@ -4,7 +4,7 @@ import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
 import { formatAmount } from '@/lib/format';
-import type { MenuCategory, MenuItem } from '@/lib/api/restaurant';
+import type { MenuCategory, MenuItem } from '@/lib/mock/restaurant';
 import { colors } from '@/theme/tokens';
 
 const categoryIcon: Record<MenuCategory, LucideIcon> = {

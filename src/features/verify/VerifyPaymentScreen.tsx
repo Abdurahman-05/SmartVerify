@@ -10,7 +10,7 @@ import { FormScreen } from '@/components/ui/FormScreen';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { getBankAccounts } from '@/lib/api/bankAccounts';
+import { getBankAccounts } from '@/lib/mock/bankAccounts';
 import { formatAmount, formatAmountInput, parseAmount, sanitizeAmountInput } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 

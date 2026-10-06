@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BankBadge } from '@/components/ui/BankBadge';
 import { Text } from '@/components/ui/Text';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import type { BankAccount } from '@/lib/api/bankAccounts';
+import type { BankAccount } from '@/lib/mock/bankAccounts';
 import { colors } from '@/theme/tokens';
 
 function AccountText({ account }: { account: BankAccount }) {

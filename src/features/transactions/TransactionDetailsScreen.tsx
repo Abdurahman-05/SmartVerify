@@ -12,7 +12,7 @@ import { LoadingView } from '@/components/ui/LoadingView';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { Text } from '@/components/ui/Text';
-import { accountFor, getTransaction, type TransactionStatus } from '@/lib/api/transactions';
+import { accountFor, getTransaction, type TransactionStatus } from '@/lib/mock/transactions';
 import { formatAmount, formatDay, formatTime } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 

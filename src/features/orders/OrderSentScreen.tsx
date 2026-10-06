@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { ResultBadge } from '@/components/ui/ResultBadge';
 import { Text } from '@/components/ui/Text';
-import { getOrder, type Order } from '@/lib/api/restaurant';
+import { getOrder, type Order } from '@/lib/mock/restaurant';
 import { formatAmount } from '@/lib/format';
 
 function useTargetLabel(order: Order) {

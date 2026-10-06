@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { getBankReport, type BankReport, type BankReportRow } from '@/lib/api/transactions';
+import { getBankReport, type BankReport, type BankReportRow } from '@/lib/mock/transactions';
 import { shareCsv, sharePdf, type ExportTable } from '@/lib/export';
 import { formatAmount } from '@/lib/format';
 import { periods, type Period } from '@/lib/period';

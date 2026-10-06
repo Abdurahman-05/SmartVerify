@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/Checkbox';
 import { Input } from '@/components/ui/Input';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
-import { signIn } from '@/lib/api/auth';
+import { signIn } from '@/lib/mock/auth';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
 import { useSession } from '@/store/session';
 

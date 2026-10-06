@@ -21,7 +21,7 @@ import {
   type OrderTarget,
   type OrderType,
   type Table,
-} from '@/lib/api/restaurant';
+} from '@/lib/mock/restaurant';
 import { digitsOnly, formatAmount } from '@/lib/format';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';

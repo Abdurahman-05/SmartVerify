@@ -4,7 +4,7 @@ import { Pressable, View } from 'react-native';
 import { BankBadge } from '@/components/ui/BankBadge';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { Text } from '@/components/ui/Text';
-import { accountFor, type Transaction } from '@/lib/api/transactions';
+import { accountFor, type Transaction } from '@/lib/mock/transactions';
 import { formatAmount, formatDay, formatTime } from '@/lib/format';
 
 interface TransactionRowProps {

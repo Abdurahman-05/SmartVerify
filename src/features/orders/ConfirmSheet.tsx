@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
-import type { OrderLine } from '@/lib/api/restaurant';
+import type { OrderLine } from '@/lib/mock/restaurant';
 import { formatAmount } from '@/lib/format';
 
 interface ConfirmSheetProps {

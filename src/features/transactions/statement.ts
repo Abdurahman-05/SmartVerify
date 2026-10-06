@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next';
 
-import { accountFor, type Transaction } from '@/lib/api/transactions';
+import { accountFor, type Transaction } from '@/lib/mock/transactions';
 import type { ExportTable } from '@/lib/export';
 import { formatAmount, formatDay, formatTime } from '@/lib/format';
 

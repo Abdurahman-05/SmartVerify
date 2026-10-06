@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
 import { ResultBadge } from '@/components/ui/ResultBadge';
 import { Text } from '@/components/ui/Text';
-import type { VerificationResult } from '@/lib/api/verify';
+import type { VerificationResult } from '@/lib/mock/verify';
 import { formatAmount, formatDateTime } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 

@@ -2,7 +2,7 @@ import { Check, Clock, Copy, X, type LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import type { TransactionStatus } from '@/lib/api/transactions';
+import type { TransactionStatus } from '@/lib/mock/transactions';
 import { colors } from '@/theme/tokens';
 
 import { Text } from './Text';

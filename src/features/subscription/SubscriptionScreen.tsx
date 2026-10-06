@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { startSubscription } from '@/lib/api/subscription';
+import { startSubscription } from '@/lib/mock/subscription';
 import { formatAmount } from '@/lib/format';
 import { useSession, type BillingPeriod, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';

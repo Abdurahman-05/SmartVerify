@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
-import type { BankAccount } from '@/lib/api/bankAccounts';
-import type { VerificationResult } from '@/lib/api/verify';
+import type { BankAccount } from '@/lib/mock/bankAccounts';
+import type { VerificationResult } from '@/lib/mock/verify';
 
 interface VerifyFlowState {
   account: BankAccount | null;

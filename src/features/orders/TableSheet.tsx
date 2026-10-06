@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
-import type { Table, TableArea } from '@/lib/api/restaurant';
+import type { Table, TableArea } from '@/lib/mock/restaurant';
 
 import { Pill } from './Pill';
 

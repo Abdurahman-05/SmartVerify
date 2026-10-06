@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandMark } from '@/components/ui/BrandMark';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
-import { getTodaySummary, type TodaySummary } from '@/lib/api/home';
+import { getTodaySummary, type TodaySummary } from '@/lib/mock/home';
 import { useSession, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
