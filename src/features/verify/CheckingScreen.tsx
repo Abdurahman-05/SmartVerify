@@ -12,7 +12,6 @@ import { SmallSpinner, SpinnerRing } from '@/components/ui/Spinner';
 import { Text } from '@/components/ui/Text';
 import { mockDelay } from '@/lib/mock/mock';
 import { verifyPayment } from '@/lib/mock/verify';
-import { parseAmount } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
 import { useVerifyFlow } from './verifyFlow';
@@ -50,8 +49,7 @@ export default function CheckingScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { account, amountInput, qrData, setResult } = useVerifyFlow();
-  const amount = parseAmount(amountInput);
+  const { account, amount, qrData, setResult } = useVerifyFlow();
   const [stage, setStage] = useState<Stage>('bank');
   const [attempt, setAttempt] = useState(0);
 

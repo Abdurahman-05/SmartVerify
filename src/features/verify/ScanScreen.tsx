@@ -10,7 +10,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
-import { parseAmount } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
 import { useVerifyFlow } from './verifyFlow';
@@ -86,8 +85,7 @@ export default function ScanScreen() {
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
-  const { account, amountInput, setQrData } = useVerifyFlow();
-  const amount = parseAmount(amountInput);
+  const { account, amount, setQrData } = useVerifyFlow();
 
   if (!account || amount <= 0) return <Redirect href="/verify" />;
 

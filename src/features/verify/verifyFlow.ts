@@ -5,11 +5,11 @@ import type { VerificationResult } from '@/lib/mock/verify';
 
 interface VerifyFlowState {
   account: BankAccount | null;
-  amountInput: string;
+  amount: number;
   qrData: string | null;
   result: VerificationResult | null;
   setAccount: (account: BankAccount) => void;
-  setAmountInput: (amountInput: string) => void;
+  setAmount: (amount: number) => void;
   setQrData: (qrData: string) => void;
   setResult: (result: VerificationResult) => void;
   /** Clears the payment but keeps the chosen account for the next customer. */
@@ -18,12 +18,12 @@ interface VerifyFlowState {
 
 export const useVerifyFlow = create<VerifyFlowState>((set) => ({
   account: null,
-  amountInput: '',
+  amount: 0,
   qrData: null,
   result: null,
   setAccount: (account) => set({ account }),
-  setAmountInput: (amountInput) => set({ amountInput }),
+  setAmount: (amount) => set({ amount }),
   setQrData: (qrData) => set({ qrData, result: null }),
   setResult: (result) => set({ result }),
-  finish: () => set({ amountInput: '', qrData: null, result: null }),
+  finish: () => set({ amount: 0, qrData: null, result: null }),
 }));

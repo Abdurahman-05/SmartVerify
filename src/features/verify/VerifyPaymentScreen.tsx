@@ -5,14 +5,14 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 
-import { MoneyText } from '@/components/ui/MoneyText';
+import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { Button } from '@/components/ui/Button';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { getBankAccounts } from '@/lib/mock/bankAccounts';
-import { formatAmountInput, parseAmount, sanitizeAmountInput } from '@/lib/format';
+import { parseAmountInput } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
 import { AccountPicker } from './AccountPicker';
@@ -22,7 +22,7 @@ export default function VerifyPaymentScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [amountFocused, setAmountFocused] = useState(false);
-  const { account: chosenAccount, amountInput, setAccount, setAmountInput } = useVerifyFlow();
+  const { account: chosenAccount, amount, setAccount, setAmount } = useVerifyFlow();
   const { data: accounts, isPending } = useQuery({
     queryKey: ['bank-accounts'],
     queryFn: getBankAccounts,
@@ -31,7 +31,6 @@ export default function VerifyPaymentScreen() {
   if (isPending || !accounts) return <LoadingView />;
 
   const account = accounts.find((a) => a.id === chosenAccount?.id) ?? accounts[0];
-  const amount = parseAmount(amountInput);
   const canScan = Boolean(account) && amount > 0;
 
   const startScan = () => {
@@ -84,11 +83,11 @@ export default function VerifyPaymentScreen() {
               {t('common.etb')}
             </Text>
             <TextInput
-              value={formatAmountInput(amountInput)}
-              onChangeText={(text) => setAmountInput(sanitizeAmountInput(text))}
+              value={amount ? formatMoney(amount, false) : ''}
+              onChangeText={(text) => setAmount(parseAmountInput(text))}
               onFocus={() => setAmountFocused(true)}
               onBlur={() => setAmountFocused(false)}
-              keyboardType="decimal-pad"
+              keyboardType="number-pad"
               placeholder="0"
               placeholderTextColor={colors.placeholder}
               accessibilityLabel={t('verify.amountLabel')}

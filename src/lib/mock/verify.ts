@@ -68,7 +68,7 @@ function statusOf(result: VerificationResult): TransactionStatus {
 function mockResult({ account, amount }: VerifyPaymentInput): VerificationResult {
   const reference = mockReference();
 
-  switch (Math.floor(amount) % 10) {
+  switch (amount % 10) {
     case 1:
       return {
         status: 'failed',
