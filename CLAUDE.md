@@ -58,3 +58,13 @@ pm run format - Format code
 - Splash, sign-in, create account, choose plan screens
 - Home dashboard
 - All using base components
+
+## Working rules
+
+- Reuse existing components, theme tokens, i18n keys, and patterns. Do not add new libraries unless unavoidable (ask first).
+- Keep it simple: no new abstractions, no generic frameworks, no backend. Mock data only, in src/lib/mock.
+- Small scope per task. Read only the files needed. Do not scan the whole repo.
+- All UI strings through i18n (en + am keys). Touch targets >= 44, text >= 14.
+- Design reference: docs/design/screens/<Name>.dc.html (read only the screen being built). Rebuild in React Native, do not copy HTML.
+- Money is integer ETB. Format with the existing MoneyText.
+- After each task: run typecheck + lint, then commit with a conventional message.
