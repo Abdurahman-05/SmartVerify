@@ -102,3 +102,31 @@ function mockResult({ account, amount }: VerifyPaymentInput): VerificationResult
       };
   }
 }
+
+/** Dev-only: make the mock bank report the exact, a larger, or a smaller amount. */
+export type BankCheckSimulation = 'exact' | 'over' | 'short';
+
+export const SIMULATED_OVER_ETB = 200;
+export const SIMULATED_SHORT_ETB = 100;
+
+export interface BankCheckInput {
+  account: BankAccount;
+  expected: number;
+  qrData: string;
+  simulate?: BankCheckSimulation;
+}
+
+/** Mock: asks the bank how much arrived for this QR. Defaults to the expected amount. */
+export async function checkBankPayment({
+  expected,
+  simulate = 'exact',
+}: BankCheckInput): Promise<{ received: number; reference: string }> {
+  await mockDelay(2200);
+  const received =
+    simulate === 'over'
+      ? expected + SIMULATED_OVER_ETB
+      : simulate === 'short'
+        ? Math.max(expected - SIMULATED_SHORT_ETB, 0)
+        : expected;
+  return { received, reference: mockReference() };
+}

@@ -1,5 +1,5 @@
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
-import { Redirect, useRouter } from 'expo-router';
+import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Camera, X } from 'lucide-react-native';
 import { useState } from 'react';
@@ -83,6 +83,7 @@ function PermissionView({
 export default function ScanScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { mode } = useLocalSearchParams<{ mode?: 'restaurant' }>();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
   const { account, amount, setQrData } = useVerifyFlow();
@@ -107,7 +108,7 @@ export default function ScanScreen() {
     if (scanned) return;
     setScanned(true);
     setQrData(data);
-    router.replace('/checking');
+    router.replace(mode === 'restaurant' ? '/verify-restaurant/checking' : '/checking');
   };
 
   return (

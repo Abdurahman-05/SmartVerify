@@ -22,7 +22,9 @@ export default function AppLayout() {
       <Stack.Screen name="subscription-started" options={{ gestureEnabled: false }} />
       <Stack.Screen name="bills/index" />
       <Stack.Screen name="bills/[id]" />
-      <Stack.Screen name="verify-restaurant" />
+      <Stack.Screen name="verify-restaurant/index" />
+      <Stack.Screen name="verify-restaurant/checking" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="verify-restaurant/result" options={{ gestureEnabled: false }} />
       <Stack.Screen name="chef" />
       <Stack.Screen name="admin" />
     </Stack>
