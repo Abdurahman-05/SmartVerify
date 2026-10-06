@@ -1,11 +1,11 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Info, Plus, ShieldCheck } from 'lucide-react-native';
+import { Banknote, Info, Plus, QrCode } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
-import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
+import { MoneyText } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/theme/tokens';
@@ -139,8 +139,16 @@ function BillView({ bill }: { bill: Bill }) {
           {/* TODO: enable once the order screen can add items to an existing bill. */}
           <Button label={t('bills.addMore')} icon={Plus} variant="outline" size="md" disabled onPress={() => {}} />
           <Button
-            label={t('bills.collect', { amount: formatMoney(bill.total) })}
-            icon={ShieldCheck}
+            label={t('bills.paidByCash')}
+            icon={Banknote}
+            variant="outline"
+            size="md"
+            disabled={bill.status === 'paid'}
+            onPress={() => router.push({ pathname: '/bills/[id]/cash', params: { id: bill.id } })}
+          />
+          <Button
+            label={t('bills.payByBank')}
+            icon={QrCode}
             disabled={bill.status === 'paid'}
             onPress={() => router.push({ pathname: '/verify-restaurant', params: { billId: bill.id } })}
           />

@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
-import { Banknote, Landmark, Lock, QrCode, Wallet, type LucideIcon } from 'lucide-react-native';
+import { Landmark, Lock, QrCode, Wallet, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
@@ -24,11 +24,8 @@ import { billLabel } from './billLabel';
 import { cashFor, settlePayment, useRestaurantPay, type RestaurantMethod } from './restaurantFlow';
 import { useVerifyFlow } from './verifyFlow';
 
-type MethodOption = RestaurantMethod | 'cash';
-
-const methods: { value: MethodOption; icon: LucideIcon }[] = [
+const methods: { value: RestaurantMethod; icon: LucideIcon }[] = [
   { value: 'bank', icon: Landmark },
-  { value: 'cash', icon: Banknote },
   { value: 'cash+bank', icon: Wallet },
 ];
 
@@ -36,24 +33,21 @@ function MethodButton({
   label,
   icon: Icon,
   selected,
-  disabled,
   onPress,
 }: {
   label: string;
   icon: LucideIcon;
   selected: boolean;
-  disabled: boolean;
   onPress: () => void;
 }) {
   return (
     <Pressable
       onPress={onPress}
-      disabled={disabled}
       accessibilityRole="radio"
-      accessibilityState={{ selected, disabled }}
+      accessibilityState={{ selected }}
       className={`h-[84px] flex-1 items-center justify-center gap-1.5 rounded-[18px] px-1 ${
         selected ? 'bg-primary' : 'border-2 border-borderStrong bg-surface'
-      } ${disabled ? 'opacity-40' : ''}`}
+      }`}
     >
       <Icon size={26} color={selected ? colors.surface : colors.primary} strokeWidth={2.2} />
       <Text font="bold" tone={selected ? 'inverse' : 'default'} className="text-center text-base">
@@ -140,8 +134,7 @@ export default function VerifyRestaurantScreen() {
                 label={t(`verifyRestaurant.method.${value}`)}
                 icon={icon}
                 selected={pay.method === value}
-                disabled={value === 'cash'}
-                onPress={() => value !== 'cash' && pay.setMethod(value)}
+                onPress={() => pay.setMethod(value)}
               />
             ))}
           </View>

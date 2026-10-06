@@ -450,9 +450,10 @@
     "totalToPay": "የሚከፈል ጠቅላላ",
     "priceNote": "ይህ ዋጋ ከትዕዛዙ የመጣ ነው። አስተናጋጁ አይጽፈውም።",
     "addMore": "ተጨማሪ ዕቃ ጨምር",
-    "collect": "ክፍያ ተቀበል · {{amount}}",
     "paid": "ተከፍሏል",
-    "notFound": "ይህ ሂሳብ አልተገኘም።"
+    "notFound": "ይህ ሂሳብ አልተገኘም።",
+    "paidByCash": "በጥሬ ገንዘብ ተከፍሏል",
+    "payByBank": "በባንክ ክፈል · QR ቃኝ"
   },
   "verifyRestaurant": {
     "title": "ክፍያ አረጋግጥ",
@@ -462,7 +463,6 @@
     "howPaying": "1. ደንበኛው እንዴት እየከፈለ ነው?",
     "method": {
       "bank": "ባንክ ብቻ",
-      "cash": "ጥሬ ገንዘብ ብቻ",
       "cash+bank": "ጥሬ ገንዘብ + ባንክ"
     },
     "totalBill": "2. ጠቅላላ ሂሳብ",
@@ -473,7 +473,7 @@
     "summaryCash": "የተቀበሉት ጥሬ ገንዘብ",
     "summaryBankAlready": "ቀድሞ በባንክ የተቀበሉት",
     "mustPayBank": "ደንበኛው በባንክ መክፈል ያለበት",
-    "cashTooMuch": "ይህ ጥሬ ገንዘብ ሙሉ ሂሳቡን ይሸፍናል። ጥሬ ገንዘብ ብቻ በቅርቡ ይመጣል።",
+    "cashTooMuch": "ይህ ጥሬ ገንዘብ ሙሉ ሂሳቡን ይሸፍናል። ተመልሰው በሂሳቡ ላይ \"በጥሬ ገንዘብ ተከፍሏል\" ይጠቀሙ።",
     "receivingAccount": "ተቀባይ ሂሳብ ••••{{last4}}",
     "change": "ቀይር",
     "chooseAccount": "ተቀባይ ሂሳብ ይምረጡ",

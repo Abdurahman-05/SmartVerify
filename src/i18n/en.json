@@ -450,9 +450,10 @@
     "totalToPay": "Total to pay",
     "priceNote": "This price comes from the order. The waiter does not type it.",
     "addMore": "Add more items",
-    "collect": "Collect payment · {{amount}}",
     "paid": "Paid",
-    "notFound": "This bill could not be found."
+    "notFound": "This bill could not be found.",
+    "paidByCash": "Paid by cash",
+    "payByBank": "Pay by bank · scan QR"
   },
   "verifyRestaurant": {
     "title": "Verify payment",
@@ -462,7 +463,6 @@
     "howPaying": "1. How is the customer paying?",
     "method": {
       "bank": "Bank only",
-      "cash": "Cash only",
       "cash+bank": "Cash + Bank"
     },
     "totalBill": "2. Total bill",
@@ -473,7 +473,7 @@
     "summaryCash": "Cash received",
     "summaryBankAlready": "Bank already received",
     "mustPayBank": "Customer must pay by bank",
-    "cashTooMuch": "This cash covers the whole bill. Cash only is coming soon.",
+    "cashTooMuch": "This cash covers the whole bill. Go back and use \"Paid by cash\" on the bill.",
     "receivingAccount": "Receiving account ••••{{last4}}",
     "change": "Change",
     "chooseAccount": "Choose receiving account",
