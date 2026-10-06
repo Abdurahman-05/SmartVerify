@@ -27,3 +27,34 @@ export function calcPayment({
   }
   return { expectedBank, status: 'short', remaining: expectedBank - received, tip: 0 };
 }
+
+export type ExtraChoice = 'tip' | 'giveback';
+
+export interface CashCalc {
+  valid: boolean;
+  missing: number;
+  extra: number;
+  tip: number;
+  change: number;
+}
+
+/** Cash only, integer ETB. Extra money goes to the waiter as a tip or back to the customer. */
+export function calcCash({
+  total,
+  cash,
+  extraChoice,
+}: {
+  total: number;
+  cash: number;
+  extraChoice: ExtraChoice;
+}): CashCalc {
+  if (cash < total) return { valid: false, missing: total - cash, extra: 0, tip: 0, change: 0 };
+  const extra = cash - total;
+  return {
+    valid: true,
+    missing: 0,
+    extra,
+    tip: extraChoice === 'tip' ? extra : 0,
+    change: extraChoice === 'giveback' ? extra : 0,
+  };
+}

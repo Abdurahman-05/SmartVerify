@@ -1,5 +1,1 @@
-import { PlaceholderScreen } from '@/components/ui/PlaceholderScreen';
-
-export default function TipsScreen() {
-  return <PlaceholderScreen titleKey="home.actions.tips" />;
-}
+export { default } from '@/features/tips/TipsScreen';

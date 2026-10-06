@@ -26,6 +26,7 @@ export const colors = {
   success: '#0E7A4E',
   dangerSurface: '#FAF5F3',
   divider: '#E8EEEB',
+  tipOnDark: '#FFD866',
 } as const;
 
 export const radii = {

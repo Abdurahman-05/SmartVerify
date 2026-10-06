@@ -23,6 +23,7 @@ export default function AppLayout() {
       <Stack.Screen name="bills/index" />
       <Stack.Screen name="bills/[id]/index" />
       <Stack.Screen name="bills/[id]/cash" />
+      <Stack.Screen name="bills/[id]/cash-saved" options={{ gestureEnabled: false }} />
       <Stack.Screen name="verify-restaurant/index" />
       <Stack.Screen name="verify-restaurant/checking" options={{ gestureEnabled: false }} />
       <Stack.Screen name="verify-restaurant/result" options={{ gestureEnabled: false }} />
