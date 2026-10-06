@@ -1,6 +1,8 @@
 import type { Href } from 'expo-router';
 import { create } from 'zustand';
 
+import { useStaff } from '@/features/staff/store';
+
 export type Plan = 'normal' | 'restaurant';
 export type Role = 'owner' | 'manager' | 'waiter' | 'chef';
 
@@ -43,11 +45,16 @@ export const useSession = create<SessionState>((set) => ({
   isAuthenticated: false,
   user: null,
   signIn: (user) => set({ isAuthenticated: true, user }),
-  setPlan: (plan) => set((state) => ({ user: state.user ? { ...state.user, plan } : null })),
+  setPlan: (plan) =>
+    set((state) => {
+      if (state.user?.role === 'owner') useStaff.getState().setOwnerPlan(plan);
+      return { user: state.user ? { ...state.user, plan } : null };
+    }),
   setRole: (role) => set((state) => ({ user: state.user ? { ...state.user, role } : null })),
   setSubscription: (subscription) =>
-    set((state) => ({
-      user: state.user ? { ...state.user, plan: subscription.plan, subscription } : null,
-    })),
+    set((state) => {
+      if (state.user?.role === 'owner') useStaff.getState().setOwnerPlan(subscription.plan, subscription);
+      return { user: state.user ? { ...state.user, plan: subscription.plan, subscription } : null };
+    }),
   signOut: () => set({ isAuthenticated: false, user: null }),
 }));

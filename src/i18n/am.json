@@ -54,7 +54,9 @@
       "pin": "PIN {{count}} አሃዝ መሆን አለበት",
       "fullName": "ሙሉ ስምዎን ያስገቡ",
       "businessName": "የድርጅቱን ስም ያስገቡ",
-      "terms": "ለመቀጠል እባክዎ ውሎቹን ይቀበሉ"
+      "terms": "ለመቀጠል እባክዎ ውሎቹን ይቀበሉ",
+      "signInPin": "ከ4 እስከ 6 አሃዝ ያለውን PIN ያስገቡ",
+      "wrongCredentials": "የተሳሳተ ስልክ ቁጥር ወይም PIN።"
     }
   },
   "plan": {
@@ -590,11 +592,47 @@
     "signOut": "ውጣ",
     "devTitle": "ለገንቢ",
     "devRole": "ሚና",
-    "devPlan": "እቅድ"
+    "devPlan": "እቅድ",
+    "staff": "ሰራተኞች"
   },
   "help": {
     "title": "እገዛ",
     "contactTitle": "ድጋፍ ያግኙ",
     "contactBody": "የድጋፍ ቡድናችን በክፍያዎች፣ በባንክ ሂሳቦች እና በእቅድዎ ይረዳዎታል። የመገናኛ መረጃ በቅርቡ ይመጣል።"
+  },
+  "staff": {
+    "title": "ሰራተኞች",
+    "people_one": "{{count}} ሰው · {{active}} አሁን እየሰሩ",
+    "people_other": "{{count}} ሰዎች · {{active}} አሁን እየሰሩ",
+    "add": "ጨምር",
+    "active": "ንቁ",
+    "off": "ጠፍቷል",
+    "empty": "እስካሁን ሰራተኛ የለም።",
+    "rowLabel": "{{name}}፣ {{role}}፣ {{state}}",
+    "setOffTitle": "{{name}} ይጥፋ?",
+    "setOffBody": "እንደገና ንቁ እስኪደረጉ ድረስ መግባት አይችሉም።",
+    "setActiveTitle": "{{name}} ንቁ ይሁን?",
+    "setActiveBody": "በስልክ ቁጥራቸው እና በPIN መግባት ይችላሉ።",
+    "confirmOff": "አጥፋ",
+    "confirmActive": "ንቁ አድርግ",
+    "cancel": "ሰርዝ",
+    "addTitle": "ሰራተኛ ጨምር",
+    "addSubtitle": "በስልክ ቁጥር የመግቢያ ፈቃድ ያገኛሉ",
+    "fullName": "ሙሉ ስም",
+    "fullNamePlaceholder": "ለምሳሌ፦ ሰላም ታደሰ",
+    "phone": "ስልክ ቁጥር",
+    "role": "ሚና",
+    "pin": "ጊዜያዊ PIN (4 አሃዝ)",
+    "pinPlaceholder": "ለምሳሌ፦ 4821",
+    "pinNote": "ይህን PIN ለሰውየው ይስጡ። ከስልክ ቁጥራቸው ጋር ለመግባት ይጠቀሙበታል።",
+    "permissions": "ይህ ሰው ምን ማድረግ ይችላል?",
+    "changeDeliveryFee": "የማድረሻ ክፍያ መቀየር",
+    "seeReports": "ሪፖርቶችን ማየት",
+    "save": "ሰራተኛውን አስቀምጥ",
+    "errors": {
+      "name": "ሙሉ ስሙን ያስገቡ",
+      "phoneTaken": "ይህ ስልክ ቁጥር አስቀድሞ ጥቅም ላይ ውሏል",
+      "pin": "PIN 4 አሃዝ መሆን አለበት"
+    }
   }
 }

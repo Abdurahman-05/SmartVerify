@@ -54,7 +54,9 @@
       "pin": "PIN must be {{count}} digits",
       "fullName": "Enter your full name",
       "businessName": "Enter your business name",
-      "terms": "Please accept the terms to continue"
+      "terms": "Please accept the terms to continue",
+      "signInPin": "Enter your 4 to 6 digit PIN",
+      "wrongCredentials": "Wrong phone number or PIN."
     }
   },
   "plan": {
@@ -590,11 +592,47 @@
     "signOut": "Sign out",
     "devTitle": "Developer",
     "devRole": "Role",
-    "devPlan": "Plan"
+    "devPlan": "Plan",
+    "staff": "Staff"
   },
   "help": {
     "title": "Help",
     "contactTitle": "Contact support",
     "contactBody": "Our support team will help you with payments, bank accounts, and your plan. Contact details are coming soon."
+  },
+  "staff": {
+    "title": "Staff",
+    "people_one": "{{count}} person · {{active}} working now",
+    "people_other": "{{count}} people · {{active}} working now",
+    "add": "Add",
+    "active": "Active",
+    "off": "Off",
+    "empty": "No staff yet.",
+    "rowLabel": "{{name}}, {{role}}, {{state}}",
+    "setOffTitle": "Set {{name}} to Off?",
+    "setOffBody": "They will not be able to sign in until set Active again.",
+    "setActiveTitle": "Set {{name}} to Active?",
+    "setActiveBody": "They can sign in with their phone number and PIN.",
+    "confirmOff": "Set Off",
+    "confirmActive": "Set Active",
+    "cancel": "Cancel",
+    "addTitle": "Add staff",
+    "addSubtitle": "They get a sign-in by phone number",
+    "fullName": "Full name",
+    "fullNamePlaceholder": "e.g. Selam Tadesse",
+    "phone": "Phone number",
+    "role": "Role",
+    "pin": "Temporary PIN (4 digits)",
+    "pinPlaceholder": "e.g. 4821",
+    "pinNote": "Give this PIN to the person. They use it with their phone number to sign in.",
+    "permissions": "What can this person do?",
+    "changeDeliveryFee": "Change delivery fee",
+    "seeReports": "See reports",
+    "save": "Save staff",
+    "errors": {
+      "name": "Enter the full name",
+      "phoneTaken": "This phone number is already used",
+      "pin": "PIN must be 4 digits"
+    }
   }
 }

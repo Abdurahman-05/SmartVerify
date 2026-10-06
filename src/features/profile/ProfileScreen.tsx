@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Globe, Landmark, LifeBuoy, LogOut, Star } from 'lucide-react-native';
+import { Globe, Landmark, LifeBuoy, LogOut, Star, Users } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -66,6 +66,7 @@ export default function ProfileScreen() {
 
   const isStaff = user.role === 'waiter' || user.role === 'chef';
   const isChef = user.role === 'chef';
+  const canManageStaff = user.role === 'owner' || user.role === 'manager';
 
   const leave = () => {
     signOut();
@@ -87,6 +88,9 @@ export default function ProfileScreen() {
               <ListRow icon={Landmark} label={t('profile.bankAccounts')} onPress={() => router.push('/bank-accounts')} />
               <ListRow icon={Star} label={t('profile.subscription')} onPress={() => router.push('/subscription')} />
             </>
+          ) : null}
+          {canManageStaff ? (
+            <ListRow icon={Users} label={t('profile.staff')} onPress={() => router.push('/staff')} />
           ) : null}
           <ListRow icon={Globe} label={t('profile.language')} right={<LanguageToggle />} />
           <ListRow icon={LifeBuoy} label={t('profile.help')} onPress={() => router.push('/help')} last />
