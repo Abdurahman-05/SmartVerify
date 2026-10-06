@@ -549,5 +549,34 @@
     "cash": "Cash",
     "empty": "No tips in this period yet.",
     "note": "Extra money from a payment is added here automatically."
+  },
+  "kitchen": {
+    "title": "Kitchen",
+    "chef": "Chef: {{name}}",
+    "tab": {
+      "new": "New",
+      "cooking": "Cooking",
+      "ready": "Ready"
+    },
+    "waiter": "Waiter: {{name}}",
+    "forCustomer": "For: {{name}}",
+    "minutes": "{{count}} min",
+    "waitingLabel": "Waiting {{count}} minutes",
+    "startCooking": "Start cooking",
+    "markReady": "Mark as ready",
+    "empty": "Nothing here right now.",
+    "openOrder": "Open {{label}}",
+    "orderLine": "Order #{{number}} · Waiter: {{name}}",
+    "waiting": "Waiting",
+    "cookingFor": "Cooking for",
+    "readyFor": "Ready",
+    "type": {
+      "dine": "Dine in",
+      "takeaway": "Takeaway",
+      "delivery": "Delivery"
+    },
+    "notesTitle": "NOTES FROM THE WAITER",
+    "back": "Back to kitchen",
+    "notFound": "This order could not be found."
   }
 }

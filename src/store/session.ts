@@ -1,7 +1,12 @@
+import type { Href } from 'expo-router';
 import { create } from 'zustand';
 
 export type Plan = 'normal' | 'restaurant';
 export type Role = 'owner' | 'manager' | 'waiter' | 'chef';
+
+/** First screen after sign in: chefs only see the kitchen. */
+export const homeRouteFor = (role: Role | null | undefined): Href =>
+  role === 'chef' ? '/kitchen' : '/home';
 
 export type BillingPeriod = 'monthly' | 'quarterly';
 

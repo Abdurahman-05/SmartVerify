@@ -15,8 +15,21 @@ export interface CreateAccountInput {
   pin: string;
 }
 
-export async function signIn(_input: SignInInput): Promise<SessionUser> {
+/** Mock: this phone number signs in as the restaurant's chef. */
+export const MOCK_CHEF_PHONE = '911000000';
+
+export async function signIn(input: SignInInput): Promise<SessionUser> {
   await mockDelay();
+  if (input.phone === MOCK_CHEF_PHONE) {
+    return {
+      userId: 'mock-chef-1',
+      displayName: 'Hana M.',
+      businessName: 'Abebe Coffee',
+      role: 'chef',
+      plan: 'restaurant',
+      subscription: null,
+    };
+  }
   return {
     userId: 'mock-user-1',
     displayName: 'Abebe',

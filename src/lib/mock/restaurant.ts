@@ -1,6 +1,7 @@
 import { useBills } from '@/features/bills/store';
 
 import { createBill } from './bills';
+import { createKitchenOrder } from './kitchen';
 import { DELIVERY_FEE_BY_AREA } from './fees';
 import { mockDelay } from './mock';
 
@@ -106,7 +107,7 @@ export const deliveryAreas: DeliveryArea[] = [
 ];
 
 const orders: Order[] = [];
-let nextOrderNumber = 1043;
+let nextOrderNumber = 1045;
 
 export async function getMenu(): Promise<MenuItem[]> {
   await mockDelay(400);
@@ -133,7 +134,8 @@ export async function sendOrder(input: NewOrderInput): Promise<Order> {
     createdAt: new Date().toISOString(),
   };
   orders.unshift(order);
-  createBill(order, input.waiterId);
+  const bill = createBill(order, input.waiterId);
+  createKitchenOrder(bill, input.notes);
   return order;
 }
 

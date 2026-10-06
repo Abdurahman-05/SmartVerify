@@ -14,7 +14,7 @@ import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
 import { signIn } from '@/lib/mock/auth';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
-import { useSession } from '@/store/session';
+import { homeRouteFor, useSession } from '@/store/session';
 
 import { AuthHeader } from './AuthHeader';
 import { FormScreen } from '@/components/ui/FormScreen';
@@ -40,7 +40,7 @@ export default function SignInScreen() {
     mutationFn: signIn,
     onSuccess: (user) => {
       startSession(user);
-      router.replace('/home');
+      router.replace(homeRouteFor(user.role));
     },
   });
 

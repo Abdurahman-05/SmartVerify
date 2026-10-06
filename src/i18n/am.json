@@ -549,5 +549,34 @@
     "cash": "ጥሬ ገንዘብ",
     "empty": "በዚህ ጊዜ ውስጥ እስካሁን ቲፕ የለም።",
     "note": "ከክፍያ የተረፈ ገንዘብ እዚህ በራሱ ይጨመራል።"
+  },
+  "kitchen": {
+    "title": "ማብሰያ ቤት",
+    "chef": "ሼፍ: {{name}}",
+    "tab": {
+      "new": "አዲስ",
+      "cooking": "በማብሰል ላይ",
+      "ready": "ዝግጁ"
+    },
+    "waiter": "አስተናጋጅ: {{name}}",
+    "forCustomer": "ለ: {{name}}",
+    "minutes": "{{count}} ደቂቃ",
+    "waitingLabel": "{{count}} ደቂቃ እየጠበቀ",
+    "startCooking": "ማብሰል ጀምር",
+    "markReady": "ዝግጁ ነው በል",
+    "empty": "አሁን እዚህ ምንም የለም።",
+    "openOrder": "{{label}} ክፈት",
+    "orderLine": "ትዕዛዝ #{{number}} · አስተናጋጅ: {{name}}",
+    "waiting": "እየጠበቀ",
+    "cookingFor": "እየበሰለ ለ",
+    "readyFor": "ዝግጁ",
+    "type": {
+      "dine": "እዚህ መመገብ",
+      "takeaway": "ይዞ መሄድ",
+      "delivery": "ማድረስ"
+    },
+    "notesTitle": "ከአስተናጋጁ የተሰጡ ማሳሰቢያዎች",
+    "back": "ወደ ማብሰያ ቤት ተመለስ",
+    "notFound": "ይህ ትዕዛዝ አልተገኘም።"
   }
 }

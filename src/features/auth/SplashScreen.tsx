@@ -8,7 +8,7 @@ import Svg, { Circle, Defs, Path, RadialGradient, Stop } from 'react-native-svg'
 
 import { SecureFooter } from '@/components/ui/SecureFooter';
 import { Text } from '@/components/ui/Text';
-import { useSession } from '@/store/session';
+import { homeRouteFor, useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
 const DESIGN_WIDTH = 390;
@@ -19,16 +19,17 @@ export default function SplashScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const isAuthenticated = useSession((s) => s.isAuthenticated);
+  const role = useSession((s) => s.user?.role);
   const { width } = useWindowDimensions();
   const scale = width / DESIGN_WIDTH;
 
   useEffect(() => {
     const timer = setTimeout(
-      () => router.replace(isAuthenticated ? '/home' : '/sign-in'),
+      () => router.replace(isAuthenticated ? homeRouteFor(role) : '/sign-in'),
       SPLASH_MS
     );
     return () => clearTimeout(timer);
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, role, router]);
 
   return (
     <View className="flex-1 bg-background">

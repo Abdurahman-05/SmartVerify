@@ -87,6 +87,7 @@ interface BillsState {
   bills: Bill[];
   addBill: (bill: Bill) => void;
   markPaid: (id: string) => void;
+  setServed: (id: string) => void;
 }
 
 export const useBills = create<BillsState>((set) => ({
@@ -94,6 +95,8 @@ export const useBills = create<BillsState>((set) => ({
   addBill: (bill) => set((s) => ({ bills: [...s.bills, bill] })),
   markPaid: (id) =>
     set((s) => ({ bills: s.bills.map((b) => (b.id === id ? { ...b, status: 'paid' } : b)) })),
+  setServed: (id) =>
+    set((s) => ({ bills: s.bills.map((b) => (b.id === id ? { ...b, servedStatus: 'served' } : b)) })),
 }));
 
 export const openBills = (bills: Bill[]) =>
