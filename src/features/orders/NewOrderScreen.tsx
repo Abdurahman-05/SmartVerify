@@ -77,6 +77,7 @@ export default function NewOrderScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const waiterName = useSession((s) => s.user?.displayName ?? '');
+  const waiterId = useSession((s) => s.user?.userId ?? '');
 
   const [type, setType] = useState<OrderType>('dineIn');
   const [table, setTable] = useState<Table | null>(null);
@@ -128,7 +129,7 @@ export default function NewOrderScreen() {
   };
 
   const submit = (target: OrderTarget) =>
-    mutation.mutate({ target, lines, notes: type === 'dineIn' ? notes : [], waiterName });
+    mutation.mutate({ target, lines, notes: type === 'dineIn' ? notes : [], waiterId, waiterName });
 
   const onSend = () => {
     if (itemCount === 0) return;

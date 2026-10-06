@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandMark } from '@/components/ui/BrandMark';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
+import { openBills, useBills } from '@/features/bills/store';
 import { getTodaySummary, type TodaySummary } from '@/lib/mock/home';
 import { useSession, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';
@@ -201,15 +202,15 @@ function TodayCard({ summary }: { summary: TodaySummary }) {
   );
 }
 
-function useActionSubtitle(plan: Plan | null, summary?: TodaySummary) {
+function useActionSubtitle(plan: Plan | null, tablesWaiting: number) {
   const { t } = useTranslation();
   const isRestaurant = plan === 'restaurant';
 
   return (action: HomeAction) => {
     switch (action.key) {
       case 'verify':
-        return isRestaurant && summary?.tablesWaiting
-          ? t('home.actions.verifySubTables', { count: summary.tablesWaiting })
+        return isRestaurant && tablesWaiting
+          ? t('home.actions.verifySubTables', { count: tablesWaiting })
           : t('home.actions.verifySub');
       case 'tips':
         return isRestaurant ? t('home.actions.tipsSubToday') : t('home.actions.tipsSub');
@@ -235,7 +236,8 @@ export default function HomeScreen() {
     queryKey: ['today-summary'],
     queryFn: getTodaySummary,
   });
-  const subtitleFor = useActionSubtitle(user?.plan ?? null, summary);
+  const tablesWaiting = useBills((s) => openBills(s.bills).filter((b) => b.type === 'dine').length);
+  const subtitleFor = useActionSubtitle(user?.plan ?? null, tablesWaiting);
 
   if (!user) return <Redirect href="/sign-in" />;
   if (isPending) return <LoadingView />;
@@ -248,8 +250,8 @@ export default function HomeScreen() {
         <HomeHeader user={user} />
         <HeroCard
           name={user.displayName}
-          tablesWaiting={user.plan === 'restaurant' ? summary?.tablesWaiting : undefined}
-          onVerify={() => router.push('/verify')}
+          tablesWaiting={user.plan === 'restaurant' ? tablesWaiting : undefined}
+          onVerify={() => router.push(user.plan === 'restaurant' ? '/bills' : '/verify')}
         />
 
         <Text font="heading" className="px-4 pb-2 pt-3.5 text-lg" accessibilityRole="header">

@@ -1,3 +1,7 @@
+import { useBills } from '@/features/bills/store';
+
+import { createBill } from './bills';
+import { DELIVERY_FEE_BY_AREA } from './fees';
 import { mockDelay } from './mock';
 
 export type MenuCategory = 'food' | 'drinks' | 'combos';
@@ -51,6 +55,7 @@ export interface NewOrderInput {
   target: OrderTarget;
   lines: OrderLine[];
   notes: OrderNote[];
+  waiterId: string;
   waiterName: string;
 }
 
@@ -73,13 +78,12 @@ const menu: MenuItem[] = [
   { id: 'm-juice', name: 'Avocado Juice', priceEtb: 90, category: 'drinks' },
   { id: 'm-water', name: 'Water 1L', priceEtb: 35, category: 'drinks' },
   { id: 'm-soda', name: 'Soft drink', priceEtb: 45, category: 'drinks' },
+  { id: 'm-ambo', name: 'Ambo Sparkling Water', priceEtb: 45, category: 'drinks' },
   { id: 'm-combo-family', name: 'Family Combo', priceEtb: 650, category: 'combos' },
   { id: 'm-combo-fasting', name: 'Fasting Combo', priceEtb: 320, category: 'combos' },
 ];
 
-const busyTables = new Set(['main-3', 'main-5', 'main-9', 'upstairs-2', 'outside-4']);
-
-const tables: Table[] = (
+const tables: Omit<Table, 'busy'>[] = (
   [
     ['main', 16],
     ['upstairs', 8],
@@ -88,17 +92,17 @@ const tables: Table[] = (
 ).flatMap(([area, count]) =>
   Array.from({ length: count }, (_, i) => {
     const id = `${area}-${i + 1}`;
-    return { id, number: i + 1, area, busy: busyTables.has(id) };
+    return { id, number: i + 1, area };
   })
 );
 
 export const deliveryAreas: DeliveryArea[] = [
-  { id: 'bole', name: 'Bole', usualFeeEtb: 80 },
-  { id: 'kazanchis', name: 'Kazanchis', usualFeeEtb: 100 },
-  { id: 'megenagna', name: 'Megenagna', usualFeeEtb: 100 },
-  { id: 'sarbet', name: 'Sarbet', usualFeeEtb: 120 },
-  { id: 'piassa', name: 'Piassa', usualFeeEtb: 120 },
-  { id: 'cmc', name: 'CMC', usualFeeEtb: 150 },
+  { id: 'bole', name: 'Bole', usualFeeEtb: DELIVERY_FEE_BY_AREA.bole },
+  { id: 'kazanchis', name: 'Kazanchis', usualFeeEtb: DELIVERY_FEE_BY_AREA.kazanchis },
+  { id: 'megenagna', name: 'Megenagna', usualFeeEtb: DELIVERY_FEE_BY_AREA.megenagna },
+  { id: 'sarbet', name: 'Sarbet', usualFeeEtb: DELIVERY_FEE_BY_AREA.sarbet },
+  { id: 'piassa', name: 'Piassa', usualFeeEtb: DELIVERY_FEE_BY_AREA.piassa },
+  { id: 'cmc', name: 'CMC', usualFeeEtb: DELIVERY_FEE_BY_AREA.cmc },
 ];
 
 const orders: Order[] = [];
@@ -109,9 +113,14 @@ export async function getMenu(): Promise<MenuItem[]> {
   return menu;
 }
 
+/** A table is busy while it has an open dine-in bill. */
 export async function getTables(): Promise<Table[]> {
   await mockDelay(300);
-  return tables.map((t) => ({ ...t }));
+  const open = useBills.getState().bills.filter((b) => b.type === 'dine' && b.status === 'open');
+  return tables.map((t) => ({
+    ...t,
+    busy: open.some((b) => b.tableNo === t.number && (b.tableArea ?? 'main') === t.area),
+  }));
 }
 
 export async function sendOrder(input: NewOrderInput): Promise<Order> {
@@ -124,11 +133,7 @@ export async function sendOrder(input: NewOrderInput): Promise<Order> {
     createdAt: new Date().toISOString(),
   };
   orders.unshift(order);
-  const { target } = input;
-  if (target.type === 'dineIn') {
-    const table = tables.find((t) => t.id === target.tableId);
-    if (table) table.busy = true;
-  }
+  createBill(order, input.waiterId);
   return order;
 }
 

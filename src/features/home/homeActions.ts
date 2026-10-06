@@ -58,5 +58,7 @@ const restaurantKeys: HomeActionKey[] = [
 
 export function getHomeActions(plan: Plan | null): HomeAction[] {
   const keys = plan === 'normal' ? normalKeys : restaurantKeys;
-  return keys.map((key) => actions[key]);
+  return keys.map((key) =>
+    key === 'verify' && plan === 'restaurant' ? { ...actions.verify, href: '/bills' } : actions[key]
+  );
 }

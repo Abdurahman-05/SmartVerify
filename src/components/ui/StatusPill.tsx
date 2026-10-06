@@ -17,14 +17,15 @@ const config: Record<TransactionStatus, { bg: string; fg: string; icon: LucideIc
 interface StatusPillProps {
   status: TransactionStatus;
   label?: string;
+  className?: string;
 }
 
-export function StatusPill({ status, label }: StatusPillProps) {
+export function StatusPill({ status, label, className = 'self-end' }: StatusPillProps) {
   const { t } = useTranslation();
   const { bg, fg, icon: Icon } = config[status];
 
   return (
-    <View className={`flex-row items-center gap-1 self-end rounded-[14px] py-[3px] pl-2 pr-2.5 ${bg}`}>
+    <View className={`flex-row items-center gap-1 rounded-[14px] py-[3px] pl-2 pr-2.5 ${bg} ${className}`}>
       <Icon size={14} color={fg} strokeWidth={2.6} />
       <Text font="bold" className="text-sm" style={{ color: fg }}>
         {label ?? t(`status.${status}`)}
