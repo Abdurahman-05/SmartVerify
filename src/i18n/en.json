@@ -578,5 +578,23 @@
     "notesTitle": "NOTES FROM THE WAITER",
     "back": "Back to kitchen",
     "notFound": "This order could not be found."
+  },
+  "profile": {
+    "title": "Profile",
+    "open": "Open profile",
+    "noPlan": "Exploring",
+    "bankAccounts": "Bank accounts",
+    "subscription": "Subscription",
+    "language": "Language",
+    "help": "Help",
+    "signOut": "Sign out",
+    "devTitle": "Developer",
+    "devRole": "Role",
+    "devPlan": "Plan"
+  },
+  "help": {
+    "title": "Help",
+    "contactTitle": "Contact support",
+    "contactBody": "Our support team will help you with payments, bank accounts, and your plan. Contact details are coming soon."
   }
 }

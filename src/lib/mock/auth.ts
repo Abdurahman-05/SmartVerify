@@ -25,6 +25,7 @@ export async function signIn(input: SignInInput): Promise<SessionUser> {
       userId: 'mock-chef-1',
       displayName: 'Hana M.',
       businessName: 'Abebe Coffee',
+      phone: input.phone,
       role: 'chef',
       plan: 'restaurant',
       subscription: null,
@@ -34,6 +35,7 @@ export async function signIn(input: SignInInput): Promise<SessionUser> {
     userId: 'mock-user-1',
     displayName: 'Abebe',
     businessName: 'Abebe Coffee',
+    phone: input.phone,
     role: 'owner',
     plan: 'normal',
     subscription: {
@@ -52,6 +54,7 @@ export async function createAccount(input: CreateAccountInput): Promise<SessionU
     userId: 'mock-user-new',
     displayName: input.fullName.trim().split(/\s+/)[0],
     businessName: input.businessName.trim(),
+    phone: input.phone,
     role: 'owner',
     plan: null,
     subscription: null,

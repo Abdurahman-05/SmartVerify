@@ -22,6 +22,8 @@ export interface SessionUser {
   userId: string;
   displayName: string;
   businessName: string;
+  /** 9 digits without +251, e.g. "912345678". */
+  phone?: string;
   role: Role;
   plan: Plan | null;
   subscription: Subscription | null;
@@ -32,6 +34,7 @@ interface SessionState {
   user: SessionUser | null;
   signIn: (user: SessionUser) => void;
   setPlan: (plan: Plan) => void;
+  setRole: (role: Role) => void;
   setSubscription: (subscription: Subscription) => void;
   signOut: () => void;
 }
@@ -41,6 +44,7 @@ export const useSession = create<SessionState>((set) => ({
   user: null,
   signIn: (user) => set({ isAuthenticated: true, user }),
   setPlan: (plan) => set((state) => ({ user: state.user ? { ...state.user, plan } : null })),
+  setRole: (role) => set((state) => ({ user: state.user ? { ...state.user, role } : null })),
   setSubscription: (subscription) =>
     set((state) => ({
       user: state.user ? { ...state.user, plan: subscription.plan, subscription } : null,

@@ -104,6 +104,7 @@ function OrderCard({ order, now }: { order: KitchenOrder; now: number }) {
 
 export default function KitchenScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const chefName = useSession((s) => s.user?.displayName ?? '');
   const orders = useKitchen((s) => s.orders);
   const [tab, setTab] = useState<KitchenStatus>('new');
@@ -115,7 +116,22 @@ export default function KitchenScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader title={t('kitchen.title')} subtitle={t('kitchen.chef', { name: chefName })} />
+      <ScreenHeader
+        title={t('kitchen.title')}
+        subtitle={t('kitchen.chef', { name: chefName })}
+        right={
+          <Pressable
+            onPress={() => router.push('/profile')}
+            accessibilityRole="button"
+            accessibilityLabel={t('profile.open')}
+            className="h-11 w-11 items-center justify-center rounded-full bg-primary active:opacity-80"
+          >
+            <Text font="bold" tone="inverse" className="text-lg">
+              {chefName.charAt(0).toUpperCase()}
+            </Text>
+          </Pressable>
+        }
+      />
 
       <View className="flex-row gap-2 px-4 pb-3 pt-1" accessibilityRole="tablist">
         {tabs.map((status) => (

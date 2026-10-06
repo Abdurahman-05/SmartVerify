@@ -578,5 +578,23 @@
     "notesTitle": "ከአስተናጋጁ የተሰጡ ማሳሰቢያዎች",
     "back": "ወደ ማብሰያ ቤት ተመለስ",
     "notFound": "ይህ ትዕዛዝ አልተገኘም።"
+  },
+  "profile": {
+    "title": "መገለጫ",
+    "open": "መገለጫ ክፈት",
+    "noPlan": "በመቃኘት ላይ",
+    "bankAccounts": "የባንክ ሂሳቦች",
+    "subscription": "የደንበኝነት ምዝገባ",
+    "language": "ቋንቋ",
+    "help": "እገዛ",
+    "signOut": "ውጣ",
+    "devTitle": "ለገንቢ",
+    "devRole": "ሚና",
+    "devPlan": "እቅድ"
+  },
+  "help": {
+    "title": "እገዛ",
+    "contactTitle": "ድጋፍ ያግኙ",
+    "contactBody": "የድጋፍ ቡድናችን በክፍያዎች፣ በባንክ ሂሳቦች እና በእቅድዎ ይረዳዎታል። የመገናኛ መረጃ በቅርቡ ይመጣል።"
   }
 }

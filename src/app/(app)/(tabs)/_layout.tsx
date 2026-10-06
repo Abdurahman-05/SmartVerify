@@ -3,6 +3,7 @@ import { Clock, House, ShieldCheck, User } from 'lucide-react-native';
 import type { ColorValue } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
 type TabIconProps = { color: ColorValue };
@@ -14,6 +15,7 @@ const ProfileIcon = ({ color }: TabIconProps) => <User size={24} color={color as
 
 export default function TabsLayout() {
   const { t } = useTranslation();
+  const isChef = useSession((s) => s.user?.role === 'chef');
 
   return (
     <Tabs
@@ -22,7 +24,9 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.navInactive,
         tabBarLabelStyle: { fontFamily: 'DMSans_700Bold', fontSize: 14 },
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        tabBarStyle: isChef
+          ? { display: 'none' }
+          : { backgroundColor: colors.surface, borderTopColor: colors.border },
         sceneStyle: { backgroundColor: colors.background },
       }}
     >
