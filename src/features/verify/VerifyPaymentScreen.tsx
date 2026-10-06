@@ -5,13 +5,14 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 
+import { MoneyText } from '@/components/ui/MoneyText';
 import { Button } from '@/components/ui/Button';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { getBankAccounts } from '@/lib/mock/bankAccounts';
-import { formatAmount, formatAmountInput, parseAmount, sanitizeAmountInput } from '@/lib/format';
+import { formatAmountInput, parseAmount, sanitizeAmountInput } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
 import { AccountPicker } from './AccountPicker';
@@ -101,9 +102,13 @@ export default function VerifyPaymentScreen() {
         <Text font="semibold" tone="inverse" className="text-base">
           {t('verify.totalLabel')}
         </Text>
-        <Text font="heading" tone="inverse" className="mt-0.5 text-[38px]" numberOfLines={1} adjustsFontSizeToFit>
-          {formatAmount(amount)} {t('common.etb')}
-        </Text>
+        <MoneyText
+          value={amount}
+          tone="inverse"
+          className="mt-0.5 text-[38px]"
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        />
       </View>
 
       <View className="min-h-6 flex-1" />

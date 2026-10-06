@@ -2,8 +2,8 @@ import { CupSoda, Soup, Utensils, type LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
+import { MoneyText } from '@/components/ui/MoneyText';
 import { Text } from '@/components/ui/Text';
-import { formatAmount } from '@/lib/format';
 import type { MenuCategory, MenuItem } from '@/lib/mock/restaurant';
 import { colors } from '@/theme/tokens';
 
@@ -65,9 +65,7 @@ export function MenuItemRow({ item, quantity, onChange }: MenuItemRowProps) {
         <Text font="bold" className="text-[17px] leading-tight">
           {item.name}
         </Text>
-        <Text font="bold" tone="link" className="mt-[3px] text-[17px]">
-          {formatAmount(item.priceEtb)} {t('common.etb')}
-        </Text>
+        <MoneyText value={item.priceEtb} font="bold" tone="link" className="mt-[3px] text-[17px]" />
       </View>
       {inOrder ? (
         <View className="flex-row items-center gap-0.5">

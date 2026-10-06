@@ -5,11 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, Share, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { formatMoney } from '@/components/ui/MoneyText';
 import { Button } from '@/components/ui/Button';
 import { ResultBadge } from '@/components/ui/ResultBadge';
 import { Text } from '@/components/ui/Text';
 import type { VerificationResult } from '@/lib/mock/verify';
-import { formatAmount, formatDateTime } from '@/lib/format';
+import { formatDateTime } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
 import { useVerifyFlow } from './verifyFlow';
@@ -40,7 +41,7 @@ function DetailsCard({ rows }: { rows: Row[] }) {
 
 function useResultContent(result: VerificationResult) {
   const { t } = useTranslation();
-  const etb = (n: number) => `${formatAmount(n)} ${t('common.etb')}`;
+  const etb = (n: number) => formatMoney(n);
   const reference = { label: t('verify.result.reference'), value: result.reference };
 
   if (result.status === 'verified') {
@@ -111,7 +112,7 @@ function ResultView({ result }: { result: VerificationResult }) {
     if (result.status !== 'verified') return;
     Share.share({
       message: t('verify.result.shareMessage', {
-        amount: formatAmount(result.amount),
+        amount: formatMoney(result.amount, false),
         account: result.accountName,
         reference: result.reference,
         date: formatDateTime(result.verifiedAt),

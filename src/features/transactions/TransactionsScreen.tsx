@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, FlatList, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { MoneyText } from '@/components/ui/MoneyText';
 import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { OptionSheet } from '@/components/ui/OptionSheet';
@@ -14,7 +15,6 @@ import { Text } from '@/components/ui/Text';
 import { findAccount, getBankAccounts } from '@/lib/mock/bankAccounts';
 import { getTransactions, type TransactionStatus } from '@/lib/mock/transactions';
 import { sharePdf } from '@/lib/export';
-import { formatAmount } from '@/lib/format';
 import { isPeriod, periods, type Period } from '@/lib/period';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
@@ -108,9 +108,13 @@ export default function TransactionsScreen() {
         <Text font="semibold" tone="inverse" className="text-[15px]">
           {t(`transactions.summary_${period}`, { count: verifiedAll.length })}
         </Text>
-        <Text font="heading" tone="inverse" className="text-[32px]" numberOfLines={1} adjustsFontSizeToFit>
-          {formatAmount(verifiedAll.reduce((sum, tx) => sum + tx.receivedAmount, 0))} {t('common.etb')}
-        </Text>
+        <MoneyText
+          value={verifiedAll.reduce((sum, tx) => sum + tx.receivedAmount, 0)}
+          tone="inverse"
+          className="text-[32px]"
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        />
       </View>
 
       <View className="pb-2 pt-3">
@@ -144,9 +148,7 @@ export default function TransactionsScreen() {
       <View className="flex-row items-center justify-between gap-2 px-4 pb-2 pt-1">
         <Text font="bold" className="flex-1 text-base">
           {account?.bankName ?? t('transactions.allBanks')} ·{' '}
-          <Text font="bold" tone="link" className="text-base">
-            {formatAmount(bankVerifiedTotal)} {t('common.etb')}
-          </Text>
+          <MoneyText value={bankVerifiedTotal} font="bold" tone="link" className="text-base" />
         </Text>
         <Pressable
           onPress={() => setSheet('status')}

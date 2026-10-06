@@ -1,29 +1,29 @@
-import { Text, TextProps } from 'react-native';
+import i18n from '@/i18n';
+import { formatAmount } from '@/lib/format';
 
-interface MoneyTextProps extends TextProps {
-  amount: number;
+import { Text, type TextProps } from './Text';
+
+/** "1,250 ETB" as plain text, for labels, share messages, and exports. */
+export const formatMoney = (value: number, showCurrency = true) =>
+  showCurrency ? `${formatAmount(value)} ${i18n.t('common.etb')}` : formatAmount(value);
+
+interface MoneyTextProps extends Omit<TextProps, 'children'> {
+  value: number;
+  size?: number;
   showCurrency?: boolean;
 }
 
-const formatETB = (amount: number) => {
-  return new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
-};
-
-export const MoneyText = ({
-  amount,
+export function MoneyText({
+  value,
+  size,
   showCurrency = true,
-  className,
+  font = 'heading',
+  style,
   ...props
-}: MoneyTextProps) => {
-  const formatted = formatETB(amount);
-  const display = showCurrency ? `ETB ${formatted}` : formatted;
-
+}: MoneyTextProps) {
   return (
-    <Text className={`font-heading text-lg text-primary ${className || ''}`} {...props}>
-      {display}
+    <Text font={font} style={[size ? { fontSize: size } : null, style]} {...props}>
+      {formatMoney(value, showCurrency)}
     </Text>
   );
-};
+}

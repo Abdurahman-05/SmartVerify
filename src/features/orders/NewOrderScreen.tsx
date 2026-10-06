@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { OptionSheet } from '@/components/ui/OptionSheet';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
@@ -22,7 +23,7 @@ import {
   type OrderType,
   type Table,
 } from '@/lib/mock/restaurant';
-import { digitsOnly, formatAmount } from '@/lib/format';
+import { digitsOnly } from '@/lib/format';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
@@ -347,7 +348,7 @@ export default function NewOrderScreen() {
             disabled={itemCount === 0}
             accessibilityRole="button"
             accessibilityState={{ disabled: itemCount === 0 }}
-            accessibilityLabel={`${t('orders.items', { count: itemCount })}, ${formatAmount(total)} ${t('common.etb')}. ${sendLabel}`}
+            accessibilityLabel={`${t('orders.items', { count: itemCount })}, ${formatMoney(total)}. ${sendLabel}`}
             className={`h-[68px] flex-row items-center justify-between rounded-[20px] bg-primary px-5 ${
               itemCount === 0 ? 'opacity-50' : 'active:opacity-80'
             }`}
@@ -356,9 +357,7 @@ export default function NewOrderScreen() {
               <Text font="semibold" tone="inverse" className="text-sm opacity-90">
                 {t('orders.items', { count: itemCount })}
               </Text>
-              <Text font="heading" tone="inverse" className="text-[22px]">
-                {formatAmount(total)} {t('common.etb')}
-              </Text>
+              <MoneyText value={total} tone="inverse" className="text-[22px]" />
             </View>
             <View className="items-end">
               {type === 'dineIn' && table ? (

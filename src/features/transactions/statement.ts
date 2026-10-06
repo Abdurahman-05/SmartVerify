@@ -1,8 +1,9 @@
 import type { TFunction } from 'i18next';
 
+import { formatMoney } from '@/components/ui/MoneyText';
 import { accountFor, type Transaction } from '@/lib/mock/transactions';
 import type { ExportTable } from '@/lib/export';
-import { formatAmount, formatDay, formatTime } from '@/lib/format';
+import { formatDay, formatTime } from '@/lib/format';
 
 export function buildStatement(
   t: TFunction,
@@ -32,10 +33,10 @@ export function buildStatement(
       tx.payerName,
       accountFor(tx).shortName,
       tx.reference,
-      formatAmount(tx.expectedAmount),
-      formatAmount(tx.receivedAmount),
+      formatMoney(tx.expectedAmount, false),
+      formatMoney(tx.receivedAmount, false),
       t(`status.${tx.status}`),
     ]),
-    footer: t('transactions.totalVerified', { amount: formatAmount(verifiedTotal) }),
+    footer: t('transactions.totalVerified', { amount: formatMoney(verifiedTotal, false) }),
   };
 }

@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { MoneyText } from '@/components/ui/MoneyText';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import type { OrderLine } from '@/lib/mock/restaurant';
-import { formatAmount } from '@/lib/format';
 
 interface ConfirmSheetProps {
   visible: boolean;
@@ -27,7 +27,6 @@ export function ConfirmSheet({
   onClose,
 }: ConfirmSheetProps) {
   const { t } = useTranslation();
-  const etb = (n: number) => `${formatAmount(n)} ${t('common.etb')}`;
 
   return (
     <BottomSheet visible={visible} onClose={onClose}>
@@ -45,18 +44,14 @@ export function ConfirmSheet({
             <Text font="semibold" className="flex-1 text-xl">
               {line.quantity} × {line.name}
             </Text>
-            <Text font="semibold" className="text-xl">
-              {etb(line.priceEtb * line.quantity)}
-            </Text>
+            <MoneyText value={line.priceEtb * line.quantity} font="semibold" className="text-xl" />
           </View>
         ))}
         <View className="flex-row justify-between border-t-2 border-border pt-2.5">
           <Text font="bold" className="text-[22px]">
             {t('orders.total')}
           </Text>
-          <Text font="bold" className="text-[22px]">
-            {etb(total)}
-          </Text>
+          <MoneyText value={total} font="bold" className="text-[22px]" />
         </View>
       </View>
       <Button label={t('orders.yesSend', { number: tableNumber })} onPress={onConfirm} />

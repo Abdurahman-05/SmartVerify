@@ -6,11 +6,11 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { startSubscription } from '@/lib/mock/subscription';
-import { formatAmount } from '@/lib/format';
 import { useSession, type BillingPeriod, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
@@ -127,13 +127,13 @@ function NormalOption({
         {length}
       </Text>
       <Text font="heading" className="text-[22px]">
-        {formatAmount(priceEtb)}{' '}
+        <MoneyText value={priceEtb} showCurrency={false} className="text-[22px]" />{' '}
         <Text font="heading" className="text-sm">
           {t('common.etb')}
         </Text>
       </Text>
       <Text font="bold" tone="link" className="min-h-[18px] text-sm">
-        {recommended ? t('plan.save', { amount: formatAmount(normalQuarterlySavingEtb) }) : ''}
+        {recommended ? t('plan.save', { amount: formatMoney(normalQuarterlySavingEtb, false) }) : ''}
       </Text>
       <ChooseButton
         className="mt-2"
@@ -143,7 +143,7 @@ function NormalOption({
         accessibilityLabel={t('subscription.chooseLabel', {
           plan: t('plans.normal'),
           length,
-          price: formatAmount(priceEtb),
+          price: formatMoney(priceEtb, false),
         })}
         onPress={onChoose}
       />
@@ -249,7 +249,7 @@ export default function SubscriptionScreen() {
                   {t('subscription.totalPrice')}
                 </Text>
                 <Text font="heading" className="text-2xl">
-                  {formatAmount(restaurantMonthlyEtb)}{' '}
+                  <MoneyText value={restaurantMonthlyEtb} showCurrency={false} />{' '}
                   <Text font="heading" className="text-sm">
                     {t('plan.perMonth')}
                   </Text>
@@ -262,7 +262,7 @@ export default function SubscriptionScreen() {
                 accessibilityLabel={t('subscription.chooseLabel', {
                   plan: t('plans.restaurant'),
                   length: t('subscription.oneMonth'),
-                  price: formatAmount(restaurantMonthlyEtb),
+                  price: formatMoney(restaurantMonthlyEtb, false),
                 })}
                 accessibilityState={{ disabled: isCurrent('restaurant', 'monthly') }}
                 className={`h-[52px] justify-center rounded-input px-8 ${

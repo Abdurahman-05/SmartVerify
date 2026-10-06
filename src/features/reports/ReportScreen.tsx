@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { BankBadge } from '@/components/ui/BankBadge';
 import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
@@ -14,7 +15,6 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { getBankReport, type BankReport, type BankReportRow } from '@/lib/mock/transactions';
 import { shareCsv, sharePdf, type ExportTable } from '@/lib/export';
-import { formatAmount } from '@/lib/format';
 import { periods, type Period } from '@/lib/period';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
@@ -53,7 +53,7 @@ function BankCard({ row, onPress }: { row: BankReportRow; onPress: () => void })
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${t('report.openBank', { bank: row.account.shortName })}. ${formatAmount(row.total)} ${t('common.etb')}, ${t('report.payments', { count: row.count, share: row.share })}`}
+      accessibilityLabel={`${t('report.openBank', { bank: row.account.shortName })}. ${formatMoney(row.total)}, ${t('report.payments', { count: row.count, share: row.share })}`}
       className="rounded-[18px] border-[1.5px] border-border bg-surface px-3.5 py-3 active:bg-background"
     >
       <View className="flex-row items-center gap-3">
@@ -67,9 +67,7 @@ function BankCard({ row, onPress }: { row: BankReportRow; onPress: () => void })
           </Text>
         </View>
         <View className="items-end">
-          <Text font="heading" className="text-lg">
-            {formatAmount(row.total)}
-          </Text>
+          <MoneyText value={row.total} showCurrency={false} className="text-lg" />
           <Text font="bold" className="text-sm">
             {t('common.etb')}
           </Text>
@@ -102,9 +100,9 @@ function buildReportTable(
       row.account.bankName,
       String(row.count),
       `${row.share}%`,
-      formatAmount(row.total),
+      formatMoney(row.total, false),
     ]),
-    footer: t('transactions.totalVerified', { amount: formatAmount(report.total) }),
+    footer: t('transactions.totalVerified', { amount: formatMoney(report.total, false) }),
   };
 }
 
@@ -166,9 +164,13 @@ export default function ReportScreen() {
               <Text font="semibold" tone="inverse" className="text-[15px]">
                 {t('report.totalAll')}
               </Text>
-              <Text font="heading" tone="inverse" className="text-[34px]" numberOfLines={1} adjustsFontSizeToFit>
-                {formatAmount(report.total)} {t('common.etb')}
-              </Text>
+              <MoneyText
+                value={report.total}
+                tone="inverse"
+                className="text-[34px]"
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              />
             </View>
 
             <Text font="heading" className="px-4 pb-2 pt-3.5 text-lg" accessibilityRole="header">

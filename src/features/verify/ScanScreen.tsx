@@ -7,9 +7,10 @@ import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { MoneyText } from '@/components/ui/MoneyText';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
-import { formatAmount, parseAmount } from '@/lib/format';
+import { parseAmount } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
 import { useVerifyFlow } from './verifyFlow';
@@ -145,9 +146,7 @@ export default function ScanScreen() {
               {account.bankName}
             </Text>
           </View>
-          <Text font="heading" tone="inverse" className="text-[26px]">
-            {formatAmount(amount)} {t('common.etb')}
-          </Text>
+          <MoneyText value={amount} tone="inverse" className="text-[26px]" />
         </View>
       </SafeAreaView>
     </View>

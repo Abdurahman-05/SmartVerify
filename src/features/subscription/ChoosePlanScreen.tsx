@@ -5,10 +5,10 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { BrandMark } from '@/components/ui/BrandMark';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
-import { formatAmount } from '@/lib/format';
 import { useSession, type Plan } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
@@ -51,7 +51,7 @@ function PeriodOption({ label, priceEtb, note, badge, selected, onPress }: Perio
         {label}
       </Text>
       <Text font="heading" className="text-[22px]">
-        {formatAmount(priceEtb)}{' '}
+        <MoneyText value={priceEtb} showCurrency={false} className="text-[22px]" />{' '}
         <Text font="heading" className="text-sm">
           {t('common.etb')}
         </Text>
@@ -105,7 +105,7 @@ export default function ChoosePlanScreen() {
             <PeriodOption
               label={t('plan.threeMonths')}
               priceEtb={normalPricing.quarterly.priceEtb}
-              note={t('plan.save', { amount: formatAmount(normalQuarterlySavingEtb) })}
+              note={t('plan.save', { amount: formatMoney(normalQuarterlySavingEtb, false) })}
               badge={t('plan.bestValue')}
               selected={period === 'quarterly'}
               onPress={() => setPeriod('quarterly')}
@@ -122,7 +122,7 @@ export default function ChoosePlanScreen() {
               {t('plans.restaurant')}
             </Text>
             <Text font="heading" className="text-xl">
-              {formatAmount(restaurantMonthlyEtb)}{' '}
+              <MoneyText value={restaurantMonthlyEtb} showCurrency={false} />{' '}
               <Text font="heading" className="text-sm">
                 {t('plan.perMonth')}
               </Text>

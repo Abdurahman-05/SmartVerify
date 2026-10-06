@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, Share, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { BankBadge } from '@/components/ui/BankBadge';
 import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
@@ -13,7 +14,7 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { Text } from '@/components/ui/Text';
 import { accountFor, getTransaction, type TransactionStatus } from '@/lib/mock/transactions';
-import { formatAmount, formatDay, formatTime } from '@/lib/format';
+import { formatDay, formatTime } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
 const hero: Record<TransactionStatus, { bg: string; icon: LucideIcon }> = {
@@ -72,14 +73,13 @@ export default function TransactionDetailsScreen() {
   const account = accountFor(tx);
   const { bg, icon: Icon } = hero[tx.status];
   const heading = t(`transaction.heading_${tx.status}`);
-  const etb = (n: number) => `${formatAmount(n)} ${t('common.etb')}`;
   const date = `${formatDay(tx.createdAt)} · ${formatTime(tx.createdAt)}`;
 
   const share = () =>
     Share.share({
       message: t('transaction.shareMessage', {
         heading,
-        amount: formatAmount(tx.receivedAmount),
+        amount: formatMoney(tx.receivedAmount, false),
         bank: account.bankName,
         reference: tx.reference,
         date,
@@ -94,7 +94,7 @@ export default function TransactionDetailsScreen() {
           className="mx-4 mt-1 items-center gap-1 rounded-card px-5 py-[18px]"
           style={{ backgroundColor: bg }}
           accessible
-          accessibilityLabel={`${heading}, ${etb(tx.receivedAmount)}, ${date}`}
+          accessibilityLabel={`${heading}, ${formatMoney(tx.receivedAmount)}, ${date}`}
         >
           <View className="h-[52px] w-[52px] items-center justify-center rounded-full bg-surface">
             <Icon size={28} color={bg} strokeWidth={3} />
@@ -103,7 +103,7 @@ export default function TransactionDetailsScreen() {
             {heading}
           </Text>
           <Text font="heading" tone="inverse" className="text-4xl" numberOfLines={1} adjustsFontSizeToFit>
-            +{etb(tx.receivedAmount)}
+            +<MoneyText value={tx.receivedAmount} tone="inverse" className="text-4xl" />
           </Text>
           <Text font="semibold" tone="inverse" className="text-[15px]">
             {date}
@@ -129,10 +129,10 @@ export default function TransactionDetailsScreen() {
             <Value>{tx.reference}</Value>
           </DetailRow>
           <DetailRow label={t('transaction.expected')}>
-            <Value>{etb(tx.expectedAmount)}</Value>
+            <Value>{formatMoney(tx.expectedAmount)}</Value>
           </DetailRow>
           <DetailRow label={t('transaction.received')}>
-            <Value>{etb(tx.receivedAmount)}</Value>
+            <Value>{formatMoney(tx.receivedAmount)}</Value>
           </DetailRow>
           <DetailRow label={t('transaction.result')} last>
             <StatusPill

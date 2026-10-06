@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
+import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { BankBadge } from '@/components/ui/BankBadge';
 import { StatusPill } from '@/components/ui/StatusPill';
 import { Text } from '@/components/ui/Text';
 import { accountFor, type Transaction } from '@/lib/mock/transactions';
-import { formatAmount, formatDay, formatTime } from '@/lib/format';
+import { formatDay, formatTime } from '@/lib/format';
 
 interface TransactionRowProps {
   transaction: Transaction;
@@ -19,7 +20,7 @@ export function TransactionRow({ transaction, showDate, onPress }: TransactionRo
   const when = showDate
     ? `${formatDay(transaction.createdAt, false)}, ${formatTime(transaction.createdAt)}`
     : formatTime(transaction.createdAt);
-  const amount = `+${formatAmount(transaction.receivedAmount)} ${t('common.etb')}`;
+  const amount = `+${formatMoney(transaction.receivedAmount)}`;
 
   return (
     <Pressable
@@ -42,7 +43,7 @@ export function TransactionRow({ transaction, showDate, onPress }: TransactionRo
           font="bold"
           className={`text-lg ${transaction.status === 'verified' ? 'text-primaryText' : 'text-muted'}`}
         >
-          {amount}
+          +<MoneyText value={transaction.receivedAmount} font="bold" className="text-lg" />
         </Text>
         <StatusPill status={transaction.status} />
       </View>

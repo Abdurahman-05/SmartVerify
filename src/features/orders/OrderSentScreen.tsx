@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { formatMoney } from '@/components/ui/MoneyText';
 import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { ResultBadge } from '@/components/ui/ResultBadge';
 import { Text } from '@/components/ui/Text';
 import { getOrder, type Order } from '@/lib/mock/restaurant';
-import { formatAmount } from '@/lib/format';
 
 function useTargetLabel(order: Order) {
   const { t } = useTranslation();
@@ -27,7 +27,7 @@ function useTargetLabel(order: Order) {
 function SentView({ order }: { order: Order }) {
   const { t } = useTranslation();
   const router = useRouter();
-  const etb = (n: number) => `${formatAmount(n)} ${t('common.etb')}`;
+  const etb = (n: number) => formatMoney(n);
   const deliveryFee = order.target.type === 'delivery' ? order.target.deliveryFeeEtb : null;
   const rows = [
     { label: t('orders.sentFor'), value: useTargetLabel(order) },

@@ -64,8 +64,8 @@ export const ComponentPreview = () => {
         {/* Money Text */}
         <View className="gap-3">
           <Text className="text-lg font-semibold text-text">Money Text</Text>
-          <MoneyText amount={1234.56} />
-          <MoneyText amount={100} />
+          <MoneyText value={1234} />
+          <MoneyText value={100} />
         </View>
 
         {/* Switch */}

@@ -3,10 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { formatMoney } from '@/components/ui/MoneyText';
 import { Button } from '@/components/ui/Button';
 import { ResultBadge } from '@/components/ui/ResultBadge';
 import { Text } from '@/components/ui/Text';
-import { formatAmount, formatDay } from '@/lib/format';
+import { formatDay } from '@/lib/format';
 import { useSession } from '@/store/session';
 
 export default function SubscriptionStartedScreen() {
@@ -23,7 +24,7 @@ export default function SubscriptionStartedScreen() {
       label: t('subscription.length'),
       value: subscription.period === 'quarterly' ? t('subscription.threeMonths') : t('subscription.oneMonth'),
     },
-    { label: t('subscription.price'), value: `${formatAmount(subscription.priceEtb)} ${t('common.etb')}` },
+    { label: t('subscription.price'), value: formatMoney(subscription.priceEtb) },
     { label: t('subscription.startedOn'), value: formatDay(subscription.startedAt) },
     { label: t('subscription.renewsOn'), value: formatDay(subscription.endsAt) },
   ];
