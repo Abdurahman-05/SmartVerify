@@ -3,6 +3,7 @@ import { Clock, House, ShieldCheck, User } from 'lucide-react-native';
 import type { ColorValue } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { useBrandColors } from '@/store/theme';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
@@ -14,6 +15,7 @@ const HistoryIcon = ({ color }: TabIconProps) => <Clock size={24} color={color a
 const ProfileIcon = ({ color }: TabIconProps) => <User size={24} color={color as string} />;
 
 export default function TabsLayout() {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const isChef = useSession((s) => s.user?.role === 'chef');
 
@@ -21,7 +23,7 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.primary,
+        tabBarActiveTintColor: brand.primary,
         tabBarInactiveTintColor: colors.navInactive,
         tabBarLabelStyle: { fontFamily: 'DMSans_700Bold', fontSize: 14 },
         tabBarStyle: isChef
@@ -31,10 +33,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen name="home" options={{ title: t('nav.home'), tabBarIcon: HomeIcon }} />
-      <Tabs.Screen
-        name="verify"
-        options={{ title: t('nav.verify'), tabBarIcon: VerifyIcon }}
-      />
+      <Tabs.Screen name="verify" options={{ title: t('nav.verify'), tabBarIcon: VerifyIcon }} />
       <Tabs.Screen
         name="transactions"
         options={{ title: t('nav.history'), tabBarIcon: HistoryIcon }}

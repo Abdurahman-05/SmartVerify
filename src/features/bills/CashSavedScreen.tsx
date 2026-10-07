@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/Button';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { usePayments } from '@/features/payments/store';
 import { useSession } from '@/store/session';
-import { colors } from '@/theme/tokens';
 
 import { useBills } from './store';
 
@@ -30,6 +30,7 @@ function Row({ label, children, last }: { label: string; children: ReactNode; la
 }
 
 export default function CashSavedScreen() {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -47,9 +48,12 @@ export default function CashSavedScreen() {
     <SafeAreaView className="flex-1 bg-background">
       <ScreenHeader title={t('cash.resultTitle')} subtitle={t('cash.resultMethod')} />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <View accessible className="mx-4 mt-1.5 items-center gap-1 rounded-card bg-primary px-5 py-[18px]">
+        <View
+          accessible
+          className="mx-4 mt-1.5 items-center gap-1 rounded-card bg-primary px-5 py-[18px]"
+        >
           <View className="h-[52px] w-[52px] items-center justify-center rounded-full bg-surface">
-            <Check size={28} color={colors.primary} strokeWidth={3} />
+            <Check size={28} color={brand.primary} strokeWidth={3} />
           </View>
           <Text font="bold" tone="inverse" className="mt-1 text-[17px]">
             {t('cash.saved')}
@@ -88,7 +92,13 @@ export default function CashSavedScreen() {
 
         <View className="gap-2.5 px-4 pb-6">
           {/* TODO: share a receipt once the receipt format is decided. */}
-          <Button label={t('cash.shareReceipt')} icon={Share2} variant="outline" size="md" onPress={() => {}} />
+          <Button
+            label={t('cash.shareReceipt')}
+            icon={Share2}
+            variant="outline"
+            size="md"
+            onPress={() => {}}
+          />
           <Button label={t('cash.done')} onPress={() => router.dismissTo('/bills')} />
         </View>
       </ScrollView>

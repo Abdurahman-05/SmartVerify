@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BrandMark } from '@/components/ui/BrandMark';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { openBills, useBills } from '@/features/bills/store';
 import { getTodaySummary, type TodaySummary } from '@/lib/mock/home';
 import { useSession, type Plan, type SessionUser } from '@/store/session';
@@ -68,6 +69,7 @@ function HeroCard({
   tablesWaiting?: number;
   onVerify: () => void;
 }) {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   return (
     <View className="mx-4 mt-1 rounded-card bg-primary p-4">
@@ -82,7 +84,7 @@ function HeroCard({
         accessibilityRole="button"
         className="mt-3.5 min-h-14 flex-row flex-wrap items-center justify-center gap-2 rounded-input bg-surface px-3 py-2 active:opacity-80"
       >
-        <ShieldCheck size={24} color={colors.primary} strokeWidth={2.2} />
+        <ShieldCheck size={24} color={brand.primary} strokeWidth={2.2} />
         <Text font="bold" className="text-[19px] text-primary">
           {t('home.verifyPayment')}
         </Text>
@@ -107,6 +109,7 @@ function ActionTile({
   subtitle: string;
   onPress: () => void;
 }) {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const Icon = action.icon;
   return (
@@ -116,8 +119,8 @@ function ActionTile({
       accessibilityLabel={`${t(`home.actions.${action.key}`)}, ${subtitle}`}
       className="min-h-[84px] flex-1 flex-row items-center gap-2.5 rounded-[18px] border-[1.5px] border-border bg-surface px-3 py-2.5 active:bg-background"
     >
-      <View className="h-11 w-11 items-center justify-center rounded-[13px] bg-successBg">
-        <Icon size={24} color={colors.primary} strokeWidth={2} />
+      <View className="h-11 w-11 items-center justify-center rounded-[13px] bg-primaryTile">
+        <Icon size={24} color={brand.primary} strokeWidth={2} />
       </View>
       <View className="flex-1">
         <Text font="bold" className="text-[17px] leading-tight">

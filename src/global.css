@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Default (forest) brand colors as RGB triplets; the active theme overrides them at runtime. */
+:root {
+  --color-primary: 13 74 54;
+  --color-primary-text: 13 107 71;
+  --color-primary-tint: 230 242 236;
+  --color-primary-tile: 221 239 230;
+}

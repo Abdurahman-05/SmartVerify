@@ -13,11 +13,16 @@ import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { OptionSheet } from '@/components/ui/OptionSheet';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { useBills } from '@/features/bills/store';
 import { Pill } from '@/features/orders/Pill';
 import { parseAmountInput } from '@/lib/format';
 import { getBankAccounts } from '@/lib/mock/bankAccounts';
-import { SIMULATED_OVER_ETB, SIMULATED_SHORT_ETB, type BankCheckSimulation } from '@/lib/mock/verify';
+import {
+  SIMULATED_OVER_ETB,
+  SIMULATED_SHORT_ETB,
+  type BankCheckSimulation,
+} from '@/lib/mock/verify';
 import { colors } from '@/theme/tokens';
 
 import { billLabel } from './billLabel';
@@ -40,6 +45,7 @@ function MethodButton({
   selected: boolean;
   onPress: () => void;
 }) {
+  const brand = useBrandColors();
   return (
     <Pressable
       onPress={onPress}
@@ -49,7 +55,7 @@ function MethodButton({
         selected ? 'bg-primary' : 'border-2 border-borderStrong bg-surface'
       }`}
     >
-      <Icon size={26} color={selected ? colors.surface : colors.primary} strokeWidth={2.2} />
+      <Icon size={26} color={selected ? colors.surface : brand.primary} strokeWidth={2.2} />
       <Text font="bold" tone={selected ? 'inverse' : 'default'} className="text-center text-base">
         {label}
       </Text>
@@ -146,13 +152,19 @@ export default function VerifyRestaurantScreen() {
           </Text>
           <View
             accessible
-            accessibilityLabel={t('verifyRestaurant.totalLocked', { amount: formatMoney(bill.total) })}
+            accessibilityLabel={t('verifyRestaurant.totalLocked', {
+              amount: formatMoney(bill.total),
+            })}
             className="h-16 flex-row items-center gap-3 rounded-input border-2 border-borderStrong bg-neutralBg px-[18px]"
           >
             <Text font="bold" tone="muted" className="text-[17px]">
               {t('common.etb')}
             </Text>
-            <MoneyText value={bill.total} showCurrency={false} className="flex-1 text-right text-[28px]" />
+            <MoneyText
+              value={bill.total}
+              showCurrency={false}
+              className="flex-1 text-right text-[28px]"
+            />
             <Lock size={22} color={colors.muted} strokeWidth={2.2} />
           </View>
         </View>
@@ -191,15 +203,27 @@ export default function VerifyRestaurantScreen() {
         {showSummary && !cashTooMuch ? (
           <View className="gap-1 rounded-[20px] bg-primary px-[18px] py-3.5">
             <SummaryRow label={t('verifyRestaurant.summaryTotal')} value={bill.total} />
-            {cash > 0 ? <SummaryRow label={t('verifyRestaurant.summaryCash')} value={cash} minus /> : null}
+            {cash > 0 ? (
+              <SummaryRow label={t('verifyRestaurant.summaryCash')} value={cash} minus />
+            ) : null}
             {pay.bankReceived > 0 ? (
-              <SummaryRow label={t('verifyRestaurant.summaryBankAlready')} value={pay.bankReceived} minus />
+              <SummaryRow
+                label={t('verifyRestaurant.summaryBankAlready')}
+                value={pay.bankReceived}
+                minus
+              />
             ) : null}
             <View className="mt-1.5 border-t-2 border-white/35 pt-2" accessible>
               <Text font="semibold" tone="inverse" className="text-base">
                 {t('verifyRestaurant.mustPayBank')}
               </Text>
-              <MoneyText value={toScan} tone="inverse" className="text-4xl" numberOfLines={1} adjustsFontSizeToFit />
+              <MoneyText
+                value={toScan}
+                tone="inverse"
+                className="text-4xl"
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              />
             </View>
           </View>
         ) : null}

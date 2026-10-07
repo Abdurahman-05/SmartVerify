@@ -15,16 +15,26 @@ import { StatusPill } from '@/components/ui/StatusPill';
 import { Text } from '@/components/ui/Text';
 import { accountFor, getTransaction, type TransactionStatus } from '@/lib/mock/transactions';
 import { formatDay, formatTime } from '@/lib/format';
+import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
-const hero: Record<TransactionStatus, { bg: string; icon: LucideIcon }> = {
-  verified: { bg: colors.primary, icon: Check },
+// Verified uses the theme color; the other states keep their fixed status colors.
+const hero: Record<TransactionStatus, { bg: string | null; icon: LucideIcon }> = {
+  verified: { bg: null, icon: Check },
   pending: { bg: colors.warnFg, icon: Clock },
   mismatch: { bg: colors.alert, icon: X },
   duplicate: { bg: colors.muted, icon: Copy },
 };
 
-function DetailRow({ label, children, last }: { label: string; children: ReactNode; last?: boolean }) {
+function DetailRow({
+  label,
+  children,
+  last,
+}: {
+  label: string;
+  children: ReactNode;
+  last?: boolean;
+}) {
   return (
     <View
       accessible
@@ -47,6 +57,7 @@ function Value({ children }: { children: string }) {
 }
 
 export default function TransactionDetailsScreen() {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -71,7 +82,8 @@ export default function TransactionDetailsScreen() {
   }
 
   const account = accountFor(tx);
-  const { bg, icon: Icon } = hero[tx.status];
+  const { bg: statusBg, icon: Icon } = hero[tx.status];
+  const bg = statusBg ?? brand.primary;
   const heading = t(`transaction.heading_${tx.status}`);
   const date = `${formatDay(tx.createdAt)} · ${formatTime(tx.createdAt)}`;
 
@@ -102,7 +114,13 @@ export default function TransactionDetailsScreen() {
           <Text font="bold" tone="inverse" className="mt-1 text-base">
             {heading}
           </Text>
-          <Text font="heading" tone="inverse" className="text-4xl" numberOfLines={1} adjustsFontSizeToFit>
+          <Text
+            font="heading"
+            tone="inverse"
+            className="text-4xl"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
             +<MoneyText value={tx.receivedAmount} tone="inverse" className="text-4xl" />
           </Text>
           <Text font="semibold" tone="inverse" className="text-[15px]">
@@ -145,7 +163,13 @@ export default function TransactionDetailsScreen() {
         <View className="min-h-6 flex-1" />
 
         <View className="gap-2.5 px-4 pb-3">
-          <Button label={t('transaction.share')} icon={Share2} variant="outline" size="md" onPress={share} />
+          <Button
+            label={t('transaction.share')}
+            icon={Share2}
+            variant="outline"
+            size="md"
+            onPress={share}
+          />
           <Button label={t('transaction.back')} onPress={goBack} />
         </View>
       </ScrollView>

@@ -9,8 +9,8 @@ import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { BrandMark } from '@/components/ui/BrandMark';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { useSession, type Plan } from '@/store/session';
-import { colors } from '@/theme/tokens';
 
 import {
   normalPricing,
@@ -37,7 +37,9 @@ function PeriodOption({ label, priceEtb, note, badge, selected, onPress }: Perio
       accessibilityRole="radio"
       accessibilityState={{ selected }}
       className={`relative flex-1 rounded-input px-3 py-2.5 ${
-        selected ? 'border-[2.5px] border-primary bg-primarySoft' : 'border-2 border-borderMid bg-surface'
+        selected
+          ? 'border-[2.5px] border-primary bg-primarySoft'
+          : 'border-2 border-borderMid bg-surface'
       }`}
     >
       {badge ? (
@@ -64,6 +66,7 @@ function PeriodOption({ label, priceEtb, note, badge, selected, onPress }: Perio
 }
 
 export default function ChoosePlanScreen() {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const setPlan = useSession((s) => s.setPlan);
@@ -134,7 +137,7 @@ export default function ChoosePlanScreen() {
           <View className="mt-3 flex-row flex-wrap gap-y-2">
             {restaurantFeatureKeys.map((key) => (
               <View key={key} className="w-1/2 flex-row items-center gap-1.5 pr-2">
-                <Check size={18} color={colors.primaryText} strokeWidth={3} />
+                <Check size={18} color={brand.primaryText} strokeWidth={3} />
                 <Text font="semibold" className="flex-1 text-[15px]">
                   {t(`plan.features.${key}`)}
                 </Text>

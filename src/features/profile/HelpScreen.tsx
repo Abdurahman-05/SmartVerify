@@ -4,11 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useBrandColors } from '@/store/theme';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { colors } from '@/theme/tokens';
 
 export default function HelpScreen() {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
 
@@ -20,8 +21,8 @@ export default function HelpScreen() {
       />
       {/* TODO: add real support contact details (phone, Telegram) once they are decided. */}
       <View className="mx-4 mt-2 gap-3 rounded-card border-[1.5px] border-border bg-surface p-4">
-        <View className="h-12 w-12 items-center justify-center rounded-[14px] bg-successBg">
-          <LifeBuoy size={26} color={colors.primary} strokeWidth={2.2} />
+        <View className="h-12 w-12 items-center justify-center rounded-[14px] bg-primaryTile">
+          <LifeBuoy size={26} color={brand.primary} strokeWidth={2.2} />
         </View>
         <Text font="heading" className="text-xl" accessibilityRole="header">
           {t('help.contactTitle')}

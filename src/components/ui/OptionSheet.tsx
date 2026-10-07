@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useBrandColors } from '@/store/theme';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { colors } from '@/theme/tokens';
 
 import { Text } from './Text';
 
@@ -33,6 +33,7 @@ export function OptionSheet<T extends string>({
   onSelect,
   onClose,
 }: OptionSheetProps<T>) {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const reducedMotion = useReducedMotion();
   const { height } = useWindowDimensions();
@@ -53,7 +54,10 @@ export function OptionSheet<T extends string>({
         <Text font="heading" className="pb-3 text-xl" accessibilityRole="header">
           {title}
         </Text>
-        <ScrollView style={{ maxHeight: height * 0.6 }} contentContainerStyle={{ gap: 8, paddingBottom: 12 }}>
+        <ScrollView
+          style={{ maxHeight: height * 0.6 }}
+          contentContainerStyle={{ gap: 8, paddingBottom: 12 }}
+        >
           {options.map((option) => {
             const isSelected = option.value === selected;
             return (
@@ -73,7 +77,7 @@ export function OptionSheet<T extends string>({
                 <Text font="bold" className="flex-1 text-lg">
                   {option.label}
                 </Text>
-                {isSelected ? <Check size={24} color={colors.primary} strokeWidth={3} /> : null}
+                {isSelected ? <Check size={24} color={brand.primary} strokeWidth={3} /> : null}
               </Pressable>
             );
           })}

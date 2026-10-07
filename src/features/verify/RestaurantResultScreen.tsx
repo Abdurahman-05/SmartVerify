@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { useBills } from '@/features/bills/store';
 import type { Bill } from '@/features/bills/types';
 import { colors } from '@/theme/tokens';
@@ -18,18 +19,21 @@ import { useRestaurantPay, type PaymentOutcome } from './restaurantFlow';
 import { useVerifyFlow } from './verifyFlow';
 
 function Hero({ short, children }: { short: boolean; children: ReactNode }) {
+  const brand = useBrandColors();
   return (
     <View
       accessible
       className={`mx-4 mt-1.5 items-center gap-1 rounded-card px-5 py-[18px] ${short ? 'bg-warnBg' : 'bg-primary'}`}
     >
-      <View className={`h-[52px] w-[52px] items-center justify-center rounded-full ${short ? 'bg-text' : 'bg-surface'}`}>
+      <View
+        className={`h-[52px] w-[52px] items-center justify-center rounded-full ${short ? 'bg-text' : 'bg-surface'}`}
+      >
         {short ? (
           <Text font="heading" tone="inverse" className="text-[28px]">
             !
           </Text>
         ) : (
-          <Check size={28} color={colors.primary} strokeWidth={3} />
+          <Check size={28} color={brand.primary} strokeWidth={3} />
         )}
       </View>
       {children}
@@ -37,7 +41,17 @@ function Hero({ short, children }: { short: boolean; children: ReactNode }) {
   );
 }
 
-function Row({ label, value, tone, last }: { label: string; value: number; tone?: 'link' | 'danger'; last?: boolean }) {
+function Row({
+  label,
+  value,
+  tone,
+  last,
+}: {
+  label: string;
+  value: number;
+  tone?: 'link' | 'danger';
+  last?: boolean;
+}) {
   return (
     <View
       accessible
@@ -70,6 +84,7 @@ function MoneyCard({
   value: number;
   tip?: boolean;
 }) {
+  const brand = useBrandColors();
   return (
     <View
       accessible
@@ -77,8 +92,10 @@ function MoneyCard({
         tip ? 'border-[2.5px] border-amber bg-tipBg' : 'border-[1.5px] border-border bg-surface'
       }`}
     >
-      <View className={`h-12 w-12 items-center justify-center rounded-[14px] ${tip ? 'bg-amber' : 'bg-successBg'}`}>
-        <Icon size={24} color={tip ? colors.text : colors.primary} strokeWidth={2.2} />
+      <View
+        className={`h-12 w-12 items-center justify-center rounded-[14px] ${tip ? 'bg-amber' : 'bg-primaryTile'}`}
+      >
+        <Icon size={24} color={tip ? colors.text : brand.primary} strokeWidth={2.2} />
       </View>
       <View className="flex-1">
         <Text font="bold" className="text-[17px]">
@@ -97,6 +114,7 @@ function MoneyCard({
 }
 
 function ResultView({ outcome, bill }: { outcome: PaymentOutcome; bill: Bill }) {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const short = outcome.status === 'short';
@@ -177,7 +195,7 @@ function ResultView({ outcome, bill }: { outcome: PaymentOutcome; bill: Bill }) 
               />
             </View>
             <View className="mx-4 mt-3 flex-row items-start gap-2">
-              <Info size={20} color={colors.primaryText} strokeWidth={2.2} />
+              <Info size={20} color={brand.primaryText} strokeWidth={2.2} />
               <Text font="semibold" tone="muted" className="flex-1 text-[15px] leading-5">
                 {t('verifyRestaurant.tipExplain')}
               </Text>
@@ -186,8 +204,12 @@ function ResultView({ outcome, bill }: { outcome: PaymentOutcome; bill: Bill }) 
         ) : (
           <View className="mx-4 mt-3 rounded-card border-[1.5px] border-border bg-surface px-[18px] py-0.5">
             <Row label={t('verifyRestaurant.rowTotal')} value={outcome.total} />
-            {outcome.cash > 0 ? <Row label={t('verifyRestaurant.rowCash')} value={outcome.cash} /> : null}
-            {short ? <Row label={t('verifyRestaurant.rowBankExpected')} value={outcome.expectedBank} /> : null}
+            {outcome.cash > 0 ? (
+              <Row label={t('verifyRestaurant.rowCash')} value={outcome.cash} />
+            ) : null}
+            {short ? (
+              <Row label={t('verifyRestaurant.rowBankExpected')} value={outcome.expectedBank} />
+            ) : null}
             <Row
               label={t('verifyRestaurant.rowBankReceived')}
               value={outcome.received}
@@ -207,7 +229,12 @@ function ResultView({ outcome, bill }: { outcome: PaymentOutcome; bill: Bill }) 
         <View className="gap-2.5 px-4 pb-6">
           {short ? (
             <>
-              <Button label={t('verifyRestaurant.changeCash')} variant="outline" size="md" onPress={changeCash} />
+              <Button
+                label={t('verifyRestaurant.changeCash')}
+                variant="outline"
+                size="md"
+                onPress={changeCash}
+              />
               <Button
                 label={t('verifyRestaurant.scanAgain', { amount: formatMoney(outcome.remaining) })}
                 icon={QrCode}

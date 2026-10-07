@@ -16,6 +16,7 @@ import { LoadingView } from '@/components/ui/LoadingView';
 import { OptionSheet } from '@/components/ui/OptionSheet';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { addBankAccount, BankAccountError, banks } from '@/lib/mock/bankAccounts';
 import { digitsOnly } from '@/lib/format';
 import { colors } from '@/theme/tokens';
@@ -29,9 +30,10 @@ const schema = z.object({
 type Values = z.infer<typeof schema>;
 
 function Note({ children }: { children: string }) {
+  const brand = useBrandColors();
   return (
     <View className="flex-row items-start gap-2">
-      <Info size={18} color={colors.primaryText} strokeWidth={2.2} />
+      <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
       <Text tone="muted" className="flex-1 text-sm leading-5">
         {children}
       </Text>
@@ -92,7 +94,8 @@ export default function AddBankAccountScreen() {
 
   const bank = banks.find((b) => b.code === bankCode) ?? banks[0];
   const generalError =
-    mutation.error && !(mutation.error instanceof BankAccountError && mutation.error.code === 'duplicate')
+    mutation.error &&
+    !(mutation.error instanceof BankAccountError && mutation.error.code === 'duplicate')
       ? mutation.error instanceof BankAccountError
         ? t('bankAccounts.errors.limit')
         : t('bankAccounts.errors.generic')

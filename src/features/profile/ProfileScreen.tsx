@@ -13,6 +13,8 @@ import { Pill } from '@/features/orders/Pill';
 import { formatPhone } from '@/lib/format';
 import { useSession, type Plan, type Role, type SessionUser } from '@/store/session';
 
+import { ThemeSwatches } from './ThemeSwatches';
+
 const roles: Role[] = ['owner', 'manager', 'waiter', 'chef'];
 const plans: Plan[] = ['normal', 'restaurant'];
 
@@ -95,6 +97,8 @@ export default function ProfileScreen() {
           <ListRow icon={Globe} label={t('profile.language')} right={<LanguageToggle />} />
           <ListRow icon={LifeBuoy} label={t('profile.help')} onPress={() => router.push('/help')} last />
         </View>
+
+        <ThemeSwatches />
 
         <View className="mx-4 mt-4">
           <Button label={t('profile.signOut')} icon={LogOut} variant="outline" onPress={leave} />

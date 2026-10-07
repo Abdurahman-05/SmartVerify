@@ -593,7 +593,9 @@
     "devTitle": "ለገንቢ",
     "devRole": "ሚና",
     "devPlan": "እቅድ",
-    "staff": "ሰራተኞች"
+    "staff": "ሰራተኞች",
+    "theme": "የቀለም ገጽታ",
+    "themeOption": "{{name}} ገጽታ"
   },
   "help": {
     "title": "እገዛ",
@@ -634,5 +636,14 @@
       "phoneTaken": "ይህ ስልክ ቁጥር አስቀድሞ ጥቅም ላይ ውሏል",
       "pin": "PIN 4 አሃዝ መሆን አለበት"
     }
+  },
+  "themes": {
+    "forest": "ደን",
+    "ocean": "ውቅያኖስ",
+    "royal": "ንጉሣዊ",
+    "teal": "ቲል",
+    "slate": "ግራጫ",
+    "rose": "ሮዝ",
+    "berry": "እንጆሪ"
   }
 }

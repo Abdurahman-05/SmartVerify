@@ -1,6 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { ArrowLeftRight, Bike, ChevronDown, MapPin, ShoppingBag, UtensilsCrossed, type LucideIcon } from 'lucide-react-native';
+import {
+  ArrowLeftRight,
+  Bike,
+  ChevronDown,
+  MapPin,
+  ShoppingBag,
+  UtensilsCrossed,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
@@ -23,6 +31,7 @@ import {
   type OrderType,
   type Table,
 } from '@/lib/mock/restaurant';
+import { useBrandColors } from '@/store/theme';
 import { digitsOnly } from '@/lib/format';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
@@ -55,6 +64,7 @@ function TypeButton({
   selected: boolean;
   onPress: () => void;
 }) {
+  const brand = useBrandColors();
   return (
     <Pressable
       onPress={onPress}
@@ -64,8 +74,13 @@ function TypeButton({
         selected ? 'bg-primary' : 'border-2 border-borderStrong bg-surface active:bg-background'
       }`}
     >
-      <Icon size={22} color={selected ? colors.surface : colors.primary} strokeWidth={2.2} />
-      <Text font="bold" tone={selected ? 'inverse' : 'default'} className="text-base" numberOfLines={1}>
+      <Icon size={22} color={selected ? colors.surface : brand.primary} strokeWidth={2.2} />
+      <Text
+        font="bold"
+        tone={selected ? 'inverse' : 'default'}
+        className="text-base"
+        numberOfLines={1}
+      >
         {label}
       </Text>
     </Pressable>
@@ -73,6 +88,7 @@ function TypeButton({
 }
 
 export default function NewOrderScreen() {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -113,7 +129,12 @@ export default function NewOrderScreen() {
   const area = deliveryAreas.find((a) => a.id === delivery.areaId) ?? deliveryAreas[0];
   const lines: OrderLine[] = menu
     .filter((item) => (cart[item.id] ?? 0) > 0)
-    .map((item) => ({ itemId: item.id, name: item.name, priceEtb: item.priceEtb, quantity: cart[item.id] }));
+    .map((item) => ({
+      itemId: item.id,
+      name: item.name,
+      priceEtb: item.priceEtb,
+      quantity: cart[item.id],
+    }));
   const itemCount = lines.reduce((sum, l) => sum + l.quantity, 0);
   const total = lines.reduce((sum, l) => sum + l.priceEtb * l.quantity, 0);
   const shownMenu = category === 'all' ? menu : menu.filter((item) => item.category === category);
@@ -172,14 +193,20 @@ export default function NewOrderScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        className="flex-1"
+      >
         <ScreenHeader
           title={t('orders.title')}
           subtitle={t('orders.waiter', { name: waiterName })}
           onBack={() => (router.canGoBack() ? router.back() : router.replace('/home'))}
         />
 
-        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingBottom: 8 }}>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ paddingBottom: 8 }}
+        >
           <View className="flex-row gap-2 px-4 pb-2.5 pt-1" accessibilityRole="radiogroup">
             {orderTypes.map(({ type: value, icon }) => (
               <TypeButton
@@ -196,9 +223,16 @@ export default function NewOrderScreen() {
             <View className="mx-4 flex-row items-center justify-between gap-2 rounded-[20px] bg-primary py-3 pl-[18px] pr-3">
               <View className="flex-1">
                 <Text font="semibold" tone="inverse" className="text-sm opacity-90">
-                  {table ? t('orders.orderingFor', { area: t(`orders.area.${table.area}`) }) : t('orders.noTable')}
+                  {table
+                    ? t('orders.orderingFor', { area: t(`orders.area.${table.area}`) })
+                    : t('orders.noTable')}
                 </Text>
-                <Text font="heading" tone="inverse" className="mt-0.5 text-[30px] leading-tight" numberOfLines={1}>
+                <Text
+                  font="heading"
+                  tone="inverse"
+                  className="mt-0.5 text-[30px] leading-tight"
+                  numberOfLines={1}
+                >
                   {table ? t('orders.table', { number: table.number }) : t('orders.chooseTable')}
                 </Text>
               </View>
@@ -230,7 +264,9 @@ export default function NewOrderScreen() {
                 label={t('orders.customerPhoneOptional')}
                 placeholder={t('orders.phonePlaceholder')}
                 value={takeaway.customerPhone}
-                onChangeText={(text) => setTakeaway((v) => ({ ...v, customerPhone: digitsOnly(text, 10) }))}
+                onChangeText={(text) =>
+                  setTakeaway((v) => ({ ...v, customerPhone: digitsOnly(text, 10) }))
+                }
                 keyboardType="phone-pad"
                 maxLength={10}
                 error={err('customerPhone')}
@@ -251,7 +287,7 @@ export default function NewOrderScreen() {
                     accessibilityLabel={`${t('orders.deliveryArea')}: ${area.name}`}
                     className="h-[50px] flex-row items-center gap-2 rounded-[14px] border-2 border-primary bg-surface px-3 active:bg-background"
                   >
-                    <MapPin size={22} color={colors.primary} strokeWidth={2.2} />
+                    <MapPin size={22} color={brand.primary} strokeWidth={2.2} />
                     <Text font="bold" className="flex-1 text-[17px]" numberOfLines={1}>
                       {area.name}
                     </Text>
@@ -262,7 +298,9 @@ export default function NewOrderScreen() {
                   <Field
                     label={t('orders.fee')}
                     value={delivery.fee}
-                    onChangeText={(text) => setDelivery((v) => ({ ...v, fee: digitsOnly(text, 4) }))}
+                    onChangeText={(text) =>
+                      setDelivery((v) => ({ ...v, fee: digitsOnly(text, 4) }))
+                    }
                     keyboardType="number-pad"
                     maxLength={4}
                     emphasis
@@ -284,7 +322,9 @@ export default function NewOrderScreen() {
                 label={t('orders.customerPhone')}
                 placeholder={t('orders.phonePlaceholder')}
                 value={delivery.customerPhone}
-                onChangeText={(text) => setDelivery((v) => ({ ...v, customerPhone: digitsOnly(text, 10) }))}
+                onChangeText={(text) =>
+                  setDelivery((v) => ({ ...v, customerPhone: digitsOnly(text, 10) }))
+                }
                 keyboardType="phone-pad"
                 maxLength={10}
                 error={err('customerPhone')}
@@ -295,11 +335,21 @@ export default function NewOrderScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 10 }}
+            contentContainerStyle={{
+              gap: 8,
+              paddingHorizontal: 16,
+              paddingTop: 12,
+              paddingBottom: 10,
+            }}
             accessibilityRole="radiogroup"
           >
             {categories.map((c) => (
-              <Pill key={c} label={t(`orders.category.${c}`)} selected={category === c} onPress={() => setCategory(c)} />
+              <Pill
+                key={c}
+                label={t(`orders.category.${c}`)}
+                selected={category === c}
+                onPress={() => setCategory(c)}
+              />
             ))}
           </ScrollView>
 
@@ -389,7 +439,12 @@ export default function NewOrderScreen() {
           total={total}
           onConfirm={() => {
             setSheet(null);
-            submit({ type: 'dineIn', tableId: table.id, tableNumber: table.number, area: table.area });
+            submit({
+              type: 'dineIn',
+              tableId: table.id,
+              tableNumber: table.number,
+              area: table.area,
+            });
           }}
           onChangeTable={() => setSheet('table')}
           onClose={() => setSheet(null)}
@@ -398,7 +453,10 @@ export default function NewOrderScreen() {
       <OptionSheet
         visible={sheet === 'area'}
         title={t('orders.chooseArea')}
-        options={deliveryAreas.map((a) => ({ value: a.id, label: `${a.name} · ${a.usualFeeEtb} ${t('common.etb')}` }))}
+        options={deliveryAreas.map((a) => ({
+          value: a.id,
+          label: `${a.name} · ${a.usualFeeEtb} ${t('common.etb')}`,
+        }))}
         selected={delivery.areaId}
         onSelect={(areaId) => {
           const next = deliveryAreas.find((a) => a.id === areaId) ?? deliveryAreas[0];

@@ -10,6 +10,7 @@ import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { startSubscription } from '@/lib/mock/subscription';
 import { useSession, type BillingPeriod, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';
@@ -44,7 +45,11 @@ function ChooseButton({
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ disabled }}
       className={`h-11 items-center justify-center rounded-[14px] ${
-        disabled ? 'bg-neutralBg' : filled ? 'bg-primary active:opacity-80' : 'border-2 border-text bg-surface active:bg-background'
+        disabled
+          ? 'bg-neutralBg'
+          : filled
+            ? 'bg-primary active:opacity-80'
+            : 'border-2 border-text bg-surface active:bg-background'
       } ${className}`}
     >
       <Text font="bold" tone={filled && !disabled ? 'inverse' : 'default'} className="text-base">
@@ -113,7 +118,9 @@ function NormalOption({
   return (
     <View
       className={`relative flex-1 rounded-input px-3 py-2.5 ${
-        recommended ? 'border-[2.5px] border-primary bg-primarySoft' : 'border-2 border-borderMid bg-surface'
+        recommended
+          ? 'border-[2.5px] border-primary bg-primarySoft'
+          : 'border-2 border-borderMid bg-surface'
       }`}
     >
       {recommended ? (
@@ -133,7 +140,9 @@ function NormalOption({
         </Text>
       </Text>
       <Text font="bold" tone="link" className="min-h-[18px] text-sm">
-        {recommended ? t('plan.save', { amount: formatMoney(normalQuarterlySavingEtb, false) }) : ''}
+        {recommended
+          ? t('plan.save', { amount: formatMoney(normalQuarterlySavingEtb, false) })
+          : ''}
       </Text>
       <ChooseButton
         className="mt-2"
@@ -152,6 +161,7 @@ function NormalOption({
 }
 
 export default function SubscriptionScreen() {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const user = useSession((s) => s.user);
@@ -170,7 +180,10 @@ export default function SubscriptionScreen() {
 
   if (mutation.isPending) {
     return (
-      <LoadingView title={t('subscription.starting')} subtitle={t('subscription.startingSubtitle')} />
+      <LoadingView
+        title={t('subscription.starting')}
+        subtitle={t('subscription.startingSubtitle')}
+      />
     );
   }
 
@@ -182,9 +195,17 @@ export default function SubscriptionScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader title={t('subscription.title')} subtitle={t('subscription.subtitle')} onBack={goBack} />
+      <ScreenHeader
+        title={t('subscription.title')}
+        subtitle={t('subscription.subtitle')}
+        onBack={goBack}
+      />
 
-      <ScrollView ref={scrollRef} contentContainerStyle={{ paddingBottom: 16 }} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={{ paddingBottom: 16 }}
+        showsVerticalScrollIndicator={false}
+      >
         {user ? (
           <CurrentPlanCard
             user={user}
@@ -236,7 +257,7 @@ export default function SubscriptionScreen() {
             <View className="mt-3 flex-row flex-wrap gap-y-2">
               {restaurantFeatureKeys.map((key) => (
                 <View key={key} className="w-1/2 flex-row items-center gap-1.5 pr-2">
-                  <Check size={18} color={colors.primaryText} strokeWidth={3} />
+                  <Check size={18} color={brand.primaryText} strokeWidth={3} />
                   <Text font="semibold" className="flex-1 text-[15px]">
                     {t(`plan.features.${key}`)}
                   </Text>
@@ -266,7 +287,9 @@ export default function SubscriptionScreen() {
                 })}
                 accessibilityState={{ disabled: isCurrent('restaurant', 'monthly') }}
                 className={`h-[52px] justify-center rounded-input px-8 ${
-                  isCurrent('restaurant', 'monthly') ? 'bg-neutralBg' : 'bg-primary active:opacity-80'
+                  isCurrent('restaurant', 'monthly')
+                    ? 'bg-neutralBg'
+                    : 'bg-primary active:opacity-80'
                 }`}
               >
                 <Text
@@ -274,7 +297,9 @@ export default function SubscriptionScreen() {
                   tone={isCurrent('restaurant', 'monthly') ? 'default' : 'inverse'}
                   className="text-lg"
                 >
-                  {isCurrent('restaurant', 'monthly') ? t('subscription.current') : t('subscription.choose')}
+                  {isCurrent('restaurant', 'monthly')
+                    ? t('subscription.current')
+                    : t('subscription.choose')}
                 </Text>
               </Pressable>
             </View>

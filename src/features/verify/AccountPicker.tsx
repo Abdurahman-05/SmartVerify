@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BankBadge } from '@/components/ui/BankBadge';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { BankAccount } from '@/lib/mock/bankAccounts';
 import { colors } from '@/theme/tokens';
@@ -32,6 +33,7 @@ interface AccountPickerProps {
 }
 
 export function AccountPicker({ accounts, selected, onSelect, onAddAccount }: AccountPickerProps) {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const reducedMotion = useReducedMotion();
   const [open, setOpen] = useState(false);
@@ -54,7 +56,7 @@ export function AccountPicker({ accounts, selected, onSelect, onAddAccount }: Ac
         accessibilityRole="button"
         className="h-11 flex-row items-center gap-1.5 self-start rounded-[22px] border-2 border-borderStrong bg-surface pl-3 pr-4 active:bg-background"
       >
-        <Plus size={20} color={colors.primaryText} strokeWidth={2.6} />
+        <Plus size={20} color={brand.primaryText} strokeWidth={2.6} />
         <Text font="bold" tone="link" className="text-base">
           {t('verify.addAccount')}
         </Text>
@@ -88,12 +90,14 @@ export function AccountPicker({ accounts, selected, onSelect, onAddAccount }: Ac
                   accessibilityRole="radio"
                   accessibilityState={{ selected: isSelected }}
                   className={`flex-row items-center gap-3 rounded-[18px] px-3.5 py-3 ${
-                    isSelected ? 'border-2 border-primary bg-primarySoft' : 'border-2 border-border bg-surface'
+                    isSelected
+                      ? 'border-2 border-primary bg-primarySoft'
+                      : 'border-2 border-border bg-surface'
                   }`}
                 >
                   <BankBadge code={account.bankCode} />
                   <AccountText account={account} />
-                  {isSelected ? <Check size={24} color={colors.primary} strokeWidth={3} /> : null}
+                  {isSelected ? <Check size={24} color={brand.primary} strokeWidth={3} /> : null}
                 </Pressable>
               );
             })}

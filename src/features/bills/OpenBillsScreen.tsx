@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { Pill } from '@/features/orders/Pill';
 import { formatTime } from '@/lib/format';
 import { useSession } from '@/store/session';
@@ -59,6 +60,7 @@ function useBillLabel() {
 }
 
 export default function OpenBillsScreen() {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const userId = useSession((s) => s.user?.userId);
@@ -78,8 +80,16 @@ export default function OpenBillsScreen() {
       />
 
       <View className="flex-row gap-2 px-4 pb-2.5 pt-1" accessibilityRole="radiogroup">
-        <Pill label={t('bills.myTables')} selected={scope === 'mine'} onPress={() => setScope('mine')} />
-        <Pill label={t('bills.allTables')} selected={scope === 'all'} onPress={() => setScope('all')} />
+        <Pill
+          label={t('bills.myTables')}
+          selected={scope === 'mine'}
+          onPress={() => setScope('mine')}
+        />
+        <Pill
+          label={t('bills.allTables')}
+          selected={scope === 'all'}
+          onPress={() => setScope('all')}
+        />
       </View>
 
       <FlatList
@@ -133,7 +143,7 @@ export default function OpenBillsScreen() {
           onPress={() => router.push('/verify')}
         />
         <View className="flex-row items-start gap-2">
-          <Info size={18} color={colors.primaryText} strokeWidth={2.2} />
+          <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
           <Text font="semibold" tone="muted" className="flex-1 text-sm leading-5">
             {t('bills.listNote')}
           </Text>

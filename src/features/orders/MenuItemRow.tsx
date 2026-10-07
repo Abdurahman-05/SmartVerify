@@ -4,8 +4,8 @@ import { Pressable, View } from 'react-native';
 
 import { MoneyText } from '@/components/ui/MoneyText';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import type { MenuCategory, MenuItem } from '@/lib/mock/restaurant';
-import { colors } from '@/theme/tokens';
 
 const categoryIcon: Record<MenuCategory, LucideIcon> = {
   food: Soup,
@@ -37,10 +37,16 @@ function RoundButton({
       accessibilityLabel={accessibilityLabel}
       hitSlop={4}
       className={`h-12 w-12 items-center justify-center rounded-full ${
-        filled ? 'bg-primary active:opacity-80' : 'border-2 border-primary bg-surface active:bg-background'
+        filled
+          ? 'bg-primary active:opacity-80'
+          : 'border-2 border-primary bg-surface active:bg-background'
       }`}
     >
-      <Text font="bold" tone={filled ? 'inverse' : 'default'} className={`text-[28px] leading-8 ${filled ? '' : 'text-primary'}`}>
+      <Text
+        font="bold"
+        tone={filled ? 'inverse' : 'default'}
+        className={`text-[28px] leading-8 ${filled ? '' : 'text-primary'}`}
+      >
         {label}
       </Text>
     </Pressable>
@@ -48,6 +54,7 @@ function RoundButton({
 }
 
 export function MenuItemRow({ item, quantity, onChange }: MenuItemRowProps) {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const Icon = categoryIcon[item.category];
   const inOrder = quantity > 0;
@@ -55,11 +62,13 @@ export function MenuItemRow({ item, quantity, onChange }: MenuItemRowProps) {
   return (
     <View
       className={`flex-row items-center gap-3 rounded-[18px] py-2 pl-2 pr-2.5 ${
-        inOrder ? 'border-[2.5px] border-primary bg-primarySoft' : 'border-[1.5px] border-border bg-surface'
+        inOrder
+          ? 'border-[2.5px] border-primary bg-primarySoft'
+          : 'border-[1.5px] border-border bg-surface'
       }`}
     >
-      <View className="h-16 w-16 items-center justify-center rounded-[14px] bg-successBg">
-        <Icon size={28} color={colors.primary} strokeWidth={1.8} />
+      <View className="h-16 w-16 items-center justify-center rounded-[14px] bg-primaryTile">
+        <Icon size={28} color={brand.primary} strokeWidth={1.8} />
       </View>
       <View className="min-w-0 flex-1">
         <Text font="bold" className="text-[17px] leading-tight">

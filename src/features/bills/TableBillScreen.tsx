@@ -4,11 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useBrandColors } from '@/store/theme';
 import { Button } from '@/components/ui/Button';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { colors } from '@/theme/tokens';
 
 import { BillPill } from './BillPill';
 import { useBills } from './store';
@@ -20,7 +20,10 @@ function useHeading(bill: Bill) {
     case 'dine':
       return {
         title: t('bills.titleTable', { number: bill.tableNo }),
-        heroLabel: [bill.tableArea ? t(`orders.area.${bill.tableArea}`) : null, bill.guests ? t('bills.guests', { count: bill.guests }) : null]
+        heroLabel: [
+          bill.tableArea ? t(`orders.area.${bill.tableArea}`) : null,
+          bill.guests ? t('bills.guests', { count: bill.guests }) : null,
+        ]
           .filter(Boolean)
           .join(' · '),
         heroName: t('orders.table', { number: bill.tableNo }),
@@ -42,7 +45,10 @@ function useHeading(bill: Bill) {
 
 function FeeRow({ label, note, value }: { label: string; note?: string; value: number }) {
   return (
-    <View className="flex-row items-center justify-between gap-3 border-t-[1.5px] border-divider py-3" accessible>
+    <View
+      className="flex-row items-center justify-between gap-3 border-t-[1.5px] border-divider py-3"
+      accessible
+    >
       <View className="flex-1">
         <Text font="semibold" className="text-[17px]">
           {label}
@@ -59,6 +65,7 @@ function FeeRow({ label, note, value }: { label: string; note?: string; value: n
 }
 
 function BillView({ bill }: { bill: Bill }) {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const { title, heroLabel, heroName } = useHeading(bill);
@@ -94,7 +101,7 @@ function BillView({ bill }: { bill: Bill }) {
               accessible
               className={`flex-row items-center gap-3 py-3 ${i < bill.items.length - 1 ? 'border-b-[1.5px] border-divider' : ''}`}
             >
-              <View className="h-9 w-9 items-center justify-center rounded-[10px] bg-successBg">
+              <View className="h-9 w-9 items-center justify-center rounded-[10px] bg-primaryTile">
                 <Text font="bold" className="text-base text-primary">
                   {item.quantity}×
                 </Text>
@@ -102,14 +109,25 @@ function BillView({ bill }: { bill: Bill }) {
               <Text font="semibold" className="flex-1 text-[17px]">
                 {item.name}
               </Text>
-              <MoneyText value={item.priceEtb * item.quantity} showCurrency={false} font="bold" className="text-[17px]" />
+              <MoneyText
+                value={item.priceEtb * item.quantity}
+                showCurrency={false}
+                font="bold"
+                className="text-[17px]"
+              />
             </View>
           ))}
           {hasFees ? (
             <>
               <FeeRow label={t('bills.foodTotal')} value={bill.foodTotal} />
-              <FeeRow label={t('bills.packing')} note={t('bills.packingNote')} value={bill.packingFee} />
-              {bill.type === 'delivery' ? <FeeRow label={t('bills.deliveryFee')} value={bill.deliveryFee} /> : null}
+              <FeeRow
+                label={t('bills.packing')}
+                note={t('bills.packingNote')}
+                value={bill.packingFee}
+              />
+              {bill.type === 'delivery' ? (
+                <FeeRow label={t('bills.deliveryFee')} value={bill.deliveryFee} />
+              ) : null}
             </>
           ) : null}
         </View>
@@ -127,7 +145,7 @@ function BillView({ bill }: { bill: Bill }) {
         </View>
 
         <View className="mx-4 mt-2 flex-row items-start gap-2">
-          <Info size={20} color={colors.primaryText} strokeWidth={2.2} />
+          <Info size={20} color={brand.primaryText} strokeWidth={2.2} />
           <Text font="semibold" tone="muted" className="flex-1 text-[15px] leading-5">
             {t('bills.priceNote')}
           </Text>
@@ -137,7 +155,14 @@ function BillView({ bill }: { bill: Bill }) {
 
         <View className="gap-2.5 px-4 pb-6">
           {/* TODO: enable once the order screen can add items to an existing bill. */}
-          <Button label={t('bills.addMore')} icon={Plus} variant="outline" size="md" disabled onPress={() => {}} />
+          <Button
+            label={t('bills.addMore')}
+            icon={Plus}
+            variant="outline"
+            size="md"
+            disabled
+            onPress={() => {}}
+          />
           <Button
             label={t('bills.paidByCash')}
             icon={Banknote}
@@ -150,7 +175,9 @@ function BillView({ bill }: { bill: Bill }) {
             label={t('bills.payByBank')}
             icon={QrCode}
             disabled={bill.status === 'paid'}
-            onPress={() => router.push({ pathname: '/verify-restaurant', params: { billId: bill.id } })}
+            onPress={() =>
+              router.push({ pathname: '/verify-restaurant', params: { billId: bill.id } })
+            }
           />
         </View>
       </ScrollView>

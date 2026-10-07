@@ -8,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { Pill } from '@/features/orders/Pill';
 import { formatDay, formatTime } from '@/lib/format';
 import { periodRange, periods, type Period } from '@/lib/period';
@@ -35,6 +36,7 @@ function SourceTag({ source }: { source: Tip['source'] }) {
 }
 
 export default function TipsScreen() {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const user = useSession((s) => s.user);
@@ -61,7 +63,12 @@ export default function TipsScreen() {
 
       <View className="flex-row gap-2 px-4 pb-2.5 pt-1" accessibilityRole="radiogroup">
         {periods.map((p) => (
-          <Pill key={p} label={t(`period.${p}`)} selected={period === p} onPress={() => setPeriod(p)} />
+          <Pill
+            key={p}
+            label={t(`period.${p}`)}
+            selected={period === p}
+            onPress={() => setPeriod(p)}
+          />
         ))}
       </View>
 
@@ -75,7 +82,13 @@ export default function TipsScreen() {
               <Text font="semibold" tone="inverse" className="text-[15px]">
                 {t(`tips.summary_${period}`, { count: tips.length })}
               </Text>
-              <MoneyText value={total} tone="inverse" className="text-4xl" numberOfLines={1} adjustsFontSizeToFit />
+              <MoneyText
+                value={total}
+                tone="inverse"
+                className="text-4xl"
+                numberOfLines={1}
+                adjustsFontSizeToFit
+              />
             </View>
             <Text font="heading" className="pb-0 pt-1.5 text-lg" accessibilityRole="header">
               {t('tips.fromEachTable')}
@@ -121,7 +134,7 @@ export default function TipsScreen() {
       />
 
       <View className="flex-row items-start gap-2 px-4 pb-4 pt-1">
-        <Info size={20} color={colors.primaryText} strokeWidth={2.2} />
+        <Info size={20} color={brand.primaryText} strokeWidth={2.2} />
         <Text font="semibold" tone="muted" className="flex-1 text-[15px] leading-5">
           {t('tips.note')}
         </Text>

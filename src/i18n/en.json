@@ -593,7 +593,9 @@
     "devTitle": "Developer",
     "devRole": "Role",
     "devPlan": "Plan",
-    "staff": "Staff"
+    "staff": "Staff",
+    "theme": "Color theme",
+    "themeOption": "{{name}} theme"
   },
   "help": {
     "title": "Help",
@@ -634,5 +636,14 @@
       "phoneTaken": "This phone number is already used",
       "pin": "PIN must be 4 digits"
     }
+  },
+  "themes": {
+    "forest": "Forest",
+    "ocean": "Ocean",
+    "royal": "Royal",
+    "teal": "Teal",
+    "slate": "Slate",
+    "rose": "Rose",
+    "berry": "Berry"
   }
 }

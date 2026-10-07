@@ -1,6 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
-import { ChefHat, Info, Save, UserCog, UtensilsCrossed, type LucideIcon } from 'lucide-react-native';
+import {
+  ChefHat,
+  Info,
+  Save,
+  UserCog,
+  UtensilsCrossed,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
@@ -12,6 +19,7 @@ import { Input } from '@/components/ui/Input';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Switch } from '@/components/ui/Switch';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
@@ -65,7 +73,9 @@ function PermissionRow({
   last?: boolean;
 }) {
   return (
-    <View className={`min-h-14 flex-row items-center gap-3 py-3 ${last ? '' : 'border-b-[1.5px] border-divider'}`}>
+    <View
+      className={`min-h-14 flex-row items-center gap-3 py-3 ${last ? '' : 'border-b-[1.5px] border-divider'}`}
+    >
       <Text font="semibold" className="flex-1 text-[17px]">
         {label}
       </Text>
@@ -75,6 +85,7 @@ function PermissionRow({
 }
 
 export default function AddStaffScreen() {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const isOwner = useSession((s) => s.user?.role === 'owner');
@@ -87,7 +98,14 @@ export default function AddStaffScreen() {
     formState: { errors },
   } = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', phone: '', pin: '', role: 'waiter', canChangeDeliveryFee: false, canSeeReports: false },
+    defaultValues: {
+      name: '',
+      phone: '',
+      pin: '',
+      role: 'waiter',
+      canChangeDeliveryFee: false,
+      canSeeReports: false,
+    },
   });
   const role = useWatch({ control, name: 'role' });
 
@@ -167,8 +185,16 @@ export default function AddStaffScreen() {
                         selected ? 'bg-primary' : 'border-2 border-borderStrong bg-surface'
                       } ${disabled ? 'opacity-40' : ''}`}
                     >
-                      <Icon size={24} color={selected ? colors.surface : colors.primary} strokeWidth={2.2} />
-                      <Text font="bold" tone={selected ? 'inverse' : 'default'} className="text-base">
+                      <Icon
+                        size={24}
+                        color={selected ? colors.surface : brand.primary}
+                        strokeWidth={2.2}
+                      />
+                      <Text
+                        font="bold"
+                        tone={selected ? 'inverse' : 'default'}
+                        className="text-base"
+                      >
                         {t(`roles.${value}`)}
                       </Text>
                     </Pressable>
@@ -197,7 +223,7 @@ export default function AddStaffScreen() {
             )}
           />
           <View className="flex-row items-start gap-2">
-            <Info size={18} color={colors.primaryText} strokeWidth={2.2} />
+            <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
             <Text tone="muted" className="flex-1 text-sm leading-5">
               {t('staff.pinNote')}
             </Text>
@@ -214,14 +240,23 @@ export default function AddStaffScreen() {
             control={control}
             name="canChangeDeliveryFee"
             render={({ field }) => (
-              <PermissionRow label={t('staff.changeDeliveryFee')} value={field.value} onChange={field.onChange} />
+              <PermissionRow
+                label={t('staff.changeDeliveryFee')}
+                value={field.value}
+                onChange={field.onChange}
+              />
             )}
           />
           <Controller
             control={control}
             name="canSeeReports"
             render={({ field }) => (
-              <PermissionRow label={t('staff.seeReports')} value={field.value} onChange={field.onChange} last />
+              <PermissionRow
+                label={t('staff.seeReports')}
+                value={field.value}
+                onChange={field.onChange}
+                last
+              />
             )}
           />
         </View>

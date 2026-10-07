@@ -50,7 +50,7 @@ function BankChip({
       </Text>
       <View
         className={`h-[26px] min-w-[26px] items-center justify-center rounded-full px-1.5 ${
-          selected ? 'bg-surface' : 'bg-successBg'
+          selected ? 'bg-surface' : 'bg-primaryTile'
         }`}
       >
         <Text font="bold" className="text-sm text-primary">
@@ -93,7 +93,13 @@ export default function TransactionsScreen() {
     setDownloading(true);
     try {
       await sharePdf(
-        buildStatement(t, visible, account?.shortName ?? t('transactions.allBanks'), t(`period.${period}`), businessName)
+        buildStatement(
+          t,
+          visible,
+          account?.shortName ?? t('transactions.allBanks'),
+          t(`period.${period}`),
+          businessName
+        )
       );
     } catch {
       Alert.alert(t('common.error'), t('transactions.downloadFailed'));
@@ -194,7 +200,9 @@ export default function TransactionsScreen() {
             <TransactionRow
               transaction={item}
               showDate={period !== 'today'}
-              onPress={() => router.push({ pathname: '/transaction/[id]', params: { id: item.id } })}
+              onPress={() =>
+                router.push({ pathname: '/transaction/[id]', params: { id: item.id } })
+              }
             />
           </View>
         )}

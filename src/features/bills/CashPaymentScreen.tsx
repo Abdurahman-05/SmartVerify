@@ -9,6 +9,7 @@ import { FormScreen } from '@/components/ui/FormScreen';
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { usePayments } from '@/features/payments/store';
 import { billLabel } from '@/features/verify/billLabel';
 import { calcCash, type ExtraChoice } from '@/features/verify/calcPayment';
@@ -44,16 +45,19 @@ function ChoiceButton({
   selected: boolean;
   onPress: () => void;
 }) {
+  const brand = useBrandColors();
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
       className={`h-[68px] flex-1 flex-row items-center justify-center gap-2 rounded-[18px] px-2 ${
-        selected ? 'border-[3px] border-primary bg-primarySoft' : 'border-2 border-borderStrong bg-surface'
+        selected
+          ? 'border-[3px] border-primary bg-primarySoft'
+          : 'border-2 border-borderStrong bg-surface'
       }`}
     >
-      <Icon size={22} color={colors.primary} strokeWidth={2.2} />
+      <Icon size={22} color={brand.primary} strokeWidth={2.2} />
       <Text font="bold" className="text-[17px]">
         {label}
       </Text>
@@ -61,19 +65,39 @@ function ChoiceButton({
   );
 }
 
-function SummaryRow({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
+function SummaryRow({
+  label,
+  value,
+  highlight,
+}: {
+  label: string;
+  value: number;
+  highlight?: boolean;
+}) {
   const style = highlight ? { color: colors.tipOnDark } : undefined;
   return (
     <View className="flex-row items-baseline justify-between gap-3" accessible>
-      <Text font={highlight ? 'bold' : 'semibold'} tone="inverse" className="flex-1 text-[17px]" style={style}>
+      <Text
+        font={highlight ? 'bold' : 'semibold'}
+        tone="inverse"
+        className="flex-1 text-[17px]"
+        style={style}
+      >
         {label}
       </Text>
-      <MoneyText value={value} font={highlight ? 'bold' : 'semibold'} tone="inverse" className="text-[17px]" style={style} />
+      <MoneyText
+        value={value}
+        font={highlight ? 'bold' : 'semibold'}
+        tone="inverse"
+        className="text-[17px]"
+        style={style}
+      />
     </View>
   );
 }
 
 export default function CashPaymentScreen() {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -83,7 +107,8 @@ export default function CashPaymentScreen() {
   const [submitted, setSubmitted] = useState(false);
 
   if (!bill) return <Redirect href="/bills" />;
-  if (bill.status === 'paid' && !submitted) return <Redirect href={{ pathname: '/bills/[id]', params: { id: bill.id } }} />;
+  if (bill.status === 'paid' && !submitted)
+    return <Redirect href={{ pathname: '/bills/[id]', params: { id: bill.id } }} />;
 
   const calc = calcCash({ total: bill.total, cash, extraChoice });
   const itemCount = bill.items.reduce((sum, l) => sum + l.quantity, 0);
@@ -116,7 +141,11 @@ export default function CashPaymentScreen() {
             <Text font="bold" tone="muted" className="text-[17px]">
               {t('common.etb')}
             </Text>
-            <MoneyText value={bill.total} showCurrency={false} className="flex-1 text-right text-[28px]" />
+            <MoneyText
+              value={bill.total}
+              showCurrency={false}
+              className="flex-1 text-right text-[28px]"
+            />
             <Lock size={22} color={colors.muted} strokeWidth={2.2} />
           </View>
         </View>
@@ -173,7 +202,11 @@ export default function CashPaymentScreen() {
             {calc.tip > 0 ? (
               <>
                 <SummaryRow label={t('cash.toRestaurant')} value={bill.total} />
-                <SummaryRow label={t('cash.tipFor', { name: bill.waiterName })} value={calc.tip} highlight />
+                <SummaryRow
+                  label={t('cash.tipFor', { name: bill.waiterName })}
+                  value={calc.tip}
+                  highlight
+                />
               </>
             ) : (
               <>
@@ -193,7 +226,7 @@ export default function CashPaymentScreen() {
         ) : null}
 
         <View className="flex-row items-start gap-2">
-          <Info size={20} color={colors.primaryText} strokeWidth={2.2} />
+          <Info size={20} color={brand.primaryText} strokeWidth={2.2} />
           <Text font="semibold" tone="muted" className="flex-1 text-[15px] leading-5">
             {t('cash.note')}
           </Text>
@@ -204,11 +237,20 @@ export default function CashPaymentScreen() {
 
       <View className="gap-2 px-4 pb-6 pt-2">
         {cash > 0 && !calc.valid ? (
-          <Text font="semibold" className="text-center text-base text-dangerFg" accessibilityLiveRegion="polite">
+          <Text
+            font="semibold"
+            className="text-center text-base text-dangerFg"
+            accessibilityLiveRegion="polite"
+          >
             {t('cash.missing', { amount: formatMoney(calc.missing) })}
           </Text>
         ) : null}
-        <Button label={t('cash.confirm')} icon={Banknote} disabled={!calc.valid} onPress={confirm} />
+        <Button
+          label={t('cash.confirm')}
+          icon={Banknote}
+          disabled={!calc.valid}
+          onPress={confirm}
+        />
       </View>
     </FormScreen>
   );

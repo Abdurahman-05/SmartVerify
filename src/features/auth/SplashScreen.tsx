@@ -8,6 +8,7 @@ import Svg, { Circle, Defs, Path, RadialGradient, Stop } from 'react-native-svg'
 
 import { SecureFooter } from '@/components/ui/SecureFooter';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { homeRouteFor, useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
@@ -16,6 +17,7 @@ const HERO_HEIGHT = 380;
 const SPLASH_MS = 1600;
 
 export default function SplashScreen() {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const isAuthenticated = useSession((s) => s.isAuthenticated);
@@ -44,13 +46,29 @@ export default function SplashScreen() {
           <RadialGradient id="glow" cx="195" cy="190" r="170" gradientUnits="userSpaceOnUse">
             <Stop offset="0" stopColor="#2E8C66" stopOpacity={0.95} />
             <Stop offset="0.55" stopColor="#1B6A4B" stopOpacity={0.6} />
-            <Stop offset="1" stopColor={colors.primary} stopOpacity={0} />
+            <Stop offset="1" stopColor={brand.primary} stopOpacity={0} />
           </RadialGradient>
         </Defs>
-        <Path d="M0 0H390V330C330 300 270 310 200 338C130 366 60 372 0 340Z" fill={colors.primary} />
+        <Path d="M0 0H390V330C330 300 270 310 200 338C130 366 60 372 0 340Z" fill={brand.primary} />
         <Circle cx={195} cy={190} r={170} fill="url(#glow)" />
-        <Circle cx={195} cy={190} r={120} fill="none" stroke="#FFFFFF" strokeOpacity={0.12} strokeWidth={1.5} />
-        <Circle cx={195} cy={190} r={190} fill="none" stroke="#FFFFFF" strokeOpacity={0.08} strokeWidth={1.5} />
+        <Circle
+          cx={195}
+          cy={190}
+          r={120}
+          fill="none"
+          stroke="#FFFFFF"
+          strokeOpacity={0.12}
+          strokeWidth={1.5}
+        />
+        <Circle
+          cx={195}
+          cy={190}
+          r={190}
+          fill="none"
+          stroke="#FFFFFF"
+          strokeOpacity={0.08}
+          strokeWidth={1.5}
+        />
       </Svg>
 
       <SafeAreaView edges={['bottom']} className="flex-1 items-center">
@@ -58,7 +76,7 @@ export default function SplashScreen() {
           className="h-32 w-32 items-center justify-center rounded-[34px] bg-surface"
           style={{
             marginTop: 318 * scale,
-            shadowColor: colors.primary,
+            shadowColor: brand.primary,
             shadowOffset: { width: 0, height: 12 },
             shadowOpacity: 0.28,
             shadowRadius: 15,
@@ -68,7 +86,7 @@ export default function SplashScreen() {
           <Svg width={84} height={84} viewBox="0 0 24 24" fill="none">
             <Path
               d="M12 2.5l8.5 3.2v6.3c0 5.2-3.6 8.6-8.5 9.9-4.9-1.3-8.5-4.7-8.5-9.9V5.7z"
-              fill={colors.primary}
+              fill={brand.primary}
             />
             <Path
               d="M8 12.2l2.9 2.9 5.3-5.8"

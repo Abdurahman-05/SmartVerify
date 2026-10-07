@@ -10,6 +10,7 @@ import { MoneyText } from '@/components/ui/MoneyText';
 import { Button } from '@/components/ui/Button';
 import { SmallSpinner, SpinnerRing } from '@/components/ui/Spinner';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { mockDelay } from '@/lib/mock/mock';
 import { verifyPayment } from '@/lib/mock/verify';
 import { colors } from '@/theme/tokens';
@@ -46,6 +47,7 @@ function Step({ state, label, detail }: { state: StepState; label: string; detai
 }
 
 export default function CheckingScreen() {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -91,7 +93,7 @@ export default function CheckingScreen() {
     >
       <View className="flex-1 items-center justify-center gap-[22px] px-6">
         <SpinnerRing size={170}>
-          <Landmark size={52} color={colors.primary} strokeWidth={1.8} />
+          <Landmark size={52} color={brand.primary} strokeWidth={1.8} />
         </SpinnerRing>
 
         <View className="items-center">

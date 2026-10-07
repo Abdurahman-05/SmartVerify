@@ -44,7 +44,11 @@ export default function KitchenOrderScreen() {
   const cooking = order.status === 'cooking';
   const minutes = minutesSince(cooking && order.startedAt ? order.startedAt : order.createdAt, now);
   const timerLabel =
-    order.status === 'new' ? t('kitchen.waiting') : cooking ? t('kitchen.cookingFor') : t('kitchen.readyFor');
+    order.status === 'new'
+      ? t('kitchen.waiting')
+      : cooking
+        ? t('kitchen.cookingFor')
+        : t('kitchen.readyFor');
   const detail = typeDetail(order, t);
 
   const act = () => {
@@ -92,7 +96,7 @@ export default function KitchenOrderScreen() {
               accessible
               className={`flex-row items-center gap-3.5 py-3.5 ${i < order.items.length - 1 ? 'border-b-[1.5px] border-divider' : ''}`}
             >
-              <View className="h-12 min-w-[52px] items-center justify-center rounded-[14px] bg-successBg px-1">
+              <View className="h-12 min-w-[52px] items-center justify-center rounded-[14px] bg-primaryTile px-1">
                 <Text font="bold" className="text-2xl text-primary">
                   {item.qty}×
                 </Text>
@@ -105,7 +109,10 @@ export default function KitchenOrderScreen() {
         </View>
 
         {order.notes.length > 0 ? (
-          <View accessible className="mx-4 mt-3 rounded-[20px] border-[2.5px] border-amber bg-tipBg px-4 py-3">
+          <View
+            accessible
+            className="mx-4 mt-3 rounded-[20px] border-[2.5px] border-amber bg-tipBg px-4 py-3"
+          >
             <Text font="bold" className="text-[15px] text-warnFg">
               {t('kitchen.notesTitle')}
             </Text>

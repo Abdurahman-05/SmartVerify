@@ -36,11 +36,16 @@ function TabButton({
         selected ? 'bg-primary' : 'border-2 border-borderStrong bg-surface'
       }`}
     >
-      <Text font="bold" tone={selected ? 'inverse' : 'default'} className="text-[17px]" numberOfLines={1}>
+      <Text
+        font="bold"
+        tone={selected ? 'inverse' : 'default'}
+        className="text-[17px]"
+        numberOfLines={1}
+      >
         {label}
       </Text>
       <View
-        className={`h-7 min-w-7 items-center justify-center rounded-full px-1.5 ${selected ? 'bg-surface' : 'bg-successBg'}`}
+        className={`h-7 min-w-7 items-center justify-center rounded-full px-1.5 ${selected ? 'bg-surface' : 'bg-primaryTile'}`}
       >
         <Text font="bold" className="text-[15px] text-primary">
           {count}
@@ -79,7 +84,7 @@ function OrderCard({ order, now }: { order: KitchenOrder; now: number }) {
       <View className="gap-1.5">
         {order.items.map((item) => (
           <View key={item.name} className="flex-row items-center gap-2.5">
-            <View className="h-8 min-w-9 items-center justify-center rounded-[10px] bg-successBg px-1">
+            <View className="h-8 min-w-9 items-center justify-center rounded-[10px] bg-primaryTile px-1">
               <Text font="bold" className="text-lg text-primary">
                 {item.qty}×
               </Text>
@@ -94,9 +99,19 @@ function OrderCard({ order, now }: { order: KitchenOrder; now: number }) {
       <NoteChips notes={order.notes} />
 
       {order.status === 'new' ? (
-        <Button label={t('kitchen.startCooking')} icon={ChefHat} size="md" onPress={() => startCooking(order.id)} />
+        <Button
+          label={t('kitchen.startCooking')}
+          icon={ChefHat}
+          size="md"
+          onPress={() => startCooking(order.id)}
+        />
       ) : order.status === 'cooking' ? (
-        <Button label={t('kitchen.markReady')} icon={Check} size="md" onPress={() => markReady(order.id)} />
+        <Button
+          label={t('kitchen.markReady')}
+          icon={Check}
+          size="md"
+          onPress={() => markReady(order.id)}
+        />
       ) : null}
     </Pressable>
   );

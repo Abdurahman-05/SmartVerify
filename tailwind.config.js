@@ -5,9 +5,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#0D4A36',
-        primaryText: '#0D6B47',
-        primarySoft: '#E6F2EC',
+        // Brand colors come from the active theme (src/theme/themes.ts).
+        primary: 'rgb(var(--color-primary) / <alpha-value>)',
+        primaryText: 'rgb(var(--color-primary-text) / <alpha-value>)',
+        primarySoft: 'rgb(var(--color-primary-tint) / <alpha-value>)',
+        primaryTile: 'rgb(var(--color-primary-tile) / <alpha-value>)',
         background: '#F4F8F6',
         surface: '#FFFFFF',
         border: '#DDE5E1',

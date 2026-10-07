@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Path } from 'react-native-svg';
 
+import { useBrandColors } from '@/store/theme';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import { colors } from '@/theme/tokens';
 
@@ -36,6 +37,7 @@ interface SpinnerRingProps {
 
 /** Large spinning ring with a soft pulse behind it, from the loading designs. */
 export function SpinnerRing({ size, children }: SpinnerRingProps) {
+  const brand = useBrandColors();
   const reducedMotion = useReducedMotion();
   const ringStyle = useRotation(!reducedMotion);
   const pulse = useSharedValue(0);
@@ -64,7 +66,7 @@ export function SpinnerRing({ size, children }: SpinnerRingProps) {
   return (
     <View className="items-center justify-center" style={{ width: size, height: size }}>
       <Animated.View
-        className="absolute rounded-full bg-successBg"
+        className="absolute rounded-full bg-primaryTile"
         style={[{ top: 22, left: 22, right: 22, bottom: 22 }, pulseStyle]}
       />
       <Animated.View className="absolute inset-0" style={ringStyle}>
@@ -73,7 +75,7 @@ export function SpinnerRing({ size, children }: SpinnerRingProps) {
           <Path
             d="M50 4a46 46 0 0 1 46 46"
             fill="none"
-            stroke={colors.primary}
+            stroke={brand.primary}
             strokeWidth={4}
             strokeLinecap="round"
           />
@@ -85,6 +87,7 @@ export function SpinnerRing({ size, children }: SpinnerRingProps) {
 }
 
 export function SmallSpinner({ size = 36 }: { size?: number }) {
+  const brand = useBrandColors();
   const reducedMotion = useReducedMotion();
   const style = useRotation(!reducedMotion);
 
@@ -95,7 +98,7 @@ export function SmallSpinner({ size = 36 }: { size?: number }) {
         <Path
           d="M18 3a15 15 0 0 1 15 15"
           fill="none"
-          stroke={colors.primary}
+          stroke={brand.primary}
           strokeWidth={4}
           strokeLinecap="round"
         />

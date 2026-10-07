@@ -2,6 +2,7 @@ import { ChevronRight, type LucideIcon } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 
+import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
 import { Text } from './Text';
@@ -16,10 +17,11 @@ interface ListRowProps {
 }
 
 export function ListRow({ icon: Icon, label, onPress, right, last }: ListRowProps) {
+  const brand = useBrandColors();
   const content = (
     <>
-      <View className="h-10 w-10 items-center justify-center rounded-xl bg-successBg">
-        <Icon size={22} color={colors.primary} strokeWidth={2.2} />
+      <View className="h-10 w-10 items-center justify-center rounded-xl bg-primaryTile">
+        <Icon size={22} color={brand.primary} strokeWidth={2.2} />
       </View>
       <Text font="bold" className="flex-1 text-[17px]">
         {label}
@@ -31,7 +33,11 @@ export function ListRow({ icon: Icon, label, onPress, right, last }: ListRowProp
 
   if (!onPress) return <View className={className}>{content}</View>;
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" className={`${className} active:bg-background`}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      className={`${className} active:bg-background`}
+    >
       {content}
     </Pressable>
   );

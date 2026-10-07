@@ -10,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
 import { useVerifyFlow } from './verifyFlow';
@@ -36,10 +37,22 @@ function ScanFrame() {
   const size = { width: CORNER, height: CORNER };
   return (
     <View style={{ width: FRAME, height: FRAME }}>
-      <View className={`${corner} left-0 top-0 rounded-tl-[22px] border-l-[5px] border-t-[5px]`} style={size} />
-      <View className={`${corner} right-0 top-0 rounded-tr-[22px] border-r-[5px] border-t-[5px]`} style={size} />
-      <View className={`${corner} bottom-0 left-0 rounded-bl-[22px] border-b-[5px] border-l-[5px]`} style={size} />
-      <View className={`${corner} bottom-0 right-0 rounded-br-[22px] border-b-[5px] border-r-[5px]`} style={size} />
+      <View
+        className={`${corner} left-0 top-0 rounded-tl-[22px] border-l-[5px] border-t-[5px]`}
+        style={size}
+      />
+      <View
+        className={`${corner} right-0 top-0 rounded-tr-[22px] border-r-[5px] border-t-[5px]`}
+        style={size}
+      />
+      <View
+        className={`${corner} bottom-0 left-0 rounded-bl-[22px] border-b-[5px] border-l-[5px]`}
+        style={size}
+      />
+      <View
+        className={`${corner} bottom-0 right-0 rounded-br-[22px] border-b-[5px] border-r-[5px]`}
+        style={size}
+      />
     </View>
   );
 }
@@ -53,6 +66,7 @@ function PermissionView({
   onAllow: () => void;
   onClose: () => void;
 }) {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -60,8 +74,8 @@ function PermissionView({
         <CloseButton onPress={onClose} />
       </View>
       <View className="flex-1 items-center justify-center gap-4 px-6">
-        <View className="h-24 w-24 items-center justify-center rounded-[28px] bg-successBg">
-          <Camera size={48} color={colors.primary} strokeWidth={2} />
+        <View className="h-24 w-24 items-center justify-center rounded-[28px] bg-primaryTile">
+          <Camera size={48} color={brand.primary} strokeWidth={2} />
         </View>
         <Text font="heading" className="text-center text-[26px]" accessibilityRole="header">
           {t('verify.scan.permissionTitle')}
