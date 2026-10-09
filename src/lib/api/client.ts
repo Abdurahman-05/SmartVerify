@@ -55,6 +55,13 @@ export const setAuthToken = (token: string | null) => {
   authToken = token;
 };
 
+let onUnauthorized: (() => void) | null = null;
+
+/** Called when the server rejects the session (expired, signed out elsewhere, staff deactivated). */
+export const setUnauthorizedHandler = (handler: (() => void) | null) => {
+  onUnauthorized = handler;
+};
+
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   body?: unknown;
@@ -96,7 +103,10 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   const json = await response.json().catch(() => null);
   if (!response.ok) {
     const error = json?.error;
-    throw new ApiError(error?.code ?? 'INTERNAL_ERROR', response.status, error?.details);
+    const code: ApiErrorCode = error?.code ?? 'INTERNAL_ERROR';
+    // WRONG_CREDENTIALS is also a 401, but only UNAUTHORIZED means "this session is no longer valid".
+    if (code === 'UNAUTHORIZED' && authToken) onUnauthorized?.();
+    throw new ApiError(code, response.status, error?.details);
   }
   return json as T;
 }

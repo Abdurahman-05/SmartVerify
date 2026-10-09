@@ -6,9 +6,12 @@ import { useStaff } from '@/features/staff/store';
 export type Plan = 'normal' | 'restaurant';
 export type Role = 'owner' | 'manager' | 'waiter' | 'chef';
 
-/** First screen after sign in: chefs only see the kitchen. */
-export const homeRouteFor = (role: Role | null | undefined): Href =>
-  role === 'chef' ? '/kitchen' : '/home';
+/** First screen after sign in: chefs only see the kitchen; an owner without a plan picks one first. */
+export const homeRouteFor = (user: { role: Role; plan: Plan | null } | null | undefined): Href => {
+  if (user?.role === 'chef') return '/kitchen';
+  if (user?.role === 'owner' && user.plan === null) return '/choose-plan';
+  return '/home';
+};
 
 export type BillingPeriod = 'monthly' | 'quarterly';
 

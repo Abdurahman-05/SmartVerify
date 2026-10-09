@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,6 +9,9 @@ import Svg, { Circle, Defs, Path, RadialGradient, Stop } from 'react-native-svg'
 import { SecureFooter } from '@/components/ui/SecureFooter';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
+import { LoadingView } from '@/components/ui/LoadingView';
+import { NoConnection } from '@/components/ui/NoConnection';
+import { getMe } from '@/lib/auth';
 import { homeRouteFor, useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
@@ -20,18 +23,54 @@ export default function SplashScreen() {
   const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
-  const isAuthenticated = useSession((s) => s.isAuthenticated);
-  const role = useSession((s) => s.user?.role);
   const { width } = useWindowDimensions();
   const scale = width / DESIGN_WIDTH;
+  const [phase, setPhase] = useState<'splash' | 'restoring' | 'offline'>('splash');
+  const [attempt, setAttempt] = useState(0);
 
+  // Restore a remembered session. Failures other than "no / rejected token" keep the token and offer Retry.
   useEffect(() => {
+    let cancelled = false;
     const timer = setTimeout(
-      () => router.replace(isAuthenticated ? homeRouteFor(role) : '/sign-in'),
-      SPLASH_MS
+      async () => {
+        const current = useSession.getState().user;
+        if (current) {
+          router.replace(homeRouteFor(current));
+          return;
+        }
+        setPhase('restoring');
+        try {
+          const user = await getMe();
+          if (cancelled) return;
+          if (!user) {
+            router.replace('/sign-in');
+            return;
+          }
+          useSession.getState().signIn(user);
+          router.replace(homeRouteFor(user));
+        } catch {
+          if (!cancelled) setPhase('offline');
+        }
+      },
+      attempt === 0 ? SPLASH_MS : 0
     );
-    return () => clearTimeout(timer);
-  }, [isAuthenticated, role, router]);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [attempt, router]);
+
+  if (phase === 'restoring') return <LoadingView />;
+  if (phase === 'offline') {
+    return (
+      <NoConnection
+        onRetry={() => {
+          setPhase('restoring');
+          setAttempt((n) => n + 1);
+        }}
+      />
+    );
+  }
 
   return (
     <View className="flex-1 bg-background">

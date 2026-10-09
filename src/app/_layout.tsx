@@ -9,12 +9,15 @@ import { Sora_600SemiBold } from '@expo-google-fonts/sora/600SemiBold';
 import { Sora_700Bold } from '@expo-google-fonts/sora/700Bold';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 
+import { setUnauthorizedHandler } from '@/lib/api/client';
+import { clearToken } from '@/lib/api/token';
+import { useSession } from '@/store/session';
 import { useTheme } from '@/store/theme';
 import { themeVars } from '@/theme/themes';
 import { colors } from '@/theme/tokens';
@@ -35,6 +38,16 @@ export default function RootLayout() {
 
   const themeId = useTheme((s) => s.themeId);
   const ready = fontsLoaded || fontError !== null;
+
+  // The server rejected the session (expired, signed out, deactivated): forget it and go to sign in.
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      void clearToken();
+      useSession.getState().signOut();
+      router.replace('/sign-in');
+    });
+    return () => setUnauthorizedHandler(null);
+  }, []);
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();

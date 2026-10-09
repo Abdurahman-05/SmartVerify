@@ -12,7 +12,8 @@ import { Checkbox } from '@/components/ui/Checkbox';
 import { Input } from '@/components/ui/Input';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
-import { signIn, WrongCredentialsError } from '@/lib/mock/auth';
+import { signIn } from '@/lib/auth';
+import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
 import { homeRouteFor, useSession } from '@/store/session';
 
@@ -40,7 +41,7 @@ export default function SignInScreen() {
     mutationFn: signIn,
     onSuccess: (user) => {
       startSession(user);
-      router.replace(homeRouteFor(user.role));
+      router.replace(homeRouteFor(user));
     },
   });
 
@@ -131,9 +132,7 @@ export default function SignInScreen() {
       <View className="gap-3 px-5">
         {mutation.isError ? (
           <Text font="semibold" className="text-center text-base text-dangerFg">
-            {mutation.error instanceof WrongCredentialsError
-              ? t('auth.errors.wrongCredentials')
-              : t('common.somethingWrong')}
+            {t(errorMessageKey(mutation.error))}
           </Text>
         ) : null}
         <Button

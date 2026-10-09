@@ -10,6 +10,7 @@ import { ListRow } from '@/components/ui/ListRow';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { Pill } from '@/features/orders/Pill';
+import { signOut as signOutRequest } from '@/lib/auth';
 import { formatPhone } from '@/lib/format';
 import { useSession, type Plan, type Role, type SessionUser } from '@/store/session';
 
@@ -70,7 +71,8 @@ export default function ProfileScreen() {
   const isChef = user.role === 'chef';
   const canManageStaff = user.role === 'owner' || user.role === 'manager';
 
-  const leave = () => {
+  const leave = async () => {
+    await signOutRequest();
     signOut();
     router.replace('/sign-in');
   };

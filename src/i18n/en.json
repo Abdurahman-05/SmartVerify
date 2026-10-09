@@ -56,7 +56,8 @@
       "businessName": "Enter your business name",
       "terms": "Please accept the terms to continue",
       "signInPin": "Enter your 4 to 6 digit PIN",
-      "wrongCredentials": "Wrong phone number or PIN."
+      "wrongCredentials": "Wrong phone number or PIN.",
+      "phoneTaken": "This phone number already has an account."
     }
   },
   "plan": {
@@ -645,5 +646,14 @@
     "slate": "Slate",
     "rose": "Rose",
     "berry": "Berry"
+  },
+  "errors": {
+    "noConnection": "No connection. Check your internet and try again.",
+    "noConnectionTitle": "No connection",
+    "noConnectionBody": "We couldn't reach Smart Verify. Check your internet connection and try again.",
+    "retry": "Retry",
+    "validation": "Please check the details and try again.",
+    "rateLimited": "Too many tries. Please wait a few minutes and try again.",
+    "subscriptionRequired": "This needs the Restaurant Plus plan."
   }
 }

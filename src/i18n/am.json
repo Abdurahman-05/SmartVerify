@@ -56,7 +56,8 @@
       "businessName": "የድርጅቱን ስም ያስገቡ",
       "terms": "ለመቀጠል እባክዎ ውሎቹን ይቀበሉ",
       "signInPin": "ከ4 እስከ 6 አሃዝ ያለውን PIN ያስገቡ",
-      "wrongCredentials": "የተሳሳተ ስልክ ቁጥር ወይም PIN።"
+      "wrongCredentials": "የተሳሳተ ስልክ ቁጥር ወይም PIN።",
+      "phoneTaken": "ይህ ስልክ ቁጥር አስቀድሞ መለያ አለው።"
     }
   },
   "plan": {
@@ -645,5 +646,14 @@
     "slate": "ግራጫ",
     "rose": "ሮዝ",
     "berry": "እንጆሪ"
+  },
+  "errors": {
+    "noConnection": "ግንኙነት የለም። ኢንተርኔትዎን ያረጋግጡ እና እንደገና ይሞክሩ።",
+    "noConnectionTitle": "ግንኙነት የለም",
+    "noConnectionBody": "ከSmart Verify ጋር መገናኘት አልተቻለም። የኢንተርኔት ግንኙነትዎን ያረጋግጡ እና እንደገና ይሞክሩ።",
+    "retry": "እንደገና ሞክር",
+    "validation": "እባክዎ መረጃዎቹን ያረጋግጡ እና እንደገና ይሞክሩ።",
+    "rateLimited": "በጣም ብዙ ሙከራዎች። እባክዎ ጥቂት ደቂቃዎች ጠብቀው እንደገና ይሞክሩ።",
+    "subscriptionRequired": "ይህ የRestaurant Plus እቅድ ያስፈልገዋል።"
   }
 }

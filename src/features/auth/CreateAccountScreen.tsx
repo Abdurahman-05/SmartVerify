@@ -12,7 +12,8 @@ import { Checkbox } from '@/components/ui/Checkbox';
 import { Input } from '@/components/ui/Input';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
-import { createAccount } from '@/lib/mock/auth';
+import { createAccount } from '@/lib/auth';
+import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
 import { useSession } from '@/store/session';
 
@@ -181,7 +182,7 @@ export default function CreateAccountScreen() {
       <View className="gap-3 px-5">
         {mutation.isError ? (
           <Text font="semibold" className="text-center text-base text-dangerFg">
-            {t('common.somethingWrong')}
+            {t(errorMessageKey(mutation.error))}
           </Text>
         ) : null}
         <Button
