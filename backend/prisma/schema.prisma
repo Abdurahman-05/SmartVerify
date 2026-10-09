@@ -1,0 +1,473 @@
+// Smart Verify database schema.
+// Rules: money is integer ETB (Int), timestamps are UTC, ids are opaque cuid strings.
+// History (transactions, verification attempts, payments, tips) is never cascade-deleted:
+// businesses are deactivated and bank accounts are soft-removed instead.
+// Partial unique indexes that Prisma cannot express are added in the migration SQL (see README).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  owner
+  manager
+  waiter
+  chef
+}
+
+enum Plan {
+  normal
+  restaurant
+}
+
+enum BillingPeriod {
+  monthly
+  quarterly
+}
+
+enum SubscriptionStatus {
+  active
+  cancelled
+  expired
+}
+
+enum VerificationInputType {
+  qr
+  ocr
+  sms
+}
+
+enum VerificationStatus {
+  verified
+  mismatch
+  duplicate
+  pending
+  unable_to_verify
+}
+
+enum TransactionStatus {
+  verified
+  pending
+  mismatch
+  duplicate
+}
+
+enum MenuCategory {
+  food
+  drinks
+  combos
+}
+
+enum TableArea {
+  main
+  upstairs
+  outside
+}
+
+enum OrderType {
+  dine
+  takeaway
+  delivery
+}
+
+enum BillStatus {
+  open
+  paid
+}
+
+enum ServedStatus {
+  kitchen
+  served
+}
+
+enum PaymentMethod {
+  bank
+  cash_bank @map("cash+bank")
+  cash
+}
+
+enum TipSource {
+  bank
+  cash
+}
+
+enum KitchenStatus {
+  new
+  cooking
+  ready
+}
+
+// ─── Identity & access ───────────────────────────────────────────────────────
+
+/// A person who can sign in. Phone is globally unique because sign-in is by phone + PIN only.
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  /// 9 digits without +251, e.g. "912345678".
+  phone     String   @unique
+  /// Argon2id hash. Never returned by the API.
+  pinHash   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownedBusiness Business?       @relation("BusinessOwner")
+  /// v1: one business per person. A multi-business login would need a business picker.
+  membership    BusinessMember?
+  sessions      Session[]
+}
+
+model Business {
+  id              String    @id @default(cuid())
+  name            String
+  ownerId         String    @unique
+  owner           User      @relation("BusinessOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  /// null = exploring without a plan.
+  plan            Plan?
+  packingFeeEtb   Int       @default(30)
+  /// Next human order number (#1001, #1002, …), incremented inside the order transaction.
+  nextOrderNumber Int       @default(1001)
+  deactivatedAt   DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  members              BusinessMember[]
+  subscriptions        Subscription[]
+  bankAccounts         BankAccount[]
+  verificationAttempts VerificationAttempt[]
+  transactions         Transaction[]
+  menuItems            MenuItem[]
+  tables               RestaurantTable[]
+  deliveryAreas        DeliveryArea[]
+  orders               Order[]
+  bills                Bill[]
+  payments             Payment[]
+  tips                 Tip[]
+  kitchenOrders        KitchenOrder[]
+}
+
+/// Role of a person inside a business. The owner also has a member row (role = owner).
+model BusinessMember {
+  id                   String   @id @default(cuid())
+  businessId           String
+  business             Business @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  role                 Role
+  active               Boolean  @default(true)
+  canChangeDeliveryFee Boolean  @default(false)
+  canSeeReports        Boolean  @default(false)
+  createdById          String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  sessions             Session[]
+  verificationAttempts VerificationAttempt[]
+  ordersTaken          Order[]               @relation("OrderWaiter")
+  billsServed          Bill[]                @relation("BillWaiter")
+  paymentsRecorded     Payment[]             @relation("PaymentRecordedBy")
+  paymentsAsWaiter     Payment[]             @relation("PaymentWaiter")
+  tips                 Tip[]
+
+  @@index([businessId])
+}
+
+/// Server-side session behind every JWT. Sign-out sets revokedAt, which invalidates the token.
+model Session {
+  id        String         @id @default(cuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  memberId  String
+  member    BusinessMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime       @default(now())
+
+  @@index([userId])
+}
+
+model Subscription {
+  id         String             @id @default(cuid())
+  businessId String
+  business   Business           @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  plan       Plan
+  period     BillingPeriod
+  priceEtb   Int
+  status     SubscriptionStatus @default(active)
+  startedAt  DateTime
+  endsAt     DateTime
+  createdAt  DateTime           @default(now())
+
+  @@index([businessId, status])
+}
+
+// ─── Bank accounts & verification ────────────────────────────────────────────
+
+model BankAccount {
+  id            String    @id @default(cuid())
+  businessId    String
+  business      Business  @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  /// Code from the supported bank list (src/providers/banks.ts), e.g. "CBE".
+  bankCode      String
+  accountNumber String
+  last4         String
+  /// From the user, or later from the bank. null until known.
+  holderName    String?
+  /// Soft delete: removed accounts keep their transactions.
+  removedAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  transactions Transaction[]
+
+  @@index([businessId])
+  // + partial unique index (businessId, bankCode, accountNumber) WHERE removedAt IS NULL (migration SQL)
+}
+
+/// Every verification request, including ones that could not be checked. Raw images are never stored.
+model VerificationAttempt {
+  id             String                @id @default(cuid())
+  businessId     String
+  business       Business              @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  memberId       String
+  member         BusinessMember        @relation(fields: [memberId], references: [id], onDelete: Restrict)
+  inputType      VerificationInputType
+  expectedAmount Int
+  /// Optional receiving-account hint from the app. The server checks all connected accounts.
+  accountHintId  String?
+  status         VerificationStatus
+  /// Machine-readable reason, e.g. NO_PROVIDER, amountMismatch, wrongAccount.
+  reason         String?
+  providerId     String?
+  transactionId  String?               @unique
+  transaction    Transaction?          @relation(fields: [transactionId], references: [id], onDelete: Restrict)
+  idempotencyKey String?
+  createdAt      DateTime              @default(now())
+
+  @@unique([businessId, idempotencyKey])
+  @@index([businessId, createdAt])
+}
+
+/// A payment the bank confirmed (or flagged), shown in History and Reports.
+model Transaction {
+  id             String            @id @default(cuid())
+  businessId     String
+  business       Business          @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  bankAccountId  String
+  bankAccount    BankAccount       @relation(fields: [bankAccountId], references: [id], onDelete: Restrict)
+  bankCode       String
+  reference      String
+  payerName      String
+  expectedAmount Int
+  receivedAmount Int
+  status         TransactionStatus
+  occurredAt     DateTime?
+  createdAt      DateTime          @default(now())
+
+  verificationAttempt VerificationAttempt?
+
+  @@index([businessId, createdAt])
+  @@index([businessId, bankAccountId, createdAt])
+  // + partial unique index (businessId, bankCode, reference) WHERE status = 'verified' (migration SQL)
+}
+
+// ─── Restaurant Plus ─────────────────────────────────────────────────────────
+
+model MenuItem {
+  id         String       @id @default(cuid())
+  businessId String
+  business   Business     @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  name       String
+  priceEtb   Int
+  category   MenuCategory
+  active     Boolean      @default(true)
+  sortOrder  Int          @default(0)
+  createdAt  DateTime     @default(now())
+
+  @@index([businessId, active])
+}
+
+model RestaurantTable {
+  id         String    @id @default(cuid())
+  businessId String
+  business   Business  @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  number     Int
+  area       TableArea
+  active     Boolean   @default(true)
+
+  orders Order[]
+  bills  Bill[]
+
+  @@unique([businessId, area, number])
+}
+
+model DeliveryArea {
+  id          String   @id @default(cuid())
+  businessId  String
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  name        String
+  usualFeeEtb Int
+  active      Boolean  @default(true)
+
+  orders Order[]
+
+  @@unique([businessId, name])
+}
+
+model Order {
+  id                  String           @id @default(cuid())
+  businessId          String
+  business            Business         @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  number              Int
+  type                OrderType
+  tableId             String?
+  table               RestaurantTable? @relation(fields: [tableId], references: [id], onDelete: Restrict)
+  guests              Int?
+  customerName        String?
+  customerPhone       String?
+  deliveryAreaId      String?
+  deliveryArea        DeliveryArea?    @relation(fields: [deliveryAreaId], references: [id], onDelete: Restrict)
+  address             String?
+  deliveryFeeEtb      Int?
+  usualDeliveryFeeEtb Int?
+  notes               String[]
+  waiterId            String
+  waiter              BusinessMember   @relation("OrderWaiter", fields: [waiterId], references: [id], onDelete: Restrict)
+  foodTotalEtb        Int
+  idempotencyKey      String?
+  createdAt           DateTime         @default(now())
+
+  items        OrderItem[]
+  bill         Bill?
+  kitchenOrder KitchenOrder?
+
+  @@unique([businessId, number])
+  @@unique([businessId, idempotencyKey])
+}
+
+model OrderItem {
+  id         String  @id @default(cuid())
+  orderId    String
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  menuItemId String?
+  /// Name and price are copied so later menu changes do not alter past orders.
+  name       String
+  priceEtb   Int
+  quantity   Int
+
+  @@index([orderId])
+}
+
+model Bill {
+  id            String           @id @default(cuid())
+  businessId    String
+  business      Business         @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  orderId       String           @unique
+  order         Order            @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  orderNo       Int
+  type          OrderType
+  tableId       String?
+  table         RestaurantTable? @relation(fields: [tableId], references: [id], onDelete: Restrict)
+  guests        Int?
+  customerName  String?
+  phone         String?
+  area          String?
+  address       String?
+  foodTotalEtb  Int
+  packingFeeEtb Int              @default(0)
+  deliveryFeeEtb Int             @default(0)
+  /// foodTotal + packingFee + deliveryFee (checked by a DB constraint).
+  totalEtb      Int
+  /// Bank money received so far across scans (partial bank payments keep the bill open).
+  bankReceivedEtb Int            @default(0)
+  waiterId      String
+  waiter        BusinessMember   @relation("BillWaiter", fields: [waiterId], references: [id], onDelete: Restrict)
+  status        BillStatus       @default(open)
+  servedStatus  ServedStatus     @default(kitchen)
+  paidAt        DateTime?
+  createdAt     DateTime         @default(now())
+
+  items        BillItem[]
+  payments     Payment[]
+  tips         Tip[]
+  kitchenOrder KitchenOrder?
+
+  @@index([businessId, status, createdAt])
+  // + partial unique index (tableId) WHERE status = 'open' AND type = 'dine' (one open bill per table)
+}
+
+model BillItem {
+  id         String  @id @default(cuid())
+  billId     String
+  bill       Bill    @relation(fields: [billId], references: [id], onDelete: Restrict)
+  menuItemId String?
+  name       String
+  priceEtb   Int
+  quantity   Int
+
+  @@index([billId])
+}
+
+model Payment {
+  id             String         @id @default(cuid())
+  businessId     String
+  business       Business       @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  billId         String
+  bill           Bill           @relation(fields: [billId], references: [id], onDelete: Restrict)
+  method         PaymentMethod
+  cashEtb        Int            @default(0)
+  bankEtb        Int            @default(0)
+  tipEtb         Int            @default(0)
+  changeEtb      Int            @default(0)
+  waiterId       String
+  waiter         BusinessMember @relation("PaymentWaiter", fields: [waiterId], references: [id], onDelete: Restrict)
+  recordedById   String
+  recordedBy     BusinessMember @relation("PaymentRecordedBy", fields: [recordedById], references: [id], onDelete: Restrict)
+  idempotencyKey String?
+  createdAt      DateTime       @default(now())
+
+  tip Tip?
+
+  @@unique([businessId, idempotencyKey])
+  @@index([businessId, createdAt])
+}
+
+/// Extra money kept by the waiter. Never counted as sales.
+model Tip {
+  id         String         @id @default(cuid())
+  businessId String
+  business   Business       @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  billId     String
+  bill       Bill           @relation(fields: [billId], references: [id], onDelete: Restrict)
+  paymentId  String         @unique
+  payment    Payment        @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  amountEtb  Int
+  source     TipSource
+  waiterId   String
+  waiter     BusinessMember @relation(fields: [waiterId], references: [id], onDelete: Restrict)
+  paidOut    Boolean        @default(false)
+  createdAt  DateTime       @default(now())
+
+  @@index([businessId, waiterId, createdAt])
+}
+
+model KitchenOrder {
+  id         String        @id @default(cuid())
+  businessId String
+  business   Business      @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  orderId    String        @unique
+  order      Order         @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  billId     String        @unique
+  bill       Bill          @relation(fields: [billId], references: [id], onDelete: Restrict)
+  status     KitchenStatus @default(new)
+  startedAt  DateTime?
+  readyAt    DateTime?
+  createdAt  DateTime      @default(now())
+
+  @@index([businessId, status, createdAt])
+}
