@@ -190,6 +190,8 @@ model BusinessMember {
 /// Server-side session behind every token. Sign-out sets revokedAt, which invalidates the token at once.
 model Session {
   id        String         @id @default(cuid())
+  /// SHA-256 of the bearer token. The token itself is never stored.
+  tokenHash String         @unique
   userId    String
   user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   memberId  String
