@@ -5,6 +5,10 @@ import { getMenu, type MenuCategory, type MenuItem } from './restaurant';
 export interface MenuAdminItem extends MenuItem {
   /** false = "Finished today": hidden from New order. */
   active: boolean;
+  /** Amharic name, shown when the app is in Amharic. */
+  nameAm?: string | null;
+  /** Section, e.g. "Meat & Tibs" (from a starter menu). */
+  groupName?: string | null;
 }
 
 export interface MenuItemInput {

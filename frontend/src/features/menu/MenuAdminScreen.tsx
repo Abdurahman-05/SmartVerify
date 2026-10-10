@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Plus, RefreshCw } from 'lucide-react-native';
+import { ChevronRight, Plus, RefreshCw, Sparkles } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, ScrollView, View } from 'react-native';
@@ -22,6 +22,8 @@ import type { MenuCategory } from '@/lib/mock/restaurant';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
+import { useLocalName } from './useLocalName';
+
 const categories: ('all' | MenuCategory)[] = ['all', 'food', 'drinks', 'combos'];
 
 function MenuRow({
@@ -35,6 +37,7 @@ function MenuRow({
 }) {
   const brand = useBrandColors();
   const { t } = useTranslation();
+  const localName = useLocalName();
   const Icon = categoryIcon[item.category];
 
   return (
@@ -54,8 +57,13 @@ function MenuRow({
         </View>
         <View className="min-w-0 flex-1">
           <Text font="bold" className="text-[17px] leading-tight">
-            {item.name}
+            {localName(item)}
           </Text>
+          {item.groupName ? (
+            <Text tone="muted" className="text-sm">
+              {item.groupName}
+            </Text>
+          ) : null}
           {item.active ? (
             <MoneyText
               value={item.priceEtb}
@@ -164,6 +172,25 @@ export default function MenuAdminScreen() {
           ))}
         </ScrollView>
       </View>
+
+      <Pressable
+        onPress={() => router.push('/menu/packs')}
+        accessibilityRole="button"
+        className="mx-4 mb-2.5 flex-row items-center gap-3 rounded-[18px] border-2 border-primary bg-primarySoft px-3 py-2.5 active:opacity-80"
+      >
+        <View className="h-11 w-11 items-center justify-center rounded-[12px] bg-primary">
+          <Sparkles size={22} color={colors.surface} strokeWidth={2.2} />
+        </View>
+        <View className="min-w-0 flex-1">
+          <Text font="bold" className="text-base">
+            {t('menuAdmin.starter.open')}
+          </Text>
+          <Text tone="muted" className="text-sm">
+            {t('menuAdmin.starter.openHint')}
+          </Text>
+        </View>
+        <ChevronRight size={22} color={colors.muted} strokeWidth={2.2} />
+      </Pressable>
 
       {query.isError ? (
         <View className="flex-1 items-center justify-center gap-4 px-6">

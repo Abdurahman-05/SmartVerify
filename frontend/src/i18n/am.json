@@ -683,7 +683,27 @@
     "loadFailed": "ምናሌውን መጫን አልተቻለም።",
     "errors": {
       "name": "የንጥሉን ስም ያስገቡ።",
-      "price": "ቢያንስ 1 ብር ዋጋ ያስገቡ።"
+      "price": "ቢያንስ 1 ብር ዋጋ ያስገቡ።",
+      "duplicate": "ይህ ስም አስቀድሞ በምናሌዎ ላይ አለ።"
+    },
+    "starter": {
+      "open": "ከዝግጁ ምናሌዎች ጨምር",
+      "openHint": "ለምግብ ቤትዎ አይነት የተዘጋጁ ዝርዝሮች",
+      "title": "ዝግጁ ምናሌዎች",
+      "subtitle": "የምግብ ቤትዎን አይነት ይምረጡ",
+      "added": "ከ{{total}} {{added}} ተጨምሯል",
+      "addPack": "ሙሉውን ምናሌ ጨምር ({{count}})",
+      "addSection": "ሁሉንም ጨምር ({{count}})",
+      "addSelected": "የተመረጡትን ጨምር ({{count}})",
+      "sectionDone": "ሁሉም ተጨምረዋል",
+      "alreadyAdded": "ተጨምሯል",
+      "addOff": "ጠፍቶ ጨምር",
+      "addOffHint": "መጀመሪያ ዋጋዎን ያስተካክሉ፣ ከዚያ በምናሌ ውስጥ ያብሩ",
+      "resultAdded": "{{count}} ንጥሎች ወደ ምናሌዎ ተጨምረዋል",
+      "resultSkipped": "{{count}} አስቀድመው በምናሌዎ ላይ ነበሩ",
+      "importFailedTitle": "ንጥሎቹን መጨመር አልተቻለም",
+      "priceNote": "ዋጋዎቹ ምክር ብቻ ናቸው። የራስዎን ዋጋ ለማስገባት በምናሌ ውስጥ ንጥሉን ይጫኑ።",
+      "select": "{{name}} ምረጥ"
     }
   }
 }

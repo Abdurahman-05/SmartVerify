@@ -683,7 +683,27 @@
     "loadFailed": "Couldn't load the menu.",
     "errors": {
       "name": "Enter the item name.",
-      "price": "Enter a price of at least 1 ETB."
+      "price": "Enter a price of at least 1 ETB.",
+      "duplicate": "This name is already on your menu."
+    },
+    "starter": {
+      "open": "Add from starter menus",
+      "openHint": "Ready lists for your kind of restaurant",
+      "title": "Starter menus",
+      "subtitle": "Pick your kind of restaurant",
+      "added": "{{added}} of {{total}} added",
+      "addPack": "Add whole menu ({{count}})",
+      "addSection": "Add all ({{count}})",
+      "addSelected": "Add selected ({{count}})",
+      "sectionDone": "All added",
+      "alreadyAdded": "Added",
+      "addOff": "Add turned off",
+      "addOffHint": "Set your prices first, then turn them on in Menu",
+      "resultAdded": "{{count}} items added to your menu",
+      "resultSkipped": "{{count}} were already on your menu",
+      "importFailedTitle": "Couldn't add the items",
+      "priceNote": "Prices are suggestions. Tap an item in Menu to set your own price.",
+      "select": "Select {{name}}"
     }
   }
 }
