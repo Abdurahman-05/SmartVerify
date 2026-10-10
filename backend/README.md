@@ -1,6 +1,6 @@
 # Smart Verify — Backend
 
-REST API for the Smart Verify mobile app (`../`). Node.js + TypeScript, Fastify 5, PostgreSQL, Prisma 7, Zod,
+REST API for the Smart Verify mobile app (`../frontend`). Node.js + TypeScript, Fastify 5, PostgreSQL, Prisma 7, Zod,
 Swagger/OpenAPI, Vitest.
 
 **Status: setup only.** The server starts, connects to the database and serves `/health` and `/docs`.

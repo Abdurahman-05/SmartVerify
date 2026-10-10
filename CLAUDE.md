@@ -18,6 +18,8 @@ px expo install, not plain npm
 
 ## Structure
 
+Two folders: `frontend/` (Expo app) and `backend/` (API). App paths below (src/...) are inside `frontend/`; run app commands from `frontend/`.
+
 - src/app/ - Routes (file-based Expo Router)
 - src/components/ui/ - Base UI components
 - src/features/ - Feature-specific logic
@@ -71,7 +73,7 @@ pm run format - Format code
 
 ## Integration rules
 
-- Backend is in backend/, API base from EXPO_PUBLIC_API_URL, routes under /api/v1. Swagger at /docs is the contract: read only the routes of the module being connected.
+- App is in frontend/, backend is in backend/, API base from EXPO_PUBLIC_API_URL, routes under /api/v1. Swagger at /docs is the contract: read only the routes of the module being connected.
 - Each module has a real file in src/lib/api/<module>.ts with the SAME function signatures as src/lib/mock/<module>.ts. Do not edit the mock files.
 - One switch per module: EXPO_PUBLIC_USE_MOCK_<MODULE> (default false) read in src/lib/<module>/index.ts. Screens import only from that index.
 - The server is the source of truth for totals, tips, statuses. The app displays server values, it does not recompute them.

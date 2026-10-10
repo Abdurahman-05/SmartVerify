@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 
 /**
- * Typed HTTP client for the Smart Verify backend (backend/). The mocks in src/lib/mock stay in use;
+ * Typed HTTP client for the Smart Verify backend (../backend). The mocks in src/lib/mock stay in use;
  * switch one mock module at a time to call `api(...)` with the same input/output shapes.
  *
  * Base URL, in order:
@@ -20,7 +20,7 @@ function resolveBaseUrl() {
 
 export const API_BASE_URL = resolveBaseUrl();
 
-/** Error codes from the backend (backend/src/shared/errors/app-error.ts), translated in the app. */
+/** Error codes from the backend (../backend/src/shared/errors/app-error.ts), translated in the app. */
 export type ApiErrorCode =
   | 'VALIDATION_ERROR'
   | 'UNAUTHORIZED'
