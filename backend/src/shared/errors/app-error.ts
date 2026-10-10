@@ -6,6 +6,10 @@ export type ErrorCode =
   | 'FORBIDDEN'
   | 'NOT_FOUND'
   | 'PHONE_TAKEN'
+  | 'SUBSCRIPTION_REQUIRED'
+  | 'TABLE_BUSY'
+  | 'ITEM_UNAVAILABLE'
+  | 'BILL_CLOSED'
   | 'RATE_LIMITED'
   | 'INTERNAL_ERROR';
 
@@ -13,9 +17,16 @@ const statusByCode: Record<ErrorCode, number> = {
   VALIDATION_ERROR: 400,
   UNAUTHORIZED: 401,
   WRONG_CREDENTIALS: 401,
+  SUBSCRIPTION_REQUIRED: 402,
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   PHONE_TAKEN: 409,
+  /** Dine-in table already has an open bill. */
+  TABLE_BUSY: 409,
+  /** A menu item is missing, inactive or from another business. */
+  ITEM_UNAVAILABLE: 409,
+  /** The bill is already paid. */
+  BILL_CLOSED: 409,
   RATE_LIMITED: 429,
   INTERNAL_ERROR: 500,
 };

@@ -33,6 +33,11 @@ export const requireRoles =
     if (!roles.includes(request.auth.role)) throw new AppError('FORBIDDEN');
   };
 
+/** preHandler for Restaurant Plus features: the business must be on the restaurant plan. */
+export const requireRestaurantPlan: preHandlerHookHandler = async (request) => {
+  if (request.auth.plan !== 'restaurant') throw new AppError('SUBSCRIPTION_REQUIRED');
+};
+
 const bearerToken = (request: FastifyRequest) => {
   const [scheme, token] = request.headers.authorization?.split(' ') ?? [];
   return scheme?.toLowerCase() === 'bearer' && token ? token : null;

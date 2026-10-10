@@ -24,8 +24,20 @@ npm run dev            # http://localhost:3000
 |---|---|
 | Health | `GET /health` |
 | Auth (phone + PIN, no SMS code yet) | `POST /auth/register`, `POST /auth/sign-in`, `POST /auth/sign-out`, `GET /auth/me` |
+| Orders (restaurant plan) | `POST /orders` (needs `Idempotency-Key`) |
+| Bills (restaurant plan) | `GET /bills`, `GET /bills/:id`, `PATCH /bills/:id/delivery-fee` |
+| Tables (restaurant plan) | `GET /tables` |
 
-Errors are always `{ "error": { "code": "…" } }`.
+Errors are always `{ "error": { "code": "…" } }`. Restaurant routes return `SUBSCRIPTION_REQUIRED` unless the
+business is on the restaurant plan.
+
+## Tests
+
+`npm test` runs Vitest against `TEST_DATABASE_URL`, which must set `?schema=` to a schema whose name contains
+"test" (e.g. `smartverify_test`). Tests apply migrations there and empty those tables; the URL check refuses any
+other schema, so development data in `public` is never touched. Use the direct (non `-pooler`) Neon host for tests.
+
+Tests are slow from far away (~5 min), because every query crosses to the database region.
 
 ## Auth design
 
