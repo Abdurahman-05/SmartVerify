@@ -598,7 +598,8 @@
     "devPlan": "እቅድ",
     "staff": "ሰራተኞች",
     "theme": "የቀለም ገጽታ",
-    "themeOption": "{{name}} ገጽታ"
+    "themeOption": "{{name}} ገጽታ",
+    "menu": "ምናሌ"
   },
   "help": {
     "title": "እገዛ",
@@ -657,5 +658,30 @@
     "validation": "እባክዎ መረጃዎቹን ያረጋግጡ እና እንደገና ይሞክሩ።",
     "rateLimited": "በጣም ብዙ ሙከራዎች። እባክዎ ጥቂት ደቂቃዎች ጠብቀው እንደገና ይሞክሩ።",
     "subscriptionRequired": "ይህ የRestaurant Plus እቅድ ያስፈልገዋል።"
+  },
+  "menuAdmin": {
+    "title": "ምናሌ",
+    "subtitle": "ያለቀውን ያጥፉ",
+    "add": "ጨምር",
+    "finished": "ዛሬ አልቋል",
+    "on": "በርቷል",
+    "off": "ጠፍቷል",
+    "available": "ይገኛል፦ {{name}}",
+    "editItem": "{{name}} አስተካክል",
+    "empty": "ገና ምንም የለም። የመጀመሪያውን ለመፍጠር ጨምርን ይጫኑ።",
+    "addTitle": "ንጥል ጨምር",
+    "editTitle": "ንጥል አስተካክል",
+    "formSubtitle": "ስም፣ ዋጋ እና ምድብ",
+    "name": "ስም",
+    "namePlaceholder": "ለምሳሌ ልዩ ፍርፍር",
+    "price": "ዋጋ (ብር)",
+    "category": "ምድብ",
+    "saveFailedTitle": "ማስቀመጥ አልተቻለም",
+    "toggleFailedTitle": "ንጥሉን መቀየር አልተቻለም",
+    "loadFailed": "ምናሌውን መጫን አልተቻለም።",
+    "errors": {
+      "name": "የንጥሉን ስም ያስገቡ።",
+      "price": "ቢያንስ 1 ብር ዋጋ ያስገቡ።"
+    }
   }
 }

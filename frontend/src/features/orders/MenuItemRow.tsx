@@ -7,7 +7,7 @@ import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
 import type { MenuCategory, MenuItem } from '@/lib/mock/restaurant';
 
-const categoryIcon: Record<MenuCategory, LucideIcon> = {
+export const categoryIcon: Record<MenuCategory, LucideIcon> = {
   food: Soup,
   drinks: CupSoda,
   combos: Utensils,

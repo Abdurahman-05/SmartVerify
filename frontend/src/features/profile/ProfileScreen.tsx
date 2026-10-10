@@ -1,5 +1,13 @@
 import { useRouter } from 'expo-router';
-import { Globe, Landmark, LifeBuoy, LogOut, Star, Users } from 'lucide-react-native';
+import {
+  Globe,
+  Landmark,
+  LifeBuoy,
+  LogOut,
+  Star,
+  Users,
+  UtensilsCrossed,
+} from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -32,7 +40,10 @@ function HeaderPill({ label }: { label: string }) {
 function ProfileCard({ user }: { user: SessionUser }) {
   const { t } = useTranslation();
   return (
-    <View accessible className="mx-4 mt-1 flex-row items-center gap-3.5 rounded-card bg-primary px-4 py-4">
+    <View
+      accessible
+      className="mx-4 mt-1 flex-row items-center gap-3.5 rounded-card bg-primary px-4 py-4"
+    >
       <View className="h-16 w-16 items-center justify-center rounded-full bg-surface">
         <Text font="heading" className="text-[28px] text-primary">
           {user.displayName.charAt(0).toUpperCase()}
@@ -81,23 +92,54 @@ export default function ProfileScreen() {
     <SafeAreaView edges={isChef ? undefined : ['top']} className="flex-1 bg-background">
       <ScreenHeader
         title={t('profile.title')}
-        onBack={isChef ? () => (router.canGoBack() ? router.back() : router.replace('/kitchen')) : undefined}
+        onBack={
+          isChef
+            ? () => (router.canGoBack() ? router.back() : router.replace('/kitchen'))
+            : undefined
+        }
       />
-      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 24 }}
+        showsVerticalScrollIndicator={false}
+      >
         <ProfileCard user={user} />
 
         <View className="mx-4 mt-3 overflow-hidden rounded-card border-[1.5px] border-border bg-surface">
           {!isStaff ? (
             <>
-              <ListRow icon={Landmark} label={t('profile.bankAccounts')} onPress={() => router.push('/bank-accounts')} />
-              <ListRow icon={Star} label={t('profile.subscription')} onPress={() => router.push('/subscription')} />
+              <ListRow
+                icon={Landmark}
+                label={t('profile.bankAccounts')}
+                onPress={() => router.push('/bank-accounts')}
+              />
+              <ListRow
+                icon={Star}
+                label={t('profile.subscription')}
+                onPress={() => router.push('/subscription')}
+              />
             </>
           ) : null}
           {canManageStaff ? (
-            <ListRow icon={Users} label={t('profile.staff')} onPress={() => router.push('/staff')} />
+            <ListRow
+              icon={Users}
+              label={t('profile.staff')}
+              onPress={() => router.push('/staff')}
+            />
+          ) : null}
+          {canManageStaff && user.plan === 'restaurant' ? (
+            <ListRow
+              icon={UtensilsCrossed}
+              label={t('profile.menu')}
+              onPress={() => router.push('/menu')}
+            />
           ) : null}
           <ListRow icon={Globe} label={t('profile.language')} right={<LanguageToggle />} />
-          <ListRow icon={LifeBuoy} label={t('profile.help')} onPress={() => router.push('/help')} last />
+          <ListRow
+            icon={LifeBuoy}
+            label={t('profile.help')}
+            onPress={() => router.push('/help')}
+            last
+          />
         </View>
 
         <ThemeSwatches />
@@ -116,7 +158,12 @@ export default function ProfileScreen() {
             </Text>
             <View className="flex-row flex-wrap gap-2">
               {roles.map((role) => (
-                <Pill key={role} label={t(`roles.${role}`)} selected={user.role === role} onPress={() => setRole(role)} />
+                <Pill
+                  key={role}
+                  label={t(`roles.${role}`)}
+                  selected={user.role === role}
+                  onPress={() => setRole(role)}
+                />
               ))}
             </View>
             <Text font="semibold" className="text-[15px]">
@@ -124,7 +171,12 @@ export default function ProfileScreen() {
             </Text>
             <View className="flex-row flex-wrap gap-2">
               {plans.map((plan) => (
-                <Pill key={plan} label={t(`plans.${plan}`)} selected={user.plan === plan} onPress={() => setPlan(plan)} />
+                <Pill
+                  key={plan}
+                  label={t(`plans.${plan}`)}
+                  selected={user.plan === plan}
+                  onPress={() => setPlan(plan)}
+                />
               ))}
             </View>
           </View>

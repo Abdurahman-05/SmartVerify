@@ -598,7 +598,8 @@
     "devPlan": "Plan",
     "staff": "Staff",
     "theme": "Color theme",
-    "themeOption": "{{name}} theme"
+    "themeOption": "{{name}} theme",
+    "menu": "Menu"
   },
   "help": {
     "title": "Help",
@@ -657,5 +658,30 @@
     "validation": "Please check the details and try again.",
     "rateLimited": "Too many tries. Please wait a few minutes and try again.",
     "subscriptionRequired": "This needs the Restaurant Plus plan."
+  },
+  "menuAdmin": {
+    "title": "Menu",
+    "subtitle": "Turn off what is finished",
+    "add": "Add",
+    "finished": "Finished today",
+    "on": "On",
+    "off": "Off",
+    "available": "Available: {{name}}",
+    "editItem": "Edit {{name}}",
+    "empty": "No items yet. Tap Add to create the first one.",
+    "addTitle": "Add item",
+    "editTitle": "Edit item",
+    "formSubtitle": "Name, price and category",
+    "name": "Name",
+    "namePlaceholder": "e.g. Special Firfir",
+    "price": "Price (ETB)",
+    "category": "Category",
+    "saveFailedTitle": "Couldn't save",
+    "toggleFailedTitle": "Couldn't change the item",
+    "loadFailed": "Couldn't load the menu.",
+    "errors": {
+      "name": "Enter the item name.",
+      "price": "Enter a price of at least 1 ETB."
+    }
   }
 }
