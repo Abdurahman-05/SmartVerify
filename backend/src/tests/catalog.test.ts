@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { CATALOG, catalogGroups } from '../modules/menu/catalog.js';
-import { applyPercent } from '../modules/menu/menu.service.js';
+import { CATALOG_ITEMS, PACKS } from '../modules/menu/catalog/index.js';
+import { applyPercent, normalizeName } from '../modules/menu/menu.service.js';
 
-const ALCOHOL = [
+const FORBIDDEN = [
   'beer',
   'tej',
   'wine',
@@ -15,40 +15,58 @@ const ALCOHOL = [
   'liquor',
   'cocktail',
   'alcohol',
+  'pork',
+  'bacon',
+  'ham',
 ];
 
-describe('sample catalog data', () => {
-  it('has about 60 items with unique keys, integer prices and Amharic names', () => {
-    expect(CATALOG.length).toBeGreaterThanOrEqual(55);
-    expect(CATALOG.length).toBeLessThanOrEqual(65);
-    expect(new Set(CATALOG.map((i) => i.key)).size).toBe(CATALOG.length);
-    for (const item of CATALOG) {
-      expect(item.key, item.key).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
-      expect(Number.isInteger(item.suggestedPriceEtb), item.key).toBe(true);
-      expect(item.suggestedPriceEtb, item.key).toBeGreaterThanOrEqual(1);
-      expect(item.nameAm.trim().length, item.key).toBeGreaterThan(0);
-      expect(item.name.trim().length, item.key).toBeGreaterThan(0);
-      expect(catalogGroups[item.category] as readonly string[], item.key).toContain(item.group);
+describe('starter pack data', () => {
+  it('has about 150 items, every item in exactly one pack and one group', () => {
+    const fromPacks = PACKS.flatMap((p) => p.groups.flatMap((g) => g.items.map((i) => i.key)));
+    expect(fromPacks.length).toBeGreaterThanOrEqual(140);
+    expect(new Set(fromPacks).size).toBe(fromPacks.length); // a key never appears twice
+    expect(CATALOG_ITEMS.map((i) => i.key)).toEqual(fromPacks);
+    expect(new Set(PACKS.map((p) => p.key)).size).toBe(PACKS.length);
+    for (const pack of PACKS) {
+      expect(new Set(pack.groups.map((g) => g.key)).size, pack.key).toBe(pack.groups.length);
     }
   });
 
-  it('every group has items', () => {
-    for (const groups of Object.values(catalogGroups)) {
-      for (const group of groups) {
-        expect(
-          CATALOG.some((i) => i.group === group),
-          group
-        ).toBe(true);
+  it('every pack and group has items; categories are valid', () => {
+    for (const pack of PACKS) {
+      expect(pack.groups.length, pack.key).toBeGreaterThan(0);
+      expect(pack.nameAm.trim(), pack.key).not.toBe('');
+      for (const group of pack.groups) {
+        expect(group.items.length, `${pack.key}/${group.key}`).toBeGreaterThan(0);
+        expect(['food', 'drinks', 'combos']).toContain(group.category);
+        expect(group.nameAm.trim(), group.key).not.toBe('');
       }
     }
   });
 
-  it('contains NO alcoholic drinks', () => {
-    const offending = CATALOG.filter((item) =>
-      [item.name, item.key, item.group].some((text) =>
-        ALCOHOL.some((word) => text.toLowerCase().includes(word))
-      )
-    ).map((i) => i.key);
+  it('every item: slug key, integer price, English and Amharic name, 1..60 chars, unique names', () => {
+    for (const item of CATALOG_ITEMS) {
+      expect(item.key, item.key).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+      expect(Number.isInteger(item.suggestedPriceEtb), item.key).toBe(true);
+      expect(item.suggestedPriceEtb, item.key).toBeGreaterThanOrEqual(1);
+      expect(item.name.length, item.key).toBeGreaterThanOrEqual(1);
+      expect(item.name.length, item.key).toBeLessThanOrEqual(60);
+      expect(item.nameAm.trim().length, item.key).toBeGreaterThan(0);
+    }
+    // Same name in two packs would make "add both packs" silently skip one of them.
+    const names = CATALOG_ITEMS.map((i) => normalizeName(i.name));
+    expect(names.filter((n, i) => names.indexOf(n) !== i)).toEqual([]);
+  });
+
+  it('contains NO alcohol and NO pork', () => {
+    const texts = PACKS.flatMap((pack) => [
+      pack.key,
+      pack.name,
+      ...pack.groups.flatMap((g) => [g.key, g.name, ...g.items.flatMap((i) => [i.key, i.name])]),
+    ]);
+    const offending = texts.filter((text) =>
+      FORBIDDEN.some((word) => text.toLowerCase().includes(word))
+    );
     expect(offending).toEqual([]);
   });
 

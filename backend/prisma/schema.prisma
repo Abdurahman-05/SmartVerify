@@ -311,8 +311,10 @@ model MenuItem {
   sortOrder      Int          @default(0)
   /// Amharic name shown when the app is in Amharic (optional).
   nameAm         String?
-  /// Key of the sample catalog entry it was imported from (src/modules/menu/catalog.ts).
+  /// Key of the starter-pack item it was imported from (src/modules/menu/catalog/).
   catalogKey     String?
+  /// Section shown to users, e.g. "Meat & Tibs" (from the starter pack, or set by hand).
+  groupName      String?
   /// Soft delete: hidden everywhere; past orders keep their own copy of name and price.
   deletedAt      DateTime?
   /// Idempotency-Key of the "add item" request, so a retried add does not create a duplicate.

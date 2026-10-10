@@ -54,6 +54,7 @@ describe('menu', () => {
       nameAm: null,
       priceEtb: 100,
       category: 'food',
+      groupName: null,
       active: false,
       sortOrder: 0,
     });

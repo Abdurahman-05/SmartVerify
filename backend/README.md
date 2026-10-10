@@ -30,8 +30,8 @@ npm run dev            # http://localhost:3000
 | Orders (restaurant plan) | `POST /orders` (needs `Idempotency-Key`) |
 | Bills (restaurant plan) | `GET /bills`, `GET /bills/:id`, `PATCH /bills/:id/delivery-fee` |
 | Tables (restaurant plan) | `GET /tables` |
-| Menu (restaurant plan) | `GET /menu`, `POST /menu`, `PATCH /menu/:id`, `DELETE /menu/:id` (soft), `POST /menu/bulk-price`, `POST /menu/bulk-availability` |
-| Menu catalog (restaurant plan) | `GET /menu/catalog`, `POST /menu/catalog/import` — sample Ethiopian menu in `src/modules/menu/catalog.ts` (no alcohol) |
+| Menu (restaurant plan) | `GET /menu`, `POST /menu`, `PATCH /menu/:id`, `DELETE /menu/:id` (soft), `POST /menu/bulk-price`, `POST /menu/bulk-availability`, `POST /menu/bulk-delete` |
+| Menu starter packs (restaurant plan) | `GET /menu/catalog/packs`, `GET /menu/catalog`, `POST /menu/catalog/import` (whole pack, section or item) — data in `src/modules/menu/catalog/` (no alcohol, no pork) |
 | Plan / subscription | `PATCH /business/plan`, `POST /subscription` (no payment step yet) |
 
 Errors are always `{ "error": { "code": "…" } }`. Restaurant routes return `SUBSCRIPTION_REQUIRED` unless the

@@ -4,21 +4,22 @@ import { z } from 'zod';
 import { requireRestaurantPlan, requireRoles } from '../../plugins/auth.js';
 import { errorResponseSchema, idParamSchema } from '../../shared/schemas/common.js';
 
-import { catalogGroups } from './catalog.js';
-import { createMenuService, MAX_PRICE_ETB } from './menu.service.js';
+import { createMenuService, MAX_IMPORT_ITEMS, MAX_PRICE_ETB } from './menu.service.js';
 
 const categorySchema = z.enum(['food', 'drinks', 'combos']);
-const groupSchema = z.enum([
-  ...catalogGroups.food,
-  ...catalogGroups.drinks,
-  ...catalogGroups.combos,
-]);
 const nameSchema = z.string().trim().min(1).max(80);
 const nameAmSchema = z.string().trim().min(1).max(80);
+const groupNameSchema = z.string().trim().min(1).max(60);
 /** Integer ETB. */
 const priceSchema = z.number().int().min(1).max(MAX_PRICE_ETB);
+const percentSchema = z
+  .number()
+  .min(-50)
+  .max(200)
+  .describe('Rounded to the nearest 5 ETB, at least 1');
 const idSchema = z.string().min(1).max(64);
-const idsSchema = z.array(idSchema).min(1).max(100);
+const idsSchema = z.array(idSchema).min(1).max(200);
+const keySchema = z.string().min(1).max(60);
 
 const menuItemSchema = z.object({
   id: z.string(),
@@ -26,8 +27,26 @@ const menuItemSchema = z.object({
   nameAm: z.string().nullable(),
   priceEtb: z.number().int(),
   category: categorySchema,
+  groupName: z.string().nullable().describe('Section shown to users, e.g. "Meat & Tibs"'),
   active: z.boolean().describe('false = "Finished today": hidden from New order'),
   sortOrder: z.number().int(),
+});
+
+const countsSchema = { itemCount: z.number().int(), addedCount: z.number().int() };
+const packSchema = z.object({
+  key: z.string(),
+  name: z.string(),
+  nameAm: z.string(),
+  ...countsSchema,
+  groups: z.array(
+    z.object({
+      key: z.string(),
+      name: z.string(),
+      nameAm: z.string(),
+      category: categorySchema,
+      ...countsSchema,
+    })
+  ),
 });
 
 const catalogItemSchema = z.object({
@@ -35,9 +54,9 @@ const catalogItemSchema = z.object({
   name: z.string(),
   nameAm: z.string(),
   category: categorySchema,
-  group: groupSchema.describe('Code; the app translates it'),
+  packKey: z.string(),
+  groupKey: z.string(),
   suggestedPriceEtb: z.number().int().describe('Only a suggestion: the owner sets the real price'),
-  sortOrder: z.number().int(),
   alreadyAdded: z.boolean(),
 });
 
@@ -54,12 +73,14 @@ const optionalIdempotencyKey = z.object({
   'idempotency-key': z.string().min(8).max(100).optional().describe('A new UUID per user action'),
 });
 
-/** Restaurant Plus menu: everyone reads it; owner and manager edit it and import the catalog. */
+/** Restaurant Plus menu: everyone reads it; owner and manager edit it and use the starter packs. */
 export const menuRoutes: FastifyPluginAsyncZod = async (app) => {
   app.addHook('preHandler', requireRestaurantPlan);
   const menu = createMenuService(app.prisma);
   const editors = requireRoles('owner', 'manager');
   const security = [{ bearerAuth: [] }];
+
+  // ─── Menu ──────────────────────────────────────────────────────────────────
 
   app.get(
     '/menu',
@@ -69,7 +90,7 @@ export const menuRoutes: FastifyPluginAsyncZod = async (app) => {
         security,
         description:
           'Owner and manager: every item that is not deleted, with its on/off flag. Waiter and ' +
-          'chef: only items that are on. Sorted by category, sortOrder, name.',
+          'chef: only items that are on. Sorted by category, groupName, sortOrder, name.',
         response: { 200: z.array(menuItemSchema), ...errors },
       },
     },
@@ -93,6 +114,7 @@ export const menuRoutes: FastifyPluginAsyncZod = async (app) => {
           nameAm: nameAmSchema.optional(),
           category: categorySchema,
           priceEtb: priceSchema,
+          groupName: groupNameSchema.optional(),
         }),
         response: { 201: menuItemSchema, ...errors, ...duplicate },
       },
@@ -153,6 +175,21 @@ export const menuRoutes: FastifyPluginAsyncZod = async (app) => {
   );
 
   app.post(
+    '/menu/bulk-delete',
+    {
+      preHandler: editors,
+      schema: {
+        tags: ['menu'],
+        security,
+        description: 'Soft-deletes several items. All or nothing (an unknown id deletes nothing).',
+        body: z.object({ ids: idsSchema }),
+        response: { 200: z.object({ deleted: z.number().int() }), ...errors, ...notFound },
+      },
+    },
+    async (request) => menu.bulkDelete(request.auth, request.body.ids)
+  );
+
+  app.post(
     '/menu/bulk-price',
     {
       preHandler: editors,
@@ -160,17 +197,24 @@ export const menuRoutes: FastifyPluginAsyncZod = async (app) => {
         tags: ['menu'],
         security,
         description:
-          'Either exact prices `{ updates: [{ id, priceEtb }] }` or a percent change ' +
-          '`{ ids, percent }` (-50..200, rounded to the nearest 5 ETB, at least 1). All or nothing: ' +
-          'an unknown id (NOT_FOUND) or a price above 1,000,000 changes nothing.',
+          'One of: exact prices `{ updates: [{ id, priceEtb }] }`; a percent change for chosen ' +
+          'items `{ ids, percent }`; or a percent change for a whole section ' +
+          '`{ groupName, category?, percent }`. Percent: -50..200, rounded to the nearest 5 ETB, ' +
+          'at least 1. All or nothing: an unknown id, an empty section (NOT_FOUND) or a price ' +
+          'above 1,000,000 changes nothing.',
         body: z.union([
           z.object({
             updates: z
               .array(z.object({ id: idSchema, priceEtb: priceSchema }))
               .min(1)
-              .max(100),
+              .max(200),
           }),
-          z.object({ ids: idsSchema, percent: z.number().min(-50).max(200) }),
+          z.object({ ids: idsSchema, percent: percentSchema }),
+          z.object({
+            groupName: groupNameSchema,
+            category: categorySchema.optional(),
+            percent: percentSchema,
+          }),
         ]),
         response: { 200: z.array(menuItemSchema), ...errors, ...notFound },
       },
@@ -186,7 +230,8 @@ export const menuRoutes: FastifyPluginAsyncZod = async (app) => {
         tags: ['menu'],
         security,
         description:
-          'Turn several items on or off. All or nothing (an unknown id changes nothing).',
+          'Turn several items on or off, e.g. after importing with activate=false. All or ' +
+          'nothing (an unknown id changes nothing).',
         body: z.object({ ids: idsSchema, active: z.boolean() }),
         response: { 200: z.array(menuItemSchema), ...errors, ...notFound },
       },
@@ -194,20 +239,42 @@ export const menuRoutes: FastifyPluginAsyncZod = async (app) => {
     async (request) => menu.bulkAvailability(request.auth, request.body.ids, request.body.active)
   );
 
+  // ─── Starter packs ─────────────────────────────────────────────────────────
+
+  app.get(
+    '/menu/catalog/packs',
+    {
+      preHandler: editors,
+      schema: {
+        tags: ['menu catalog'],
+        security,
+        description:
+          'Starter menus by restaurant type and their sections. addedCount = items this ' +
+          'business already has (same catalog item or same name).',
+        response: { 200: z.array(packSchema), ...errors },
+      },
+    },
+    async (request) => menu.packs(request.auth)
+  );
+
   app.get(
     '/menu/catalog',
     {
       preHandler: editors,
       schema: {
-        tags: ['menu'],
+        tags: ['menu catalog'],
         security,
-        description:
-          'Sample Ethiopian menu to import from (no alcoholic drinks). `alreadyAdded` = this ' +
-          'business has an item from this entry or with the same name.',
+        description: 'Starter-pack items (no alcohol, no pork), filtered.',
         querystring: z.object({
+          pack: keySchema.optional(),
+          group: keySchema.optional(),
           category: categorySchema.optional(),
-          group: groupSchema.optional(),
-          q: z.string().trim().max(60).optional().describe('Search in name, Amharic name and key'),
+          q: z
+            .string()
+            .trim()
+            .max(60)
+            .optional()
+            .describe('Search in the English and Amharic name'),
         }),
         response: { 200: z.array(catalogItemSchema), ...errors },
       },
@@ -220,30 +287,40 @@ export const menuRoutes: FastifyPluginAsyncZod = async (app) => {
     {
       preHandler: editors,
       schema: {
-        tags: ['menu'],
+        tags: ['menu catalog'],
         security,
         description:
-          'Adds catalog entries in one transaction, using the suggested price unless priceEtb is ' +
-          'given and the catalog name unless name is given. Entries already on the menu are ' +
-          'skipped (ALREADY_ADDED), so sending the same import again is safe. An unknown key ' +
-          'fails the whole request (VALIDATION_ERROR) and creates nothing.',
+          'Add whole packs, whole sections and single items in one request (one transaction). ' +
+          'Selection = items of `packs` + items of `groups` + `items`, minus `exclude`; it must ' +
+          `be 1..${MAX_IMPORT_ITEMS} items. Price: items[].priceEtb or the suggested price; ` +
+          'name override only for items[]. activate=false adds them turned off, so prices can be ' +
+          'set first. Items already on the menu are skipped (ALREADY_ADDED), so importing again ' +
+          'is safe. An unknown pack, section or key fails everything (VALIDATION_ERROR).',
         headers: optionalIdempotencyKey,
         body: z.object({
+          packs: z.array(keySchema).max(20).optional(),
+          groups: z
+            .array(z.object({ pack: keySchema, group: keySchema }))
+            .max(100)
+            .optional(),
           items: z
             .array(
               z.object({
-                key: z.string().min(1).max(60),
+                key: keySchema,
                 priceEtb: priceSchema.optional(),
                 name: z.string().trim().min(1).max(60).optional(),
               })
             )
-            .min(1)
-            .max(100),
+            .max(MAX_IMPORT_ITEMS)
+            .optional(),
+          exclude: z.array(keySchema).max(MAX_IMPORT_ITEMS).optional(),
+          activate: z.boolean().default(true),
         }),
         response: {
           200: z.object({
             created: z.array(menuItemSchema),
             skipped: z.array(z.object({ key: z.string(), reason: z.literal('ALREADY_ADDED') })),
+            totalCreated: z.number().int(),
           }),
           ...errors,
         },
