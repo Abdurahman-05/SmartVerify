@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react-native';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
+import { Alert, Keyboard, Pressable, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
@@ -43,6 +43,8 @@ export default function CreateAccountScreen() {
       startSession(user);
       router.replace('/choose-plan');
     },
+    // A popup is visible even with the keyboard open; the text above the button stays as a reminder.
+    onError: (error) => Alert.alert(t('common.error'), t(errorMessageKey(error))),
   });
 
   if (mutation.isPending) return <LoadingView />;
@@ -188,7 +190,10 @@ export default function CreateAccountScreen() {
         <Button
           label={t('auth.createAccount')}
           icon={ArrowRight}
-          onPress={handleSubmit(({ acceptTerms: _accepted, ...values }) => mutation.mutate(values))}
+          onPress={() => {
+            Keyboard.dismiss();
+            void handleSubmit(({ acceptTerms: _accepted, ...values }) => mutation.mutate(values))();
+          }}
         />
       </View>
 

@@ -5,7 +5,7 @@ import { ArrowRight, Fingerprint } from 'lucide-react-native';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
+import { Alert, Keyboard, Pressable, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
@@ -43,6 +43,8 @@ export default function SignInScreen() {
       startSession(user);
       router.replace(homeRouteFor(user));
     },
+    // A popup is visible even with the keyboard open; the text above the button stays as a reminder.
+    onError: (error) => Alert.alert(t('common.error'), t(errorMessageKey(error))),
   });
 
   if (mutation.isPending) return <LoadingView />;
@@ -138,7 +140,10 @@ export default function SignInScreen() {
         <Button
           label={t('auth.signIn')}
           icon={ArrowRight}
-          onPress={handleSubmit((values) => mutation.mutate(values))}
+          onPress={() => {
+            Keyboard.dismiss();
+            void handleSubmit((values) => mutation.mutate(values))();
+          }}
         />
         <Text font="bold" tone="muted" className="text-center text-[15px]">
           {t('common.or')}
