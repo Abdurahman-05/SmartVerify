@@ -8,6 +8,11 @@ const schema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   DATABASE_URL: z.url(),
+  /**
+   * Start subscriptions without payment (no payment provider yet). Allowed by default outside
+   * production; in production it must be switched on explicitly.
+   */
+  ALLOW_UNPAID_SUBSCRIPTIONS: z.enum(['true', 'false']).optional(),
 });
 
 export type Env = z.infer<typeof schema>;

@@ -12,6 +12,7 @@ import { authRoutes, publicAuthRoutes } from './modules/auth/auth.routes.js';
 import { billRoutes } from './modules/bills/bill.routes.js';
 import { menuRoutes } from './modules/menu/menu.routes.js';
 import { orderRoutes } from './modules/orders/order.routes.js';
+import { subscriptionRoutes } from './modules/subscriptions/subscription.routes.js';
 import { tableRoutes } from './modules/tables/table.routes.js';
 import authPlugin from './plugins/auth.js';
 import errorsPlugin from './plugins/errors.js';
@@ -84,6 +85,7 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
       await api.register(async (secured) => {
         secured.addHook('onRequest', secured.authenticate);
         await secured.register(authRoutes);
+        await secured.register(subscriptionRoutes);
         // Restaurant Plus (each module requires the restaurant plan).
         await secured.register(orderRoutes);
         await secured.register(billRoutes);

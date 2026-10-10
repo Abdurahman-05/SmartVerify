@@ -1,0 +1,149 @@
+import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
+import { z } from 'zod';
+
+import { Prisma, type BillingPeriod, type Plan } from '../../generated/prisma/client.js';
+import { requireRoles } from '../../plugins/auth.js';
+import { AppError } from '../../shared/errors/app-error.js';
+import { errorResponseSchema, planSchema } from '../../shared/schemas/common.js';
+import { subscriptionSchema } from '../auth/session-user.js';
+
+/** Prices and lengths are decided here, never by the app. Restaurant Plus is monthly only. */
+const PRICING: Record<
+  Plan,
+  Partial<Record<BillingPeriod, { priceEtb: number; months: number }>>
+> = {
+  normal: { monthly: { priceEtb: 700, months: 1 }, quarterly: { priceEtb: 1500, months: 3 } },
+  restaurant: { monthly: { priceEtb: 4000, months: 1 } },
+};
+
+const addMonths = (date: Date, months: number) => {
+  const result = new Date(date);
+  result.setUTCMonth(result.getUTCMonth() + months);
+  return result;
+};
+
+const toSubscription = (s: {
+  plan: Plan;
+  period: BillingPeriod;
+  priceEtb: number;
+  startedAt: Date;
+  endsAt: Date;
+}) => ({
+  plan: s.plan,
+  period: s.period,
+  priceEtb: s.priceEtb,
+  startedAt: s.startedAt.toISOString(),
+  endsAt: s.endsAt.toISOString(),
+});
+
+const errors = {
+  400: errorResponseSchema.describe('VALIDATION_ERROR'),
+  401: errorResponseSchema.describe('UNAUTHORIZED'),
+  403: errorResponseSchema.describe('FORBIDDEN (owner only)'),
+};
+
+/** The business plan. Owner only: staff share the owner's plan. */
+export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
+  const { prisma, env } = app;
+  const allowUnpaid =
+    env.ALLOW_UNPAID_SUBSCRIPTIONS === 'true' ||
+    (env.ALLOW_UNPAID_SUBSCRIPTIONS === undefined && env.NODE_ENV !== 'production');
+
+  app.patch(
+    '/business/plan',
+    {
+      preHandler: requireRoles('owner'),
+      schema: {
+        tags: ['subscription'],
+        security: [{ bearerAuth: [] }],
+        description:
+          'Choose Plan "Explore": sets the plan the business explores without paying. ' +
+          'Staff get the new plan on their next request.',
+        body: z.object({ plan: planSchema }),
+        response: { 200: z.object({ plan: planSchema }), ...errors },
+      },
+    },
+    async (request) => {
+      await prisma.business.update({
+        where: { id: request.auth.businessId },
+        data: { plan: request.body.plan },
+      });
+      return { plan: request.body.plan };
+    }
+  );
+
+  app.post(
+    '/subscription',
+    {
+      preHandler: requireRoles('owner'),
+      schema: {
+        tags: ['subscription'],
+        security: [{ bearerAuth: [] }],
+        description:
+          'Starts a subscription right away. NO PAYMENT STEP YET: refused in production unless ' +
+          'ALLOW_UNPAID_SUBSCRIPTIONS=true. Normal: monthly 700 ETB / quarterly 1,500 ETB; ' +
+          'Restaurant Plus: monthly 4,000 ETB. Replaces the current subscription. ' +
+          'Repeating an Idempotency-Key returns the first subscription.',
+        headers: z.object({
+          'idempotency-key': z.string().min(8).max(100).describe('A new UUID per user action'),
+        }),
+        body: z.object({
+          plan: planSchema,
+          period: z.enum(['monthly', 'quarterly']).describe('Restaurant Plus is always monthly'),
+        }),
+        response: {
+          201: subscriptionSchema,
+          ...errors,
+          501: errorResponseSchema.describe('PAYMENT_NOT_CONFIGURED'),
+        },
+      },
+    },
+    async (request, reply) => {
+      if (!allowUnpaid) throw new AppError('PAYMENT_NOT_CONFIGURED');
+      const { businessId } = request.auth;
+      const { plan } = request.body;
+      const period: BillingPeriod = plan === 'restaurant' ? 'monthly' : request.body.period;
+      const pricing = PRICING[plan][period];
+      if (!pricing) throw new AppError('VALIDATION_ERROR');
+      const idempotencyKey = request.headers['idempotency-key'];
+
+      const replay = () =>
+        prisma.subscription.findUnique({
+          where: { businessId_idempotencyKey: { businessId, idempotencyKey } },
+        });
+      const existing = await replay();
+      if (existing) return reply.status(201).send(toSubscription(existing));
+
+      const startedAt = new Date();
+      try {
+        const subscription = await prisma.$transaction(async (tx) => {
+          // One active subscription at a time: the new one replaces the old one.
+          await tx.subscription.updateMany({
+            where: { businessId, status: 'active' },
+            data: { status: 'cancelled' },
+          });
+          await tx.business.update({ where: { id: businessId }, data: { plan } });
+          return tx.subscription.create({
+            data: {
+              businessId,
+              plan,
+              period,
+              priceEtb: pricing.priceEtb,
+              startedAt,
+              endsAt: addMonths(startedAt, pricing.months),
+              idempotencyKey,
+            },
+          });
+        });
+        return reply.status(201).send(toSubscription(subscription));
+      } catch (error) {
+        // The same request arrived twice at once: return the one that was saved.
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+          const winner = await replay();
+          if (winner) return reply.status(201).send(toSubscription(winner));
+        }
+        throw error;
+      }
+    }
+  );
+};

@@ -204,18 +204,21 @@ model Session {
 }
 
 model Subscription {
-  id         String             @id @default(cuid())
-  businessId String
-  business   Business           @relation(fields: [businessId], references: [id], onDelete: Restrict)
-  plan       Plan
+  id             String             @id @default(cuid())
+  businessId     String
+  business       Business           @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  plan           Plan
   /// Restaurant Plus is always monthly.
-  period     BillingPeriod
-  priceEtb   Int
-  status     SubscriptionStatus @default(active)
-  startedAt  DateTime
-  endsAt     DateTime
-  createdAt  DateTime           @default(now())
+  period         BillingPeriod
+  priceEtb       Int
+  status         SubscriptionStatus @default(active)
+  startedAt      DateTime
+  endsAt         DateTime
+  /// Idempotency-Key of the "choose plan" request, so a retry does not start a second subscription.
+  idempotencyKey String?
+  createdAt      DateTime           @default(now())
 
+  @@unique([businessId, idempotencyKey])
   @@index([businessId, status])
 }
 

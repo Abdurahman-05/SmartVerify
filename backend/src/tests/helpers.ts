@@ -7,8 +7,8 @@ import { testDatabaseUrl } from './test-database.js';
 
 export type TestApp = Awaited<ReturnType<typeof buildApp>>;
 
-export async function createTestApp() {
-  const app = await buildApp({ env: loadEnv(), logger: false });
+export async function createTestApp(envOverrides: Record<string, string> = {}) {
+  const app = await buildApp({ env: loadEnv({ ...process.env, ...envOverrides }), logger: false });
   await app.ready();
   return app;
 }
@@ -23,6 +23,7 @@ const USED_TABLES = [
   'RestaurantTable',
   'DeliveryArea',
   'Session',
+  'Subscription',
   'BusinessMember',
   'Business',
   'User',
