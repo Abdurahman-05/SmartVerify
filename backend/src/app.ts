@@ -10,17 +10,6 @@ import {
 import { z } from 'zod';
 
 import type { Env } from './config/env.js';
-import { authRoutes, publicAuthRoutes } from './modules/auth/auth.routes.js';
-import { bankAccountRoutes } from './modules/bank-accounts/bank-account.routes.js';
-import { feeRoutes } from './modules/fees/fee.routes.js';
-import { menuRoutes } from './modules/menu/menu.routes.js';
-import { staffRoutes } from './modules/staff/staff.routes.js';
-import { subscriptionRoutes } from './modules/subscriptions/subscription.routes.js';
-import { tableRoutes } from './modules/tables/table.routes.js';
-import { transactionRoutes } from './modules/transactions/transaction.routes.js';
-import { verificationRoutes } from './modules/verification/verification.routes.js';
-import type { VerificationProvider } from './modules/verification/verification.types.js';
-import authPlugin from './plugins/auth.js';
 import errorsPlugin from './plugins/errors.js';
 import prismaPlugin from './plugins/prisma.js';
 import swaggerPlugin from './plugins/swagger.js';
@@ -34,16 +23,14 @@ declare module 'fastify' {
 
 export interface BuildAppOptions {
   env: Env;
-  /** Authorised payment-verification providers. Empty until a real bank integration exists. */
-  verificationProviders?: VerificationProvider[];
   logger?: FastifyServerOptions['logger'];
 }
 
-export async function buildApp({ env, verificationProviders = [], logger }: BuildAppOptions) {
+export async function buildApp({ env, logger }: BuildAppOptions) {
   const app = Fastify({
     logger: logger ?? {
       level: env.LOG_LEVEL,
-      // Never log tokens. PINs and payment data are not logged because request bodies are not logged.
+      // Never log tokens.
       redact: ['req.headers.authorization', 'req.headers.cookie'],
     },
     bodyLimit: 1_048_576,
@@ -65,7 +52,6 @@ export async function buildApp({ env, verificationProviders = [], logger }: Buil
     errorResponseBuilder: () => new AppError('RATE_LIMITED'),
   });
   await app.register(prismaPlugin, { databaseUrl: env.DATABASE_URL });
-  await app.register(authPlugin, { jwtSecret: env.JWT_SECRET });
   await app.register(swaggerPlugin);
 
   await app.register(
@@ -91,21 +77,7 @@ export async function buildApp({ env, verificationProviders = [], logger }: Buil
         }
       );
 
-      await api.register(publicAuthRoutes);
-
-      // Everything below requires a valid, non-revoked session.
-      await api.register(async (secured) => {
-        secured.addHook('onRequest', secured.authenticate);
-        await secured.register(authRoutes);
-        await secured.register(staffRoutes);
-        await secured.register(subscriptionRoutes);
-        await secured.register(bankAccountRoutes);
-        await secured.register(transactionRoutes);
-        await secured.register(verificationRoutes(verificationProviders));
-        await secured.register(menuRoutes);
-        await secured.register(tableRoutes);
-        await secured.register(feeRoutes);
-      });
+      // Feature modules (src/modules/<name>) are registered here.
     },
     { prefix: '/api/v1' }
   );
