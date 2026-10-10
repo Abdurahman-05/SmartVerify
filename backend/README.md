@@ -17,6 +17,9 @@ npm run dev            # http://localhost:3000
 - API base: `http://localhost:3000/api/v1` · Health: `GET /api/v1/health` · Swagger UI: `http://localhost:3000/docs`
 - Other: `npm run typecheck` · `npm run lint` · `npm run format` · `npm run build` then `npm start`
 - Optional `.env` overrides: `PORT` (3000), `HOST` (0.0.0.0), `LOG_LEVEL` (info), `NODE_ENV` (development)
+- `DIRECT_DATABASE_URL` (recommended with Neon): the same database on the direct host (no `-pooler`), used only by
+  the Prisma CLI. Migrations take a session lock that a pooler can leave stuck ("Timed out trying to acquire a
+  postgres advisory lock"); the running app keeps using the pooled `DATABASE_URL`.
 
 ## Built so far
 
@@ -27,6 +30,7 @@ npm run dev            # http://localhost:3000
 | Orders (restaurant plan) | `POST /orders` (needs `Idempotency-Key`) |
 | Bills (restaurant plan) | `GET /bills`, `GET /bills/:id`, `PATCH /bills/:id/delivery-fee` |
 | Tables (restaurant plan) | `GET /tables` |
+| Menu (restaurant plan) | `GET /menu` (`all=true` for owner/manager), `POST /menu` (needs `Idempotency-Key`), `PATCH /menu/:id` |
 
 Errors are always `{ "error": { "code": "…" } }`. Restaurant routes return `SUBSCRIPTION_REQUIRED` unless the
 business is on the restaurant plan.

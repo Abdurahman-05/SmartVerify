@@ -7,6 +7,7 @@ export default function setup() {
   const { url } = testDatabaseUrl();
   execSync('npx prisma migrate deploy', {
     stdio: 'inherit',
-    env: { ...process.env, DATABASE_URL: url },
+    // Both, so the CLI can never fall back to the development database.
+    env: { ...process.env, DATABASE_URL: url, DIRECT_DATABASE_URL: url },
   });
 }

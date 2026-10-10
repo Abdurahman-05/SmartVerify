@@ -298,17 +298,20 @@ model Transaction {
 // ─── Restaurant Plus ───────────────────────────────────────────────────────
 
 model MenuItem {
-  id         String       @id @default(cuid())
-  businessId String
-  business   Business     @relation(fields: [businessId], references: [id], onDelete: Restrict)
-  name       String
-  priceEtb   Int
-  category   MenuCategory
-  active     Boolean      @default(true)
-  sortOrder  Int          @default(0)
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  id             String       @id @default(cuid())
+  businessId     String
+  business       Business     @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  name           String
+  priceEtb       Int
+  category       MenuCategory
+  active         Boolean      @default(true)
+  sortOrder      Int          @default(0)
+  /// Idempotency-Key of the "add item" request, so a retried add does not create a duplicate.
+  idempotencyKey String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
+  @@unique([businessId, idempotencyKey])
   @@index([businessId, active])
 }
 
