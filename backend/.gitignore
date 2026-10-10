@@ -1,6 +1,4 @@
 node_modules/
 dist/
-coverage/
-src/generated/
 .env
-*.log
+src/generated/
