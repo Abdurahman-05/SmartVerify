@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Keyboard, Pressable, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
@@ -13,6 +14,7 @@ import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { Input } from '@/components/ui/Input';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
+import { useFullFieldFeedback } from '@/hooks/useFullFieldFeedback';
 import { createAccount } from '@/lib/auth';
 import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
@@ -28,6 +30,7 @@ export default function CreateAccountScreen() {
   const router = useRouter();
   const startSession = useSession((s) => s.signIn);
   const [showPin, setShowPin] = useState(false);
+  const phoneFull = useFullFieldFeedback(PHONE_DIGITS);
 
   const {
     control,
@@ -48,8 +51,7 @@ export default function CreateAccountScreen() {
 
   if (mutation.isPending) return <LoadingView />;
 
-  const errorText = (message?: string) =>
-    message ? t(message, { count: PIN_LENGTH }) : undefined;
+  const errorText = (message?: string) => (message ? t(message, { count: PIN_LENGTH }) : undefined);
 
   const goToSignIn = () => (router.canGoBack() ? router.back() : router.replace('/sign-in'));
 
@@ -113,19 +115,22 @@ export default function CreateAccountScreen() {
           control={control}
           name="phone"
           render={({ field }) => (
-            <Input
-              label={t('auth.phone')}
-              prefix="+251"
-              placeholder={t('auth.phonePlaceholder')}
-              value={formatPhone(field.value)}
-              onChangeText={(text) => field.onChange(digitsOnly(text, PHONE_DIGITS))}
-              onBlur={field.onBlur}
-              keyboardType="number-pad"
-              textContentType="telephoneNumber"
-              autoComplete="tel"
-              maxLength={11}
-              error={errorText(errors.phone?.message)}
-            />
+            <Animated.View style={phoneFull.style}>
+              <Input
+                label={t('auth.phone')}
+                prefix="+251"
+                placeholder={t('auth.phonePlaceholder')}
+                value={formatPhone(field.value)}
+                onChangeText={(text) => field.onChange(phoneFull.limit(text, field.value))}
+                onBlur={field.onBlur}
+                keyboardType="number-pad"
+                textContentType="telephoneNumber"
+                autoComplete="tel"
+                // "912 345 678" is 11 characters; one more lets an extra digit reach `limit`.
+                maxLength={12}
+                error={errorText(errors.phone?.message)}
+              />
+            </Animated.View>
           )}
         />
 
