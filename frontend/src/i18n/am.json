@@ -343,7 +343,8 @@
     "oneMonth": "1 ወር",
     "threeMonths": "3 ወር",
     "goHome": "ወደ መነሻ ሂድ",
-    "error": "እቅዱን ማስጀመር አልተቻለም። እባክዎ እንደገና ይሞክሩ።"
+    "error": "እቅዱን ማስጀመር አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
+    "errorTitle": "እቅዱን መጀመር አልተቻለም"
   },
   "orders": {
     "title": "አዲስ ትዕዛዝ",
@@ -657,7 +658,8 @@
     "retry": "እንደገና ሞክር",
     "validation": "እባክዎ መረጃዎቹን ያረጋግጡ እና እንደገና ይሞክሩ።",
     "rateLimited": "በጣም ብዙ ሙከራዎች። እባክዎ ጥቂት ደቂቃዎች ጠብቀው እንደገና ይሞክሩ።",
-    "subscriptionRequired": "ይህ የRestaurant Plus እቅድ ያስፈልገዋል።"
+    "subscriptionRequired": "ይህ የRestaurant Plus እቅድ ያስፈልገዋል።",
+    "paymentNotConfigured": "የሚከፈልባቸው እቅዶች ገና አልተዘጋጁም።"
   },
   "menuAdmin": {
     "title": "ምናሌ",

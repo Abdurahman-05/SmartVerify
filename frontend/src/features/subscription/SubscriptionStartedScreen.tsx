@@ -22,7 +22,10 @@ export default function SubscriptionStartedScreen() {
     { label: t('subscription.plan'), value: planName },
     {
       label: t('subscription.length'),
-      value: subscription.period === 'quarterly' ? t('subscription.threeMonths') : t('subscription.oneMonth'),
+      value:
+        subscription.period === 'quarterly'
+          ? t('subscription.threeMonths')
+          : t('subscription.oneMonth'),
     },
     { label: t('subscription.price'), value: formatMoney(subscription.priceEtb) },
     { label: t('subscription.startedOn'), value: formatDay(subscription.startedAt) },
@@ -32,7 +35,12 @@ export default function SubscriptionStartedScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingTop: 32, paddingBottom: 32 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingHorizontal: 24,
+          paddingTop: 32,
+          paddingBottom: 32,
+        }}
         showsVerticalScrollIndicator={false}
       >
         <View className="items-center" accessibilityLiveRegion="assertive">
@@ -62,7 +70,11 @@ export default function SubscriptionStartedScreen() {
 
         <View className="min-h-6 flex-1" />
 
-        <Button label={t('subscription.goHome')} variant="success" onPress={() => router.dismissTo('/home')} />
+        <Button
+          label={t('subscription.goHome')}
+          variant="success"
+          onPress={() => router.dismissTo('/home')}
+        />
       </ScrollView>
     </SafeAreaView>
   );

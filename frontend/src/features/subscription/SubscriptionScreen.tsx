@@ -11,7 +11,9 @@ import { LoadingView } from '@/components/ui/LoadingView';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
-import { startSubscription } from '@/lib/mock/subscription';
+import { ErrorDialog } from '@/components/ui/ErrorDialog';
+import { errorMessageKey } from '@/lib/errors';
+import { startSubscription } from '@/lib/subscription';
 import { useSession, type BillingPeriod, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
@@ -306,16 +308,18 @@ export default function SubscriptionScreen() {
           </View>
         </View>
 
-        {mutation.isError ? (
-          <Text font="semibold" className="px-4 pt-3 text-center text-base text-dangerFg">
-            {t('subscription.error')}
-          </Text>
-        ) : null}
-
         <Text font="semibold" tone="muted" className="px-4 pt-3 text-center text-sm">
           {t('subscription.footer')}
         </Text>
       </ScrollView>
+
+      <ErrorDialog
+        visible={mutation.isError}
+        title={t('subscription.errorTitle')}
+        message={t(errorMessageKey(mutation.error))}
+        actionLabel={t('errors.retry')}
+        onClose={mutation.reset}
+      />
     </SafeAreaView>
   );
 }

@@ -8,6 +8,7 @@ const keyByCode: Partial<Record<ApiErrorCode, string>> = {
   VALIDATION_ERROR: 'errors.validation',
   RATE_LIMITED: 'errors.rateLimited',
   SUBSCRIPTION_REQUIRED: 'errors.subscriptionRequired',
+  PAYMENT_NOT_CONFIGURED: 'errors.paymentNotConfigured',
   NETWORK_ERROR: 'errors.noConnection',
 };
 

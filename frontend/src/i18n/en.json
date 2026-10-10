@@ -343,7 +343,8 @@
     "oneMonth": "1 month",
     "threeMonths": "3 months",
     "goHome": "Go to home",
-    "error": "Could not start the plan. Please try again."
+    "error": "Could not start the plan. Please try again.",
+    "errorTitle": "Couldn't start the plan"
   },
   "orders": {
     "title": "New order",
@@ -657,7 +658,8 @@
     "retry": "Retry",
     "validation": "Please check the details and try again.",
     "rateLimited": "Too many tries. Please wait a few minutes and try again.",
-    "subscriptionRequired": "This needs the Restaurant Plus plan."
+    "subscriptionRequired": "This needs the Restaurant Plus plan.",
+    "paymentNotConfigured": "Paid plans are not available yet."
   },
   "menuAdmin": {
     "title": "Menu",

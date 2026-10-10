@@ -1,3 +1,4 @@
+import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { Check } from 'lucide-react-native';
 import { useState } from 'react';
@@ -8,7 +9,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { BrandMark } from '@/components/ui/BrandMark';
 import { Button } from '@/components/ui/Button';
+import { ErrorDialog } from '@/components/ui/ErrorDialog';
+import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
+import { errorMessageKey } from '@/lib/errors';
+import { explorePlan } from '@/lib/subscription';
 import { useBrandColors } from '@/store/theme';
 import { useSession, type Plan } from '@/store/session';
 
@@ -72,10 +77,21 @@ export default function ChoosePlanScreen() {
   const setPlan = useSession((s) => s.setPlan);
   const [period, setPeriod] = useState<BillingPeriod>('quarterly');
 
+  // The plan is saved on the server first, so it survives a restart and staff get it too.
+  const mutation = useMutation({
+    mutationFn: explorePlan,
+    onSuccess: (_result, plan) => {
+      setPlan(plan);
+      router.dismissTo('/home');
+    },
+  });
+
   const explore = (plan?: Plan) => {
-    if (plan) setPlan(plan);
-    router.dismissTo('/home');
+    if (plan) mutation.mutate(plan);
+    else router.dismissTo('/home');
   };
+
+  if (mutation.isPending) return <LoadingView />;
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -167,6 +183,14 @@ export default function ChoosePlanScreen() {
           </Text>
         </View>
       </ScrollView>
+
+      <ErrorDialog
+        visible={mutation.isError}
+        title={t('subscription.errorTitle')}
+        message={t(errorMessageKey(mutation.error))}
+        actionLabel={t('errors.retry')}
+        onClose={mutation.reset}
+      />
     </SafeAreaView>
   );
 }

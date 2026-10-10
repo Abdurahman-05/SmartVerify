@@ -8,7 +8,8 @@ export const normalPricing: Record<BillingPeriod, { months: number; priceEtb: nu
 };
 
 export const normalQuarterlySavingEtb =
-  normalPricing.monthly.priceEtb * normalPricing.quarterly.months - normalPricing.quarterly.priceEtb;
+  normalPricing.monthly.priceEtb * normalPricing.quarterly.months -
+  normalPricing.quarterly.priceEtb;
 
 export const restaurantMonthlyEtb = 4000;
 
