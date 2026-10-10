@@ -5,10 +5,11 @@ import { ArrowRight } from 'lucide-react-native';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
-import { Alert, Keyboard, Pressable, View } from 'react-native';
+import { Keyboard, Pressable, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
+import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { Input } from '@/components/ui/Input';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
@@ -43,8 +44,6 @@ export default function CreateAccountScreen() {
       startSession(user);
       router.replace('/choose-plan');
     },
-    // A popup is visible even with the keyboard open; the text above the button stays as a reminder.
-    onError: (error) => Alert.alert(t('common.error'), t(errorMessageKey(error))),
   });
 
   if (mutation.isPending) return <LoadingView />;
@@ -182,11 +181,13 @@ export default function CreateAccountScreen() {
       <View className="min-h-6 flex-1" />
 
       <View className="gap-3 px-5">
-        {mutation.isError ? (
-          <Text font="semibold" className="text-center text-base text-dangerFg">
-            {t(errorMessageKey(mutation.error))}
-          </Text>
-        ) : null}
+        <ErrorDialog
+          visible={mutation.isError}
+          title={t('auth.errors.createFailedTitle')}
+          message={t(errorMessageKey(mutation.error))}
+          actionLabel={t('errors.retry')}
+          onClose={mutation.reset}
+        />
         <Button
           label={t('auth.createAccount')}
           icon={ArrowRight}

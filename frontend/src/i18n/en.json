@@ -57,7 +57,9 @@
       "terms": "Please accept the terms to continue",
       "signInPin": "Enter your 4 to 6 digit PIN",
       "wrongCredentials": "Wrong phone number or PIN.",
-      "phoneTaken": "This phone number already has an account."
+      "phoneTaken": "This phone number already has an account.",
+      "signInFailedTitle": "Couldn't sign in",
+      "createFailedTitle": "Couldn't create account"
     }
   },
   "plan": {

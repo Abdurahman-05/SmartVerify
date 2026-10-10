@@ -57,7 +57,9 @@
       "terms": "ለመቀጠል እባክዎ ውሎቹን ይቀበሉ",
       "signInPin": "ከ4 እስከ 6 አሃዝ ያለውን PIN ያስገቡ",
       "wrongCredentials": "የተሳሳተ ስልክ ቁጥር ወይም PIN።",
-      "phoneTaken": "ይህ ስልክ ቁጥር አስቀድሞ መለያ አለው።"
+      "phoneTaken": "ይህ ስልክ ቁጥር አስቀድሞ መለያ አለው።",
+      "signInFailedTitle": "መግባት አልተቻለም",
+      "createFailedTitle": "መለያ መፍጠር አልተቻለም"
     }
   },
   "plan": {
