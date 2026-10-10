@@ -10,6 +10,7 @@ export type ErrorCode =
   | 'TABLE_BUSY'
   | 'ITEM_UNAVAILABLE'
   | 'BILL_CLOSED'
+  | 'MENU_DUPLICATE'
   | 'PAYMENT_NOT_CONFIGURED'
   | 'RATE_LIMITED'
   | 'INTERNAL_ERROR';
@@ -28,6 +29,8 @@ const statusByCode: Record<ErrorCode, number> = {
   ITEM_UNAVAILABLE: 409,
   /** The bill is already paid. */
   BILL_CLOSED: 409,
+  /** The business already has a menu item with this name (ignoring case and spaces). */
+  MENU_DUPLICATE: 409,
   /** Paid subscriptions are not available yet (no payment provider). */
   PAYMENT_NOT_CONFIGURED: 501,
   RATE_LIMITED: 429,

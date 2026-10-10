@@ -42,22 +42,21 @@ const errorCode = (res: { json: () => unknown }) =>
   (res.json() as { error?: { code?: string } }).error?.code;
 
 describe('menu', () => {
-  it('waiters see only items that are on; owner and manager can see all', async () => {
+  it('waiters and chefs see only items that are on; owner and manager see all', async () => {
     expect(names(await list(r.waiter.token)).sort()).toEqual(['Coffee', 'Tibs']);
     expect(names(await list(r.waiter.token, '?all=true')).sort()).toEqual(['Coffee', 'Tibs']);
-    expect(names(await list(r.manager.token, '?all=true')).sort()).toEqual([
-      'Coffee',
-      'Old dish',
-      'Tibs',
-    ]);
+    expect(names(await list(r.chef.token)).sort()).toEqual(['Coffee', 'Tibs']);
+    // `all=true` (still sent by the app) is no longer needed: owner/manager always get all.
+    expect(names(await list(r.manager.token)).sort()).toEqual(['Coffee', 'Old dish', 'Tibs']);
     expect((await list(r.owner.token, '?all=true')).json()).toContainEqual({
       id: r.menu.retired.id,
       name: 'Old dish',
+      nameAm: null,
       priceEtb: 100,
       category: 'food',
       active: false,
+      sortOrder: 0,
     });
-    expect((await list(r.chef.token)).statusCode).toBe(403);
   });
 
   it('owner and manager add items; waiters cannot', async () => {

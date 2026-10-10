@@ -309,10 +309,18 @@ model MenuItem {
   category       MenuCategory
   active         Boolean      @default(true)
   sortOrder      Int          @default(0)
+  /// Amharic name shown when the app is in Amharic (optional).
+  nameAm         String?
+  /// Key of the sample catalog entry it was imported from (src/modules/menu/catalog.ts).
+  catalogKey     String?
+  /// Soft delete: hidden everywhere; past orders keep their own copy of name and price.
+  deletedAt      DateTime?
   /// Idempotency-Key of the "add item" request, so a retried add does not create a duplicate.
   idempotencyKey String?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  // + partial unique (businessId, catalogKey) WHERE catalogKey IS NOT NULL AND deletedAt IS NULL
+  // + partial unique (businessId, name ignoring case and spaces) WHERE deletedAt IS NULL   (migration SQL)
 
   @@unique([businessId, idempotencyKey])
   @@index([businessId, active])
