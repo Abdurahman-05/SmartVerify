@@ -97,9 +97,16 @@ export default function SignInScreen() {
             <Input
               label={t('auth.pin')}
               labelRight={
-                <Text font="bold" tone="link" className="text-base">
-                  {t('auth.forgotPin')}
-                </Text>
+                <Pressable
+                  onPress={() => router.push('/forgot-pin')}
+                  accessibilityRole="link"
+                  hitSlop={10}
+                  className="min-h-11 justify-center"
+                >
+                  <Text font="bold" tone="link" className="text-base">
+                    {t('auth.forgotPin')}
+                  </Text>
+                </Pressable>
               }
               placeholder={t('auth.pinPlaceholder')}
               value={field.value}

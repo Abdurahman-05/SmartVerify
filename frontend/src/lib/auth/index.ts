@@ -11,4 +11,10 @@ export const signIn = USE_MOCK_AUTH ? mock.signIn : real.signIn;
 export const createAccount = USE_MOCK_AUTH ? mock.createAccount : real.createAccount;
 // The mock keeps no token: sign-out is local only and there is no session to restore at start.
 export const signOut: () => Promise<void> = USE_MOCK_AUTH ? async () => {} : real.signOut;
-export const getMe: () => Promise<SessionUser | null> = USE_MOCK_AUTH ? async () => null : real.getMe;
+export const getMe: () => Promise<SessionUser | null> = USE_MOCK_AUTH
+  ? async () => null
+  : real.getMe;
+// The mock has no server PIN to change.
+export const changePin: (currentPin: string, newPin: string) => Promise<void> = USE_MOCK_AUTH
+  ? async () => {}
+  : real.changePin;

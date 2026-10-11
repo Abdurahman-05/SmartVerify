@@ -24,6 +24,11 @@ export async function createAccount(input: CreateAccountInput): Promise<SessionU
   return res.user;
 }
 
+/** POST /auth/change-pin — needs the current PIN. Other devices are signed out. */
+export async function changePin(currentPin: string, newPin: string): Promise<void> {
+  await api('/auth/change-pin', { method: 'POST', body: { currentPin, newPin } });
+}
+
 /** POST /auth/sign-out, then forget the token even if the server could not be reached. */
 export async function signOut(): Promise<void> {
   try {

@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import {
   Armchair,
+  KeyRound,
   Bike,
   Globe,
   Landmark,
@@ -149,6 +150,11 @@ export default function ProfileScreen() {
               onPress={() => router.push('/setup/fees')}
             />
           ) : null}
+          <ListRow
+            icon={KeyRound}
+            label={t('profile.changePin')}
+            onPress={() => router.push('/change-pin')}
+          />
           <ListRow icon={Globe} label={t('profile.language')} right={<LanguageToggle />} />
           <ListRow
             icon={LifeBuoy}

@@ -615,7 +615,8 @@
     "themeOption": "{{name}} theme",
     "menu": "Menu",
     "tables": "Tables",
-    "fees": "Fees & delivery"
+    "fees": "Fees & delivery",
+    "changePin": "Change PIN"
   },
   "help": {
     "title": "Help",
@@ -807,5 +808,31 @@
     "markAllPaid": "Mark all as paid out",
     "empty": "No tips in this period.",
     "failedTitle": "Couldn't mark the tips as paid"
+  },
+  "pin": {
+    "changeTitle": "Change PIN",
+    "changeSubtitle": "Use your current PIN to set a new one",
+    "current": "Current PIN",
+    "new": "New PIN",
+    "confirm": "New PIN again",
+    "digits": "{{count}} digits",
+    "save": "Save new PIN",
+    "saved": "Your PIN was changed. Your other phones were signed out.",
+    "failedTitle": "Couldn't change the PIN",
+    "errors": {
+      "currentWrong": "Your current PIN is wrong.",
+      "length": "Enter {{count}} digits.",
+      "mismatch": "The two new PINs are not the same.",
+      "same": "The new PIN must be different from the current one."
+    },
+    "forgot": {
+      "title": "Forgot PIN?",
+      "subtitle": "Resetting with a code sent by SMS is coming soon",
+      "staffTitle": "Waiter, chef or manager",
+      "staffBody": "Ask your owner or manager to set a new PIN for you.",
+      "ownerTitle": "Owner",
+      "ownerBody": "Contact Smart Verify support to reset your PIN. Soon you will be able to reset it yourself with a code sent to your phone.",
+      "back": "Back to sign in"
+    }
   }
 }

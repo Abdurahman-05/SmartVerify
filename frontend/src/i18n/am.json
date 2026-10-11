@@ -615,7 +615,8 @@
     "themeOption": "{{name}} ገጽታ",
     "menu": "ምናሌ",
     "tables": "ጠረጴዛዎች",
-    "fees": "ክፍያዎች እና ማድረሻ"
+    "fees": "ክፍያዎች እና ማድረሻ",
+    "changePin": "PIN ቀይር"
   },
   "help": {
     "title": "እገዛ",
@@ -807,5 +808,31 @@
     "markAllPaid": "ሁሉንም ተከፍሏል በል",
     "empty": "በዚህ ጊዜ ውስጥ ጉርሻ የለም።",
     "failedTitle": "ጉርሻዎቹን ተከፍሏል ማለት አልተቻለም"
+  },
+  "pin": {
+    "changeTitle": "PIN ቀይር",
+    "changeSubtitle": "አዲስ PIN ለማስገባት የአሁኑን PIN ይጠቀሙ",
+    "current": "የአሁኑ PIN",
+    "new": "አዲስ PIN",
+    "confirm": "አዲሱን PIN እንደገና",
+    "digits": "{{count}} አሃዞች",
+    "save": "አዲሱን PIN አስቀምጥ",
+    "saved": "PIN ተቀይሯል። በሌሎች ስልኮችዎ ላይ ከመለያው ወጥተዋል።",
+    "failedTitle": "PIN መቀየር አልተቻለም",
+    "errors": {
+      "currentWrong": "የአሁኑ PIN ትክክል አይደለም።",
+      "length": "{{count}} አሃዞች ያስገቡ።",
+      "mismatch": "ሁለቱ አዲስ PINዎች አንድ አይደሉም።",
+      "same": "አዲሱ PIN ከአሁኑ የተለየ መሆን አለበት።"
+    },
+    "forgot": {
+      "title": "PIN ረሱ?",
+      "subtitle": "በኤስኤምኤስ በሚላክ ኮድ ዳግም ማስጀመር በቅርቡ ይመጣል",
+      "staffTitle": "አስተናጋጅ፣ ሼፍ ወይም ሥራ አስኪያጅ",
+      "staffBody": "ባለቤትዎን ወይም ሥራ አስኪያጅዎን አዲስ PIN እንዲያዘጋጁልዎ ይጠይቁ።",
+      "ownerTitle": "ባለቤት",
+      "ownerBody": "PIN ዳግም ለማስጀመር የSmart Verify ድጋፍን ያግኙ። በቅርቡ ወደ ስልክዎ በሚላክ ኮድ እራስዎ ዳግም ማስጀመር ይችላሉ።",
+      "back": "ወደ መግቢያ ተመለስ"
+    }
   }
 }
