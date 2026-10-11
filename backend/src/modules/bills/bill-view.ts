@@ -17,6 +17,9 @@ export const billListItemSchema = z.object({
   tableArea: z.enum(['main', 'upstairs', 'outside']).nullable(),
   guests: z.number().int().nullable(),
   customerName: z.string().nullable(),
+  deliveryAreaName: z.string().nullable(),
+  orderNo: z.number().int().describe('Number of the first order on the bill'),
+  waiterId: z.string(),
   status: z.enum(['open', 'paid']),
   servedStatus: z.enum(['kitchen', 'served']),
   totalEtb: z.number().int(),
@@ -28,9 +31,7 @@ export const billListItemSchema = z.object({
 export const billDetailSchema = billListItemSchema.extend({
   customerPhone: z.string().nullable(),
   deliveryAreaId: z.string().nullable(),
-  deliveryAreaName: z.string().nullable(),
   address: z.string().nullable(),
-  waiterId: z.string(),
   foodTotalEtb: z.number().int(),
   packingFeeEtb: z.number().int(),
   deliveryFeeEtb: z.number().int(),
@@ -64,6 +65,7 @@ const memberName = { select: { user: { select: { name: true } } } } as const;
 
 export const billListInclude = {
   table: { select: { number: true, area: true } },
+  deliveryArea: { select: { name: true } },
   waiter: memberName,
   orders: {
     orderBy: { number: 'asc' },
@@ -117,6 +119,9 @@ export function toBillListItem(row: ListRow | DetailRow): BillListItem {
     tableArea: row.table?.area ?? null,
     guests: row.guests,
     customerName: row.customerName,
+    deliveryAreaName: row.deliveryArea?.name ?? null,
+    orderNo: row.orders[0]?.number ?? 0,
+    waiterId: row.waiterId,
     status: row.status,
     servedStatus: row.servedStatus,
     totalEtb: row.totalEtb,
@@ -133,9 +138,7 @@ export function toBillDetail(row: DetailRow): BillDetail {
     ...toBillListItem(row),
     customerPhone: row.customerPhone,
     deliveryAreaId: row.deliveryAreaId,
-    deliveryAreaName: row.deliveryArea?.name ?? null,
     address: row.address,
-    waiterId: row.waiterId,
     foodTotalEtb: row.foodTotalEtb,
     packingFeeEtb: row.packingFeeEtb,
     deliveryFeeEtb: row.deliveryFeeEtb,
