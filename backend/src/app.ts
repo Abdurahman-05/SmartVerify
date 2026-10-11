@@ -12,6 +12,9 @@ import { authRoutes, publicAuthRoutes } from './modules/auth/auth.routes.js';
 import { billRoutes } from './modules/bills/bill.routes.js';
 import { feeRoutes } from './modules/fees/fee.routes.js';
 import { kitchenRoutes } from './modules/kitchen/kitchen.routes.js';
+import { overviewRoutes } from './modules/overview/overview.routes.js';
+import { paymentRoutes } from './modules/payments/payment.routes.js';
+import { tipRoutes } from './modules/tips/tip.routes.js';
 import { menuRoutes } from './modules/menu/menu.routes.js';
 import { orderRoutes } from './modules/orders/order.routes.js';
 import { subscriptionRoutes } from './modules/subscriptions/subscription.routes.js';
@@ -95,6 +98,9 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
         await secured.register(menuRoutes);
         await secured.register(feeRoutes);
         await secured.register(kitchenRoutes);
+        await secured.register(paymentRoutes);
+        await secured.register(tipRoutes);
+        await secured.register(overviewRoutes);
       });
     },
     { prefix: '/api/v1' }

@@ -33,6 +33,13 @@ npm run dev            # http://localhost:3000
 | Menu (restaurant plan) | `GET /menu`, `POST /menu`, `PATCH /menu/:id`, `DELETE /menu/:id` (soft), `POST /menu/bulk-price`, `POST /menu/bulk-availability`, `POST /menu/bulk-delete` |
 | Menu starter packs (restaurant plan) | `GET /menu/catalog/packs`, `GET /menu/catalog`, `POST /menu/catalog/import` (whole pack, section or item) — data in `src/modules/menu/catalog/` (no alcohol, no pork) |
 | Plan / subscription | `PATCH /business/plan`, `POST /subscription` (no payment step yet) |
+| Tables & fees setup | `POST /tables`, `DELETE /tables/:id`, `GET /fees`, `PUT /fees` |
+| Kitchen | `GET /kitchen/orders`, `POST /kitchen/orders/:id/start`, `POST /kitchen/orders/:id/ready` |
+| Payments (restaurant plan) | `POST /bills/:id/payments` — cash only, bank, cash + bank (one request per bank scan; short keeps the bill open) |
+| Tips & overview | `GET /tips`, `POST /tips/mark-paid`, `GET /overview` |
+
+**Bank amounts are not verified yet.** Until bank verification is built, the app's fake bank check reports the
+amount and the server records it. This is refused in production unless `ALLOW_UNVERIFIED_BANK_PAYMENTS=true`.
 
 Errors are always `{ "error": { "code": "…" } }`. Restaurant routes return `SUBSCRIPTION_REQUIRED` unless the
 business is on the restaurant plan.

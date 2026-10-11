@@ -156,6 +156,7 @@ model Business {
   payments      Payment[]
   tips          Tip[]
   kitchenOrders KitchenOrder[]
+  paymentScans  BillPaymentScan[]
 }
 
 /// A person's role inside a business. The owner also has a member row (role = owner).
@@ -175,14 +176,15 @@ model BusinessMember {
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
 
-  created            BusinessMember[] @relation("MemberCreatedBy")
+  created            BusinessMember[]  @relation("MemberCreatedBy")
   sessions           Session[]
   transactions       Transaction[]
-  billsServed        Bill[]           @relation("BillWaiter")
-  deliveryFeeChanges Bill[]           @relation("BillDeliveryFeeChangedBy")
+  billsServed        Bill[]            @relation("BillWaiter")
+  deliveryFeeChanges Bill[]            @relation("BillDeliveryFeeChangedBy")
   ordersTaken        Order[]
-  paymentsRecorded   Payment[]        @relation("PaymentRecordedBy")
+  paymentsRecorded   Payment[]         @relation("PaymentRecordedBy")
   tips               Tip[]
+  paymentScans       BillPaymentScan[]
 
   @@index([businessId])
 }
@@ -396,6 +398,7 @@ model Bill {
   orders       Order[]
   transactions Transaction[]
   payment      Payment?
+  paymentScans BillPaymentScan[]
   tips         Tip[]
   // + partial unique (tableId) WHERE status = 'open' AND type = 'dine' (one open bill per table)
 
@@ -456,6 +459,27 @@ model KitchenOrder {
 }
 
 /// The settlement of a bill (one per bill, created when it becomes paid).
+/// One bank scan towards a bill. A short scan keeps the bill open; the next scan adds to it.
+/// Until bank verification exists, amountEtb is what the app's (fake) bank check reported.
+model BillPaymentScan {
+  id             String         @id @default(cuid())
+  businessId     String
+  business       Business       @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  billId         String
+  bill           Bill           @relation(fields: [billId], references: [id], onDelete: Restrict)
+  memberId       String
+  member         BusinessMember @relation(fields: [memberId], references: [id], onDelete: Restrict)
+  amountEtb      Int
+  /// Cash part of a cash+bank payment at the time of this scan.
+  cashEtb        Int            @default(0)
+  reference      String?
+  idempotencyKey String
+  createdAt      DateTime       @default(now())
+
+  @@unique([businessId, idempotencyKey])
+  @@index([billId])
+}
+
 model Payment {
   id             String         @id @default(cuid())
   businessId     String

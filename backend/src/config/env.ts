@@ -13,6 +13,11 @@ const schema = z.object({
    * production; in production it must be switched on explicitly.
    */
   ALLOW_UNPAID_SUBSCRIPTIONS: z.enum(['true', 'false']).optional(),
+  /**
+   * Accept bank amounts reported by the app (fake bank check) for restaurant payments, until bank
+   * verification is built. Allowed by default outside production; never on in production unless set.
+   */
+  ALLOW_UNVERIFIED_BANK_PAYMENTS: z.enum(['true', 'false']).optional(),
 });
 
 export type Env = z.infer<typeof schema>;
