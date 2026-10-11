@@ -1,5 +1,7 @@
 import { useRouter } from 'expo-router';
 import {
+  Armchair,
+  Bike,
   Globe,
   Landmark,
   LifeBuoy,
@@ -131,6 +133,20 @@ export default function ProfileScreen() {
               icon={UtensilsCrossed}
               label={t('profile.menu')}
               onPress={() => router.push('/menu')}
+            />
+          ) : null}
+          {canManageStaff && user.plan === 'restaurant' ? (
+            <ListRow
+              icon={Armchair}
+              label={t('profile.tables')}
+              onPress={() => router.push('/setup/tables')}
+            />
+          ) : null}
+          {canManageStaff && user.plan === 'restaurant' ? (
+            <ListRow
+              icon={Bike}
+              label={t('profile.fees')}
+              onPress={() => router.push('/setup/fees')}
             />
           ) : null}
           <ListRow icon={Globe} label={t('profile.language')} right={<LanguageToggle />} />

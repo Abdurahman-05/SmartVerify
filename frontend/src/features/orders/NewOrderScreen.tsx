@@ -14,23 +14,30 @@ import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { LoadingView } from '@/components/ui/LoadingView';
+import { NoConnection } from '@/components/ui/NoConnection';
 import { OptionSheet } from '@/components/ui/OptionSheet';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
+import { newIdempotencyKey } from '@/lib/api/idempotency';
+import { ApiError } from '@/lib/api/client';
+import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import {
-  deliveryAreas,
+  feesKey,
+  getFees,
   getMenu,
   getTables,
   sendOrder,
+  tablesKey,
   type MenuCategory,
   type OrderLine,
   type OrderNote,
-  type OrderTarget,
   type OrderType,
+  type SendOrderInput,
   type Table,
-} from '@/lib/mock/restaurant';
+} from '@/lib/restaurant';
 import { useBrandColors } from '@/store/theme';
 import { digitsOnly } from '@/lib/format';
 import { useSession } from '@/store/session';
@@ -103,30 +110,58 @@ export default function NewOrderScreen() {
   const [sheet, setSheet] = useState<Sheet>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [takeaway, setTakeaway] = useState({ customerName: '', customerPhone: '' });
-  const [delivery, setDelivery] = useState({
-    areaId: deliveryAreas[0].id,
-    fee: String(deliveryAreas[0].usualFeeEtb),
-    address: '',
-    customerPhone: '',
-  });
+  // areaId '' = the first area; fee null = the chosen area's usual fee.
+  const [delivery, setDelivery] = useState<{
+    areaId: string;
+    fee: string | null;
+    address: string;
+    customerPhone: string;
+  }>({ areaId: '', fee: null, address: '', customerPhone: '' });
+  // One key per order being built: a retry after a lost answer does not send it twice.
+  const [orderKey] = useState(newIdempotencyKey);
 
-  const { data: menu } = useQuery({ queryKey: ['menu'], queryFn: getMenu });
-  const { data: tables } = useQuery({ queryKey: ['tables'], queryFn: getTables });
+  const menuQuery = useQuery({ queryKey: ['menu'], queryFn: getMenu });
+  const tablesQuery = useQuery({ queryKey: tablesKey, queryFn: getTables });
+  const feesQuery = useQuery({ queryKey: feesKey, queryFn: getFees });
 
   const mutation = useMutation({
-    mutationFn: sendOrder,
+    mutationFn: (input: SendOrderInput) => sendOrder(input, orderKey),
     onSuccess: (order) => {
-      queryClient.invalidateQueries({ queryKey: ['tables'] });
+      void queryClient.invalidateQueries({ queryKey: tablesKey });
       router.replace({ pathname: '/order-sent', params: { id: order.id } });
+    },
+    onError: (error) => {
+      // Someone else took the table meanwhile: refresh tables and let the waiter pick again.
+      if (error instanceof ApiError && error.code === 'TABLE_BUSY') {
+        setTable(null);
+        void queryClient.invalidateQueries({ queryKey: tablesKey });
+      }
     },
   });
 
-  if (!menu || !tables) return <LoadingView />;
+  const menu = menuQuery.data;
+  const tables = tablesQuery.data;
+  const fees = feesQuery.data;
+  const loadError = menuQuery.error ?? tablesQuery.error ?? feesQuery.error;
+  if (loadError && isNetworkError(loadError)) {
+    return (
+      <NoConnection
+        onRetry={() => {
+          void menuQuery.refetch();
+          void tablesQuery.refetch();
+          void feesQuery.refetch();
+        }}
+      />
+    );
+  }
+  if (!menu || !tables || !fees) return <LoadingView />;
   if (mutation.isPending) {
     return <LoadingView title={t('orders.sending')} subtitle={t('orders.sendingSubtitle')} />;
   }
 
-  const area = deliveryAreas.find((a) => a.id === delivery.areaId) ?? deliveryAreas[0];
+  const deliveryAreas = fees.deliveryAreas;
+  const area = deliveryAreas.find((a) => a.id === delivery.areaId) ?? deliveryAreas[0] ?? null;
+  const deliveryFee = delivery.fee ?? (area ? String(area.usualFeeEtb) : '');
   const lines: OrderLine[] = menu
     .filter((item) => (cart[item.id] ?? 0) > 0)
     .map((item) => ({
@@ -149,7 +184,7 @@ export default function NewOrderScreen() {
     setErrors({});
   };
 
-  const submit = (target: OrderTarget) =>
+  const submit = (target: SendOrderInput['target']) =>
     mutation.mutate({ target, lines, notes: type === 'dineIn' ? notes : [], waiterId, waiterName });
 
   const onSend = () => {
@@ -169,11 +204,13 @@ export default function NewOrderScreen() {
       });
       return;
     }
-    const parsed = deliverySchema.safeParse(delivery);
+    if (!area) return setErrors({ area: 'orders.errors.area' });
+    const parsed = deliverySchema.safeParse({ ...delivery, fee: deliveryFee });
     if (!parsed.success) return setErrors(fieldErrors(parsed.error));
     setErrors({});
     submit({
       type: 'delivery',
+      areaId: area.id,
       areaName: area.name,
       deliveryFeeEtb: Number(parsed.data.fee),
       usualFeeEtb: area.usualFeeEtb,
@@ -274,7 +311,18 @@ export default function NewOrderScreen() {
             </View>
           ) : null}
 
-          {type === 'delivery' ? (
+          {type === 'delivery' && !area ? (
+            <View className="mx-4 gap-1 rounded-[20px] border-[1.5px] border-border bg-surface px-3.5 py-3">
+              <Text font="bold" className="text-base">
+                {t('orders.noAreas')}
+              </Text>
+              <Text tone="muted" className="text-sm">
+                {t('orders.noAreasHint')}
+              </Text>
+            </View>
+          ) : null}
+
+          {type === 'delivery' && area ? (
             <View className="mx-4 gap-2.5 rounded-[20px] border-[1.5px] border-border bg-surface px-3.5 py-3">
               <View className="flex-row items-start gap-2.5">
                 <View className="min-w-0 flex-1 gap-1">
@@ -297,7 +345,7 @@ export default function NewOrderScreen() {
                 <View className="w-32">
                   <Field
                     label={t('orders.fee')}
-                    value={delivery.fee}
+                    value={deliveryFee}
                     onChangeText={(text) =>
                       setDelivery((v) => ({ ...v, fee: digitsOnly(text, 4) }))
                     }
@@ -353,6 +401,17 @@ export default function NewOrderScreen() {
             ))}
           </ScrollView>
 
+          {menu.length === 0 ? (
+            <View className="mx-4 gap-1 rounded-[20px] border-[1.5px] border-border bg-surface px-3.5 py-3">
+              <Text font="bold" className="text-base">
+                {t('orders.emptyMenu')}
+              </Text>
+              <Text tone="muted" className="text-sm">
+                {t('orders.emptyMenuHint')}
+              </Text>
+            </View>
+          ) : null}
+
           <View className="gap-2 px-4">
             {shownMenu.map((item) => (
               <MenuItemRow
@@ -385,11 +444,7 @@ export default function NewOrderScreen() {
         </ScrollView>
 
         <View className="px-4 pb-2.5 pt-1.5">
-          {mutation.isError ? (
-            <Text font="semibold" className="pb-2 text-center text-base text-dangerFg">
-              {t('orders.sendFailed')}
-            </Text>
-          ) : itemCount === 0 ? (
+          {itemCount === 0 ? (
             <Text font="semibold" tone="muted" className="pb-2 text-center text-[15px]">
               {t('orders.emptyCart')}
             </Text>
@@ -424,6 +479,13 @@ export default function NewOrderScreen() {
         </View>
       </KeyboardAvoidingView>
 
+      <ErrorDialog
+        visible={mutation.isError}
+        title={t('orders.sendFailedTitle')}
+        message={t(errorMessageKey(mutation.error))}
+        actionLabel={t('errors.retry')}
+        onClose={mutation.reset}
+      />
       <TableSheet
         visible={sheet === 'table'}
         tables={tables}
@@ -457,11 +519,8 @@ export default function NewOrderScreen() {
           value: a.id,
           label: `${a.name} · ${a.usualFeeEtb} ${t('common.etb')}`,
         }))}
-        selected={delivery.areaId}
-        onSelect={(areaId) => {
-          const next = deliveryAreas.find((a) => a.id === areaId) ?? deliveryAreas[0];
-          setDelivery((v) => ({ ...v, areaId, fee: String(next.usualFeeEtb) }));
-        }}
+        selected={area?.id ?? ''}
+        onSelect={(areaId) => setDelivery((v) => ({ ...v, areaId, fee: null }))}
         onClose={() => setSheet(null)}
       />
     </SafeAreaView>

@@ -413,7 +413,10 @@
       "customerName": "Enter the customer's name",
       "phone": "Enter a phone like 09XX XXX XXX",
       "address": "Enter a street or landmark",
-      "fee": "Enter the fee (0 for free)"
+      "fee": "Enter the fee (0 for free)",
+      "tableBusy": "This table already has an open bill. Choose another table.",
+      "itemUnavailable": "An item is no longer on the menu. Remove it and try again.",
+      "area": "Choose a delivery area."
     },
     "sending": "Sending to the kitchen",
     "sendingSubtitle": "The chef will see it right away",
@@ -426,7 +429,14 @@
     "deliveryFee": "Delivery fee",
     "foodTotal": "Food total",
     "newOrder": "New order",
-    "goHome": "Go to home"
+    "goHome": "Go to home",
+    "sendFailedTitle": "Couldn't send the order",
+    "emptyMenu": "No items on the menu yet.",
+    "emptyMenuHint": "Owner or manager: add them in Profile → Menu.",
+    "noTables": "No tables in this area yet.",
+    "noTablesHint": "Owner or manager: add tables in Profile → Tables.",
+    "noAreas": "No delivery areas yet.",
+    "noAreasHint": "Owner or manager: add them in Profile → Fees & delivery."
   },
   "bills": {
     "title": "Open bills",
@@ -600,7 +610,9 @@
     "staff": "Staff",
     "theme": "Color theme",
     "themeOption": "{{name}} theme",
-    "menu": "Menu"
+    "menu": "Menu",
+    "tables": "Tables",
+    "fees": "Fees & delivery"
   },
   "help": {
     "title": "Help",
@@ -704,6 +716,46 @@
       "importFailedTitle": "Couldn't add the items",
       "priceNote": "Prices are suggestions. Tap an item in Menu to set your own price.",
       "select": "Select {{name}}"
+    }
+  },
+  "setup": {
+    "tables": {
+      "title": "Tables",
+      "inUse": "Tables in use: {{count}}",
+      "addTitle": "Add tables",
+      "from": "From number",
+      "to": "To number",
+      "add": "Add tables",
+      "tapToRemove": "Tap a table to remove it.",
+      "removeTitle": "Remove Table {{number}}?",
+      "removeBody": "It disappears from New order. Past bills keep it.",
+      "remove": "Remove",
+      "busy": "Open bill",
+      "empty": "No tables in this area yet.",
+      "rangeError": "Enter numbers from 1 to 999, at most 100 tables at once.",
+      "failedTitle": "Couldn't change the tables"
+    },
+    "fees": {
+      "title": "Fees",
+      "subtitle": "Packing and delivery",
+      "packing": "Packing fee",
+      "packingHint": "Same for every takeaway and delivery order",
+      "amount": "Amount (ETB)",
+      "areas": "Delivery fee by area",
+      "areaName": "Area",
+      "areaNamePlaceholder": "e.g. Bole",
+      "fee": "Fee",
+      "addArea": "Add area",
+      "removeArea": "Remove {{name}}",
+      "save": "Save fees",
+      "saved": "Fees saved",
+      "emptyAreas": "No delivery areas yet. Tap Add area.",
+      "failedTitle": "Couldn't save the fees",
+      "errors": {
+        "name": "Enter the area name.",
+        "fee": "Enter a fee in whole ETB.",
+        "duplicate": "Two areas have the same name."
+      }
     }
   }
 }

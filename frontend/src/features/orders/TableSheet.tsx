@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
-import type { Table, TableArea } from '@/lib/mock/restaurant';
+import type { Table, TableArea } from '@/lib/restaurant';
 
 import { Pill } from './Pill';
 
@@ -32,13 +32,33 @@ export function TableSheet({ visible, tables, currentId, onSelect, onClose }: Ta
       </Text>
       <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
         {areas.map((a) => (
-          <Pill key={a} label={t(`orders.area.${a}`)} selected={area === a} dark onPress={() => setArea(a)} />
+          <Pill
+            key={a}
+            label={t(`orders.area.${a}`)}
+            selected={area === a}
+            dark
+            onPress={() => setArea(a)}
+          />
         ))}
       </View>
+      {shown.length === 0 ? (
+        <View className="gap-1 py-2">
+          <Text font="bold" className="text-base">
+            {t('orders.noTables')}
+          </Text>
+          <Text tone="muted" className="text-sm">
+            {t('orders.noTablesHint')}
+          </Text>
+        </View>
+      ) : null}
       <View className="flex-row flex-wrap" style={{ marginHorizontal: -5 }}>
         {shown.map((table) => {
           const isNow = table.id === currentId;
-          const state = isNow ? t('orders.tableNow') : table.busy ? t('orders.tableBusy') : t('orders.tableFree');
+          const state = isNow
+            ? t('orders.tableNow')
+            : table.busy
+              ? t('orders.tableBusy')
+              : t('orders.tableFree');
           const disabled = table.busy && !isNow;
           return (
             <View key={table.id} className="w-1/4 p-[5px]">
@@ -59,10 +79,18 @@ export function TableSheet({ visible, tables, currentId, onSelect, onClose }: Ta
                       : 'border-2 border-primary bg-surface active:bg-primarySoft'
                 }`}
               >
-                <Text font="heading" tone={isNow ? 'inverse' : disabled ? 'muted' : 'default'} className="text-2xl leading-tight">
+                <Text
+                  font="heading"
+                  tone={isNow ? 'inverse' : disabled ? 'muted' : 'default'}
+                  className="text-2xl leading-tight"
+                >
                   {table.number}
                 </Text>
-                <Text font="semibold" tone={isNow ? 'inverse' : disabled ? 'muted' : 'default'} className="text-sm">
+                <Text
+                  font="semibold"
+                  tone={isNow ? 'inverse' : disabled ? 'muted' : 'default'}
+                  className="text-sm"
+                >
                   {state}
                 </Text>
               </Pressable>

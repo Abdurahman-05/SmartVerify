@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { ResultBadge } from '@/components/ui/ResultBadge';
 import { Text } from '@/components/ui/Text';
-import { getOrder, type Order } from '@/lib/mock/restaurant';
+import { getOrder, type Order } from '@/lib/restaurant';
 
 function useTargetLabel(order: Order) {
   const { t } = useTranslation();
@@ -31,7 +31,10 @@ function SentView({ order }: { order: Order }) {
   const deliveryFee = order.target.type === 'delivery' ? order.target.deliveryFeeEtb : null;
   const rows = [
     { label: t('orders.sentFor'), value: useTargetLabel(order) },
-    ...order.lines.map((l) => ({ label: `${l.quantity} × ${l.name}`, value: etb(l.priceEtb * l.quantity) })),
+    ...order.lines.map((l) => ({
+      label: `${l.quantity} × ${l.name}`,
+      value: etb(l.priceEtb * l.quantity),
+    })),
     ...(deliveryFee !== null ? [{ label: t('orders.deliveryFee'), value: etb(deliveryFee) }] : []),
     { label: t('orders.foodTotal'), value: etb(order.foodTotalEtb) },
   ];
@@ -39,7 +42,12 @@ function SentView({ order }: { order: Order }) {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingTop: 32, paddingBottom: 24 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingHorizontal: 24,
+          paddingTop: 32,
+          paddingBottom: 24,
+        }}
         showsVerticalScrollIndicator={false}
       >
         <View className="items-center" accessibilityLiveRegion="assertive">
@@ -85,7 +93,10 @@ function SentView({ order }: { order: Order }) {
 
 export default function OrderSentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: order, isPending } = useQuery({ queryKey: ['order', id], queryFn: () => getOrder(id) });
+  const { data: order, isPending } = useQuery({
+    queryKey: ['order', id],
+    queryFn: () => getOrder(id),
+  });
 
   if (isPending) return <LoadingView />;
   if (!order) return <Redirect href="/home" />;

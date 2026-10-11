@@ -67,7 +67,7 @@ export const setUnauthorizedHandler = (handler: (() => void) | null) => {
 };
 
 interface RequestOptions {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   query?: Record<string, string | undefined>;
   /** Send the same key when retrying, so the server does not create duplicates. */
