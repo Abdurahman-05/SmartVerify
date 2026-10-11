@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 
 import { Prisma } from '../../generated/prisma/client.js';
+import type { AuthContext } from '../../plugins/auth.js';
 import { hashPin, verifyAgainstDummy, verifyPin } from '../../services/pin-hasher.js';
 import { hashSessionToken, newSessionToken } from '../../services/session-token.js';
 import { AppError } from '../../shared/errors/app-error.js';
@@ -92,6 +93,30 @@ export function createAuthService(app: FastifyInstance) {
 
     async signOut(sessionId: string) {
       await prisma.session.update({ where: { id: sessionId }, data: { revokedAt: new Date() } });
+    },
+
+    /**
+     * Signed-in PIN change. The current PIN must be right; the new PIN has the role's length
+     * (owner 6, staff 4). Other devices are signed out; this one stays signed in.
+     */
+    async changePin(auth: AuthContext, currentPin: string, newPin: string) {
+      const length = auth.role === 'owner' ? 6 : 4;
+      if (!new RegExp(`^\\d{${length}}$`).test(newPin)) {
+        throw new AppError('VALIDATION_ERROR', { reason: 'pinLength', length });
+      }
+      if (newPin === currentPin) throw new AppError('VALIDATION_ERROR', { reason: 'samePin' });
+
+      const user = await prisma.user.findUniqueOrThrow({ where: { id: auth.userId } });
+      if (!(await verifyPin(user.pinHash, currentPin))) throw new AppError('WRONG_CREDENTIALS');
+
+      const pinHash = await hashPin(newPin);
+      await prisma.$transaction([
+        prisma.user.update({ where: { id: user.id }, data: { pinHash, pinIsTemporary: false } }),
+        prisma.session.updateMany({
+          where: { userId: user.id, id: { not: auth.sessionId }, revokedAt: null },
+          data: { revokedAt: new Date() },
+        }),
+      ]);
     },
   };
 }

@@ -71,7 +71,7 @@ export const publicAuthRoutes: FastifyPluginAsyncZod = async (app) => {
   );
 };
 
-/** Authenticated routes: sign-out and current session. */
+/** Authenticated routes: sign-out, current session and PIN change. */
 export const authRoutes: FastifyPluginAsyncZod = async (app) => {
   const auth = createAuthService(app);
 
@@ -94,5 +94,37 @@ export const authRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => loadSessionUser(app.prisma, request.auth.memberId)
+  );
+
+  app.post(
+    '/auth/change-pin',
+    {
+      config: {
+        // Guessing the current PIN from a stolen, signed-in phone is limited too.
+        rateLimit: {
+          max: SIGN_IN_MAX_ATTEMPTS,
+          timeWindow: SIGN_IN_WINDOW,
+          keyGenerator: (request) => `change-pin:${request.headers.authorization ?? request.ip}`,
+        },
+      },
+      schema: {
+        tags: ['auth'],
+        security: [{ bearerAuth: [] }],
+        description:
+          'Change your own PIN. newPin: 6 digits for the owner, 4 for staff. A wrong current PIN ' +
+          'gives WRONG_CREDENTIALS. Your other devices are signed out; this one stays signed in.',
+        body: z.object({ currentPin: anyPinSchema, newPin: z.string().regex(/^\d{4,6}$/) }),
+        response: {
+          204: z.null(),
+          400: errorResponseSchema.describe('VALIDATION_ERROR (wrong length or same PIN)'),
+          401: errorResponseSchema.describe('WRONG_CREDENTIALS (current PIN) | UNAUTHORIZED'),
+          429: errorResponseSchema.describe('RATE_LIMITED'),
+        },
+      },
+    },
+    async (request, reply) => {
+      await auth.changePin(request.auth, request.body.currentPin, request.body.newPin);
+      return reply.status(204).send(null);
+    }
   );
 };
