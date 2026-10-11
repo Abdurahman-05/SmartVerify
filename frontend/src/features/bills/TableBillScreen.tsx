@@ -1,17 +1,22 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Banknote, Info, Plus, QrCode } from 'lucide-react-native';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useBrandColors } from '@/store/theme';
 import { Button } from '@/components/ui/Button';
+import { LoadingView } from '@/components/ui/LoadingView';
 import { MoneyText } from '@/components/ui/MoneyText';
+import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
+import { billKey, canTakePayment, getBill } from '@/lib/bills';
+import { isNetworkError } from '@/lib/errors';
 
 import { BillPill } from './BillPill';
-import { useBills } from './store';
 import type { Bill } from './types';
 
 function useHeading(bill: Bill) {
@@ -154,6 +159,14 @@ function BillView({ bill }: { bill: Bill }) {
         <View className="min-h-6 flex-1" />
 
         <View className="gap-2.5 px-4 pb-6">
+          {!canTakePayment ? (
+            <View className="flex-row items-start gap-2">
+              <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
+              <Text font="semibold" tone="muted" className="flex-1 text-sm leading-5">
+                {t('bills.payLater')}
+              </Text>
+            </View>
+          ) : null}
           {/* TODO: enable once the order screen can add items to an existing bill. */}
           <Button
             label={t('bills.addMore')}
@@ -168,13 +181,13 @@ function BillView({ bill }: { bill: Bill }) {
             icon={Banknote}
             variant="outline"
             size="md"
-            disabled={bill.status === 'paid'}
+            disabled={bill.status === 'paid' || !canTakePayment}
             onPress={() => router.push({ pathname: '/bills/[id]/cash', params: { id: bill.id } })}
           />
           <Button
             label={t('bills.payByBank')}
             icon={QrCode}
-            disabled={bill.status === 'paid'}
+            disabled={bill.status === 'paid' || !canTakePayment}
             onPress={() =>
               router.push({ pathname: '/verify-restaurant', params: { billId: bill.id } })
             }
@@ -189,8 +202,20 @@ export default function TableBillScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const bill = useBills((s) => s.bills.find((b) => b.id === id));
+  const query = useQuery({ queryKey: billKey(id), queryFn: () => getBill(id) });
+  const { refetch } = query;
+  // Fresh totals and status when coming back (e.g. after the kitchen marked it served).
+  useFocusEffect(
+    useCallback(() => {
+      void refetch();
+    }, [refetch])
+  );
 
+  if (query.isPending) return <LoadingView />;
+  if (query.isError && isNetworkError(query.error)) {
+    return <NoConnection onRetry={() => void refetch()} />;
+  }
+  const bill = query.data;
   if (!bill) {
     return (
       <SafeAreaView className="flex-1 bg-background">

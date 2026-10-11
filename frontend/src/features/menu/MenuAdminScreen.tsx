@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { ChevronRight, Plus, RefreshCw, Sparkles } from 'lucide-react-native';
+import { ChevronRight, Eye, EyeOff, Plus, RefreshCw, Sparkles, Trash2 } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Pressable, ScrollView, View } from 'react-native';
+import { Alert, FlatList, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
@@ -17,7 +17,14 @@ import { Text } from '@/components/ui/Text';
 import { categoryIcon } from '@/features/orders/MenuItemRow';
 import { Pill } from '@/features/orders/Pill';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
-import { getMenuItems, menuAdminKey, updateMenuItem, type MenuAdminItem } from '@/lib/menu';
+import {
+  getMenuItems,
+  menuAdminKey,
+  removeMenuItem,
+  setMenuItemsActive,
+  updateMenuItem,
+  type MenuAdminItem,
+} from '@/lib/menu';
 import type { MenuCategory } from '@/lib/mock/restaurant';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
@@ -30,10 +37,12 @@ function MenuRow({
   item,
   onEdit,
   onToggle,
+  onRemove,
 }: {
   item: MenuAdminItem;
   onEdit: () => void;
   onToggle: (active: boolean) => void;
+  onRemove: () => void;
 }) {
   const brand = useBrandColors();
   const { t } = useTranslation();
@@ -88,6 +97,15 @@ function MenuRow({
           {item.active ? t('menuAdmin.on') : t('menuAdmin.off')}
         </Text>
       </View>
+      <Pressable
+        onPress={onRemove}
+        accessibilityRole="button"
+        accessibilityLabel={t('menuAdmin.remove', { name: localName(item) })}
+        hitSlop={4}
+        className="h-11 w-11 items-center justify-center rounded-[12px] active:bg-dangerBg"
+      >
+        <Trash2 size={22} color={colors.dangerFg} strokeWidth={2.2} />
+      </Pressable>
     </View>
   );
 }
@@ -124,6 +142,14 @@ export default function MenuAdminScreen() {
     onSettled: () => queryClient.invalidateQueries({ queryKey: ['menu'] }),
   });
 
+  const refreshMenu = () => queryClient.invalidateQueries({ queryKey: ['menu'] });
+  const remove = useMutation({ mutationFn: removeMenuItem, onSettled: refreshMenu });
+  const bulk = useMutation({
+    mutationFn: ({ ids, active }: { ids: string[]; active: boolean }) =>
+      setMenuItemsActive(ids, active),
+    onSettled: refreshMenu,
+  });
+
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/profile'));
 
   if (query.isPending) return <LoadingView />;
@@ -133,6 +159,33 @@ export default function MenuAdminScreen() {
 
   const items = query.data ?? [];
   const shown = category === 'all' ? items : items.filter((item) => item.category === category);
+  const offIds = shown.filter((item) => !item.active).map((item) => item.id);
+  const onIds = shown.filter((item) => item.active).map((item) => item.id);
+
+  const confirmRemove = (item: MenuAdminItem) =>
+    Alert.alert(t('menuAdmin.removeTitle', { name: item.name }), t('menuAdmin.removeBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('menuAdmin.removeAction'),
+        style: 'destructive',
+        onPress: () => remove.mutate(item.id),
+      },
+    ]);
+  const confirmAllOff = () =>
+    Alert.alert(t('menuAdmin.allOffTitle', { count: onIds.length }), t('menuAdmin.allOffBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('menuAdmin.allOff'),
+        style: 'destructive',
+        onPress: () => bulk.mutate({ ids: onIds, active: false }),
+      },
+    ]);
+  const failed = toggle.isError ? toggle : remove.isError ? remove : bulk.isError ? bulk : null;
+  const failedTitle = toggle.isError
+    ? 'menuAdmin.toggleFailedTitle'
+    : remove.isError
+      ? 'menuAdmin.removeFailedTitle'
+      : 'menuAdmin.bulkFailedTitle';
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -192,6 +245,31 @@ export default function MenuAdminScreen() {
         <ChevronRight size={22} color={colors.muted} strokeWidth={2.2} />
       </Pressable>
 
+      {shown.length ? (
+        <View className="flex-row gap-2 px-4 pb-2.5">
+          <View className="flex-1">
+            <Button
+              label={t('menuAdmin.allOn')}
+              icon={Eye}
+              variant="outline"
+              size="md"
+              disabled={offIds.length === 0 || bulk.isPending}
+              onPress={() => bulk.mutate({ ids: offIds, active: true })}
+            />
+          </View>
+          <View className="flex-1">
+            <Button
+              label={t('menuAdmin.allOff')}
+              icon={EyeOff}
+              variant="outline"
+              size="md"
+              disabled={onIds.length === 0 || bulk.isPending}
+              onPress={confirmAllOff}
+            />
+          </View>
+        </View>
+      ) : null}
+
       {query.isError ? (
         <View className="flex-1 items-center justify-center gap-4 px-6">
           <Text font="semibold" className="text-center text-lg">
@@ -211,6 +289,7 @@ export default function MenuAdminScreen() {
               item={item}
               onEdit={() => router.push({ pathname: '/menu/edit', params: { id: item.id } })}
               onToggle={(active) => toggle.mutate({ id: item.id, active })}
+              onRemove={() => confirmRemove(item)}
             />
           )}
           ListEmptyComponent={
@@ -222,11 +301,11 @@ export default function MenuAdminScreen() {
       )}
 
       <ErrorDialog
-        visible={toggle.isError}
-        title={t('menuAdmin.toggleFailedTitle')}
-        message={t(errorMessageKey(toggle.error))}
+        visible={Boolean(failed)}
+        title={t(failedTitle)}
+        message={t(errorMessageKey(failed?.error))}
         actionLabel={t('errors.retry')}
-        onClose={toggle.reset}
+        onClose={() => failed?.reset()}
       />
     </SafeAreaView>
   );

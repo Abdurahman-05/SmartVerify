@@ -6,12 +6,16 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
+import { ErrorDialog } from '@/components/ui/ErrorDialog';
+import { LoadingView } from '@/components/ui/LoadingView';
+import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
+import { errorMessageKey, isNetworkError } from '@/lib/errors';
 
 import { minutesSince, useNow } from './parts';
-import { useKitchen } from './store';
 import type { KitchenOrder } from './types';
+import { useKitchenActions, useKitchenOrders } from './useKitchenData';
 
 function typeDetail(order: KitchenOrder, t: TFunction) {
   if (order.type === 'dine' && order.guests) return t('bills.guests', { count: order.guests });
@@ -24,12 +28,17 @@ export default function KitchenOrderScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const order = useKitchen((s) => s.orders.find((o) => o.id === id));
-  const { startCooking, markReady } = useKitchen();
+  const query = useKitchenOrders();
+  const { start, ready, failed } = useKitchenActions();
   const now = useNow();
 
   const backToKitchen = () => (router.canGoBack() ? router.back() : router.replace('/kitchen'));
 
+  if (query.isPending || start.isPending || ready.isPending) return <LoadingView />;
+  if (query.isError && isNetworkError(query.error)) {
+    return <NoConnection onRetry={() => void query.refetch()} />;
+  }
+  const order = query.data?.find((o) => o.id === id);
   if (!order) {
     return (
       <SafeAreaView className="flex-1 bg-background">
@@ -51,10 +60,10 @@ export default function KitchenOrderScreen() {
         : t('kitchen.readyFor');
   const detail = typeDetail(order, t);
 
+  // Back to the list once the server has saved the change.
   const act = () => {
-    if (order.status === 'new') startCooking(order.id);
-    else if (cooking) markReady(order.id);
-    backToKitchen();
+    if (order.status === 'new') start.mutate(order.id, { onSuccess: backToKitchen });
+    else if (cooking) ready.mutate(order.id, { onSuccess: backToKitchen });
   };
 
   return (
@@ -92,7 +101,7 @@ export default function KitchenOrderScreen() {
         <View className="mx-4 mt-3 rounded-card border-[1.5px] border-border bg-surface px-4">
           {order.items.map((item, i) => (
             <View
-              key={item.name}
+              key={`${item.name}-${i}`}
               accessible
               className={`flex-row items-center gap-3.5 py-3.5 ${i < order.items.length - 1 ? 'border-b-[1.5px] border-divider' : ''}`}
             >
@@ -133,6 +142,14 @@ export default function KitchenOrderScreen() {
           <Button label={t('kitchen.back')} variant="outline" size="md" onPress={backToKitchen} />
         </View>
       </ScrollView>
+
+      <ErrorDialog
+        visible={Boolean(failed)}
+        title={t('kitchen.actionFailedTitle')}
+        message={t(errorMessageKey(failed?.error))}
+        actionLabel={t('errors.retry')}
+        onClose={() => failed?.reset()}
+      />
     </SafeAreaView>
   );
 }

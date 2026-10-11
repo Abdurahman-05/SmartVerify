@@ -1,23 +1,29 @@
-import { useRouter } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Bike, ChevronRight, Info, ShieldCheck, ShoppingBag } from 'lucide-react-native';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
+import { LoadingView } from '@/components/ui/LoadingView';
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
+import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
 import { Pill } from '@/features/orders/Pill';
+import { billsKey, getBills } from '@/lib/bills';
+import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { formatTime } from '@/lib/format';
-import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
 import { BillPill } from './BillPill';
-import { openBills, useBills } from './store';
 import type { Bill } from './types';
+
+/** Open bills refresh on their own (bills paid or served by someone else). */
+const BILLS_REFRESH_MS = 20_000;
 
 function BillTile({ bill }: { bill: Bill }) {
   const { t } = useTranslation();
@@ -63,13 +69,26 @@ export default function OpenBillsScreen() {
   const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
-  const userId = useSession((s) => s.user?.userId);
-  const allBills = useBills((s) => s.bills);
   const [scope, setScope] = useState<'mine' | 'all'>('mine');
   const labelFor = useBillLabel();
 
-  const open = openBills(allBills);
-  const shown = scope === 'mine' ? open.filter((b) => b.waiterId === userId) : open;
+  const query = useQuery({
+    queryKey: billsKey(scope),
+    queryFn: () => getBills({ mine: scope === 'mine' }),
+    refetchInterval: BILLS_REFRESH_MS,
+  });
+  const { refetch } = query;
+  useFocusEffect(
+    useCallback(() => {
+      void refetch();
+    }, [refetch])
+  );
+
+  if (query.isPending) return <LoadingView />;
+  if (query.isError && isNetworkError(query.error)) {
+    return <NoConnection onRetry={() => void refetch()} />;
+  }
+  const shown = query.data ?? [];
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -129,7 +148,7 @@ export default function OpenBillsScreen() {
         }}
         ListEmptyComponent={
           <Text tone="muted" className="px-4 pt-8 text-center text-lg">
-            {t('bills.empty')}
+            {query.isError ? t(errorMessageKey(query.error)) : t('bills.empty')}
           </Text>
         }
       />

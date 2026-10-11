@@ -16,6 +16,21 @@ export const getMenuItems = () => api<MenuAdminItem[]>('/menu', { query: { all: 
 export const addMenuItem = (input: MenuItemInput, idempotencyKey = newIdempotencyKey()) =>
   api<MenuAdminItem>('/menu', { method: 'POST', body: input, idempotencyKey });
 
+/** DELETE /menu/:id — removes the item from the menu (past bills keep it). */
+export async function removeMenuItem(id: string): Promise<void> {
+  await api(`/menu/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
+/** POST /menu/bulk-availability — turn many items on or off at once (max 200 per request). */
+export async function setMenuItemsActive(ids: string[], active: boolean): Promise<void> {
+  for (let i = 0; i < ids.length; i += 200) {
+    await api('/menu/bulk-availability', {
+      method: 'POST',
+      body: { ids: ids.slice(i, i + 200), active },
+    });
+  }
+}
+
 /** GET /menu/catalog/packs — starter menus by restaurant type, with sections and counts. */
 export const getCatalogPacks = () => api<CatalogPack[]>('/menu/catalog/packs');
 

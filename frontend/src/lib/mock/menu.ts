@@ -51,3 +51,14 @@ export async function updateMenuItem(id: string, changes: MenuItemChanges): Prom
   items = (await load()).map((item) => (item.id === id ? updated : item));
   return updated;
 }
+
+export async function removeMenuItem(id: string): Promise<void> {
+  await mockDelay(400);
+  items = (await load()).filter((item) => item.id !== id);
+}
+
+export async function setMenuItemsActive(ids: string[], active: boolean): Promise<void> {
+  await mockDelay(500);
+  const chosen = new Set(ids);
+  items = (await load()).map((item) => (chosen.has(item.id) ? { ...item, active } : item));
+}

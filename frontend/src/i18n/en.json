@@ -469,7 +469,8 @@
     "paid": "Paid",
     "notFound": "This bill could not be found.",
     "paidByCash": "Paid by cash",
-    "payByBank": "Pay by bank · scan QR"
+    "payByBank": "Pay by bank · scan QR",
+    "payLater": "Taking payment for bills saved on the server comes in the next update."
   },
   "verifyRestaurant": {
     "title": "Verify payment",
@@ -593,7 +594,8 @@
     },
     "notesTitle": "NOTES FROM THE WAITER",
     "back": "Back to kitchen",
-    "notFound": "This order could not be found."
+    "notFound": "This order could not be found.",
+    "actionFailedTitle": "Couldn't update the order"
   },
   "profile": {
     "title": "Profile",
@@ -716,7 +718,17 @@
       "importFailedTitle": "Couldn't add the items",
       "priceNote": "Prices are suggestions. Tap an item in Menu to set your own price.",
       "select": "Select {{name}}"
-    }
+    },
+    "remove": "Remove {{name}}",
+    "removeTitle": "Remove {{name}} from the menu?",
+    "removeBody": "Waiters can no longer order it. Past bills keep it.",
+    "removeAction": "Remove",
+    "allOn": "Turn all on",
+    "allOff": "Turn all off",
+    "allOffTitle": "Turn off {{count}} items?",
+    "allOffBody": "Waiters won't see them until you turn them on again.",
+    "removeFailedTitle": "Couldn't remove the item",
+    "bulkFailedTitle": "Couldn't change the items"
   },
   "setup": {
     "tables": {

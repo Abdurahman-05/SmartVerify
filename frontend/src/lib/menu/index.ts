@@ -17,6 +17,8 @@ export const USE_MOCK_MENU = process.env.EXPO_PUBLIC_USE_MOCK_MENU === 'true';
 export const getMenuItems = USE_MOCK_MENU ? mock.getMenuItems : real.getMenuItems;
 export const addMenuItem = USE_MOCK_MENU ? mock.addMenuItem : real.addMenuItem;
 export const updateMenuItem = USE_MOCK_MENU ? mock.updateMenuItem : real.updateMenuItem;
+export const removeMenuItem = USE_MOCK_MENU ? mock.removeMenuItem : real.removeMenuItem;
+export const setMenuItemsActive = USE_MOCK_MENU ? mock.setMenuItemsActive : real.setMenuItemsActive;
 
 export const getCatalogPacks = USE_MOCK_MENU ? mockCatalog.getCatalogPacks : real.getCatalogPacks;
 export const getCatalogItems = USE_MOCK_MENU ? mockCatalog.getCatalogItems : real.getCatalogItems;

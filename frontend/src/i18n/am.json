@@ -469,7 +469,8 @@
     "paid": "ተከፍሏል",
     "notFound": "ይህ ሂሳብ አልተገኘም።",
     "paidByCash": "በጥሬ ገንዘብ ተከፍሏል",
-    "payByBank": "በባንክ ክፈል · QR ቃኝ"
+    "payByBank": "በባንክ ክፈል · QR ቃኝ",
+    "payLater": "በሰርቨር ላይ ለተቀመጡ ሂሳቦች ክፍያ መቀበል በሚቀጥለው ዝመና ይመጣል።"
   },
   "verifyRestaurant": {
     "title": "ክፍያ አረጋግጥ",
@@ -593,7 +594,8 @@
     },
     "notesTitle": "ከአስተናጋጁ የተሰጡ ማሳሰቢያዎች",
     "back": "ወደ ማብሰያ ቤት ተመለስ",
-    "notFound": "ይህ ትዕዛዝ አልተገኘም።"
+    "notFound": "ይህ ትዕዛዝ አልተገኘም።",
+    "actionFailedTitle": "ትዕዛዙን ማዘመን አልተቻለም"
   },
   "profile": {
     "title": "መገለጫ",
@@ -716,7 +718,17 @@
       "importFailedTitle": "ንጥሎቹን መጨመር አልተቻለም",
       "priceNote": "ዋጋዎቹ ምክር ብቻ ናቸው። የራስዎን ዋጋ ለማስገባት በምናሌ ውስጥ ንጥሉን ይጫኑ።",
       "select": "{{name}} ምረጥ"
-    }
+    },
+    "remove": "{{name}} አስወግድ",
+    "removeTitle": "{{name}} ከምናሌው ይወገድ?",
+    "removeBody": "አስተናጋጆች ከእንግዲህ ሊያዙት አይችሉም። ያለፉ ሂሳቦች ይጠብቁታል።",
+    "removeAction": "አስወግድ",
+    "allOn": "ሁሉንም አብራ",
+    "allOff": "ሁሉንም አጥፋ",
+    "allOffTitle": "{{count}} ንጥሎች ይጥፉ?",
+    "allOffBody": "እንደገና እስኪያበሯቸው ድረስ አስተናጋጆች አያዩአቸውም።",
+    "removeFailedTitle": "ንጥሉን ማስወገድ አልተቻለም",
+    "bulkFailedTitle": "ንጥሎቹን መቀየር አልተቻለም"
   },
   "setup": {
     "tables": {

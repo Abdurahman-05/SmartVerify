@@ -6,13 +6,17 @@ import { FlatList, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
+import { ErrorDialog } from '@/components/ui/ErrorDialog';
+import { LoadingView } from '@/components/ui/LoadingView';
+import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
+import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { useSession } from '@/store/session';
 
 import { minutesSince, NoteChips, TypeTile, useNow, useOrderSubtitle, WaitTag } from './parts';
-import { useKitchen } from './store';
 import type { KitchenOrder, KitchenStatus } from './types';
+import { useKitchenActions, useKitchenOrders } from './useKitchenData';
 
 const tabs: KitchenStatus[] = ['new', 'cooking', 'ready'];
 
@@ -55,11 +59,22 @@ function TabButton({
   );
 }
 
-function OrderCard({ order, now }: { order: KitchenOrder; now: number }) {
+function OrderCard({
+  order,
+  now,
+  onStart,
+  onReady,
+  busy,
+}: {
+  order: KitchenOrder;
+  now: number;
+  onStart: () => void;
+  onReady: () => void;
+  busy: boolean;
+}) {
   const { t } = useTranslation();
   const router = useRouter();
   const subtitleFor = useOrderSubtitle();
-  const { startCooking, markReady } = useKitchen();
 
   return (
     <Pressable
@@ -82,8 +97,8 @@ function OrderCard({ order, now }: { order: KitchenOrder; now: number }) {
       </View>
 
       <View className="gap-1.5">
-        {order.items.map((item) => (
-          <View key={item.name} className="flex-row items-center gap-2.5">
+        {order.items.map((item, i) => (
+          <View key={`${item.name}-${i}`} className="flex-row items-center gap-2.5">
             <View className="h-8 min-w-9 items-center justify-center rounded-[10px] bg-primaryTile px-1">
               <Text font="bold" className="text-lg text-primary">
                 {item.qty}×
@@ -103,14 +118,16 @@ function OrderCard({ order, now }: { order: KitchenOrder; now: number }) {
           label={t('kitchen.startCooking')}
           icon={ChefHat}
           size="md"
-          onPress={() => startCooking(order.id)}
+          disabled={busy}
+          onPress={onStart}
         />
       ) : order.status === 'cooking' ? (
         <Button
           label={t('kitchen.markReady')}
           icon={Check}
           size="md"
-          onPress={() => markReady(order.id)}
+          disabled={busy}
+          onPress={onReady}
         />
       ) : null}
     </Pressable>
@@ -121,9 +138,17 @@ export default function KitchenScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const chefName = useSession((s) => s.user?.displayName ?? '');
-  const orders = useKitchen((s) => s.orders);
+  const query = useKitchenOrders();
+  const { start, ready, failed } = useKitchenActions();
   const [tab, setTab] = useState<KitchenStatus>('new');
   const now = useNow();
+
+  if (query.isPending) return <LoadingView />;
+  if (query.isError && isNetworkError(query.error)) {
+    return <NoConnection onRetry={() => void query.refetch()} />;
+  }
+  const orders = query.data ?? [];
+  const busyId = start.isPending ? start.variables : ready.isPending ? ready.variables : null;
 
   const shown = orders
     .filter((o) => o.status === tab)
@@ -164,12 +189,28 @@ export default function KitchenScreen() {
         data={shown}
         keyExtractor={(o) => o.id}
         contentContainerStyle={{ gap: 10, paddingHorizontal: 16, paddingBottom: 16 }}
-        renderItem={({ item }) => <OrderCard order={item} now={now} />}
+        renderItem={({ item }) => (
+          <OrderCard
+            order={item}
+            now={now}
+            busy={busyId === item.id}
+            onStart={() => start.mutate(item.id)}
+            onReady={() => ready.mutate(item.id)}
+          />
+        )}
         ListEmptyComponent={
           <Text tone="muted" className="pt-10 text-center text-lg">
-            {t('kitchen.empty')}
+            {query.isError ? t(errorMessageKey(query.error)) : t('kitchen.empty')}
           </Text>
         }
+      />
+
+      <ErrorDialog
+        visible={Boolean(failed)}
+        title={t('kitchen.actionFailedTitle')}
+        message={t(errorMessageKey(failed?.error))}
+        actionLabel={t('errors.retry')}
+        onClose={() => failed?.reset()}
       />
     </SafeAreaView>
   );
