@@ -7,7 +7,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
-import { useBills } from '@/features/bills/store';
+import { usePaymentBill } from '@/features/bills/usePaymentBill';
+import { newIdempotencyKey } from '@/lib/api/idempotency';
 import { checkBankPayment } from '@/lib/mock/verify';
 
 import { settlePayment, useRestaurantPay } from './restaurantFlow';
@@ -17,19 +18,26 @@ export default function RestaurantCheckingScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const billId = useRestaurantPay((s) => s.billId);
-  const bill = useBills((s) => s.bills.find((b) => b.id === billId));
+  const { bill, pending } = usePaymentBill(billId);
   const { account, amount, qrData } = useVerifyFlow();
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  // One key for this scan: "Try again" after a lost answer does not count it twice.
+  const [scanKey] = useState(newIdempotencyKey);
 
   useEffect(() => {
     if (!bill || !account || !qrData) return;
     let cancelled = false;
-    checkBankPayment({ account, expected: amount, qrData, simulate: useRestaurantPay.getState().simulate })
-      .then(({ received }) => {
-        if (cancelled) return;
-        settlePayment(bill, received);
-        router.replace('/verify-restaurant/result');
+    // FAKE bank check for now (lib/mock/verify); real verification comes at the final stage.
+    checkBankPayment({
+      account,
+      expected: amount,
+      qrData,
+      simulate: useRestaurantPay.getState().simulate,
+    })
+      .then(({ received }) => settlePayment(bill, received, scanKey))
+      .then(() => {
+        if (!cancelled) router.replace('/verify-restaurant/result');
       })
       .catch(() => {
         if (!cancelled) setFailed(true);
@@ -39,8 +47,9 @@ export default function RestaurantCheckingScreen() {
     };
     // Re-run only on retry; bill/flow values are read once per attempt.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attempt]);
+  }, [attempt, bill?.id]);
 
+  if (pending) return <LoadingView />;
   if (!bill || !account || !qrData) return <Redirect href="/bills" />;
 
   if (failed) {
@@ -62,5 +71,10 @@ export default function RestaurantCheckingScreen() {
     );
   }
 
-  return <LoadingView title={t('verifyRestaurant.checking')} subtitle={t('verifyRestaurant.checkingSubtitle')} />;
+  return (
+    <LoadingView
+      title={t('verifyRestaurant.checking')}
+      subtitle={t('verifyRestaurant.checkingSubtitle')}
+    />
+  );
 }

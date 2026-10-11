@@ -2,6 +2,7 @@ import type { Href } from 'expo-router';
 import {
   ChartColumn,
   CircleDollarSign,
+  LayoutDashboard,
   Landmark,
   List,
   ReceiptText,
@@ -10,11 +11,12 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 
-import type { Plan } from '@/store/session';
+import type { Plan, Role } from '@/store/session';
 
 export type HomeActionKey =
   | 'verify'
   | 'newOrder'
+  | 'overview'
   | 'tips'
   | 'transactions'
   | 'reports'
@@ -30,6 +32,7 @@ export interface HomeAction {
 const actions: Record<HomeActionKey, HomeAction> = {
   verify: { key: 'verify', icon: ShieldCheck, href: '/verify' },
   newOrder: { key: 'newOrder', icon: ReceiptText, href: '/orders' },
+  overview: { key: 'overview', icon: LayoutDashboard, href: '/admin' },
   tips: { key: 'tips', icon: CircleDollarSign, href: '/tips' },
   transactions: { key: 'transactions', icon: List, href: '/transactions' },
   reports: { key: 'reports', icon: ChartColumn, href: '/reports' },
@@ -56,8 +59,12 @@ const restaurantKeys: HomeActionKey[] = [
   'subscription',
 ];
 
-export function getHomeActions(plan: Plan | null): HomeAction[] {
-  const keys = plan === 'normal' ? normalKeys : restaurantKeys;
+export function getHomeActions(plan: Plan | null, role: Role): HomeAction[] {
+  const base = plan === 'normal' ? normalKeys : restaurantKeys;
+  // The overview (sales, cash, bank, tips) is for owner and manager on Restaurant Plus.
+  const manages = role === 'owner' || role === 'manager';
+  const keys: HomeActionKey[] =
+    plan === 'restaurant' && manages ? [...base.slice(0, 2), 'overview', ...base.slice(2)] : base;
   return keys.map((key) =>
     key === 'verify' && plan === 'restaurant' ? { ...actions.verify, href: '/bills' } : actions[key]
   );

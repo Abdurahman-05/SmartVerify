@@ -17,11 +17,8 @@ export const getBills = USE_MOCK_BILLS
 
 export const getBill = USE_MOCK_BILLS ? mock.getBill : real.getBill;
 
-/**
- * Taking payment (cash, bank) still runs on the in-app mock. With the real backend, server bills
- * cannot be paid from the app yet: the pay buttons are turned off.
- */
-export const canTakePayment = USE_MOCK_BILLS;
+export { payBill } from '@/lib/api/payments';
+export type { PayRequest, PayResult } from '@/lib/api/payments';
 
 export const billsKey = (scope: 'mine' | 'all') => ['bills', scope] as const;
 export const billKey = (id: string) => ['bill', id] as const;

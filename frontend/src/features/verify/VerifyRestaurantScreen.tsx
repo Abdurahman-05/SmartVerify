@@ -3,7 +3,7 @@ import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Landmark, Lock, QrCode, Wallet, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, TextInput, View } from 'react-native';
+import { Alert, Pressable, TextInput, View } from 'react-native';
 
 import { BankBadge } from '@/components/ui/BankBadge';
 import { Button } from '@/components/ui/Button';
@@ -14,7 +14,9 @@ import { OptionSheet } from '@/components/ui/OptionSheet';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
-import { useBills } from '@/features/bills/store';
+import { usePaymentBill } from '@/features/bills/usePaymentBill';
+import { newIdempotencyKey } from '@/lib/api/idempotency';
+import { errorMessageKey } from '@/lib/errors';
 import { Pill } from '@/features/orders/Pill';
 import { parseAmountInput } from '@/lib/format';
 import { getBankAccounts } from '@/lib/mock/bankAccounts';
@@ -81,8 +83,10 @@ export default function VerifyRestaurantScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { billId } = useLocalSearchParams<{ billId: string }>();
-  const bill = useBills((s) => s.bills.find((b) => b.id === billId));
+  const { bill, pending } = usePaymentBill(billId);
   const pay = useRestaurantPay();
+  const [settling, setSettling] = useState(false);
+  const [settleKey] = useState(newIdempotencyKey);
   const { account: chosenAccount, setAccount, setAmount } = useVerifyFlow();
   const [accountSheet, setAccountSheet] = useState(false);
   const { data: accounts } = useQuery({ queryKey: ['bank-accounts'], queryFn: getBankAccounts });
@@ -92,6 +96,7 @@ export default function VerifyRestaurantScreen() {
     if (billId && pay.billId !== billId) start(billId);
   }, [billId, pay.billId, start]);
 
+  if (pending || settling) return <LoadingView />;
   if (!bill) return <Redirect href="/bills" />;
   if (!accounts) return <LoadingView />;
 
@@ -106,8 +111,12 @@ export default function VerifyRestaurantScreen() {
     if (!account) return;
     setAccount(account);
     if (toScan === 0) {
-      settlePayment(bill, 0);
-      router.push('/verify-restaurant/result');
+      // Earlier scans already cover the bill: just close it.
+      setSettling(true);
+      settlePayment(bill, 0, settleKey)
+        .then(() => router.push('/verify-restaurant/result'))
+        .catch((error: unknown) => Alert.alert(t('common.error'), t(errorMessageKey(error))))
+        .finally(() => setSettling(false));
       return;
     }
     setAmount(toScan);

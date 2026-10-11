@@ -191,7 +191,9 @@
       "bankAccount": "የባንክ ሂሳብ",
       "bankAccountSub": "ገንዘብ የሚቀበሉ ሂሳቦች",
       "subscription": "የደንበኝነት ምዝገባ",
-      "subscriptionSubNone": "እቅድ ይምረጡ"
+      "subscriptionSubNone": "እቅድ ይምረጡ",
+      "overview": "አጠቃላይ እይታ",
+      "overviewSub": "ሽያጭ፣ ጥሬ ገንዘብ፣ ባንክ እና ጉርሻ"
     }
   },
   "nav": {
@@ -469,8 +471,7 @@
     "paid": "ተከፍሏል",
     "notFound": "ይህ ሂሳብ አልተገኘም።",
     "paidByCash": "በጥሬ ገንዘብ ተከፍሏል",
-    "payByBank": "በባንክ ክፈል · QR ቃኝ",
-    "payLater": "በሰርቨር ላይ ለተቀመጡ ሂሳቦች ክፍያ መቀበል በሚቀጥለው ዝመና ይመጣል።"
+    "payByBank": "በባንክ ክፈል · QR ቃኝ"
   },
   "verifyRestaurant": {
     "title": "ክፍያ አረጋግጥ",
@@ -769,5 +770,42 @@
         "duplicate": "ሁለት ቦታዎች አንድ ስም አላቸው።"
       }
     }
+  },
+  "overview": {
+    "title": "አጠቃላይ እይታ",
+    "totalSales": "ጠቅላላ ሽያጭ",
+    "orders_one": "{{count}} ትዕዛዝ",
+    "orders_other": "{{count}} ትዕዛዞች",
+    "cash": "ጥሬ ገንዘብ",
+    "bank": "ባንክ",
+    "tips": "ጉርሻ",
+    "tipsNote": "ጉርሻ እንደ ሽያጭ አይቆጠርም",
+    "attention": "ትኩረትዎን የሚሹ",
+    "openTables_one": "{{count}} ጠረጴዛ ገና አልተከፈለም",
+    "openTables_other": "{{count}} ጠረጴዛዎች ገና አልተከፈሉም",
+    "openBills_one": "{{count}} ክፍት ሂሳብ",
+    "openBills_other": "{{count}} ክፍት ሂሳቦች",
+    "openBillsSub": "ክፍት ሂሳቦች",
+    "feeChanged_one": "{{count}} የማድረሻ ክፍያ ተቀይሯል",
+    "feeChanged_other": "{{count}} የማድረሻ ክፍያዎች ተቀይረዋል",
+    "feeChangedSub": "{{name}} · ከ{{from}} ወደ {{to}} ብር",
+    "tipsToPay": "ጉርሻ በአስተናጋጅ",
+    "tipsToPaySub": "ጉርሻዎችን ይዩ እና ይክፈሉ",
+    "allGood": "ትኩረትዎን የሚሻ ነገር የለም።",
+    "loadFailed": "አጠቃላይ እይታውን መጫን አልተቻለም።"
+  },
+  "tipsAdmin": {
+    "title": "ጉርሻ በአስተናጋጅ",
+    "subtitle": "ጉርሻ እንደ ሽያጭ አይቆጠርም",
+    "toPayOut": "የሚከፈል ጉርሻ",
+    "waiters_one": "{{count}} አስተናጋጅ",
+    "waiters_other": "{{count}} አስተናጋጆች",
+    "tipCount_one": "{{count}} ጉርሻ",
+    "tipCount_other": "{{count}} ጉርሻዎች",
+    "markPaid": "ተከፍሏል በል",
+    "paid": "ተከፍሏል",
+    "markAllPaid": "ሁሉንም ተከፍሏል በል",
+    "empty": "በዚህ ጊዜ ውስጥ ጉርሻ የለም።",
+    "failedTitle": "ጉርሻዎቹን ተከፍሏል ማለት አልተቻለም"
   }
 }

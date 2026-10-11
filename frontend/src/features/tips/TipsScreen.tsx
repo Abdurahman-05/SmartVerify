@@ -1,21 +1,25 @@
-import { useRouter } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Banknote, HandCoins, Info, Landmark } from 'lucide-react-native';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { LoadingView } from '@/components/ui/LoadingView';
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
+import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
 import { Pill } from '@/features/orders/Pill';
+import { isNetworkError } from '@/lib/errors';
 import { formatDay, formatTime } from '@/lib/format';
-import { periodRange, periods, type Period } from '@/lib/period';
+import { periods, type Period } from '@/lib/period';
+import { getTips, tipsKey } from '@/lib/tips';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
-import { useTips } from './store';
 import type { Tip } from './types';
 
 function SourceTag({ source }: { source: Tip['source'] }) {
@@ -40,17 +44,24 @@ export default function TipsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const user = useSession((s) => s.user);
-  const allTips = useTips((s) => s.tips);
   const [period, setPeriod] = useState<Period>('today');
 
-  const { from, to } = periodRange(period);
-  const tips = allTips
-    .filter((tip) => tip.waiterId === user?.userId)
-    .filter((tip) => {
-      const time = new Date(tip.createdAt).getTime();
-      return time >= from.getTime() && time <= to.getTime();
-    })
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  const query = useQuery({
+    queryKey: tipsKey(period, 'mine'),
+    queryFn: () => getTips(period, { mine: true }),
+  });
+  const { refetch } = query;
+  useFocusEffect(
+    useCallback(() => {
+      void refetch();
+    }, [refetch])
+  );
+
+  if (query.isPending) return <LoadingView />;
+  if (query.isError && isNetworkError(query.error)) {
+    return <NoConnection onRetry={() => void refetch()} />;
+  }
+  const tips = query.data ?? [];
   const total = tips.reduce((sum, tip) => sum + tip.amount, 0);
 
   return (

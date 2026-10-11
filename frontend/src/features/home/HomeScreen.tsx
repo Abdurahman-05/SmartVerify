@@ -9,7 +9,7 @@ import { BrandMark } from '@/components/ui/BrandMark';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
-import { openBills, useBills } from '@/features/bills/store';
+import { billsKey, getBills } from '@/lib/bills';
 import { getTodaySummary, type TodaySummary } from '@/lib/mock/home';
 import { useSession, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';
@@ -239,14 +239,21 @@ export default function HomeScreen() {
     queryKey: ['today-summary'],
     queryFn: getTodaySummary,
   });
-  const tablesWaiting = useBills((s) => openBills(s.bills).filter((b) => b.type === 'dine').length);
+  // Open dine-in bills from the server (waiters: their own tables), refreshed with the bills.
+  const isRestaurant = user?.plan === 'restaurant' && user.role !== 'chef';
+  const { data: openList } = useQuery({
+    queryKey: billsKey('all'),
+    queryFn: () => getBills(),
+    enabled: isRestaurant,
+  });
+  const tablesWaiting = (openList ?? []).filter((b) => b.type === 'dine').length;
   const subtitleFor = useActionSubtitle(user?.plan ?? null, tablesWaiting);
 
   if (!user) return <Redirect href="/sign-in" />;
   if (user.role === 'chef') return <Redirect href="/kitchen" />;
   if (isPending) return <LoadingView />;
 
-  const actions = getHomeActions(user.plan);
+  const actions = getHomeActions(user.plan, user.role);
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-background">

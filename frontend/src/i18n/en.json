@@ -191,7 +191,9 @@
       "bankAccount": "Bank account",
       "bankAccountSub": "Receiving accounts",
       "subscription": "Subscription",
-      "subscriptionSubNone": "Choose a plan"
+      "subscriptionSubNone": "Choose a plan",
+      "overview": "Overview",
+      "overviewSub": "Sales, cash, bank and tips"
     }
   },
   "nav": {
@@ -469,8 +471,7 @@
     "paid": "Paid",
     "notFound": "This bill could not be found.",
     "paidByCash": "Paid by cash",
-    "payByBank": "Pay by bank · scan QR",
-    "payLater": "Taking payment for bills saved on the server comes in the next update."
+    "payByBank": "Pay by bank · scan QR"
   },
   "verifyRestaurant": {
     "title": "Verify payment",
@@ -769,5 +770,42 @@
         "duplicate": "Two areas have the same name."
       }
     }
+  },
+  "overview": {
+    "title": "Overview",
+    "totalSales": "Total sales",
+    "orders_one": "{{count}} order",
+    "orders_other": "{{count}} orders",
+    "cash": "Cash",
+    "bank": "Bank",
+    "tips": "Tips",
+    "tipsNote": "Tips are not counted as sales",
+    "attention": "Needs your attention",
+    "openTables_one": "{{count}} table not paid yet",
+    "openTables_other": "{{count}} tables not paid yet",
+    "openBills_one": "{{count}} bill open",
+    "openBills_other": "{{count}} bills open",
+    "openBillsSub": "Open bills",
+    "feeChanged_one": "{{count}} delivery fee was changed",
+    "feeChanged_other": "{{count}} delivery fees were changed",
+    "feeChangedSub": "{{name}} · {{from}} to {{to}} ETB",
+    "tipsToPay": "Tips by waiter",
+    "tipsToPaySub": "See and pay out tips",
+    "allGood": "Nothing needs your attention.",
+    "loadFailed": "Couldn't load the overview."
+  },
+  "tipsAdmin": {
+    "title": "Tips by waiter",
+    "subtitle": "Tips are not counted as sales",
+    "toPayOut": "Tips to pay out",
+    "waiters_one": "{{count}} waiter",
+    "waiters_other": "{{count}} waiters",
+    "tipCount_one": "{{count}} tip",
+    "tipCount_other": "{{count}} tips",
+    "markPaid": "Mark paid",
+    "paid": "Paid",
+    "markAllPaid": "Mark all as paid out",
+    "empty": "No tips in this period.",
+    "failedTitle": "Couldn't mark the tips as paid"
   }
 }

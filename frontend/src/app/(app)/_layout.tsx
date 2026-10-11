@@ -40,6 +40,7 @@ export default function AppLayout() {
       <Stack.Screen name="setup/fees" />
       <Stack.Screen name="kitchen/[id]" />
       <Stack.Screen name="admin" />
+      <Stack.Screen name="tips-admin" />
     </Stack>
   );
 }

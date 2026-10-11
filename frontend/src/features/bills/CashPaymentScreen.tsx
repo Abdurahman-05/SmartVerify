@@ -1,3 +1,4 @@
+import { useMutation } from '@tanstack/react-query';
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Banknote, HandCoins, Info, Lock, Undo2, type LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
@@ -5,7 +6,9 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
+import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { FormScreen } from '@/components/ui/FormScreen';
+import { LoadingView } from '@/components/ui/LoadingView';
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
@@ -13,14 +16,27 @@ import { useBrandColors } from '@/store/theme';
 import { usePayments } from '@/features/payments/store';
 import { billLabel } from '@/features/verify/billLabel';
 import { calcCash, type ExtraChoice } from '@/features/verify/calcPayment';
+import { newIdempotencyKey } from '@/lib/api/idempotency';
+import { payBill, USE_MOCK_BILLS } from '@/lib/bills';
+import { errorMessageKey } from '@/lib/errors';
 import { parseAmountInput } from '@/lib/format';
+import { refreshAfterPayment } from '@/lib/queryClient';
 import { colors } from '@/theme/tokens';
 
 import { useBills } from './store';
 import type { Bill } from './types';
+import { usePaymentBill } from './usePaymentBill';
 
-function saveCashPayment(bill: Bill, cash: number, tip: number) {
-  useBills.getState().markPaid(bill.id);
+/** Records the cash payment (on the server with the backend), plus a local copy for the receipt. */
+async function saveCashPayment(bill: Bill, cash: number, extraChoice: ExtraChoice, key: string) {
+  let tip = calcCash({ total: bill.total, cash, extraChoice }).tip;
+  if (USE_MOCK_BILLS) {
+    useBills.getState().markPaid(bill.id);
+  } else {
+    // The server checks the cash covers the total and decides tip / change.
+    tip = (await payBill(bill.id, { method: 'cash', cashEtb: cash, extraChoice }, key)).tipEtb;
+    refreshAfterPayment();
+  }
   usePayments.getState().addPayment({
     id: `pay-${Date.now()}`,
     billId: bill.id,
@@ -101,11 +117,20 @@ export default function CashPaymentScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const bill = useBills((s) => s.bills.find((b) => b.id === id));
+  const { bill, pending } = usePaymentBill(id);
   const [cash, setCash] = useState(0);
   const [extraChoice, setExtraChoice] = useState<ExtraChoice>('tip');
   const [submitted, setSubmitted] = useState(false);
+  // One key per cash payment: confirming again after a lost answer pays once.
+  const [payKey] = useState(newIdempotencyKey);
+  const mutation = useMutation({
+    mutationFn: (b: Bill) => saveCashPayment(b, cash, extraChoice, payKey),
+    onSuccess: (_result, b) =>
+      router.replace({ pathname: '/bills/[id]/cash-saved', params: { id: b.id } }),
+    onError: () => setSubmitted(false),
+  });
 
+  if (pending || mutation.isPending) return <LoadingView />;
   if (!bill) return <Redirect href="/bills" />;
   if (bill.status === 'paid' && !submitted)
     return <Redirect href={{ pathname: '/bills/[id]', params: { id: bill.id } }} />;
@@ -116,8 +141,7 @@ export default function CashPaymentScreen() {
   const confirm = () => {
     if (!calc.valid) return;
     setSubmitted(true);
-    saveCashPayment(bill, cash, calc.tip);
-    router.replace({ pathname: '/bills/[id]/cash-saved', params: { id: bill.id } });
+    mutation.mutate(bill);
   };
 
   return (
@@ -252,6 +276,14 @@ export default function CashPaymentScreen() {
           onPress={confirm}
         />
       </View>
+
+      <ErrorDialog
+        visible={mutation.isError}
+        title={t('common.error')}
+        message={t(errorMessageKey(mutation.error))}
+        actionLabel={t('errors.retry')}
+        onClose={mutation.reset}
+      />
     </FormScreen>
   );
 }

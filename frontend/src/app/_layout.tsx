@@ -7,7 +7,7 @@ import { DMSans_600SemiBold } from '@expo-google-fonts/dm-sans/600SemiBold';
 import { DMSans_700Bold } from '@expo-google-fonts/dm-sans/700Bold';
 import { Sora_600SemiBold } from '@expo-google-fonts/sora/600SemiBold';
 import { Sora_700Bold } from '@expo-google-fonts/sora/700Bold';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -17,14 +17,13 @@ import { View } from 'react-native';
 
 import { setUnauthorizedHandler } from '@/lib/api/client';
 import { clearToken } from '@/lib/api/token';
+import { queryClient } from '@/lib/queryClient';
 import { useSession } from '@/store/session';
 import { useTheme } from '@/store/theme';
 import { themeVars } from '@/theme/themes';
 import { colors } from '@/theme/tokens';
 
 SplashScreen.preventAutoHideAsync();
-
-const queryClient = new QueryClient();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({

@@ -13,7 +13,7 @@ import { MoneyText } from '@/components/ui/MoneyText';
 import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { billKey, canTakePayment, getBill } from '@/lib/bills';
+import { billKey, getBill } from '@/lib/bills';
 import { isNetworkError } from '@/lib/errors';
 
 import { BillPill } from './BillPill';
@@ -159,14 +159,6 @@ function BillView({ bill }: { bill: Bill }) {
         <View className="min-h-6 flex-1" />
 
         <View className="gap-2.5 px-4 pb-6">
-          {!canTakePayment ? (
-            <View className="flex-row items-start gap-2">
-              <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
-              <Text font="semibold" tone="muted" className="flex-1 text-sm leading-5">
-                {t('bills.payLater')}
-              </Text>
-            </View>
-          ) : null}
           {/* TODO: enable once the order screen can add items to an existing bill. */}
           <Button
             label={t('bills.addMore')}
@@ -181,13 +173,13 @@ function BillView({ bill }: { bill: Bill }) {
             icon={Banknote}
             variant="outline"
             size="md"
-            disabled={bill.status === 'paid' || !canTakePayment}
+            disabled={bill.status === 'paid'}
             onPress={() => router.push({ pathname: '/bills/[id]/cash', params: { id: bill.id } })}
           />
           <Button
             label={t('bills.payByBank')}
             icon={QrCode}
-            disabled={bill.status === 'paid' || !canTakePayment}
+            disabled={bill.status === 'paid'}
             onPress={() =>
               router.push({ pathname: '/verify-restaurant', params: { billId: bill.id } })
             }

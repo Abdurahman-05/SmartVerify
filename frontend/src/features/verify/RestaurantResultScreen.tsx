@@ -10,7 +10,8 @@ import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
-import { useBills } from '@/features/bills/store';
+import { LoadingView } from '@/components/ui/LoadingView';
+import { usePaymentBill } from '@/features/bills/usePaymentBill';
 import type { Bill } from '@/features/bills/types';
 import { colors } from '@/theme/tokens';
 
@@ -263,8 +264,9 @@ function ResultView({ outcome, bill }: { outcome: PaymentOutcome; bill: Bill }) 
 export default function RestaurantResultScreen() {
   // Snapshot so resetting the flow on "Done" doesn't blank the screen mid-transition.
   const [outcome] = useState(() => useRestaurantPay.getState().outcome);
-  const bill = useBills((s) => s.bills.find((b) => b.id === outcome?.billId));
+  const { bill, pending } = usePaymentBill(outcome?.billId);
 
+  if (pending) return <LoadingView />;
   if (!outcome || !bill) return <Redirect href="/bills" />;
   return <ResultView outcome={outcome} bill={bill} />;
 }

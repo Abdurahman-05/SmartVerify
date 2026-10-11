@@ -3,7 +3,9 @@ import { create } from 'zustand';
 import { useBills } from '@/features/bills/store';
 import type { Bill } from '@/features/bills/types';
 import { usePayments } from '@/features/payments/store';
+import { payBill, USE_MOCK_BILLS } from '@/lib/bills';
 import type { BankCheckSimulation } from '@/lib/mock/verify';
+import { refreshAfterPayment } from '@/lib/queryClient';
 
 import { calcPayment, type PaymentCalc } from './calcPayment';
 
@@ -52,13 +54,56 @@ export const useRestaurantPay = create<RestaurantPayState>((set) => ({
 
 export const cashFor = (method: RestaurantMethod, cash: number) => (method === 'bank' ? 0 : cash);
 
-/** Adds the newly received bank money, then closes the bill or keeps it open if short. */
-export function settlePayment(bill: Bill, newlyReceived: number): PaymentOutcome {
+/**
+ * Adds the newly received bank money, then closes the bill or keeps it open if short.
+ * With the backend, the server adds up the scans and decides; pass the same key when retrying
+ * the same scan so it is counted once.
+ */
+export async function settlePayment(
+  bill: Bill,
+  newlyReceived: number,
+  idempotencyKey: string
+): Promise<PaymentOutcome> {
   const { method, cash: cashInput, bankReceived } = useRestaurantPay.getState();
   const cash = cashFor(method, cashInput);
+
+  if (!USE_MOCK_BILLS) {
+    const res = await payBill(
+      bill.id,
+      method === 'bank'
+        ? { method, bankReceivedEtb: newlyReceived }
+        : { method, cashEtb: cash, bankReceivedEtb: newlyReceived },
+      idempotencyKey
+    );
+    const outcome: PaymentOutcome = {
+      billId: bill.id,
+      method,
+      total: res.totalEtb,
+      cash: res.cashEtb,
+      received: res.bankReceivedEtb,
+      expectedBank: res.expectedBankEtb,
+      status: res.status,
+      remaining: res.remainingEtb,
+      tip: res.tipEtb,
+    };
+    useRestaurantPay.setState({
+      bankReceived: res.status === 'short' ? res.bankReceivedEtb : 0,
+      outcome,
+    });
+    refreshAfterPayment();
+    return outcome;
+  }
+
   const received = bankReceived + newlyReceived;
   const calc = calcPayment({ total: bill.total, cash, received });
-  const outcome: PaymentOutcome = { ...calc, billId: bill.id, method, total: bill.total, cash, received };
+  const outcome: PaymentOutcome = {
+    ...calc,
+    billId: bill.id,
+    method,
+    total: bill.total,
+    cash,
+    received,
+  };
 
   if (calc.status === 'short') {
     useRestaurantPay.setState({ bankReceived: received, outcome });

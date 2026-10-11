@@ -6,6 +6,7 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
+import { LoadingView } from '@/components/ui/LoadingView';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
@@ -13,7 +14,7 @@ import { useBrandColors } from '@/store/theme';
 import { usePayments } from '@/features/payments/store';
 import { useSession } from '@/store/session';
 
-import { useBills } from './store';
+import { usePaymentBill } from './usePaymentBill';
 
 function Row({ label, children, last }: { label: string; children: ReactNode; last?: boolean }) {
   return (
@@ -34,12 +35,13 @@ export default function CashSavedScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const bill = useBills((s) => s.bills.find((b) => b.id === id));
+  const { bill, pending } = usePaymentBill(id);
   const payment = usePayments((s) =>
     [...s.payments].reverse().find((p) => p.billId === id && p.method === 'cash')
   );
   const recordedBy = useSession((s) => s.user?.displayName ?? '');
 
+  if (pending) return <LoadingView />;
   if (!bill || !payment) return <Redirect href="/bills" />;
 
   const change = payment.cash - bill.total - payment.tip;

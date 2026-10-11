@@ -5,6 +5,9 @@ export interface Tip {
   amount: number;
   source: 'bank' | 'cash';
   waiterId: string;
+  /** From the server; the mock store does not keep it. */
+  waiterName?: string;
   createdAt: string;
-  paidOut: false;
+  /** Paid out to the waiter by the owner/manager. */
+  paidOut: boolean;
 }
