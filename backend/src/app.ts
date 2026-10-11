@@ -10,6 +10,7 @@ import { z } from 'zod';
 import type { Env } from './config/env.js';
 import { authRoutes, publicAuthRoutes } from './modules/auth/auth.routes.js';
 import { billRoutes } from './modules/bills/bill.routes.js';
+import { feeRoutes } from './modules/fees/fee.routes.js';
 import { menuRoutes } from './modules/menu/menu.routes.js';
 import { orderRoutes } from './modules/orders/order.routes.js';
 import { subscriptionRoutes } from './modules/subscriptions/subscription.routes.js';
@@ -91,6 +92,7 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
         await secured.register(billRoutes);
         await secured.register(tableRoutes);
         await secured.register(menuRoutes);
+        await secured.register(feeRoutes);
       });
     },
     { prefix: '/api/v1' }
