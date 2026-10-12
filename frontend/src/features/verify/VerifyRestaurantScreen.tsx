@@ -19,7 +19,7 @@ import { newIdempotencyKey } from '@/lib/api/idempotency';
 import { errorMessageKey } from '@/lib/errors';
 import { Pill } from '@/features/orders/Pill';
 import { parseAmountInput } from '@/lib/format';
-import { getBankAccounts } from '@/lib/mock/bankAccounts';
+import { getBankAccounts } from '@/lib/bankAccounts';
 import {
   SIMULATED_OVER_ETB,
   SIMULATED_SHORT_ETB,

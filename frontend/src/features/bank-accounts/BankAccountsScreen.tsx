@@ -1,23 +1,27 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'expo-router';
-import { Check, EllipsisVertical, Plus, Trash2 } from 'lucide-react-native';
-import { useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { Check, EllipsisVertical, Plus, RefreshCw, Trash2 } from 'lucide-react-native';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, FlatList, Modal, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BankBadge } from '@/components/ui/BankBadge';
 import { Button } from '@/components/ui/Button';
+import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { LoadingView } from '@/components/ui/LoadingView';
+import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import {
+  bankAccountsKey,
   getBankAccounts,
   MAX_BANK_ACCOUNTS,
   removeBankAccount,
   type BankAccount,
-} from '@/lib/mock/bankAccounts';
+} from '@/lib/bankAccounts';
+import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { colors } from '@/theme/tokens';
 
 function UsageCard({ count }: { count: number }) {
@@ -38,7 +42,10 @@ function UsageCard({ count }: { count: number }) {
       </View>
       <View className="flex-row gap-[5px]">
         {Array.from({ length: MAX_BANK_ACCOUNTS }, (_, i) => (
-          <View key={i} className={`h-2 flex-1 rounded ${i < count ? 'bg-primary' : 'bg-borderMid'}`} />
+          <View
+            key={i}
+            className={`h-2 flex-1 rounded ${i < count ? 'bg-primary' : 'bg-borderMid'}`}
+          />
         ))}
       </View>
     </View>
@@ -94,7 +101,11 @@ function AccountActions({
       animationType={reducedMotion ? 'none' : 'slide'}
       onRequestClose={onClose}
     >
-      <Pressable className="flex-1 bg-black/40" onPress={onClose} accessibilityLabel={t('verify.scan.close')} />
+      <Pressable
+        className="flex-1 bg-black/40"
+        onPress={onClose}
+        accessibilityLabel={t('verify.scan.close')}
+      />
       <SafeAreaView edges={['bottom']} className="gap-3 rounded-t-card bg-surface px-4 pb-3 pt-4">
         {account ? (
           <>
@@ -119,7 +130,12 @@ function AccountActions({
                 {t('bankAccounts.remove')}
               </Text>
             </Pressable>
-            <Button label={t('bankAccounts.cancel')} variant="secondary" size="md" onPress={onClose} />
+            <Button
+              label={t('bankAccounts.cancel')}
+              variant="secondary"
+              size="md"
+              onPress={onClose}
+            />
           </>
         ) : null}
       </SafeAreaView>
@@ -132,16 +148,35 @@ export default function BankAccountsScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [menuFor, setMenuFor] = useState<BankAccount | null>(null);
-  const { data: accounts, isPending } = useQuery({
-    queryKey: ['bank-accounts'],
-    queryFn: getBankAccounts,
-  });
+  const query = useQuery({ queryKey: bankAccountsKey, queryFn: getBankAccounts });
+  const { refetch } = query;
+  useFocusEffect(
+    useCallback(() => {
+      void refetch();
+    }, [refetch])
+  );
   const remove = useMutation({
     mutationFn: removeBankAccount,
     onSuccess: () => queryClient.invalidateQueries(),
   });
 
-  if (isPending || !accounts || remove.isPending) return <LoadingView />;
+  if (query.isError && isNetworkError(query.error)) {
+    return <NoConnection onRetry={() => void refetch()} />;
+  }
+  const accounts = query.data;
+  if (query.isError && !accounts) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
+        <Text font="semibold" className="text-center text-lg">
+          {t(errorMessageKey(query.error))}
+        </Text>
+        <View className="w-full">
+          <Button label={t('errors.retry')} icon={RefreshCw} onPress={() => void refetch()} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+  if (query.isPending || !accounts || remove.isPending) return <LoadingView />;
 
   const atLimit = accounts.length >= MAX_BANK_ACCOUNTS;
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/home'));
@@ -154,7 +189,11 @@ export default function BankAccountsScreen() {
       t('bankAccounts.removeBody', { bank: account.bankName, last4: account.last4 }),
       [
         { text: t('bankAccounts.cancel'), style: 'cancel' },
-        { text: t('bankAccounts.remove'), style: 'destructive', onPress: () => remove.mutate(account.id) },
+        {
+          text: t('bankAccounts.remove'),
+          style: 'destructive',
+          onPress: () => remove.mutate(account.id),
+        },
       ]
     );
   };
@@ -202,10 +241,22 @@ export default function BankAccountsScreen() {
             {t('bankAccounts.limitReached', { max: MAX_BANK_ACCOUNTS })}
           </Text>
         ) : null}
-        <Button label={t('bankAccounts.addAccount')} icon={Plus} disabled={atLimit} onPress={addAccount} />
+        <Button
+          label={t('bankAccounts.addAccount')}
+          icon={Plus}
+          disabled={atLimit}
+          onPress={addAccount}
+        />
       </View>
 
       <AccountActions account={menuFor} onRemove={confirmRemove} onClose={() => setMenuFor(null)} />
+      <ErrorDialog
+        visible={remove.isError}
+        title={t('common.error')}
+        message={t(errorMessageKey(remove.error))}
+        actionLabel={t('errors.retry')}
+        onClose={remove.reset}
+      />
     </SafeAreaView>
   );
 }

@@ -8,7 +8,7 @@ import { BankBadge } from '@/components/ui/BankBadge';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import type { BankAccount } from '@/lib/mock/bankAccounts';
+import type { BankAccount } from '@/lib/bankAccounts';
 import { colors } from '@/theme/tokens';
 
 function AccountText({ account }: { account: BankAccount }) {

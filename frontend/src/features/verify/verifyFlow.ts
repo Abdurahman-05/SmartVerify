@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import type { BankAccount } from '@/lib/mock/bankAccounts';
+import type { BankAccount } from '@/lib/bankAccounts';
 import type { VerificationResult } from '@/lib/mock/verify';
 
 interface VerifyFlowState {

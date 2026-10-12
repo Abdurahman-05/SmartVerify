@@ -11,7 +11,7 @@ import { FormScreen } from '@/components/ui/FormScreen';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { getBankAccounts } from '@/lib/mock/bankAccounts';
+import { getBankAccounts } from '@/lib/bankAccounts';
 import { parseAmountInput } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 

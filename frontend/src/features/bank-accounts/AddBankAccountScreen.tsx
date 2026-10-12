@@ -17,7 +17,8 @@ import { OptionSheet } from '@/components/ui/OptionSheet';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
-import { addBankAccount, BankAccountError, banks } from '@/lib/mock/bankAccounts';
+import { addBankAccount, BankAccountError, banks } from '@/lib/bankAccounts';
+import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
@@ -98,7 +99,7 @@ export default function AddBankAccountScreen() {
     !(mutation.error instanceof BankAccountError && mutation.error.code === 'duplicate')
       ? mutation.error instanceof BankAccountError
         ? t('bankAccounts.errors.limit')
-        : t('bankAccounts.errors.generic')
+        : t(errorMessageKey(mutation.error))
       : null;
 
   return (
