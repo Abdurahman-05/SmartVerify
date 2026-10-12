@@ -1,0 +1,177 @@
+import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
+import { z } from 'zod';
+
+import { Prisma } from '../../generated/prisma/client.js';
+import { requireRoles } from '../../plugins/auth.js';
+import { AppError } from '../../shared/errors/app-error.js';
+import { errorResponseSchema, idParamSchema } from '../../shared/schemas/common.js';
+
+/** Most receiving accounts a business can connect at once. */
+export const MAX_BANK_ACCOUNTS = 6;
+
+const bankSchema = z.object({ code: z.string(), name: z.string(), shortName: z.string() });
+
+const accountSchema = z.object({
+  id: z.string(),
+  bankCode: z.string(),
+  bankName: z.string(),
+  shortName: z.string(),
+  last4: z.string().describe('The app only ever shows the last 4 digits'),
+  holderName: z.string(),
+});
+
+const select = {
+  id: true,
+  bankCode: true,
+  last4: true,
+  holderName: true,
+  bank: { select: { name: true, shortName: true } },
+  business: { select: { name: true } },
+} as const;
+
+type Row = Prisma.BankAccountGetPayload<{ select: typeof select }>;
+
+const toAccount = (row: Row) => ({
+  id: row.id,
+  bankCode: row.bankCode,
+  bankName: row.bank.name,
+  shortName: row.bank.shortName,
+  last4: row.last4,
+  // Until the bank can tell us the holder's name, an empty name shows the business name.
+  holderName: row.holderName ?? row.business.name,
+});
+
+const errors = {
+  401: errorResponseSchema.describe('UNAUTHORIZED'),
+  403: errorResponseSchema.describe('FORBIDDEN'),
+};
+
+/** Receiving bank accounts (both plans). The full account number is never returned. */
+export const bankAccountRoutes: FastifyPluginAsyncZod = async (app) => {
+  const { prisma } = app;
+  const security = [{ bearerAuth: [] }];
+
+  app.get(
+    '/banks',
+    {
+      schema: {
+        tags: ['bank accounts'],
+        security,
+        description: 'Supported banks and wallets (CBE, Telebirr, …).',
+        response: { 200: z.array(bankSchema), ...errors },
+      },
+    },
+    async () =>
+      prisma.bank.findMany({
+        where: { active: true },
+        orderBy: { sortOrder: 'asc' },
+        select: { code: true, name: true, shortName: true },
+      })
+  );
+
+  app.get(
+    '/bank-accounts',
+    {
+      preHandler: requireRoles('owner', 'manager', 'waiter'),
+      schema: {
+        tags: ['bank accounts'],
+        security,
+        description: 'Connected receiving accounts, oldest first.',
+        response: { 200: z.array(accountSchema), ...errors },
+      },
+    },
+    async (request) => {
+      const rows = await prisma.bankAccount.findMany({
+        where: { businessId: request.auth.businessId, removedAt: null },
+        orderBy: { createdAt: 'asc' },
+        select,
+      });
+      return rows.map(toAccount);
+    }
+  );
+
+  app.post(
+    '/bank-accounts',
+    {
+      preHandler: requireRoles('owner', 'manager'),
+      schema: {
+        tags: ['bank accounts'],
+        security,
+        description:
+          `Connect a receiving account (max ${MAX_BANK_ACCOUNTS}). The same bank and number ` +
+          'twice gives ACCOUNT_DUPLICATE; a full list gives ACCOUNT_LIMIT. Without holderName ' +
+          'the business name is shown until the bank can tell us the real name.',
+        body: z.object({
+          bankCode: z.string().min(1).max(10),
+          accountNumber: z.string().regex(/^\d{10,13}$/, '10–13 digits'),
+          holderName: z.string().trim().min(1).max(80).optional(),
+        }),
+        response: {
+          201: accountSchema,
+          400: errorResponseSchema.describe('VALIDATION_ERROR (bad number or unknown bank)'),
+          ...errors,
+          409: errorResponseSchema.describe('ACCOUNT_DUPLICATE | ACCOUNT_LIMIT'),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { businessId } = request.auth;
+      const { bankCode, accountNumber, holderName } = request.body;
+      const bank = await prisma.bank.findFirst({ where: { code: bankCode, active: true } });
+      if (!bank) throw new AppError('VALIDATION_ERROR', { reason: 'unknownBank' });
+
+      try {
+        const row = await prisma.$transaction(async (tx) => {
+          const active = await tx.bankAccount.findMany({
+            where: { businessId, removedAt: null },
+            select: { bankCode: true, accountNumber: true },
+          });
+          if (active.some((a) => a.bankCode === bankCode && a.accountNumber === accountNumber)) {
+            throw new AppError('ACCOUNT_DUPLICATE');
+          }
+          if (active.length >= MAX_BANK_ACCOUNTS) throw new AppError('ACCOUNT_LIMIT');
+          return tx.bankAccount.create({
+            data: {
+              businessId,
+              bankCode,
+              accountNumber,
+              last4: accountNumber.slice(-4),
+              holderName: holderName ?? null,
+            },
+            select,
+          });
+        });
+        return reply.status(201).send(toAccount(row));
+      } catch (error) {
+        // The same account added twice at the same moment (partial unique index).
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+          throw new AppError('ACCOUNT_DUPLICATE');
+        }
+        throw error;
+      }
+    }
+  );
+
+  app.delete(
+    '/bank-accounts/:id',
+    {
+      preHandler: requireRoles('owner', 'manager'),
+      schema: {
+        tags: ['bank accounts'],
+        security,
+        description:
+          'Removes the account from the list. Past records keep it; it can be added again later.',
+        params: idParamSchema,
+        response: { 204: z.null(), ...errors, 404: errorResponseSchema.describe('NOT_FOUND') },
+      },
+    },
+    async (request, reply) => {
+      const { count } = await prisma.bankAccount.updateMany({
+        where: { id: request.params.id, businessId: request.auth.businessId, removedAt: null },
+        data: { removedAt: new Date() },
+      });
+      if (count === 0) throw new AppError('NOT_FOUND');
+      return reply.status(204).send(null);
+    }
+  );
+};

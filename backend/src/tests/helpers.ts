@@ -27,6 +27,7 @@ const USED_TABLES = [
   'DeliveryArea',
   'Session',
   'Subscription',
+  'BankAccount',
   'BusinessMember',
   'Business',
   'User',

@@ -11,6 +11,8 @@ export type ErrorCode =
   | 'ITEM_UNAVAILABLE'
   | 'BILL_CLOSED'
   | 'MENU_DUPLICATE'
+  | 'ACCOUNT_DUPLICATE'
+  | 'ACCOUNT_LIMIT'
   | 'PAYMENT_NOT_CONFIGURED'
   | 'RATE_LIMITED'
   | 'INTERNAL_ERROR';
@@ -31,6 +33,10 @@ const statusByCode: Record<ErrorCode, number> = {
   BILL_CLOSED: 409,
   /** The business already has a menu item with this name (ignoring case and spaces). */
   MENU_DUPLICATE: 409,
+  /** This bank account is already connected. */
+  ACCOUNT_DUPLICATE: 409,
+  /** The business already has the most receiving accounts allowed. */
+  ACCOUNT_LIMIT: 409,
   /** Paid subscriptions are not available yet (no payment provider). */
   PAYMENT_NOT_CONFIGURED: 501,
   RATE_LIMITED: 429,
