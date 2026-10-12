@@ -1,42 +1,44 @@
 import type { TFunction } from 'i18next';
 
 import { formatMoney } from '@/components/ui/MoneyText';
-import { accountFor, type Transaction } from '@/lib/mock/transactions';
 import type { ExportTable } from '@/lib/export';
 import { formatDay, formatTime } from '@/lib/format';
+import type { PaymentRecord } from '@/lib/history';
 
+import { methodKey } from './methods';
+
+/** PDF statement of paid bills (sales; tips shown apart). */
 export function buildStatement(
   t: TFunction,
-  transactions: Transaction[],
-  bankName: string,
+  payments: PaymentRecord[],
+  methodLabel: string,
   periodLabel: string,
   businessName: string
 ): ExportTable {
-  const verifiedTotal = transactions
-    .filter((tx) => tx.status === 'verified')
-    .reduce((sum, tx) => sum + tx.receivedAmount, 0);
-
+  const total = payments.reduce((sum, p) => sum + p.salesEtb, 0);
   return {
-    title: t('transactions.statementTitle', { bank: bankName }),
+    title: `${t('history.statementTitle')} · ${methodLabel}`,
     subtitle: `${businessName} · ${periodLabel}`,
     columns: [
-      t('transactions.columns.date'),
-      t('transactions.columns.payer'),
-      t('transactions.columns.bank'),
-      t('transactions.columns.reference'),
-      t('transactions.columns.expected'),
-      t('transactions.columns.received'),
-      t('transactions.columns.status'),
+      t('history.columns.date'),
+      t('history.columns.bill'),
+      t('history.columns.method'),
+      t('history.columns.waiter'),
+      t('history.columns.cash'),
+      t('history.columns.bank'),
+      t('history.columns.tip'),
+      t('history.columns.total'),
     ],
-    rows: transactions.map((tx) => [
-      `${formatDay(tx.createdAt)} ${formatTime(tx.createdAt)}`,
-      tx.payerName,
-      accountFor(tx).shortName,
-      tx.reference,
-      formatMoney(tx.expectedAmount, false),
-      formatMoney(tx.receivedAmount, false),
-      t(`status.${tx.status}`),
+    rows: payments.map((p) => [
+      `${formatDay(p.createdAt)} ${formatTime(p.createdAt)}`,
+      p.label,
+      t(methodKey(p.method)),
+      p.waiterName,
+      formatMoney(p.cashEtb, false),
+      formatMoney(p.bankEtb, false),
+      formatMoney(p.tipEtb, false),
+      formatMoney(p.salesEtb, false),
     ]),
-    footer: t('transactions.totalVerified', { amount: formatMoney(verifiedTotal, false) }),
+    footer: t('history.total', { amount: formatMoney(total, false) }),
   };
 }

@@ -834,5 +834,70 @@
       "ownerBody": "PIN ዳግም ለማስጀመር የSmart Verify ድጋፍን ያግኙ። በቅርቡ ወደ ስልክዎ በሚላክ ኮድ እራስዎ ዳግም ማስጀመር ይችላሉ።",
       "back": "ወደ መግቢያ ተመለስ"
     }
+  },
+  "history": {
+    "summary_today": "የዛሬ ሽያጭ · {{count}} ክፍያዎች",
+    "summary_7d": "ሽያጭ · ያለፉት 7 ቀናት · {{count}} ክፍያዎች",
+    "summary_30d": "ሽያጭ · ያለፉት 30 ቀናት · {{count}} ክፍያዎች",
+    "chooseMethod": "የተከፈለው በ",
+    "method": {
+      "all": "ሁሉም",
+      "cash": "ጥሬ ገንዘብ",
+      "bank": "ባንክ",
+      "cashBank": "ጥሬ ገንዘብ + ባንክ"
+    },
+    "empty": "በዚህ ጊዜ ውስጥ ገና የተከፈለ ሂሳብ የለም።",
+    "tipFor": "ጉርሻ {{amount}} ብር",
+    "download": "መግለጫ አውርድ (PDF)",
+    "statementTitle": "የክፍያዎች መግለጫ",
+    "columns": {
+      "date": "ቀን",
+      "bill": "ሂሳብ",
+      "method": "የተከፈለው በ",
+      "waiter": "አስተናጋጅ",
+      "cash": "ጥሬ ገንዘብ",
+      "bank": "ባንክ",
+      "tip": "ጉርሻ",
+      "total": "ጠቅላላ"
+    },
+    "total": "ጠቅላላ ሽያጭ፦ {{amount}} ብር",
+    "loadFailed": "ክፍያዎቹን መጫን አልተቻለም።",
+    "detail": {
+      "title": "ክፍያ",
+      "paidWith": "የተከፈለው በ{{method}}",
+      "items": "ንጥሎች",
+      "food": "ምግብ",
+      "packing": "ማሸጊያ",
+      "delivery": "የማድረሻ ክፍያ",
+      "total": "የሂሳብ ጠቅላላ",
+      "cash": "ጥሬ ገንዘብ",
+      "bank": "ባንክ",
+      "tip": "ጉርሻ ለ{{name}}",
+      "change": "የተመለሰ መልስ",
+      "waiter": "አስተናጋጅ",
+      "recordedBy": "ክፍያውን የተቀበለው",
+      "time": "ሰዓት",
+      "notFound": "ይህ ክፍያ አልተገኘም።",
+      "back": "ወደ ክፍያዎች ተመለስ"
+    },
+    "report": {
+      "title": "የሽያጭ ሪፖርት",
+      "totalAll": "ጠቅላላ ሽያጭ · {{count}} ክፍያዎች",
+      "byMethod": "ሽያጭ በክፍያ አይነት",
+      "payments": "{{count}} ክፍያዎች · {{share}}%",
+      "tips": "ጉርሻ (ሽያጭ አይደለም)፦ {{amount}} ብር",
+      "open": "የ{{method}} ክፍያዎችን ክፈት",
+      "fileTitle": "የሽያጭ ሪፖርት",
+      "columns": {
+        "method": "የተከፈለው በ",
+        "payments": "ክፍያዎች",
+        "share": "ድርሻ",
+        "amount": "መጠን (ብር)"
+      }
+    },
+    "today": {
+      "paid": "የተከፈሉ ሂሳቦች",
+      "open": "ክፍት ሂሳቦች"
+    }
   }
 }

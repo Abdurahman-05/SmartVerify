@@ -1,16 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
 import { Redirect, useRouter } from 'expo-router';
-import { Bell, Check, Clock, Copy, ShieldCheck, type LucideIcon } from 'lucide-react-native';
+import { Bell, Check, Clock, ShieldCheck, type LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandMark } from '@/components/ui/BrandMark';
-import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
 import { billsKey, getBills } from '@/lib/bills';
-import { getTodaySummary, type TodaySummary } from '@/lib/mock/home';
+import { getPayments, paymentsKey } from '@/lib/history';
 import { useSession, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
@@ -166,7 +165,8 @@ function StatBox({
   );
 }
 
-function TodayCard({ summary }: { summary: TodaySummary }) {
+/** Today's bills: paid (from the payment history) and still open. */
+function TodayCard({ paid, open }: { paid: number; open: number }) {
   const { t } = useTranslation();
   return (
     <View className="mx-4 mb-2.5 rounded-[20px] border-[1.5px] border-border bg-surface px-3 py-2.5">
@@ -180,25 +180,18 @@ function TodayCard({ summary }: { summary: TodaySummary }) {
       </View>
       <View className="flex-row gap-2">
         <StatBox
-          value={summary.verified}
-          label={t('home.verified')}
+          value={paid}
+          label={t('history.today.paid')}
           icon={Check}
           bg="bg-successBg"
           fg={colors.successFg}
         />
         <StatBox
-          value={summary.pending}
-          label={t('home.pending')}
+          value={open}
+          label={t('history.today.open')}
           icon={Clock}
           bg="bg-warnBg"
           fg={colors.warnFg}
-        />
-        <StatBox
-          value={summary.duplicate}
-          label={t('home.duplicate')}
-          icon={Copy}
-          bg="bg-neutralBg"
-          fg={colors.muted}
         />
       </View>
     </View>
@@ -235,10 +228,6 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const user = useSession((s) => s.user);
-  const { data: summary, isPending } = useQuery({
-    queryKey: ['today-summary'],
-    queryFn: getTodaySummary,
-  });
   // Open dine-in bills from the server (waiters: their own tables), refreshed with the bills.
   const isRestaurant = user?.plan === 'restaurant' && user.role !== 'chef';
   const { data: openList } = useQuery({
@@ -247,11 +236,15 @@ export default function HomeScreen() {
     enabled: isRestaurant,
   });
   const tablesWaiting = (openList ?? []).filter((b) => b.type === 'dine').length;
+  const { data: paidToday } = useQuery({
+    queryKey: paymentsKey('today'),
+    queryFn: () => getPayments('today'),
+    enabled: isRestaurant,
+  });
   const subtitleFor = useActionSubtitle(user?.plan ?? null, tablesWaiting);
 
   if (!user) return <Redirect href="/sign-in" />;
   if (user.role === 'chef') return <Redirect href="/kitchen" />;
-  if (isPending) return <LoadingView />;
 
   const actions = getHomeActions(user.plan, user.role);
 
@@ -284,7 +277,9 @@ export default function HomeScreen() {
         </View>
 
         <View className="min-h-4 flex-1" />
-        {summary ? <TodayCard summary={summary} /> : null}
+        {isRestaurant && paidToday && openList ? (
+          <TodayCard paid={paidToday.length} open={openList.length} />
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );

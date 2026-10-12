@@ -834,5 +834,70 @@
       "ownerBody": "Contact Smart Verify support to reset your PIN. Soon you will be able to reset it yourself with a code sent to your phone.",
       "back": "Back to sign in"
     }
+  },
+  "history": {
+    "summary_today": "Sales today · {{count}} payments",
+    "summary_7d": "Sales · last 7 days · {{count}} payments",
+    "summary_30d": "Sales · last 30 days · {{count}} payments",
+    "chooseMethod": "Paid with",
+    "method": {
+      "all": "All",
+      "cash": "Cash",
+      "bank": "Bank",
+      "cashBank": "Cash + bank"
+    },
+    "empty": "No paid bills in this period yet.",
+    "tipFor": "Tip {{amount}} ETB",
+    "download": "Download statement (PDF)",
+    "statementTitle": "Payments statement",
+    "columns": {
+      "date": "Date",
+      "bill": "Bill",
+      "method": "Paid with",
+      "waiter": "Waiter",
+      "cash": "Cash",
+      "bank": "Bank",
+      "tip": "Tip",
+      "total": "Total"
+    },
+    "total": "Total sales: {{amount}} ETB",
+    "loadFailed": "Couldn't load the payments.",
+    "detail": {
+      "title": "Payment",
+      "paidWith": "Paid with {{method}}",
+      "items": "Items",
+      "food": "Food",
+      "packing": "Packing",
+      "delivery": "Delivery fee",
+      "total": "Bill total",
+      "cash": "Cash",
+      "bank": "Bank",
+      "tip": "Tip for {{name}}",
+      "change": "Change given back",
+      "waiter": "Waiter",
+      "recordedBy": "Payment taken by",
+      "time": "Time",
+      "notFound": "This payment could not be found.",
+      "back": "Back to payments"
+    },
+    "report": {
+      "title": "Sales report",
+      "totalAll": "Total sales · {{count}} payments",
+      "byMethod": "Sales by payment method",
+      "payments": "{{count}} payments · {{share}}%",
+      "tips": "Tips (not sales): {{amount}} ETB",
+      "open": "Open {{method}} payments",
+      "fileTitle": "Sales report",
+      "columns": {
+        "method": "Paid with",
+        "payments": "Payments",
+        "share": "Share",
+        "amount": "Amount (ETB)"
+      }
+    },
+    "today": {
+      "paid": "Paid bills",
+      "open": "Open bills"
+    }
   }
 }

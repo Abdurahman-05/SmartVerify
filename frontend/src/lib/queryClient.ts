@@ -5,7 +5,15 @@ export const queryClient = new QueryClient();
 
 /** Everything that changes when a bill is paid. */
 export function refreshAfterPayment() {
-  for (const key of ['bills', 'bill', 'tables', 'tips', 'overview']) {
+  for (const key of [
+    'bills',
+    'bill',
+    'tables',
+    'tips',
+    'overview',
+    'payments',
+    'payments-report',
+  ]) {
     void queryClient.invalidateQueries({ queryKey: [key] });
   }
 }
