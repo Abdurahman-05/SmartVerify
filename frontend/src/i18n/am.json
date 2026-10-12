@@ -98,6 +98,7 @@
     "title": "ክፍያ አረጋግጥ",
     "whereSent": "1. ገንዘቡ የተላከው ወዴት ነው?",
     "accountMasked": "ሂሳብ ••••{{last4}}",
+    "phoneMasked": "ስልክ ••••{{last4}}",
     "chooseAccount": "ሂሳብ ይምረጡ",
     "addAccount": "ሌላ ሂሳብ ጨምር",
     "howMuch": "2. ምን ያህል መከፈል አለበት?",
@@ -303,6 +304,10 @@
     "accountNumber": "የሂሳብ ቁጥር",
     "accountNumberHint": "ከ10 እስከ 13 አሃዝ",
     "accountNumberPlaceholder": "ለምሳሌ፦ 1000293884758",
+    "telebirrPhone": "የቴሌብር ስልክ ቁጥር",
+    "telebirrPhoneHint": "10 አሃዝ",
+    "telebirrPhonePlaceholder": "ለምሳሌ 0911223344",
+    "telebirrNote": "ቴሌብር የሂሳብ ቁጥር የለውም። ክፍያ የሚቀበለውን የቴሌብር ስልክ ቁጥር ያስገቡ።",
     "holderName": "የሂሳብ ባለቤት ስም",
     "optional": "አማራጭ",
     "holderPlaceholder": "ለምሳሌ፦ አበበ ቢቂላ",
@@ -312,6 +317,7 @@
     "connectingSubtitle": "ሂሳቡን ከባንኩ ጋር በማረጋገጥ ላይ",
     "errors": {
       "accountNumber": "ከ10 እስከ 13 አሃዝ ያስገቡ",
+      "telebirrPhone": "እንደ 0911223344 ያለ ስልክ ቁጥር ያስገቡ",
       "duplicate": "ይህ ሂሳብ አስቀድሞ ተገናኝቷል።",
       "limit": "በእቅድዎ ያሉትን ሂሳቦች በሙሉ ተጠቅመዋል።",
       "generic": "ችግር ተፈጥሯል። እባክዎ እንደገና ይሞክሩ።"

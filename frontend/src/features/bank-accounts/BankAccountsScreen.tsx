@@ -24,6 +24,8 @@ import {
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { colors } from '@/theme/tokens';
 
+import { maskedNumberKey } from './telebirr';
+
 function UsageCard({ count }: { count: number }) {
   const { t } = useTranslation();
   return (
@@ -62,7 +64,7 @@ function AccountRow({ account, onMore }: { account: BankAccount; onMore: () => v
           {account.bankName}
         </Text>
         <Text tone="muted" className="mb-1 mt-px text-[15px]">
-          {t('verify.accountMasked', { last4: account.last4 })}
+          {t(maskedNumberKey(account.bankCode), { last4: account.last4 })}
         </Text>
         <View className="flex-row items-center gap-1 self-start rounded-[14px] bg-successBg py-[3px] pl-2 pr-2.5">
           <Check size={14} color={colors.successFg} strokeWidth={2.6} />
@@ -116,7 +118,7 @@ function AccountActions({
                   {account.bankName}
                 </Text>
                 <Text tone="muted" className="text-[15px]">
-                  {t('verify.accountMasked', { last4: account.last4 })}
+                  {t(maskedNumberKey(account.bankCode), { last4: account.last4 })}
                 </Text>
               </View>
             </View>

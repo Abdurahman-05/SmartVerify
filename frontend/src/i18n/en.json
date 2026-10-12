@@ -98,6 +98,7 @@
     "title": "Verify payment",
     "whereSent": "1. Where was the money sent?",
     "accountMasked": "Account ••••{{last4}}",
+    "phoneMasked": "Phone ••••{{last4}}",
     "chooseAccount": "Choose account",
     "addAccount": "Add another account",
     "howMuch": "2. How much should be paid?",
@@ -303,6 +304,10 @@
     "accountNumber": "Account number",
     "accountNumberHint": "10 to 13 digits",
     "accountNumberPlaceholder": "e.g. 1000293884758",
+    "telebirrPhone": "Telebirr phone number",
+    "telebirrPhoneHint": "10 digits",
+    "telebirrPhonePlaceholder": "e.g. 0911223344",
+    "telebirrNote": "Telebirr has no account number. Enter the phone number of the Telebirr wallet that receives payments.",
     "holderName": "Account holder name",
     "optional": "Optional",
     "holderPlaceholder": "e.g. Abebe Bikila",
@@ -312,6 +317,7 @@
     "connectingSubtitle": "Checking the account with the bank",
     "errors": {
       "accountNumber": "Enter 10 to 13 digits",
+      "telebirrPhone": "Enter a phone number like 0911223344",
       "duplicate": "This account is already connected.",
       "limit": "You have used all accounts in your plan.",
       "generic": "Something went wrong. Please try again."

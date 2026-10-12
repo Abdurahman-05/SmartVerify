@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BankBadge } from '@/components/ui/BankBadge';
 import { Text } from '@/components/ui/Text';
+import { maskedNumberKey } from '@/features/bank-accounts/telebirr';
 import { useBrandColors } from '@/store/theme';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { BankAccount } from '@/lib/bankAccounts';
@@ -19,7 +20,7 @@ function AccountText({ account }: { account: BankAccount }) {
         {account.bankName}
       </Text>
       <Text tone="muted" className="mt-0.5 text-base">
-        {t('verify.accountMasked', { last4: account.last4 })}
+        {t(maskedNumberKey(account.bankCode), { last4: account.last4 })}
       </Text>
     </View>
   );
@@ -43,7 +44,7 @@ export function AccountPicker({ accounts, selected, onSelect, onAddAccount }: Ac
       <Pressable
         onPress={() => setOpen(true)}
         accessibilityRole="button"
-        accessibilityLabel={`${selected.bankName}, ${t('verify.accountMasked', { last4: selected.last4 })}. ${t('verify.chooseAccount')}`}
+        accessibilityLabel={`${selected.bankName}, ${t(maskedNumberKey(selected.bankCode), { last4: selected.last4 })}. ${t('verify.chooseAccount')}`}
         className="flex-row items-center gap-3 rounded-[18px] border-2 border-primary bg-surface px-3.5 py-3 active:bg-background"
       >
         <BankBadge code={selected.bankCode} />

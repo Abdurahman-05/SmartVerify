@@ -22,11 +22,26 @@ import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
-const schema = z.object({
-  bankCode: z.string(),
-  accountNumber: z.string().regex(/^\d{10,13}$/, 'bankAccounts.errors.accountNumber'),
-  holderName: z.string().trim().max(80),
-});
+import { TELEBIRR, TELEBIRR_PHONE } from './telebirr';
+
+const schema = z
+  .object({
+    bankCode: z.string(),
+    accountNumber: z.string(),
+    holderName: z.string().trim().max(80),
+  })
+  .superRefine(({ bankCode, accountNumber }, ctx) => {
+    const telebirr = bankCode === TELEBIRR;
+    if (!(telebirr ? TELEBIRR_PHONE : /^\d{10,13}$/).test(accountNumber)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['accountNumber'],
+        message: telebirr
+          ? 'bankAccounts.errors.telebirrPhone'
+          : 'bankAccounts.errors.accountNumber',
+      });
+    }
+  });
 
 type Values = z.infer<typeof schema>;
 
@@ -61,6 +76,7 @@ export default function AddBankAccountScreen() {
     handleSubmit,
     setError,
     setValue,
+    clearErrors,
     formState: { errors },
   } = useForm<Values>({
     resolver: zodResolver(schema),
@@ -94,6 +110,7 @@ export default function AddBankAccountScreen() {
   }
 
   const bank = banks.find((b) => b.code === bankCode) ?? banks[0];
+  const telebirr = bank.code === TELEBIRR;
   const generalError =
     mutation.error &&
     !(mutation.error instanceof BankAccountError && mutation.error.code === 'duplicate')
@@ -130,7 +147,7 @@ export default function AddBankAccountScreen() {
             </Text>
             <ChevronDown size={24} color={colors.text} strokeWidth={2} />
           </Pressable>
-          <Note>{t('bankAccounts.bankNote')}</Note>
+          <Note>{t(telebirr ? 'bankAccounts.telebirrNote' : 'bankAccounts.bankNote')}</Note>
         </View>
 
         <Controller
@@ -138,14 +155,25 @@ export default function AddBankAccountScreen() {
           name="accountNumber"
           render={({ field }) => (
             <Input
-              label={t('bankAccounts.accountNumber')}
-              labelRight={<FieldHint>{t('bankAccounts.accountNumberHint')}</FieldHint>}
-              placeholder={t('bankAccounts.accountNumberPlaceholder')}
+              label={t(telebirr ? 'bankAccounts.telebirrPhone' : 'bankAccounts.accountNumber')}
+              labelRight={
+                <FieldHint>
+                  {t(
+                    telebirr ? 'bankAccounts.telebirrPhoneHint' : 'bankAccounts.accountNumberHint'
+                  )}
+                </FieldHint>
+              }
+              placeholder={t(
+                telebirr
+                  ? 'bankAccounts.telebirrPhonePlaceholder'
+                  : 'bankAccounts.accountNumberPlaceholder'
+              )}
               value={field.value}
-              onChangeText={(text) => field.onChange(digitsOnly(text, 13))}
+              onChangeText={(text) => field.onChange(digitsOnly(text, telebirr ? 10 : 13))}
               onBlur={field.onBlur}
-              keyboardType="number-pad"
-              maxLength={13}
+              keyboardType={telebirr ? 'phone-pad' : 'number-pad'}
+              textContentType={telebirr ? 'telephoneNumber' : 'none'}
+              maxLength={telebirr ? 10 : 13}
               style={{ letterSpacing: 0.7 }}
               error={errors.accountNumber?.message ? t(errors.accountNumber.message) : undefined}
             />
@@ -204,7 +232,12 @@ export default function AddBankAccountScreen() {
           leading: <BankBadge code={b.code} size={40} />,
         }))}
         selected={bank.code}
-        onSelect={(code) => setValue('bankCode', code)}
+        onSelect={(code) => {
+          // A phone number and an account number are different things: start the field again.
+          if ((code === TELEBIRR) !== telebirr) setValue('accountNumber', '');
+          setValue('bankCode', code);
+          clearErrors('accountNumber');
+        }}
         onClose={() => setBankSheetOpen(false)}
       />
     </FormScreen>
