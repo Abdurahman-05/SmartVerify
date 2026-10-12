@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { useLoadingStyle } from '@/store/loadingStyle';
 import { colors } from '@/theme/tokens';
 
 import { SecureFooter } from './SecureFooter';
@@ -56,7 +57,96 @@ function LoadingDot({ delay, animate }: { delay: number; animate: boolean }) {
   return <Animated.View className="h-3 w-3 rounded-full bg-primary" style={style} />;
 }
 
+/** A gently pulsing grey block (skeleton style). */
+function Bone({ className, animate }: { className: string; animate: boolean }) {
+  const pulse = useSharedValue(1);
+  useEffect(() => {
+    if (!animate) return;
+    pulse.value = withRepeat(
+      withSequence(withTiming(0.45, { duration: 700 }), withTiming(1, { duration: 700 })),
+      -1
+    );
+    return () => cancelAnimation(pulse);
+  }, [animate, pulse]);
+  const style = useAnimatedStyle(() => ({ opacity: pulse.value }));
+  return <Animated.View className={`rounded-[14px] bg-neutralBg ${className}`} style={style} />;
+}
+
+/** Light style: the page background with a small spinner (and the message, when given). */
+function LightLoading({ title, subtitle }: LoadingViewProps) {
+  const { t } = useTranslation();
+  return (
+    <SafeAreaView
+      className="flex-1 bg-background"
+      accessibilityRole="progressbar"
+      accessibilityLabel={title ?? t('loading.title')}
+    >
+      <View className="flex-1 items-center justify-center gap-4 px-6">
+        <SpinnerRing size={64}>
+          <View className="h-3 w-3 rounded-full bg-primary" />
+        </SpinnerRing>
+        {title ? (
+          <View className="items-center">
+            <Text font="bold" className="text-center text-lg">
+              {title}
+            </Text>
+            {subtitle ? (
+              <Text tone="muted" className="mt-1 text-center text-base">
+                {subtitle}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+      </View>
+    </SafeAreaView>
+  );
+}
+
+/** Skeleton style: grey blocks shaped like a page while it fills in. */
+function SkeletonLoading() {
+  const { t } = useTranslation();
+  const animate = !useReducedMotion();
+  return (
+    <SafeAreaView
+      className="flex-1 bg-background"
+      accessibilityRole="progressbar"
+      accessibilityLabel={t('loading.title')}
+    >
+      <View className="gap-2 px-4 pb-3 pt-5">
+        <Bone animate={animate} className="h-7 w-3/5" />
+        <Bone animate={animate} className="h-4 w-2/5" />
+      </View>
+      <View className="gap-2.5 px-4">
+        <Bone animate={animate} className="h-28 w-full rounded-[20px]" />
+        {[0, 1, 2, 3].map((i) => (
+          <View
+            key={i}
+            className="flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface p-3"
+          >
+            <Bone animate={animate} className="h-12 w-12" />
+            <View className="flex-1 gap-2">
+              <Bone animate={animate} className="h-4 w-3/4" />
+              <Bone animate={animate} className="h-3.5 w-1/2" />
+            </View>
+          </View>
+        ))}
+      </View>
+    </SafeAreaView>
+  );
+}
+
 export function LoadingView({ title, subtitle }: LoadingViewProps) {
+  const style = useLoadingStyle((s) => s.loadingStyle);
+  if (style === 'light') return <LightLoading title={title} subtitle={subtitle} />;
+  // A message means an action is running ("Sending order…"): show it, not a fake page.
+  if (style === 'skeleton') {
+    return title ? <LightLoading title={title} subtitle={subtitle} /> : <SkeletonLoading />;
+  }
+  return <BrandLoading title={title} subtitle={subtitle} />;
+}
+
+/** Branded style: the full Smart Verify loading page. */
+function BrandLoading({ title, subtitle }: LoadingViewProps) {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotion();
 
