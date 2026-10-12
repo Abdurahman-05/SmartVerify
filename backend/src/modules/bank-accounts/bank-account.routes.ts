@@ -4,10 +4,16 @@ import { z } from 'zod';
 import { Prisma } from '../../generated/prisma/client.js';
 import { requireRoles } from '../../plugins/auth.js';
 import { AppError } from '../../shared/errors/app-error.js';
-import { errorResponseSchema, idParamSchema } from '../../shared/schemas/common.js';
+import {
+  customerPhoneSchema,
+  errorResponseSchema,
+  idParamSchema,
+} from '../../shared/schemas/common.js';
 
 /** Most receiving accounts a business can connect at once. */
 export const MAX_BANK_ACCOUNTS = 6;
+/** Telebirr has no account number: the wallet is the phone number (09… or 07…). */
+const TELEBIRR = 'TEL';
 
 const bankSchema = z.object({ code: z.string(), name: z.string(), shortName: z.string() });
 
@@ -100,7 +106,8 @@ export const bankAccountRoutes: FastifyPluginAsyncZod = async (app) => {
         description:
           `Connect a receiving account (max ${MAX_BANK_ACCOUNTS}). The same bank and number ` +
           'twice gives ACCOUNT_DUPLICATE; a full list gives ACCOUNT_LIMIT. Without holderName ' +
-          'the business name is shown until the bank can tell us the real name.',
+          'the business name is shown until the bank can tell us the real name. Telebirr takes the ' +
+          'wallet phone number (10 digits, 09… or 07…) as accountNumber.',
         body: z.object({
           bankCode: z.string().min(1).max(10),
           accountNumber: z.string().regex(/^\d{10,13}$/, '10–13 digits'),
@@ -119,6 +126,9 @@ export const bankAccountRoutes: FastifyPluginAsyncZod = async (app) => {
       const { bankCode, accountNumber, holderName } = request.body;
       const bank = await prisma.bank.findFirst({ where: { code: bankCode, active: true } });
       if (!bank) throw new AppError('VALIDATION_ERROR', { reason: 'unknownBank' });
+      if (bankCode === TELEBIRR && !customerPhoneSchema.safeParse(accountNumber).success) {
+        throw new AppError('VALIDATION_ERROR', { reason: 'telebirrPhone' });
+      }
 
       try {
         const row = await prisma.$transaction(async (tx) => {

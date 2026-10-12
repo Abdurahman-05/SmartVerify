@@ -89,7 +89,10 @@ describe('bank accounts', () => {
       (await add(r.owner.token, { bankCode: 'AWA', accountNumber: '1000293884582' })).statusCode
     ).toBe(201);
 
-    for (const n of ['1000000001', '1000000002', '1000000003', '1000000004']) {
+    expect(
+      (await add(r.owner.token, { bankCode: 'TEL', accountNumber: '0912345678' })).statusCode
+    ).toBe(201);
+    for (const n of ['1000000001', '1000000002', '1000000003']) {
       expect((await add(r.owner.token, { bankCode: 'DAS', accountNumber: n })).statusCode).toBe(
         201
       );
@@ -103,6 +106,9 @@ describe('bank accounts', () => {
       { bankCode: 'CBE', accountNumber: '12345678901234' },
       { bankCode: 'CBE', accountNumber: '10002938845ab' },
       { bankCode: 'XYZ', accountNumber: '1000293884582' },
+      // Telebirr takes the wallet phone number, not an account number.
+      { bankCode: 'TEL', accountNumber: '1000293884582' },
+      { bankCode: 'TEL', accountNumber: '0812345678' },
     ]) {
       expect(code(await add(r.manager.token, body)), JSON.stringify(body)).toBe('VALIDATION_ERROR');
     }
