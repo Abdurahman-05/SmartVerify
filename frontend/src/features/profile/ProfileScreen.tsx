@@ -25,7 +25,6 @@ import { signOut as signOutRequest } from '@/lib/auth';
 import { formatPhone } from '@/lib/format';
 import { useSession, type Plan, type Role, type SessionUser } from '@/store/session';
 
-import { LoadingStylePicker } from './LoadingStylePicker';
 import { ThemeSwatches } from './ThemeSwatches';
 
 const roles: Role[] = ['owner', 'manager', 'waiter', 'chef'];
@@ -166,7 +165,6 @@ export default function ProfileScreen() {
         </View>
 
         <ThemeSwatches />
-        <LoadingStylePicker />
 
         <View className="mx-4 mt-4">
           <Button label={t('profile.signOut')} icon={LogOut} variant="outline" onPress={leave} />

@@ -60,7 +60,7 @@ export default function SplashScreen() {
     };
   }, [attempt, router]);
 
-  if (phase === 'restoring') return <LoadingView brand />;
+  if (phase === 'restoring') return <LoadingView />;
   if (phase === 'offline') {
     return (
       <NoConnection

@@ -22,7 +22,8 @@
   },
   "loading": {
     "title": "እባክዎ ይጠብቁ",
-    "subtitle": "በማዘጋጀት ላይ"
+    "subtitle": "በማዘጋጀት ላይ",
+    "slow": "ኢንተርኔቱ ቀርፋፋ ነው፣ አሁንም በመጫን ላይ…"
   },
   "auth": {
     "welcomeBack": "እንኳን ደህና መጡ",
@@ -613,10 +614,6 @@
     "staff": "ሰራተኞች",
     "theme": "የቀለም ገጽታ",
     "themeOption": "{{name}} ገጽታ",
-    "loadingStyle": "የመጫኛ ገጽታ",
-    "loadingStyleHint": "ለማየት አንዱን ይንኩ። መተግበሪያው ሲከፈት ሙሉው የመጫኛ ገጽ ይታያል።",
-    "loadingStyleBrand": "እንደነበረው",
-    "loadingStyleLight": "ቀላል",
     "menu": "ምናሌ",
     "tables": "ጠረጴዛዎች",
     "fees": "ክፍያዎች እና ማድረሻ",

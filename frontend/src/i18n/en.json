@@ -22,7 +22,8 @@
   },
   "loading": {
     "title": "Please wait",
-    "subtitle": "Getting things ready"
+    "subtitle": "Getting things ready",
+    "slow": "Slow connection, still loading…"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -613,10 +614,6 @@
     "staff": "Staff",
     "theme": "Color theme",
     "themeOption": "{{name}} theme",
-    "loadingStyle": "Loading style",
-    "loadingStyleHint": "Tap one to preview it on a sample page. App start always uses the full loading page.",
-    "loadingStyleBrand": "As it is",
-    "loadingStyleLight": "Light",
     "menu": "Menu",
     "tables": "Tables",
     "fees": "Fees & delivery",

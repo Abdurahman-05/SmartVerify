@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import Animated, {
@@ -15,7 +15,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { useLoadingStyle } from '@/store/loadingStyle';
 import { colors } from '@/theme/tokens';
 
 import { ScreenHeader } from './ScreenHeader';
@@ -26,11 +25,9 @@ import { Text } from './Text';
 interface LoadingViewProps {
   title?: string;
   subtitle?: string;
-  /** Light style: header of the page being opened, shown above the spinner. */
+  /** Header of the page being opened, shown on the slow-connection skeleton. */
   screenTitle?: string;
   onBack?: () => void;
-  /** Always use the branded page (app start). */
-  brand?: boolean;
 }
 
 function LoadingDot({ delay, animate }: { delay: number; animate: boolean }) {
@@ -63,45 +60,94 @@ function LoadingDot({ delay, animate }: { delay: number; animate: boolean }) {
   return <Animated.View className="h-3 w-3 rounded-full bg-primary" style={style} />;
 }
 
-/** Light style: the page itself (its header, when given) with a small spinner. */
-function LightLoading({ title, subtitle, screenTitle, onBack }: LoadingViewProps) {
+/** A pulsing grey block for the slow-connection skeleton. */
+function Bone({
+  className,
+  animate,
+  width,
+}: {
+  className: string;
+  animate: boolean;
+  width?: number;
+}) {
+  const pulse = useSharedValue(1);
+  useEffect(() => {
+    if (!animate) return;
+    pulse.value = withRepeat(
+      withSequence(withTiming(0.45, { duration: 700 }), withTiming(1, { duration: 700 })),
+      -1
+    );
+    return () => cancelAnimation(pulse);
+  }, [animate, pulse]);
+  const style = useAnimatedStyle(() => ({ opacity: pulse.value }));
+  return (
+    <Animated.View className={`bg-border ${className}`} style={[style, width ? { width } : null]} />
+  );
+}
+
+/** Slow connection: the page's header over a skeleton list (LoadingList design). */
+function SlowLoading({ screenTitle, onBack }: Pick<LoadingViewProps, 'screenTitle' | 'onBack'>) {
   const { t } = useTranslation();
+  const animate = !useReducedMotion();
   return (
     <SafeAreaView
       className="flex-1 bg-background"
       accessibilityRole="progressbar"
-      accessibilityLabel={title ?? t('loading.title')}
+      accessibilityLabel={t('loading.slow')}
     >
-      {screenTitle ? <ScreenHeader title={screenTitle} onBack={onBack} /> : null}
-      <View className="flex-1 items-center justify-center gap-4 px-6">
-        <SpinnerRing size={48}>
-          <View className="h-2.5 w-2.5 rounded-full bg-primary" />
-        </SpinnerRing>
-        {title ? (
-          <View className="items-center">
-            <Text font="bold" className="text-center text-lg">
-              {title}
-            </Text>
-            {subtitle ? (
-              <Text tone="muted" className="mt-1 text-center text-base">
-                {subtitle}
-              </Text>
-            ) : null}
-          </View>
-        ) : null}
+      <ScreenHeader title={screenTitle ?? ''} onBack={onBack} />
+      <View className="mx-4 gap-2.5 rounded-[22px] bg-primary px-5 py-4">
+        <View className="h-3.5 w-[55%] rounded-full bg-white/30" />
+        <View className="h-[30px] w-[45%] rounded-lg bg-white/40" />
       </View>
+      <View className="flex-row gap-2 overflow-hidden px-4 pb-2.5 pt-3.5">
+        {[90, 70, 96, 84].map((width) => (
+          <Bone key={width} animate={animate} width={width} className="h-12 rounded-full" />
+        ))}
+      </View>
+      <View className="flex-1 gap-2 overflow-hidden px-4">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <View
+            key={i}
+            className="flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface p-3"
+          >
+            <Bone animate={animate} className="h-12 w-12 rounded-[14px]" />
+            <View className="flex-1 gap-2">
+              <Bone animate={animate} className="h-4 w-3/5 rounded-lg" />
+              <Bone animate={animate} className="h-3 w-2/5 rounded-lg" />
+            </View>
+            <View className="items-end gap-2">
+              <Bone animate={animate} className="h-[18px] w-20 rounded-lg" />
+              <Bone animate={animate} className="h-3.5 w-16 rounded-xl" />
+            </View>
+          </View>
+        ))}
+      </View>
+      <Text font="bold" tone="muted" className="pb-6 pt-2.5 text-center text-base">
+        {t('loading.slow')}
+      </Text>
     </SafeAreaView>
   );
 }
 
-export function LoadingView({ brand, ...props }: LoadingViewProps) {
-  const style = useLoadingStyle((s) => s.loadingStyle);
-  // App start (restoring, sign-in, plan) keeps the branded page in every style.
-  if (style === 'light' && !brand) return <LightLoading {...props} />;
-  return <BrandLoading title={props.title} subtitle={props.subtitle} />;
+/** After this long without data, assume a slow connection and show the page skeleton. */
+const SLOW_MS = 2500;
+
+export function LoadingView({ title, subtitle, screenTitle, onBack }: LoadingViewProps) {
+  const [slow, setSlow] = useState(false);
+
+  useEffect(() => {
+    // Only pages that pass their header switch; app start and actions stay branded.
+    if (!screenTitle || title) return;
+    const timer = setTimeout(() => setSlow(true), SLOW_MS);
+    return () => clearTimeout(timer);
+  }, [screenTitle, title]);
+
+  if (slow) return <SlowLoading screenTitle={screenTitle} onBack={onBack} />;
+  return <BrandLoading title={title} subtitle={subtitle} />;
 }
 
-/** Branded style: the full Smart Verify loading page. */
+/** The full Smart Verify loading page. */
 function BrandLoading({ title, subtitle }: Pick<LoadingViewProps, 'title' | 'subtitle'>) {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotion();
