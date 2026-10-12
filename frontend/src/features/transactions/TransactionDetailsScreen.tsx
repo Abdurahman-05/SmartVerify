@@ -54,7 +54,8 @@ export default function TransactionDetailsScreen() {
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/transactions'));
 
-  if (query.isPending) return <LoadingView />;
+  if (query.isPending)
+    return <LoadingView screenTitle={t('history.detail.title')} onBack={goBack} />;
   if (query.isError && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void query.refetch()} />;
   }

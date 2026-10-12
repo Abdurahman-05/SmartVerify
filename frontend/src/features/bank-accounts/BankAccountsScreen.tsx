@@ -176,10 +176,13 @@ export default function BankAccountsScreen() {
       </SafeAreaView>
     );
   }
-  if (query.isPending || !accounts || remove.isPending) return <LoadingView />;
+
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/home'));
+
+  if (query.isPending || !accounts || remove.isPending)
+    return <LoadingView screenTitle={t('bankAccounts.title')} onBack={goBack} />;
 
   const atLimit = accounts.length >= MAX_BANK_ACCOUNTS;
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/home'));
   const addAccount = () => router.push('/add-bank-account');
 
   const confirmRemove = (account: BankAccount) => {

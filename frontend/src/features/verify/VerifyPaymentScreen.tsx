@@ -28,7 +28,7 @@ export default function VerifyPaymentScreen() {
     queryFn: getBankAccounts,
   });
 
-  if (isPending || !accounts) return <LoadingView />;
+  if (isPending || !accounts) return <LoadingView screenTitle={t('verify.title')} />;
 
   const account = accounts.find((a) => a.id === chosenAccount?.id) ?? accounts[0];
   const canScan = Boolean(account) && amount > 0;

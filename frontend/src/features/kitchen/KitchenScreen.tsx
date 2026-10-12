@@ -143,7 +143,7 @@ export default function KitchenScreen() {
   const [tab, setTab] = useState<KitchenStatus>('new');
   const now = useNow();
 
-  if (query.isPending) return <LoadingView />;
+  if (query.isPending) return <LoadingView screenTitle={t('kitchen.title')} />;
   if (query.isError && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void query.refetch()} />;
   }

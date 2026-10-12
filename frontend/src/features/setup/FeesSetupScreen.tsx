@@ -225,7 +225,7 @@ export default function FeesSetupScreen() {
   const query = useQuery({ queryKey: setupFeesKey, queryFn: getSetupFees });
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/profile'));
 
-  if (query.isPending) return <LoadingView />;
+  if (query.isPending) return <LoadingView screenTitle={t('setup.fees.title')} onBack={goBack} />;
   if (query.isError && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void query.refetch()} />;
   }

@@ -35,7 +35,8 @@ export default function StarterPacksScreen() {
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/menu'));
 
-  if (query.isPending) return <LoadingView />;
+  if (query.isPending)
+    return <LoadingView screenTitle={t('menuAdmin.starter.title')} onBack={goBack} />;
   if (query.isError && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void refetch()} />;
   }

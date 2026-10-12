@@ -57,7 +57,7 @@ export default function TipsScreen() {
     }, [refetch])
   );
 
-  if (query.isPending) return <LoadingView />;
+  if (query.isPending) return <LoadingView screenTitle={t('tips.title')} />;
   if (query.isError && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void refetch()} />;
   }

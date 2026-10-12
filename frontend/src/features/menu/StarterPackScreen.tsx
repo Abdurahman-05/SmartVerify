@@ -112,7 +112,8 @@ export default function StarterPackScreen() {
     void items.refetch();
   };
 
-  if (packs.isPending || items.isPending || mutation.isPending) return <LoadingView />;
+  if (packs.isPending || items.isPending || mutation.isPending)
+    return <LoadingView screenTitle={t('menuAdmin.starter.title')} onBack={goBack} />;
   const loadError = packs.error ?? items.error;
   if (loadError && isNetworkError(loadError)) return <NoConnection onRetry={refetchAll} />;
 

@@ -11,7 +11,6 @@ const PREVIEW_MS = 2000;
 const labelKey: Record<LoadingStyle, string> = {
   brand: 'profile.loadingStyleBrand',
   light: 'profile.loadingStyleLight',
-  skeleton: 'profile.loadingStyleSkeleton',
 };
 
 /** Trial picker: choose how pages look while loading, with a short preview. */
@@ -67,7 +66,7 @@ export function LoadingStylePicker() {
 
       <Modal visible={previewing} animationType="fade" onRequestClose={() => setPreviewing(false)}>
         <Pressable className="flex-1" onPress={() => setPreviewing(false)}>
-          <LoadingView />
+          <LoadingView screenTitle={t('menuAdmin.title')} />
         </Pressable>
       </Modal>
     </View>

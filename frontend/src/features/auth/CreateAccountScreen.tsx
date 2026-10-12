@@ -49,7 +49,7 @@ export default function CreateAccountScreen() {
     },
   });
 
-  if (mutation.isPending) return <LoadingView />;
+  if (mutation.isPending) return <LoadingView brand />;
 
   const errorText = (message?: string) => (message ? t(message, { count: PIN_LENGTH }) : undefined);
 

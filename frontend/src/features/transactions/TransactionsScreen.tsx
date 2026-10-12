@@ -82,7 +82,7 @@ export default function TransactionsScreen() {
     }, [refetch])
   );
 
-  if (query.isPending) return <LoadingView />;
+  if (query.isPending) return <LoadingView screenTitle={t('transactions.title')} />;
   if (query.isError && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void refetch()} />;
   }

@@ -84,7 +84,8 @@ export default function MenuItemFormScreen() {
     },
   });
 
-  if (isEdit && isPending) return <LoadingView />;
+  if (isEdit && isPending)
+    return <LoadingView screenTitle={t('menuAdmin.editTitle')} onBack={goBack} />;
 
   const err = (message?: string) => (message ? t(message) : undefined);
 

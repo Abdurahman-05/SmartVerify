@@ -154,7 +154,7 @@ export default function NewOrderScreen() {
       />
     );
   }
-  if (!menu || !tables || !fees) return <LoadingView />;
+  if (!menu || !tables || !fees) return <LoadingView screenTitle={t('orders.title')} />;
   if (mutation.isPending) {
     return <LoadingView title={t('orders.sending')} subtitle={t('orders.sendingSubtitle')} />;
   }

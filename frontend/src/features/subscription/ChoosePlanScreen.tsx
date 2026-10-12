@@ -91,7 +91,7 @@ export default function ChoosePlanScreen() {
     else router.dismissTo('/home');
   };
 
-  if (mutation.isPending) return <LoadingView />;
+  if (mutation.isPending) return <LoadingView brand />;
 
   return (
     <SafeAreaView className="flex-1 bg-background">
