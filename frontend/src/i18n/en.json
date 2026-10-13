@@ -971,6 +971,11 @@
       "wrong": "Check this number on the receipt",
       "check": "Check · {{amount}}",
       "readAgain": "Read again"
+    },
+    "qrResult": {
+      "title": "QR result",
+      "copy": "Copy",
+      "copied": "Copied"
     }
   }
 }

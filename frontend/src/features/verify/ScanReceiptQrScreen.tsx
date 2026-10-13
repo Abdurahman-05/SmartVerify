@@ -1,15 +1,13 @@
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
-import { Redirect, useRouter } from 'expo-router';
+import { Redirect, useFocusEffect, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ChevronLeft, FileText, RotateCcw } from 'lucide-react-native';
-import { useState } from 'react';
+import { ChevronLeft, FileText } from 'lucide-react-native';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BankBadge } from '@/components/ui/BankBadge';
-import { BottomSheet } from '@/components/ui/BottomSheet';
-import { Button } from '@/components/ui/Button';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/theme/tokens';
@@ -19,33 +17,30 @@ import { useReceiptFlow } from './receiptFlow';
 import { PermissionView, ScanFrame } from './ScanScreen';
 import { useVerifyFlow } from './verifyFlow';
 
-/** Step 2: scan the receipt QR (VerifyScanQR + VerifyQRNotFound). */
+/** Step 2: scan the receipt QR (VerifyScanQR). For now it only shows what the QR says. */
 export default function ScanReceiptQrScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const amount = useVerifyFlow((s) => s.amount);
   const bankCode = useReceiptFlow((s) => s.bankCode);
-  const setFound = useReceiptFlow((s) => s.setFound);
   const bank = findPayerBank(bankCode);
-  // Scanning pauses while a QR is handled or the "No QR found" sheet is open.
-  const [paused, setPaused] = useState(false);
-  const [notFound, setNotFound] = useState(false);
+  // Scan once, then stay locked until the user comes back to this screen.
+  const [locked, setLocked] = useState(false);
+  useFocusEffect(useCallback(() => setLocked(false), []));
 
   if (!bank || amount <= 0) return <Redirect href="/verify-bank" />;
 
   const goBack = () =>
     router.canGoBack() ? router.back() : router.replace('/verify-bank/receipt');
-  const readReceipt = () => {
-    setNotFound(false);
-    router.replace('/verify-bank/read');
-  };
+  const readReceipt = () => router.replace('/verify-bank/read');
 
   if (!permission) return <View className="flex-1 bg-black" />;
   if (!permission.granted) {
     return (
       <PermissionView
-        canAskAgain={permission.canAskAgain}
+        // Denied once: the system will not ask again, so offer the phone settings.
+        canAskAgain={permission.status !== 'denied' && permission.canAskAgain}
         onAllow={requestPermission}
         onClose={goBack}
       />
@@ -53,15 +48,9 @@ export default function ScanReceiptQrScreen() {
   }
 
   const handleScanned = ({ data }: BarcodeScanningResult) => {
-    if (paused) return;
-    setPaused(true);
-    const values = bank.parseQr(data);
-    if (!values) {
-      setNotFound(true);
-      return;
-    }
-    setFound(values);
-    router.replace('/verify-bank/found');
+    if (locked) return;
+    setLocked(true);
+    router.push({ pathname: '/verify/qr-result', params: { text: data } });
   };
 
   return (
@@ -71,7 +60,7 @@ export default function ScanReceiptQrScreen() {
         style={{ flex: 1 }}
         facing="back"
         barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-        onBarcodeScanned={paused ? undefined : handleScanned}
+        onBarcodeScanned={locked ? undefined : handleScanned}
       />
 
       <SafeAreaView className="absolute inset-0" pointerEvents="box-none">
@@ -102,10 +91,7 @@ export default function ScanReceiptQrScreen() {
           <MoneyText value={amount} tone="inverse" className="text-xl" />
         </View>
 
-        <View
-          className={`flex-1 items-center justify-center gap-6 ${notFound ? 'opacity-40' : ''}`}
-          pointerEvents="none"
-        >
+        <View className="flex-1 items-center justify-center gap-6" pointerEvents="none">
           <ScanFrame />
           <Text font="semibold" tone="inverse" className="px-8 text-center text-[19px]">
             {t('verifyBank.scan.hint')}
@@ -125,29 +111,6 @@ export default function ScanReceiptQrScreen() {
           </Pressable>
         </View>
       </SafeAreaView>
-
-      <BottomSheet
-        visible={notFound}
-        onClose={() => {
-          setNotFound(false);
-          setPaused(false);
-        }}
-      >
-        <Text font="heading" className="text-center text-2xl" accessibilityRole="header">
-          {t('verifyBank.scan.notFound')}
-        </Text>
-        <Button label={t('verifyBank.readReceipt')} icon={FileText} onPress={readReceipt} />
-        <Button
-          label={t('verifyBank.scan.again')}
-          icon={RotateCcw}
-          variant="outline"
-          size="md"
-          onPress={() => {
-            setNotFound(false);
-            setPaused(false);
-          }}
-        />
-      </BottomSheet>
     </View>
   );
 }

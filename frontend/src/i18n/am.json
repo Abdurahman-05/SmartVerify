@@ -971,6 +971,11 @@
       "wrong": "ይህን ቁጥር በደረሰኙ ላይ ያረጋግጡ",
       "check": "አረጋግጥ · {{amount}}",
       "readAgain": "እንደገና ያንብቡ"
+    },
+    "qrResult": {
+      "title": "የQR ውጤት",
+      "copy": "ቅዳ",
+      "copied": "ተቀድቷል"
     }
   }
 }

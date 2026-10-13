@@ -42,6 +42,7 @@ export default function AppLayout() {
       <Stack.Screen name="admin" />
       <Stack.Screen name="tips-admin" />
       <Stack.Screen name="change-pin" />
+      <Stack.Screen name="verify/qr-result" />
     </Stack>
   );
 }
