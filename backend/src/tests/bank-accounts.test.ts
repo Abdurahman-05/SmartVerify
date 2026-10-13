@@ -92,7 +92,8 @@ describe('bank accounts', () => {
     expect(
       (await add(r.owner.token, { bankCode: 'TEL', accountNumber: '0912345678' })).statusCode
     ).toBe(201);
-    for (const n of ['1000000001', '1000000002', '1000000003']) {
+    // Abyssinia accounts can be 9 digits.
+    for (const n of ['100000001', '1000000002', '1000000003']) {
       expect((await add(r.owner.token, { bankCode: 'DAS', accountNumber: n })).statusCode).toBe(
         201
       );
@@ -103,7 +104,8 @@ describe('bank accounts', () => {
 
     for (const body of [
       { bankCode: 'CBE', accountNumber: '12345' },
-      { bankCode: 'CBE', accountNumber: '12345678901234' },
+      { bankCode: 'CBE', accountNumber: '12345678901234567' },
+      { bankCode: 'BOA', accountNumber: '1234567' },
       { bankCode: 'CBE', accountNumber: '10002938845ab' },
       { bankCode: 'XYZ', accountNumber: '1000293884582' },
       // Telebirr takes the wallet phone number, not an account number.

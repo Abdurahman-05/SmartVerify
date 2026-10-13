@@ -110,7 +110,8 @@ export const bankAccountRoutes: FastifyPluginAsyncZod = async (app) => {
           'wallet phone number (10 digits, 09… or 07…) as accountNumber.',
         body: z.object({
           bankCode: z.string().min(1).max(10),
-          accountNumber: z.string().regex(/^\d{10,13}$/, '10–13 digits'),
+          // Lengths differ by bank (Abyssinia 8–9, CBE 13, some 16).
+          accountNumber: z.string().regex(/^\d{8,16}$/, '8–16 digits'),
           holderName: z.string().trim().min(1).max(80).optional(),
         }),
         response: {

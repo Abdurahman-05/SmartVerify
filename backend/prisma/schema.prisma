@@ -244,7 +244,7 @@ model BankAccount {
   business      Business  @relation(fields: [businessId], references: [id], onDelete: Restrict)
   bankCode      String
   bank          Bank      @relation(fields: [bankCode], references: [code], onDelete: Restrict)
-  /// Full number (10–13 digits). The API only returns last4.
+  /// Full number (8–16 digits; Telebirr: the 10-digit phone). The API only returns last4.
   accountNumber String
   last4         String
   /// From the user, or looked up at the bank. null until known.
