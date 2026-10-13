@@ -14,6 +14,7 @@ export type ErrorCode =
   | 'ACCOUNT_DUPLICATE'
   | 'ACCOUNT_LIMIT'
   | 'PAYMENT_NOT_CONFIGURED'
+  | 'INVALID_URL'
   | 'RATE_LIMITED'
   | 'INTERNAL_ERROR';
 
@@ -39,6 +40,8 @@ const statusByCode: Record<ErrorCode, number> = {
   ACCOUNT_LIMIT: 409,
   /** Paid subscriptions are not available yet (no payment provider). */
   PAYMENT_NOT_CONFIGURED: 501,
+  /** Not a receipt link we accept (wrong scheme, host or receipt id). */
+  INVALID_URL: 400,
   RATE_LIMITED: 429,
   INTERNAL_ERROR: 500,
 };

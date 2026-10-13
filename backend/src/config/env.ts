@@ -18,6 +18,10 @@ const schema = z.object({
    * verification is built. Allowed by default outside production; never on in production unless set.
    */
   ALLOW_UNVERIFIED_BANK_PAYMENTS: z.enum(['true', 'false']).optional(),
+  /** 'false' skips TLS certificate checks on CBE receipt links. Dev only: ignored in production. */
+  CBE_TLS_STRICT: z.enum(['true', 'false']).default('true'),
+  /** A CBE receipt older than this is EXPIRED. */
+  CBE_RECEIPT_MAX_AGE_HOURS: z.coerce.number().int().positive().default(24),
 });
 
 export type Env = z.infer<typeof schema>;

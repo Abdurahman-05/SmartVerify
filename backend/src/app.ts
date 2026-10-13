@@ -10,6 +10,7 @@ import { z } from 'zod';
 import type { Env } from './config/env.js';
 import { authRoutes, publicAuthRoutes } from './modules/auth/auth.routes.js';
 import { bankAccountRoutes } from './modules/bank-accounts/bank-account.routes.js';
+import { verificationRoutes } from './modules/verification/verification.routes.js';
 import { billRoutes } from './modules/bills/bill.routes.js';
 import { feeRoutes } from './modules/fees/fee.routes.js';
 import { historyRoutes } from './modules/history/history.routes.js';
@@ -94,6 +95,7 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
         await secured.register(authRoutes);
         await secured.register(subscriptionRoutes);
         await secured.register(bankAccountRoutes);
+        await secured.register(verificationRoutes);
         // Restaurant Plus (each module requires the restaurant plan).
         await secured.register(orderRoutes);
         await secured.register(billRoutes);
