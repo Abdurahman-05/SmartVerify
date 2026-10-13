@@ -24,6 +24,8 @@ export const verifiedSchema = z.object({
 
 export const notMatchingSchema = z.object({
   status: z.literal('not_matching'),
+  reference: z.string(),
+  amountEtb: z.number().int().describe('Amount on the receipt'),
   reasons: z.array(z.enum(['WRONG_RECEIVER', 'AMOUNT_TOO_LOW', 'NOT_SUCCESS', 'EXPIRED'])),
 });
 

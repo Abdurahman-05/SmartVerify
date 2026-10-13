@@ -203,7 +203,10 @@ describe('POST /verify/cbe', () => {
     for (const [options, reasons] of cases) {
       fetchMock.mockResolvedValueOnce(htmlReceipt(options));
       const res = await verify({ url: URL_OK, expectedAmountEtb: 600 });
-      expect(res.json(), JSON.stringify(options)).toEqual({ status: 'not_matching', reasons });
+      expect(res.json(), JSON.stringify(options)).toMatchObject({
+        status: 'not_matching',
+        reasons,
+      });
     }
   });
 
@@ -237,7 +240,7 @@ describe('POST /verify/cbe', () => {
     const other = await createRestaurant(app);
     fetchMock.mockResolvedValueOnce(htmlReceipt());
     const res = await verify({ url: URL_OK, expectedAmountEtb: 600 }, other.owner.token);
-    expect(res.json()).toEqual({ status: 'not_matching', reasons: ['WRONG_RECEIVER'] });
+    expect(res.json()).toMatchObject({ status: 'not_matching', reasons: ['WRONG_RECEIVER'] });
 
     const anon = await app.inject({
       method: 'POST',
@@ -285,7 +288,15 @@ describe('POST /verify/cbe', () => {
 
     it('compares the JSON fields and reports what the bank says', async () => {
       const cases: [Record<string, unknown>, unknown][] = [
-        [{ amountCredited: '550.00' }, { status: 'not_matching', reasons: ['AMOUNT_TOO_LOW'] }],
+        [
+          { amountCredited: '550.00' },
+          {
+            status: 'not_matching',
+            reasons: ['AMOUNT_TOO_LOW'],
+            reference: 'FT26283K4Z9P',
+            amountEtb: 550,
+          },
+        ],
         [
           { creditAccountNo: 'E***********9999' },
           { status: 'not_matching', reasons: ['WRONG_RECEIVER'] },
@@ -303,7 +314,7 @@ describe('POST /verify/cbe', () => {
       for (const [changes, expected] of cases) {
         fetchMock.mockResolvedValueOnce(jsonReceipt(changes));
         const res = await verify({ url: MB_URL, expectedAmountEtb: 600 }, r.waiter2.token);
-        expect(res.json(), JSON.stringify(changes)).toEqual(expected);
+        expect(res.json(), JSON.stringify(changes)).toMatchObject(expected as object);
       }
 
       // The bank answers 400 "transaction not found" for a link it does not know.

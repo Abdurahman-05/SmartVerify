@@ -141,7 +141,14 @@ export async function verifyCbe(
     now,
     maxAgeHours: env.CBE_RECEIPT_MAX_AGE_HOURS,
   });
-  if (!result.ok) return { status: 'not_matching', reasons: result.reasons };
+  if (!result.ok) {
+    return {
+      status: 'not_matching',
+      reasons: result.reasons,
+      reference: receipt.reference,
+      amountEtb: receipt.amountEtb,
+    };
+  }
 
   return {
     status: 'verified',
