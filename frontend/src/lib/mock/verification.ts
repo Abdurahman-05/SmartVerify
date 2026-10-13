@@ -14,7 +14,7 @@ export type CbeCheck =
       receiverName: string;
       date: string;
     }
-  | { status: 'not_matching'; reasons: CbeMismatch[] }
+  | { status: 'not_matching'; reasons: CbeMismatch[]; reference: string; amountEtb: number }
   | { status: 'unable_to_verify'; reason: CbeUnable };
 
 /** Offline stand-in: every receipt is paid exactly. */

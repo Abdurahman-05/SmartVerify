@@ -978,7 +978,6 @@
       "copied": "ተቀድቷል"
     },
     "check": {
-      "notMatching": "ክፍያው አይዛመድም",
       "unable": "ክፍያውን ማረጋገጥ አልተቻለም",
       "invalidUrl": "ይህ የCBE ደረሰኝ ሊንክ አይደለም።",
       "reasons": {
@@ -992,7 +991,13 @@
         "UNREACHABLE": "ባንኩን ማግኘት አልቻልንም።",
         "NOT_FOUND": "ባንኩ ለዚህ QR ደረሰኝ የለውም።",
         "UNPARSEABLE": "ይህን ደረሰኝ ማንበብ አልቻልንም።"
-      }
+      },
+      "titles": {
+        "WRONG_RECEIVER": "ወደ ሌላ ሂሳብ ተከፍሏል",
+        "NOT_SUCCESS": "ክፍያው አልተሳካም",
+        "EXPIRED": "ደረሰኙ በጣም የቆየ ነው"
+      },
+      "billOpen": "ሂሳቡ አሁንም ክፍት ነው። ምንም አልተመዘገበም።"
     }
   }
 }

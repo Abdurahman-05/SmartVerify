@@ -1,13 +1,15 @@
 import { Redirect, useRouter } from 'expo-router';
-import { CircleAlert, CircleX, QrCode, RotateCcw, Save } from 'lucide-react-native';
+import { CircleAlert } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
+import { formatMoney } from '@/components/ui/MoneyText';
 import { NoConnection } from '@/components/ui/NoConnection';
+import { ResultBadge } from '@/components/ui/ResultBadge';
 import { Text } from '@/components/ui/Text';
 import { usePaymentBill } from '@/features/bills/usePaymentBill';
 import { newIdempotencyKey } from '@/lib/api/idempotency';
@@ -16,13 +18,14 @@ import { checkBankPayment } from '@/lib/mock/verify';
 import { isCbeReceiptLink, verifyCbe, type CbeMismatch, type CbeUnable } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
+import { DetailsCard } from './PaymentResultScreen';
 import { settlePayment, useRestaurantPay } from './restaurantFlow';
 import { useVerifyFlow } from './verifyFlow';
 
 type Failure =
   | { kind: 'network' }
   | { kind: 'error'; messageKey: string }
-  | { kind: 'mismatch'; reasons: CbeMismatch[] }
+  | { kind: 'mismatch'; reasons: CbeMismatch[]; reference: string; paid: number }
   | { kind: 'unable'; reason: CbeUnable };
 
 /**
@@ -37,7 +40,14 @@ async function checkReceived(
   if (!isCbeReceiptLink(qrData)) return fake();
   const result = await verifyCbe(qrData, amount);
   if (result.status === 'verified') return result.amountEtb;
-  if (result.status === 'not_matching') return { kind: 'mismatch', reasons: result.reasons };
+  if (result.status === 'not_matching') {
+    return {
+      kind: 'mismatch',
+      reasons: result.reasons,
+      reference: result.reference,
+      paid: result.amountEtb,
+    };
+  }
   return { kind: 'unable', reason: result.reason };
 }
 
@@ -113,67 +123,92 @@ export default function RestaurantCheckingScreen() {
   if (failure?.kind === 'network') return <NoConnection onRetry={retry} />;
 
   if (failure) {
-    const mismatch = failure.kind === 'mismatch';
-    const Icon = mismatch ? CircleX : CircleAlert;
+    // Same layout as the other failed results (Failed design): badge, title, details, note.
+    const expected = { label: t('verify.result.expected'), value: formatMoney(amount) };
+    const [first] = failure.kind === 'mismatch' ? failure.reasons : [];
     const title =
       failure.kind === 'mismatch'
-        ? t('verifyBank.check.notMatching')
+        ? first === 'AMOUNT_TOO_LOW' || !first
+          ? t('verify.result.amountMismatchTitle')
+          : t(`verifyBank.check.titles.${first}`)
         : failure.kind === 'unable'
           ? t('verifyBank.check.unable')
           : t('verifyRestaurant.checkFailed');
-    const lines =
+    const body =
       failure.kind === 'mismatch'
-        ? failure.reasons.map((r) => t(`verifyBank.check.reasons.${r}`))
+        ? failure.reasons.map((r) => t(`verifyBank.check.reasons.${r}`)).join(' ')
         : failure.kind === 'unable'
-          ? [t(`verifyBank.check.unableReasons.${failure.reason}`)]
-          : [t(failure.messageKey)];
+          ? t(`verifyBank.check.unableReasons.${failure.reason}`)
+          : t(failure.messageKey);
+    const rows =
+      failure.kind === 'mismatch'
+        ? [
+            expected,
+            { label: t('verify.result.paid'), value: formatMoney(failure.paid) },
+            { label: t('verify.result.reference'), value: failure.reference },
+          ]
+        : [expected];
 
     return (
-      <SafeAreaView className={`flex-1 ${mismatch ? 'bg-dangerSurface' : 'bg-background'}`}>
-        <View className="flex-1 items-center justify-center gap-4 px-6">
-          <View
-            className={`h-24 w-24 items-center justify-center rounded-full ${
-              mismatch ? 'bg-dangerBg' : 'bg-tipBg'
-            }`}
-          >
-            <Icon size={52} color={mismatch ? colors.dangerFg : colors.warnFg} strokeWidth={2.2} />
+      <SafeAreaView className="flex-1 bg-dangerSurface">
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingHorizontal: 24,
+            paddingTop: 32,
+            paddingBottom: 32,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View className="items-center" accessibilityLiveRegion="assertive">
+            <ResultBadge success={false} />
+            <Text
+              font="heading"
+              className="mt-5 text-center text-[26px]"
+              accessibilityRole="header"
+            >
+              {title}
+            </Text>
+            <Text className="mt-2.5 max-w-[300px] text-center text-base leading-6 text-navInactive">
+              {body}
+            </Text>
           </View>
-          <Text font="heading" className="text-center text-[26px]" accessibilityRole="header">
-            {title}
-          </Text>
-          <View className="gap-1.5">
-            {lines.map((line) => (
-              <Text key={line} font="semibold" tone="muted" className="text-center text-lg">
-                {line}
-              </Text>
-            ))}
+
+          <DetailsCard rows={rows} />
+
+          <View className="mt-4 flex-row items-start gap-2.5 px-1">
+            <CircleAlert size={18} color={colors.alert} strokeWidth={2} />
+            <Text className="flex-1 text-sm leading-5 text-navInactive">
+              {t('verifyBank.check.billOpen')}
+            </Text>
           </View>
-        </View>
-        <View className="gap-2.5 px-4 pb-6">
-          {failure.kind === 'mismatch' ? (
-            <Button label={t('verifyBank.scan.again')} icon={QrCode} onPress={scanAgain} />
-          ) : (
-            <Button label={t('verifyRestaurant.tryAgain')} icon={RotateCcw} onPress={retry} />
-          )}
-          {failure.kind === 'unable' ? (
+
+          <View className="min-h-6 flex-1" />
+
+          <View className="gap-3">
             <Button
-              label={t('verifyBank.saveNotChecked')}
-              icon={Save}
-              variant="outline"
-              size="md"
-              onPress={saveNotChecked}
+              label={t('verify.result.tryAgain')}
+              variant="danger"
+              onPress={failure.kind === 'mismatch' ? scanAgain : retry}
             />
-          ) : null}
-          {failure.kind !== 'mismatch' ? (
-            <Button
-              label={t('verifyBank.scan.again')}
-              icon={QrCode}
-              variant="outline"
-              size="md"
-              onPress={scanAgain}
-            />
-          ) : null}
-        </View>
+            {failure.kind === 'unable' ? (
+              <Button
+                label={t('verifyBank.saveNotChecked')}
+                variant="secondary"
+                size="md"
+                onPress={saveNotChecked}
+              />
+            ) : (
+              <Button
+                label={t('verify.result.contactSupport')}
+                variant="secondary"
+                size="md"
+                disabled
+                onPress={() => {}}
+              />
+            )}
+          </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }

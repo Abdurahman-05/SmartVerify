@@ -20,7 +20,7 @@ interface Row {
   value: string;
 }
 
-function DetailsCard({ rows }: { rows: Row[] }) {
+export function DetailsCard({ rows }: { rows: Row[] }) {
   return (
     <View className="mt-8 rounded-[20px] border border-border bg-surface px-5 py-1">
       {rows.map((row, i) => (

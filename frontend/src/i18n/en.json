@@ -978,7 +978,6 @@
       "copied": "Copied"
     },
     "check": {
-      "notMatching": "Payment does not match",
       "unable": "Could not check the payment",
       "invalidUrl": "This is not a CBE receipt link.",
       "reasons": {
@@ -992,7 +991,13 @@
         "UNREACHABLE": "We could not reach the bank.",
         "NOT_FOUND": "The bank has no receipt for this QR.",
         "UNPARSEABLE": "We could not read this receipt."
-      }
+      },
+      "titles": {
+        "WRONG_RECEIVER": "Paid to another account",
+        "NOT_SUCCESS": "Payment did not go through",
+        "EXPIRED": "Receipt is too old"
+      },
+      "billOpen": "The bill is still open. Nothing was recorded."
     }
   }
 }
