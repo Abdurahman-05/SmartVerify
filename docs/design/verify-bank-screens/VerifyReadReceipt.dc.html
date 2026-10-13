@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Read receipt</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F8F6}
+button,input{font-family:'DM Sans',sans-serif}
+input::placeholder{color:#5B6B64}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F8F6; color: #14201B; display: flex; flex-direction: column; overflow: hidden; position: relative">
+<div style="display: flex; align-items: center; gap: 4px; padding: 14px 16px 6px 8px"><button aria-label="Back" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#14201B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div><div style="font-family: Sora, sans-serif; font-size: 22px; font-weight: 700; line-height: 1.15">Read the receipt</div><div style="font-size: 14px; color: #3B4A44; margin-top: 1px">CBE · 600 ETB</div></div></div><div style="padding: 10px 16px 0 16px; font-size: 18px; color: #3B4A44">We find the Transaction ID for you.</div><div style="flex-grow: 1; display: flex; flex-direction: column; gap: 12px; padding: 14px 16px 24px 16px"><button style="flex: 1; border: 2px solid #0D4A36; border-radius: 26px; background: #0D4A36; color: #FFFFFF; font-size: 22px; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>Take a photo</button><button style="flex: 1; border: 2px solid #B9C7C1; border-radius: 26px; background: #FFFFFF; color: #14201B; font-size: 22px; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#0D4A36" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg>Choose a screenshot</button></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
