@@ -13,6 +13,7 @@ const keyByCode: Partial<Record<ApiErrorCode, string>> = {
   TABLE_BUSY: 'orders.errors.tableBusy',
   ITEM_UNAVAILABLE: 'orders.errors.itemUnavailable',
   NETWORK_ERROR: 'errors.noConnection',
+  INVALID_URL: 'verifyBank.check.invalidUrl',
 };
 
 export function errorMessageKey(error: unknown): string {

@@ -1,15 +1,18 @@
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera';
 import { Redirect, useFocusEffect, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ChevronLeft, FileText } from 'lucide-react-native';
+import { ChevronLeft, FileText, RotateCcw } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BankBadge } from '@/components/ui/BankBadge';
+import { BottomSheet } from '@/components/ui/BottomSheet';
+import { Button } from '@/components/ui/Button';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { Text } from '@/components/ui/Text';
+import { isCbeReceiptLink } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
 import { findPayerBank } from './payerBanks';
@@ -17,7 +20,10 @@ import { useReceiptFlow } from './receiptFlow';
 import { PermissionView, ScanFrame } from './ScanScreen';
 import { useVerifyFlow } from './verifyFlow';
 
-/** Step 2: scan the receipt QR (VerifyScanQR). For now it only shows what the QR says. */
+/**
+ * Step 2: scan the receipt QR (VerifyScanQR + VerifyQRNotFound). A CBE receipt link is checked
+ * by the server; other banks still show what the QR says (temporary).
+ */
 export default function ScanReceiptQrScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -25,6 +31,8 @@ export default function ScanReceiptQrScreen() {
   const amount = useVerifyFlow((s) => s.amount);
   const bankCode = useReceiptFlow((s) => s.bankCode);
   const bank = findPayerBank(bankCode);
+  const setQrData = useVerifyFlow((s) => s.setQrData);
+  const [notFound, setNotFound] = useState(false);
   // Scan once, then stay locked until the user comes back to this screen.
   const [locked, setLocked] = useState(false);
   useFocusEffect(useCallback(() => setLocked(false), []));
@@ -33,7 +41,14 @@ export default function ScanReceiptQrScreen() {
 
   const goBack = () =>
     router.canGoBack() ? router.back() : router.replace('/verify-bank/receipt');
-  const readReceipt = () => router.replace('/verify-bank/read');
+  const readReceipt = () => {
+    setNotFound(false);
+    router.replace('/verify-bank/read');
+  };
+  const scanAgain = () => {
+    setNotFound(false);
+    setLocked(false);
+  };
 
   if (!permission) return <View className="flex-1 bg-black" />;
   if (!permission.granted) {
@@ -50,7 +65,16 @@ export default function ScanReceiptQrScreen() {
   const handleScanned = ({ data }: BarcodeScanningResult) => {
     if (locked) return;
     setLocked(true);
-    router.push({ pathname: '/verify/qr-result', params: { text: data } });
+    if (bank.code !== 'CBE') {
+      router.push({ pathname: '/verify/qr-result', params: { text: data } });
+      return;
+    }
+    if (!isCbeReceiptLink(data)) {
+      setNotFound(true);
+      return;
+    }
+    setQrData(data.trim());
+    router.replace('/verify-restaurant/checking');
   };
 
   return (
@@ -111,6 +135,20 @@ export default function ScanReceiptQrScreen() {
           </Pressable>
         </View>
       </SafeAreaView>
+
+      <BottomSheet visible={notFound} onClose={scanAgain}>
+        <Text font="heading" className="text-center text-2xl" accessibilityRole="header">
+          {t('verifyBank.scan.notFound')}
+        </Text>
+        <Button label={t('verifyBank.readReceipt')} icon={FileText} onPress={readReceipt} />
+        <Button
+          label={t('verifyBank.scan.again')}
+          icon={RotateCcw}
+          variant="outline"
+          size="md"
+          onPress={scanAgain}
+        />
+      </BottomSheet>
     </View>
   );
 }

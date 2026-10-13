@@ -976,6 +976,23 @@
       "title": "የQR ውጤት",
       "copy": "ቅዳ",
       "copied": "ተቀድቷል"
+    },
+    "check": {
+      "notMatching": "ክፍያው አይዛመድም",
+      "unable": "ክፍያውን ማረጋገጥ አልተቻለም",
+      "invalidUrl": "ይህ የCBE ደረሰኝ ሊንክ አይደለም።",
+      "reasons": {
+        "WRONG_RECEIVER": "ገንዘቡ የእርስዎ ወዳልሆነ ሂሳብ ሄዷል።",
+        "AMOUNT_TOO_LOW": "በደረሰኙ ላይ ያለው መጠን ከሂሳቡ ያነሰ ነው።",
+        "NOT_SUCCESS": "ባንኩ ይህ ክፍያ አልተሳካም ይላል።",
+        "EXPIRED": "ይህ ደረሰኝ በጣም የቆየ ነው።"
+      },
+      "unableReasons": {
+        "TIMEOUT": "ባንኩ ለመመለስ በጣም ቆየ።",
+        "UNREACHABLE": "ባንኩን ማግኘት አልቻልንም።",
+        "NOT_FOUND": "ባንኩ ለዚህ QR ደረሰኝ የለውም።",
+        "UNPARSEABLE": "ይህን ደረሰኝ ማንበብ አልቻልንም።"
+      }
     }
   }
 }

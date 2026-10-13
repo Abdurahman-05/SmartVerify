@@ -38,6 +38,7 @@ export type ApiErrorCode =
   | 'TABLE_BUSY'
   | 'ITEM_UNAVAILABLE'
   | 'BILL_CLOSED'
+  | 'INVALID_URL'
   | 'INTERNAL_ERROR'
   | 'NETWORK_ERROR';
 

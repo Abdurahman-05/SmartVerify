@@ -976,6 +976,23 @@
       "title": "QR result",
       "copy": "Copy",
       "copied": "Copied"
+    },
+    "check": {
+      "notMatching": "Payment does not match",
+      "unable": "Could not check the payment",
+      "invalidUrl": "This is not a CBE receipt link.",
+      "reasons": {
+        "WRONG_RECEIVER": "The money went to an account that is not yours.",
+        "AMOUNT_TOO_LOW": "The amount on the receipt is less than the bill.",
+        "NOT_SUCCESS": "The bank says this payment did not go through.",
+        "EXPIRED": "This receipt is too old."
+      },
+      "unableReasons": {
+        "TIMEOUT": "The bank took too long to answer.",
+        "UNREACHABLE": "We could not reach the bank.",
+        "NOT_FOUND": "The bank has no receipt for this QR.",
+        "UNPARSEABLE": "We could not read this receipt."
+      }
     }
   }
 }
