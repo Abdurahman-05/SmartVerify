@@ -1,10 +1,12 @@
 import { PDFParse } from 'pdf-parse';
 
+import type { FastifyBaseLogger } from 'fastify';
+
 import type { Env } from '../../config/env.js';
 import type { PrismaClient } from '../../generated/prisma/client.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { cbeParser } from './banks/cbe.js';
-import { compareReceipt } from './compare.js';
+import { compareReceipt, explainComparison } from './compare.js';
 import { fetchReceipt, ReceiptFetchError } from './fetch-receipt.js';
 import type { FailedCheck, VerifyResponse } from './verification.schemas.js';
 
@@ -113,6 +115,8 @@ export async function verifyCbe(
   businessId: string,
   rawUrl: string,
   expectedAmountEtb: number,
+  /** Logs why a check passed or failed (no names, account last 4 only). */
+  log?: Pick<FastifyBaseLogger, 'info'>,
   now = new Date()
 ): Promise<VerifyResponse> {
   const source = parseCbeUrl(rawUrl);
@@ -124,23 +128,44 @@ export async function verifyCbe(
     fetched = await fetchReceipt(source.url, { ...FETCH, tlsStrict, headers: source.headers });
   } catch (error) {
     const reason = error instanceof ReceiptFetchError ? error.reason : 'UNREACHABLE';
+    log?.info(
+      { cbeCheck: 'unable_to_verify', reason },
+      `CBE check: could not fetch the receipt (${reason})`
+    );
     return { status: 'unable_to_verify', reason };
   }
 
   const text = await receiptText(fetched.contentType, fetched.body);
   const receipt = text ? cbeParser.parse(text) : null;
-  if (!receipt) return { status: 'unable_to_verify', reason: 'UNPARSEABLE' };
+  if (!receipt) {
+    log?.info(
+      { cbeCheck: 'unable_to_verify', reason: 'UNPARSEABLE', contentType: fetched.contentType },
+      `CBE check: could not read the receipt (content-type ${fetched.contentType || 'none'})`
+    );
+    return { status: 'unable_to_verify', reason: 'UNPARSEABLE' };
+  }
 
   const accounts = await prisma.bankAccount.findMany({
     where: { businessId, bankCode: 'CBE', removedAt: null },
     select: { last4: true },
   });
-  const result = compareReceipt(receipt, {
+  const compareInput = {
     expectedAmountEtb,
     accountLast4s: accounts.map((a) => a.last4),
     now,
     maxAgeHours: env.CBE_RECEIPT_MAX_AGE_HOURS,
-  });
+  };
+  const result = compareReceipt(receipt, compareInput);
+  if (log) {
+    const why = explainComparison(receipt, compareInput);
+    const verdict = result.ok
+      ? `VERIFIED (extra ${result.extraEtb} ETB)`
+      : `NOT MATCHING (${result.reasons.join(', ')})`;
+    log.info(
+      { cbeCheck: result.ok ? 'verified' : 'not_matching', ...why.fields, checks: why.checks },
+      `CBE check ${verdict}: ${why.lines.join(' | ')}`
+    );
+  }
   if (!result.ok) {
     return {
       status: 'not_matching',

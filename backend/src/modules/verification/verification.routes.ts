@@ -60,7 +60,14 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         if (!bill) throw new AppError('NOT_FOUND');
       }
 
-      const result = await verifyCbe(app.prisma, app.env, businessId, url, expectedAmountEtb);
+      const result = await verifyCbe(
+        app.prisma,
+        app.env,
+        businessId,
+        url,
+        expectedAmountEtb,
+        request.log
+      );
       if (result.status !== 'verified') {
         await saveFailedCheck(app.prisma, {
           businessId,
