@@ -12,11 +12,13 @@ export type PayInput =
       /** Bank money of THIS scan, as reported by the bank check. */
       bankReceivedEtb: number;
       reference?: string;
+      /** When more arrived than the bill: the waiter's tip (default) or given back in cash. */
+      extraChoice?: 'tip' | 'giveback';
     };
 
 /** What the app shows after a payment step (same idea as the app's calcPayment). */
 export interface PayResult {
-  /** paid = exact; over = more arrived (the extra is the waiter's tip); short = bill stays open. */
+  /** paid = exact; over = more arrived (tip or change given back); short = bill stays open. */
   status: 'paid' | 'over' | 'short';
   billId: string;
   method: 'cash' | 'bank' | 'cash+bank';
@@ -57,7 +59,7 @@ export function createPaymentService(prisma: PrismaClient, allowUnverifiedBank: 
     const paid = bill.payment;
     if (paid) {
       return {
-        status: paid.tipEtb > 0 && paid.method !== 'cash' ? 'over' : 'paid',
+        status: paid.method !== 'cash' && paid.tipEtb + paid.changeEtb > 0 ? 'over' : 'paid',
         billId: bill.id,
         method: methodOf(paid.method),
         totalEtb: bill.totalEtb,
@@ -206,7 +208,10 @@ export function createPaymentService(prisma: PrismaClient, allowUnverifiedBank: 
             };
           }
 
-          const tip = received - expected;
+          // The extra is the waiter's tip, or given back to the customer from the cash drawer.
+          const extra = received - expected;
+          const tip = input.extraChoice === 'giveback' ? 0 : extra;
+          const change = extra - tip;
           await close(tx, bill.id);
           const payment = await tx.payment.create({
             data: {
@@ -216,6 +221,7 @@ export function createPaymentService(prisma: PrismaClient, allowUnverifiedBank: 
               cashEtb: cash,
               bankEtb: received,
               tipEtb: tip,
+              changeEtb: change,
               recordedById: auth.memberId,
               idempotencyKey: key,
             },
@@ -234,9 +240,10 @@ export function createPaymentService(prisma: PrismaClient, allowUnverifiedBank: 
           }
           return {
             ...base,
-            status: tip > 0 ? ('over' as const) : ('paid' as const),
+            status: extra > 0 ? ('over' as const) : ('paid' as const),
             remainingEtb: 0,
             tipEtb: tip,
+            changeEtb: change,
           };
         });
       } catch (error) {

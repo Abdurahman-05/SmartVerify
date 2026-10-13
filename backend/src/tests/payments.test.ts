@@ -137,6 +137,20 @@ describe('bank and cash + bank (fake bank check)', () => {
     });
   });
 
+  it('more than expected, given back: no tip; the extra is change paid from the cash drawer', async () => {
+    const billId = await openBill();
+    const res = (
+      await pay(billId, { method: 'bank', bankReceivedEtb: 1160, extraChoice: 'giveback' })
+    ).json() as Result;
+    expect(res).toMatchObject({ status: 'over', tipEtb: 0, changeEtb: 200, bankReceivedEtb: 1160 });
+    expect(await app.prisma.tip.count({ where: { billId } })).toBe(0);
+    expect(await app.prisma.payment.findFirstOrThrow({ where: { billId } })).toMatchObject({
+      bankEtb: 1160,
+      tipEtb: 0,
+      changeEtb: 200,
+    });
+  });
+
   it('short keeps the bill open; the next scan adds up; a replayed scan counts once', async () => {
     const billId = await openBill();
     const key = newKey();

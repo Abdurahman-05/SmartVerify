@@ -43,7 +43,8 @@ export const paymentRoutes: FastifyPluginAsyncZod = async (app) => {
           'Cash only: `{ method: "cash", cashEtb, extraChoice }` — cash must cover the total; the ' +
           "extra is the waiter's tip or change given back. Bank / cash+bank: one request per bank " +
           'scan with `bankReceivedEtb` (this scan). The server adds all scans: exact = paid, more ' +
-          "= paid with the extra as the waiter's tip, less = short (bill stays open, scan again). " +
+          "= paid with the extra as the waiter's tip (or, with extraChoice giveback, given back from " +
+          'the cash drawer as changeEtb), less = short (bill stays open, scan again). ' +
           'Waiters can pay only their own bills. BANK AMOUNTS ARE NOT VERIFIED YET (fake check in ' +
           'the app): refused in production unless ALLOW_UNVERIFIED_BANK_PAYMENTS=true.',
         params: idParamSchema,
@@ -60,12 +61,14 @@ export const paymentRoutes: FastifyPluginAsyncZod = async (app) => {
             method: z.literal('bank'),
             bankReceivedEtb: etb,
             reference: z.string().trim().min(1).max(60).optional(),
+            extraChoice: z.enum(['tip', 'giveback']).default('tip'),
           }),
           z.object({
             method: z.literal('cash+bank'),
             cashEtb: etb,
             bankReceivedEtb: etb,
             reference: z.string().trim().min(1).max(60).optional(),
+            extraChoice: z.enum(['tip', 'giveback']).default('tip'),
           }),
         ]),
         response: {
