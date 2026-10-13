@@ -1,5 +1,5 @@
 import { Redirect, useRouter } from 'expo-router';
-import { Check, HandCoins, Info, QrCode, Receipt, Share2 } from 'lucide-react-native';
+import { Banknote, Check, HandCoins, Info, QrCode, Receipt, Share2 } from 'lucide-react-native';
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
@@ -187,18 +187,32 @@ function ResultView({ outcome, bill }: { outcome: PaymentOutcome; bill: Bill }) 
                 note={t('verifyRestaurant.fromOrder')}
                 value={outcome.total}
               />
-              <MoneyCard
-                icon={HandCoins}
-                title={t('verifyRestaurant.tipFor', { name: bill.waiterName })}
-                note={t('verifyRestaurant.tipNote')}
-                value={outcome.tip}
-                tip
-              />
+              {outcome.change > 0 ? (
+                <MoneyCard
+                  icon={Banknote}
+                  title={t('verifyRestaurant.giveBackTitle')}
+                  note={t('verifyRestaurant.giveBackNote')}
+                  value={outcome.change}
+                  tip
+                />
+              ) : (
+                <MoneyCard
+                  icon={HandCoins}
+                  title={t('verifyRestaurant.tipFor', { name: bill.waiterName })}
+                  note={t('verifyRestaurant.tipNote')}
+                  value={outcome.tip}
+                  tip
+                />
+              )}
             </View>
             <View className="mx-4 mt-3 flex-row items-start gap-2">
               <Info size={20} color={brand.primaryText} strokeWidth={2.2} />
               <Text font="semibold" tone="muted" className="flex-1 text-[15px] leading-5">
-                {t('verifyRestaurant.tipExplain')}
+                {t(
+                  outcome.change > 0
+                    ? 'verifyRestaurant.giveBackExplain'
+                    : 'verifyRestaurant.tipExplain'
+                )}
               </Text>
             </View>
           </>

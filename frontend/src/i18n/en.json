@@ -522,7 +522,7 @@
     "restaurantBill": "Restaurant bill",
     "fromOrder": "From the order",
     "tipFor": "Tip for {{name}}",
-    "tipNote": "Extra money, added automatically",
+    "tipNote": "Extra money, kept as the waiter's tip",
     "tipExplain": "The bill is known from the order, so anything extra is saved as the waiter's tip.",
     "notFullyPaid": "Not fully paid yet",
     "stillNeeds": "Customer still needs to pay",
@@ -534,7 +534,10 @@
     "shareReceipt": "Share receipt",
     "done": "Done",
     "scanAgain": "Scan again · {{amount}}",
-    "changeCash": "Change cash amount"
+    "changeCash": "Change cash amount",
+    "giveBackTitle": "Give back in cash",
+    "giveBackNote": "Return this to the customer from the cash drawer",
+    "giveBackExplain": "The customer chose to get the extra back, so it is not a tip. Give it from the cash drawer."
   },
   "cash": {
     "title": "Cash payment",
@@ -1004,6 +1007,12 @@
         "EXPIRED": "Receipt is too old"
       },
       "billOpen": "The bill is still open. Nothing was recorded."
+    },
+    "extra": {
+      "title": "Extra money received",
+      "body": "The customer sent {{received}} for a {{bill}} bill. Ask the customer: keep the extra as {{name}}'s tip, or give it back in cash?",
+      "keepTip": "Keep as tip",
+      "giveBack": "Give back in cash"
     }
   }
 }

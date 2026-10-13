@@ -1,18 +1,20 @@
 import { Redirect, useRouter } from 'expo-router';
-import { CircleAlert } from 'lucide-react-native';
+import { Banknote, CircleAlert, HandCoins } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
-import { formatMoney } from '@/components/ui/MoneyText';
+import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { NoConnection } from '@/components/ui/NoConnection';
 import { ResultBadge } from '@/components/ui/ResultBadge';
 import { Text } from '@/components/ui/Text';
 import { usePaymentBill } from '@/features/bills/usePaymentBill';
 import { newIdempotencyKey } from '@/lib/api/idempotency';
+import type { ExtraChoice } from '@/lib/api/payments';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { checkBankPayment } from '@/lib/mock/verify';
 import { isCbeReceiptLink, verifyCbe, type CbeMismatch, type CbeUnable } from '@/lib/verification';
@@ -62,6 +64,8 @@ export default function RestaurantCheckingScreen() {
   const [failure, setFailure] = useState<Failure | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [saving, setSaving] = useState(false);
+  // More arrived than the bill: the waiter asks the customer before anything is recorded.
+  const [extra, setExtra] = useState<{ received: number } | null>(null);
   // One key per action: "Try again" after a lost answer does not count the payment twice.
   const [scanKey] = useState(newIdempotencyKey);
   const [saveKey] = useState(newIdempotencyKey);
@@ -81,6 +85,10 @@ export default function RestaurantCheckingScreen() {
       .then(async (received) => {
         if (typeof received !== 'number') {
           if (!cancelled) setFailure(received);
+          return;
+        }
+        if (received > amount) {
+          if (!cancelled) setExtra({ received });
           return;
         }
         await settlePayment(bill, received, scanKey);
@@ -122,7 +130,60 @@ export default function RestaurantCheckingScreen() {
       });
   };
 
+  const settleWith = (received: number, choice: ExtraChoice) => {
+    setExtra(null);
+    setSaving(true);
+    settlePayment(bill, received, scanKey, choice)
+      .then(() => router.replace('/verify-restaurant/result'))
+      .catch((error: unknown) => {
+        setSaving(false);
+        setFailure(
+          isNetworkError(error)
+            ? { kind: 'network' }
+            : { kind: 'error', messageKey: errorMessageKey(error) }
+        );
+      });
+  };
+
   if (failure?.kind === 'network') return <NoConnection onRetry={retry} />;
+
+  if (extra) {
+    const extraEtb = extra.received - amount;
+    return (
+      <SafeAreaView className="flex-1 bg-background">
+        <BottomSheet visible onClose={() => {}}>
+          <View className="items-center gap-2">
+            <View className="h-16 w-16 items-center justify-center rounded-full bg-tipBg">
+              <HandCoins size={32} color={colors.warnFg} strokeWidth={2.2} />
+            </View>
+            <Text font="heading" className="text-center text-[22px]" accessibilityRole="header">
+              {t('verifyBank.extra.title')}
+            </Text>
+            <MoneyText value={extraEtb} className="text-4xl" />
+            <Text tone="muted" className="text-center text-base">
+              {t('verifyBank.extra.body', {
+                received: formatMoney(extra.received),
+                bill: formatMoney(amount),
+                name: bill.waiterName,
+              })}
+            </Text>
+          </View>
+          <Button
+            label={t('verifyBank.extra.keepTip')}
+            icon={HandCoins}
+            onPress={() => settleWith(extra.received, 'tip')}
+          />
+          <Button
+            label={t('verifyBank.extra.giveBack')}
+            icon={Banknote}
+            variant="outline"
+            size="md"
+            onPress={() => settleWith(extra.received, 'giveback')}
+          />
+        </BottomSheet>
+      </SafeAreaView>
+    );
+  }
 
   if (failure) {
     // Same layout as the other failed results (Failed design): badge, title, details, note.

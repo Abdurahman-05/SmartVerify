@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { useBills } from '@/features/bills/store';
 import type { Bill } from '@/features/bills/types';
 import { usePayments } from '@/features/payments/store';
+import type { ExtraChoice } from '@/lib/api/payments';
 import { payBill, USE_MOCK_BILLS } from '@/lib/bills';
 import type { BankCheckSimulation } from '@/lib/mock/verify';
 import { refreshAfterPayment } from '@/lib/queryClient';
@@ -17,6 +18,8 @@ export interface PaymentOutcome extends PaymentCalc {
   total: number;
   cash: number;
   received: number;
+  /** Extra given back to the customer from the cash drawer (instead of a tip). */
+  change: number;
 }
 
 interface RestaurantPayState {
@@ -62,7 +65,8 @@ export const cashFor = (method: RestaurantMethod, cash: number) => (method === '
 export async function settlePayment(
   bill: Bill,
   newlyReceived: number,
-  idempotencyKey: string
+  idempotencyKey: string,
+  extraChoice: ExtraChoice = 'tip'
 ): Promise<PaymentOutcome> {
   const { method, cash: cashInput, bankReceived } = useRestaurantPay.getState();
   const cash = cashFor(method, cashInput);
@@ -71,8 +75,8 @@ export async function settlePayment(
     const res = await payBill(
       bill.id,
       method === 'bank'
-        ? { method, bankReceivedEtb: newlyReceived }
-        : { method, cashEtb: cash, bankReceivedEtb: newlyReceived },
+        ? { method, bankReceivedEtb: newlyReceived, extraChoice }
+        : { method, cashEtb: cash, bankReceivedEtb: newlyReceived, extraChoice },
       idempotencyKey
     );
     const outcome: PaymentOutcome = {
@@ -85,6 +89,7 @@ export async function settlePayment(
       status: res.status,
       remaining: res.remainingEtb,
       tip: res.tipEtb,
+      change: res.changeEtb,
     };
     useRestaurantPay.setState({
       bankReceived: res.status === 'short' ? res.bankReceivedEtb : 0,
@@ -95,9 +100,12 @@ export async function settlePayment(
   }
 
   const received = bankReceived + newlyReceived;
-  const calc = calcPayment({ total: bill.total, cash, received });
+  const raw = calcPayment({ total: bill.total, cash, received });
+  const giveBack = extraChoice === 'giveback' ? raw.tip : 0;
+  const calc = { ...raw, tip: raw.tip - giveBack };
   const outcome: PaymentOutcome = {
     ...calc,
+    change: giveBack,
     billId: bill.id,
     method,
     total: bill.total,

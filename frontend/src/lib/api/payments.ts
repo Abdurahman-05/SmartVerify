@@ -2,8 +2,17 @@ import { api } from './client';
 
 export type PayRequest =
   | { method: 'cash'; cashEtb: number; extraChoice: 'tip' | 'giveback' }
-  | { method: 'bank'; bankReceivedEtb: number; reference?: string }
-  | { method: 'cash+bank'; cashEtb: number; bankReceivedEtb: number; reference?: string };
+  | { method: 'bank'; bankReceivedEtb: number; reference?: string; extraChoice?: ExtraChoice }
+  | {
+      method: 'cash+bank';
+      cashEtb: number;
+      bankReceivedEtb: number;
+      reference?: string;
+      extraChoice?: ExtraChoice;
+    };
+
+/** Money above the bill: the waiter's tip, or given back to the customer in cash. */
+export type ExtraChoice = 'tip' | 'giveback';
 
 /** The server's verdict for one payment step (POST /bills/:id/payments). */
 export interface PayResult {
