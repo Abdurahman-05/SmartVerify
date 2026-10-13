@@ -6,7 +6,7 @@ import { AppError } from '../../shared/errors/app-error.js';
 import { cbeParser } from './banks/cbe.js';
 import { compareReceipt } from './compare.js';
 import { fetchReceipt, ReceiptFetchError } from './fetch-receipt.js';
-import type { VerifyResponse } from './verification.schemas.js';
+import type { FailedCheck, VerifyResponse } from './verification.schemas.js';
 
 /** Receipt PDF/HTML link: https://apps.cbe.com.et[:100]/?id=FT… */
 const CBE_HOST = 'apps.cbe.com.et';
@@ -159,4 +159,81 @@ export async function verifyCbe(
     receiverName: receipt.receiverName,
     date: receipt.date.toISOString(),
   };
+}
+
+/** Saves a check that did not verify, so the failed try shows in history. */
+export async function saveFailedCheck(
+  prisma: PrismaClient,
+  input: {
+    businessId: string;
+    checkedById: string;
+    billId?: string;
+    bankCode: string;
+    expectedAmountEtb: number;
+    result: Exclude<VerifyResponse, { status: 'verified' }>;
+  }
+) {
+  const { result } = input;
+  await prisma.receiptCheck.create({
+    data: {
+      businessId: input.businessId,
+      checkedById: input.checkedById,
+      billId: input.billId ?? null,
+      bankCode: input.bankCode,
+      expectedAmountEtb: input.expectedAmountEtb,
+      status: result.status,
+      reasons: result.status === 'not_matching' ? result.reasons : [result.reason],
+      reference: result.status === 'not_matching' ? result.reference : null,
+      receiptAmountEtb: result.status === 'not_matching' ? result.amountEtb : null,
+    },
+  });
+}
+
+/** Failed checks since `from`, newest first. Waiters only see their own tries. */
+export async function listFailedChecks(
+  prisma: PrismaClient,
+  auth: { businessId: string; memberId: string; role: string },
+  from: Date
+) {
+  const rows = await prisma.receiptCheck.findMany({
+    where: {
+      businessId: auth.businessId,
+      createdAt: { gte: from },
+      ...(auth.role === 'waiter' && { checkedById: auth.memberId }),
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 200,
+    include: {
+      checkedBy: { select: { user: { select: { name: true } } } },
+      bill: {
+        select: {
+          type: true,
+          table: { select: { number: true } },
+          orders: { orderBy: { number: 'asc' }, take: 1, select: { number: true } },
+        },
+      },
+    },
+  });
+  return rows.map((row): FailedCheck => {
+    const bill = row.bill;
+    const label = !bill
+      ? null
+      : bill.type === 'dine'
+        ? `Table ${bill.table?.number ?? ''}`.trim()
+        : `${bill.type === 'takeaway' ? 'Takeaway' : 'Delivery'} #${bill.orders[0]?.number ?? ''}`;
+    return {
+      id: row.id,
+      billId: row.billId,
+      label,
+      bankCode: row.bankCode,
+      status: row.status,
+      // Written by saveFailedCheck from the same reason lists.
+      reasons: row.reasons as FailedCheck['reasons'],
+      reference: row.reference,
+      receiptAmountEtb: row.receiptAmountEtb,
+      expectedAmountEtb: row.expectedAmountEtb,
+      checkedBy: row.checkedBy.user.name,
+      createdAt: row.createdAt.toISOString(),
+    };
+  });
 }

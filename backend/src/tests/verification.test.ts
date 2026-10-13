@@ -11,6 +11,7 @@ import {
   createRestaurant,
   createTestApp,
   headers,
+  newKey,
   resetDatabase,
   type Restaurant,
   type TestApp,
@@ -326,5 +327,73 @@ describe('POST /verify/cbe', () => {
         reason: 'NOT_FOUND',
       });
     });
+  });
+});
+
+describe('failed checks history', () => {
+  async function openBill(token: string, restaurant: Restaurant = r) {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/v1/orders',
+      headers: headers(token, newKey()),
+      payload: {
+        type: 'dine',
+        tableId: restaurant.tables[1]!.id,
+        items: [{ menuItemId: restaurant.menu.coffee.id, quantity: 1 }],
+      },
+    });
+    return (res.json() as { id: string }).id;
+  }
+  const failed = (token: string) =>
+    app.inject({ method: 'GET', url: '/api/v1/verify/failed', headers: headers(token) });
+
+  it('saves checks that do not verify, with the bill, and lists them by who may see them', async () => {
+    // Earlier tests in this file also left failed checks.
+    await app.prisma.receiptCheck.deleteMany({});
+    const billId = await openBill(r.feeWaiter.token);
+
+    fetchMock.mockResolvedValueOnce(jsonReceipt({ amountCredited: '550.00' }));
+    await verify({ url: MB_URL, expectedAmountEtb: 600, billId }, r.feeWaiter.token);
+    fetchMock.mockRejectedValueOnce(new ReceiptFetchError('TIMEOUT'));
+    await verify({ url: MB_URL, expectedAmountEtb: 600 }, r.manager.token);
+    // A verified check is not a failed try: it becomes the payment instead.
+    fetchMock.mockResolvedValueOnce(jsonReceipt());
+    await verify({ url: MB_URL, expectedAmountEtb: 600, billId }, r.feeWaiter.token);
+
+    const all = (await failed(r.owner.token)).json() as Record<string, unknown>[];
+    expect(all).toHaveLength(2);
+    expect(all[0]).toMatchObject({
+      status: 'unable_to_verify',
+      reasons: ['TIMEOUT'],
+      reference: null,
+      receiptAmountEtb: null,
+      expectedAmountEtb: 600,
+      billId: null,
+      label: null,
+      checkedBy: 'Manager Yonas',
+    });
+    expect(all[1]).toMatchObject({
+      status: 'not_matching',
+      reasons: ['AMOUNT_TOO_LOW'],
+      reference: 'FT26283K4Z9P',
+      receiptAmountEtb: 550,
+      expectedAmountEtb: 600,
+      billId,
+      label: `Table ${r.tables[1]!.number}`,
+    });
+
+    // A waiter only sees their own tries.
+    const mine = (await failed(r.feeWaiter.token)).json() as { status: string }[];
+    expect(mine.map((c) => c.status)).toEqual(['not_matching']);
+  });
+
+  it('refuses a bill of another business, without checking', async () => {
+    const other = await createRestaurant(app);
+    const res = await verify(
+      { url: MB_URL, expectedAmountEtb: 600, billId: await openBill(other.owner.token, other) },
+      r.feeWaiter.token
+    );
+    expect(res.statusCode).toBe(404);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

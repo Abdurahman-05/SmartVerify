@@ -101,6 +101,12 @@ enum TipSource {
   cash
 }
 
+/// A receipt check that did not verify.
+enum ReceiptCheckStatus {
+  not_matching
+  unable_to_verify
+}
+
 enum KitchenStatus {
   new
   cooking
@@ -157,6 +163,7 @@ model Business {
   tips          Tip[]
   kitchenOrders KitchenOrder[]
   paymentScans  BillPaymentScan[]
+  receiptChecks ReceiptCheck[]
 }
 
 /// A person's role inside a business. The owner also has a member row (role = owner).
@@ -185,6 +192,7 @@ model BusinessMember {
   paymentsRecorded   Payment[]         @relation("PaymentRecordedBy")
   tips               Tip[]
   paymentScans       BillPaymentScan[]
+  receiptChecks      ReceiptCheck[]
 
   @@index([businessId])
 }
@@ -395,11 +403,12 @@ model Bill {
   createdAt              DateTime         @default(now())
   updatedAt              DateTime         @updatedAt
 
-  orders       Order[]
-  transactions Transaction[]
-  payment      Payment?
-  paymentScans BillPaymentScan[]
-  tips         Tip[]
+  orders        Order[]
+  transactions  Transaction[]
+  payment       Payment?
+  paymentScans  BillPaymentScan[]
+  tips          Tip[]
+  receiptChecks ReceiptCheck[]
   // + partial unique (tableId) WHERE status = 'open' AND type = 'dine' (one open bill per table)
 
   @@index([businessId, status, createdAt])
@@ -522,4 +531,29 @@ model Tip {
   createdAt  DateTime       @default(now())
 
   @@index([businessId, waiterId, createdAt])
+}
+
+/// A bank receipt check that did not verify (not matching, or the bank could not be read).
+/// Kept so failed tries show in history. Verified checks become payments instead.
+model ReceiptCheck {
+  id                String             @id @default(cuid())
+  businessId        String
+  business          Business           @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  checkedById       String
+  checkedBy         BusinessMember     @relation(fields: [checkedById], references: [id], onDelete: Restrict)
+  /// The bill being paid, when the check came from a bill.
+  billId            String?
+  bill              Bill?              @relation(fields: [billId], references: [id], onDelete: Restrict)
+  bankCode          String
+  status            ReceiptCheckStatus
+  /// not_matching: WRONG_RECEIVER | AMOUNT_TOO_LOW | NOT_SUCCESS | EXPIRED;
+  /// unable_to_verify: one of TIMEOUT | UNREACHABLE | NOT_FOUND | UNPARSEABLE.
+  reasons           String[]
+  /// From the receipt, when it could be read.
+  reference         String?
+  receiptAmountEtb  Int?
+  expectedAmountEtb Int
+  createdAt         DateTime           @default(now())
+
+  @@index([businessId, createdAt])
 }

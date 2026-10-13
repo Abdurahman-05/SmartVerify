@@ -10,6 +10,12 @@ export const verifyCbeBodySchema = z.object({
         'or https://apps.cbe.com.et/?id=FT…(+ payer account last 8)'
     ),
   expectedAmountEtb: z.number().int().positive().max(100_000_000),
+  billId: z
+    .string()
+    .min(1)
+    .max(64)
+    .optional()
+    .describe('The bill being paid; a failed check is saved with it for history'),
 });
 
 export const verifiedSchema = z.object({
@@ -39,3 +45,30 @@ export const unableSchema = z.object({
 export const verifyResponseSchema = z.union([verifiedSchema, notMatchingSchema, unableSchema]);
 
 export type VerifyResponse = z.infer<typeof verifyResponseSchema>;
+
+const reasonSchema = z.enum([
+  'WRONG_RECEIVER',
+  'AMOUNT_TOO_LOW',
+  'NOT_SUCCESS',
+  'EXPIRED',
+  'TIMEOUT',
+  'UNREACHABLE',
+  'NOT_FOUND',
+  'UNPARSEABLE',
+]);
+
+export const failedCheckSchema = z.object({
+  id: z.string(),
+  billId: z.string().nullable(),
+  label: z.string().nullable().describe('"Table 12", "Takeaway #1044"; null without a bill'),
+  bankCode: z.string(),
+  status: z.enum(['not_matching', 'unable_to_verify']),
+  reasons: z.array(reasonSchema),
+  reference: z.string().nullable(),
+  receiptAmountEtb: z.number().int().nullable(),
+  expectedAmountEtb: z.number().int(),
+  checkedBy: z.string(),
+  createdAt: z.string(),
+});
+
+export type FailedCheck = z.infer<typeof failedCheckSchema>;
