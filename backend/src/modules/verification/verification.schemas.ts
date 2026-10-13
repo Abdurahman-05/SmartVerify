@@ -6,7 +6,8 @@ export const verifyCbeBodySchema = z.object({
     .min(1)
     .max(500)
     .describe(
-      'The link in the CBE receipt QR: https://apps.cbe.com.et/?id=FT…(+ payer account last 8)'
+      'The CBE receipt link from the QR: https://mbreciept.cbe.com.et/v2-… (mobile banking) ' +
+        'or https://apps.cbe.com.et/?id=FT…(+ payer account last 8)'
     ),
   expectedAmountEtb: z.number().int().positive().max(100_000_000),
 });
@@ -28,7 +29,9 @@ export const notMatchingSchema = z.object({
 
 export const unableSchema = z.object({
   status: z.literal('unable_to_verify'),
-  reason: z.enum(['TIMEOUT', 'UNREACHABLE', 'UNPARSEABLE']),
+  reason: z
+    .enum(['TIMEOUT', 'UNREACHABLE', 'NOT_FOUND', 'UNPARSEABLE'])
+    .describe('NOT_FOUND: the bank has no receipt for this link'),
 });
 
 export const verifyResponseSchema = z.union([verifiedSchema, notMatchingSchema, unableSchema]);

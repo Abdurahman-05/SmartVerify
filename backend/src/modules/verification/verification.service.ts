@@ -8,34 +8,66 @@ import { compareReceipt } from './compare.js';
 import { fetchReceipt, ReceiptFetchError } from './fetch-receipt.js';
 import type { VerifyResponse } from './verification.schemas.js';
 
+/** Receipt PDF/HTML link: https://apps.cbe.com.et[:100]/?id=FT… */
 const CBE_HOST = 'apps.cbe.com.et';
 /** The receipt link ports CBE uses ('' = 443). */
 const CBE_PORTS = new Set(['', '100']);
 /** FT + 10 (the reference) + 8 digits (payer account last 8). */
 const CBE_ID = /^FT[A-Z0-9]{10}\d{8}$/;
 
+/** Mobile banking receipt link: https://mbreciept.cbe.com.et/v2-<token> (CBE's spelling). */
+const MB_RECEIPT_HOST = 'mbreciept.cbe.com.et';
+const MB_TOKEN = /^\/(v2-[A-Za-z0-9]{10,64})$/;
+/**
+ * The public JSON behind that page. The headers are the ones CBE's own receipt page sends
+ * (public values from its web client, not secrets); without Origin/Referer it answers "not found".
+ */
+const MB_DETAIL_URL = 'https://mb.cbe.com.et/api/v1/transactions/public/transaction-detail/';
+const MB_HEADERS = {
+  accept: 'application/json',
+  'x-app-id': 'd1292e42-7400-49de-a2d3-9731caa4c819',
+  'x-app-version': '0a01980b-9859-1369-8198-59f403820000',
+  origin: `https://${MB_RECEIPT_HOST}`,
+  // Without a User-Agent the bank answers 401; we name ourselves honestly.
+  'user-agent': 'SmartVerify/1.0',
+};
+
 const FETCH = { timeoutMs: 10_000, maxBytes: 2 * 1024 * 1024 };
 
+interface ReceiptSource {
+  url: URL;
+  headers?: Record<string, string>;
+}
+
 /** Only a real CBE receipt link is fetched; anything else is INVALID_URL. */
-export function parseCbeUrl(raw: string): URL {
+export function parseCbeUrl(raw: string): ReceiptSource {
   let url: URL;
   try {
     url = new URL(raw);
   } catch {
     throw new AppError('INVALID_URL');
   }
-  const id = url.searchParams.get('id') ?? '';
-  if (
-    url.protocol !== 'https:' ||
-    url.hostname !== CBE_HOST ||
-    !CBE_PORTS.has(url.port) ||
-    url.username ||
-    url.password ||
-    !CBE_ID.test(id)
-  ) {
+  if (url.protocol !== 'https:' || url.username || url.password) {
     throw new AppError('INVALID_URL');
   }
-  return url;
+
+  if (url.hostname === MB_RECEIPT_HOST && url.port === '' && !url.search) {
+    const token = MB_TOKEN.exec(url.pathname)?.[1];
+    if (!token) throw new AppError('INVALID_URL');
+    return {
+      url: new URL(`${MB_DETAIL_URL}${token}`),
+      headers: { ...MB_HEADERS, referer: `https://${MB_RECEIPT_HOST}/${token}` },
+    };
+  }
+
+  if (
+    url.hostname === CBE_HOST &&
+    CBE_PORTS.has(url.port) &&
+    CBE_ID.test(url.searchParams.get('id') ?? '')
+  ) {
+    return { url };
+  }
+  throw new AppError('INVALID_URL');
 }
 
 async function pdfText(data: Buffer): Promise<string | null> {
@@ -69,6 +101,8 @@ function htmlText(html: string): string {
 async function receiptText(contentType: string, body: Buffer): Promise<string | null> {
   if (contentType.startsWith('application/pdf')) return pdfText(body);
   if (contentType.startsWith('text/html')) return htmlText(body.toString('utf8'));
+  // Mobile banking receipts: the bank's JSON, read field by field by the parser.
+  if (contentType.startsWith('application/json')) return body.toString('utf8');
   return null;
 }
 
@@ -81,13 +115,13 @@ export async function verifyCbe(
   expectedAmountEtb: number,
   now = new Date()
 ): Promise<VerifyResponse> {
-  const url = parseCbeUrl(rawUrl);
+  const source = parseCbeUrl(rawUrl);
   // TLS can only be relaxed outside production (CBE's certificate chain breaks some dev setups).
   const tlsStrict = env.NODE_ENV === 'production' || env.CBE_TLS_STRICT !== 'false';
 
   let fetched;
   try {
-    fetched = await fetchReceipt(url, { ...FETCH, tlsStrict });
+    fetched = await fetchReceipt(source.url, { ...FETCH, tlsStrict, headers: source.headers });
   } catch (error) {
     const reason = error instanceof ReceiptFetchError ? error.reason : 'UNREACHABLE';
     return { status: 'unable_to_verify', reason };

@@ -3,8 +3,8 @@ import type { ParsedReceipt, ReceiptParser } from './types.js';
 /** Addis Ababa is UTC+3 all year (no daylight saving). */
 const ADDIS_OFFSET_HOURS = 3;
 
-// Labels as printed on CBE transfer receipts. No real sample is in tests/fixtures yet:
-// check these against a real receipt and adjust.
+// Labels as printed on CBE PDF/HTML transfer receipts (apps.cbe.com.et links). Not yet checked
+// against a real receipt of that kind; mobile banking receipts come as JSON (parseDetail).
 const ACCOUNT = String.raw`([0-9][0-9*Xx]{3,})`;
 const patterns = {
   payer: new RegExp(String.raw`Payer\s*:?\s*(.+?)\s+Account\s*(?:No\.?)?\s*:?\s*${ACCOUNT}`, 'i'),
@@ -39,11 +39,59 @@ function addisDate(m: RegExpExecArray): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
+
+/**
+ * Mobile banking receipt JSON (mb.cbe.com.et transaction-detail), as in
+ * tests/fixtures/cbe-detail.json. Accounts arrive masked; the last 4 digits are kept.
+ */
+function parseDetail(json: string): ParsedReceipt | null {
+  let d: Record<string, unknown>;
+  try {
+    const parsed: unknown = JSON.parse(json);
+    if (!parsed || typeof parsed !== 'object') return null;
+    d = parsed as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+  const dateTimes = Array.isArray(d['dateTimes']) ? (d['dateTimes'] as unknown[]) : [];
+  const fields = {
+    reference: str(d['id']),
+    payerName: str(d['debitAccountHolder']),
+    payerAccount: str(d['debitAccountNo']),
+    receiverName: str(d['creditAccountHolder']),
+    receiverAccount: str(d['creditAccountNo']),
+    amount: str(d['amountCredited']),
+    currency: str(d['creditCurrency']),
+    date: str(dateTimes[0]),
+    status: str(d['statusDesc']) || str(d['status']),
+  };
+  if (Object.values(fields).some((v) => !v) || !/^FT[A-Z0-9]{10}$/i.test(fields.reference)) {
+    return null;
+  }
+  const value = Number(fields.amount.replace(/,/g, ''));
+  const date = new Date(fields.date);
+  if (!Number.isFinite(value) || Number.isNaN(date.getTime())) return null;
+
+  return {
+    payerName: fields.payerName,
+    payerAccount: fields.payerAccount,
+    receiverName: fields.receiverName,
+    receiverAccount: fields.receiverAccount,
+    amountEtb: Math.floor(value),
+    currency: fields.currency.toUpperCase(),
+    date,
+    reference: fields.reference.toUpperCase(),
+    status: fields.status,
+  };
+}
+
 /** Captured groups of a match, '' where a group did not match. */
 const groups = (m: RegExpExecArray | null) => (m ? m.slice(1).map((g) => g ?? '') : null);
 
 export const cbeParser: ReceiptParser = {
   parse(content) {
+    if (content.trimStart().startsWith('{')) return parseDetail(content);
     const text = content.replace(/\s+/g, ' ');
     const dateMatch = patterns.date.exec(text);
     const [payerName, payerAccount] = groups(patterns.payer.exec(text)) ?? [];

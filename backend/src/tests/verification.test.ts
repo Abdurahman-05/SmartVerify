@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -22,6 +24,21 @@ vi.mock('../modules/verification/fetch-receipt.js', async (importOriginal) => {
 const fetchMock = vi.mocked(fetchReceipt);
 
 const URL_OK = 'https://apps.cbe.com.et:100/?id=FT26283K4Z9P00014582';
+const MB_URL = 'https://mbreciept.cbe.com.et/v2-AbCdEfGhIjKlMnOpQrSt';
+
+/** Mobile banking receipt JSON in the bank's real shape (made-up values). */
+const detailFixture = JSON.parse(
+  readFileSync(new URL('./fixtures/cbe-detail.json', import.meta.url), 'utf8')
+) as Record<string, unknown>;
+
+function jsonReceipt(changes: Record<string, unknown> = {}): FetchedReceipt {
+  const detail = {
+    ...detailFixture,
+    dateTimes: [new Date(Date.now() - HOUR).toISOString()],
+    ...changes,
+  };
+  return { contentType: 'application/json', body: Buffer.from(JSON.stringify(detail)) };
+}
 const HOUR = 60 * 60 * 1000;
 
 /** "10/12/2026, 2:35:00 PM" in Addis Ababa time (UTC+3), as CBE prints it. */
@@ -145,7 +162,7 @@ describe('POST /verify/cbe', () => {
       'https://apps.cbe.com.et/',
       'not a url',
     ]) {
-      const res = await verify({ url, expectedAmountEtb: 600 });
+      const res = await verify({ url, expectedAmountEtb: 600 }, r.manager.token);
       expect(res.statusCode, url).toBe(400);
       expect(res.json().error.code, url).toBe('INVALID_URL');
     }
@@ -228,5 +245,75 @@ describe('POST /verify/cbe', () => {
       payload: { url: URL_OK, expectedAmountEtb: 600 },
     });
     expect(anon.statusCode).toBe(401);
+  });
+
+  describe('mobile banking receipt link (mbreciept.cbe.com.et)', () => {
+    it('reads the bank JSON for the link and verifies it', async () => {
+      fetchMock.mockResolvedValueOnce(jsonReceipt());
+      const res = await verify({ url: MB_URL, expectedAmountEtb: 600 });
+      expect(res.json()).toMatchObject({
+        status: 'verified',
+        reference: 'FT26283K4Z9P',
+        amountEtb: 600,
+        extraEtb: 0,
+        payerName: 'KEBEDE TESFAYE ALEMU',
+        receiverName: 'ABEBE COFFEE AND RESTAURANT',
+      });
+      const [url, options] = fetchMock.mock.calls[0] ?? [];
+      expect(url?.href).toBe(
+        'https://mb.cbe.com.et/api/v1/transactions/public/transaction-detail/v2-AbCdEfGhIjKlMnOpQrSt'
+      );
+      expect(options?.headers).toMatchObject({
+        referer: 'https://mbreciept.cbe.com.et/v2-AbCdEfGhIjKlMnOpQrSt',
+      });
+    });
+
+    it('refuses other paths on that host', async () => {
+      for (const url of [
+        'https://mbreciept.cbe.com.et/v2-abc',
+        'https://mbreciept.cbe.com.et/v2-AbCdEfGhIjKlMnOpQrSt/x',
+        'https://mbreciept.cbe.com.et/v2-AbCdEfGhIjKlMnOpQrSt?next=1',
+        'https://mbreciept.cbe.com.et/api/v2-AbCdEfGhIjKlMnOpQrSt',
+        'http://mbreciept.cbe.com.et/v2-AbCdEfGhIjKlMnOpQrSt',
+        'https://mbreciept.cbe.com.et:8443/v2-AbCdEfGhIjKlMnOpQrSt',
+      ]) {
+        const res = await verify({ url, expectedAmountEtb: 600 }, r.manager.token);
+        expect(res.json().error?.code, url).toBe('INVALID_URL');
+      }
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('compares the JSON fields and reports what the bank says', async () => {
+      const cases: [Record<string, unknown>, unknown][] = [
+        [{ amountCredited: '550.00' }, { status: 'not_matching', reasons: ['AMOUNT_TOO_LOW'] }],
+        [
+          { creditAccountNo: 'E***********9999' },
+          { status: 'not_matching', reasons: ['WRONG_RECEIVER'] },
+        ],
+        [
+          { statusDesc: 'FAILED', status: 'FAILED' },
+          { status: 'not_matching', reasons: ['NOT_SUCCESS'] },
+        ],
+        [
+          { dateTimes: [new Date(Date.now() - 30 * HOUR).toISOString()] },
+          { status: 'not_matching', reasons: ['EXPIRED'] },
+        ],
+        [{ creditAccountHolder: '' }, { status: 'unable_to_verify', reason: 'UNPARSEABLE' }],
+      ];
+      for (const [changes, expected] of cases) {
+        fetchMock.mockResolvedValueOnce(jsonReceipt(changes));
+        const res = await verify({ url: MB_URL, expectedAmountEtb: 600 }, r.waiter2.token);
+        expect(res.json(), JSON.stringify(changes)).toEqual(expected);
+      }
+
+      // The bank answers 400 "transaction not found" for a link it does not know.
+      fetchMock.mockRejectedValueOnce(new ReceiptFetchError('NOT_FOUND'));
+      expect(
+        (await verify({ url: MB_URL, expectedAmountEtb: 600 }, r.waiter2.token)).json()
+      ).toEqual({
+        status: 'unable_to_verify',
+        reason: 'NOT_FOUND',
+      });
+    });
   });
 });

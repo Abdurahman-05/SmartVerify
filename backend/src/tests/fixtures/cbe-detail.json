@@ -1,0 +1,76 @@
+{
+  "id": "FT26283K4Z9P",
+  "transactionType": "ACNX",
+  "debitAccountNo": "1********1234",
+  "currencyMktDr": "1",
+  "debitCurrency": "ETB",
+  "debitAmount": "600.00",
+  "debitValueDate": "20261013",
+  "debitTheirRef": "2900000000011",
+  "creditTheirRef": "2900000000011",
+  "creditAccountNo": "E***********5678",
+  "creditCurrency": "ETB",
+  "creditValueDate": "20261013",
+  "processingDate": "20261013",
+  "paymentDetails": [
+    "2900000000011"
+  ],
+  "chargeComDisplay": "NO",
+  "commissionCode": "Debit Plus Charges",
+  "commissionTypes": [
+    {
+      "commissionType": "COMETSWCH",
+      "commissionAmt": "ETB0.40"
+    },
+    {
+      "commissionType": "COMMBP2P",
+      "commissionAmt": "ETB5.00"
+    },
+    {
+      "commissionType": "COMMBP2PDR",
+      "commissionAmt": "ETB0.25"
+    }
+  ],
+  "chargeCode": "WAIVE",
+  "positionType": "TR",
+  "taxTypes": [
+    {
+      "taxType": "15",
+      "taxAmt": "ETB0.81"
+    }
+  ],
+  "amountDebitedWithCurrency": "ETB606.46",
+  "amountCreditedWithCurrency": "ETB600.00",
+  "totalChargeAmountWithCurrency": "ETB6.46",
+  "totalTaxAmountWithCurrency": "ETB0.81",
+  "amountDebited": "606.46",
+  "amountCredited": "600.00",
+  "totalChargeAmount": "6.46",
+  "totalTaxAmount": "0.81",
+  "totRecComm": "0",
+  "totRecCommLcl": "0",
+  "totRecChg": "0",
+  "totRecChgLcl": "0",
+  "rateFixing": "NO",
+  "authDate": "20261013",
+  "roundType": "NATURAL",
+  "currNo": "1",
+  "dateTimes": [
+    "2026-10-13T09:15:00Z"
+  ],
+  "creditAccountHolder": "ABEBE COFFEE AND RESTAURANT",
+  "debitAccountHolder": "KEBEDE TESFAYE ALEMU",
+  "encodedReceipt": "https://mbreciept.cbe.com.et/v2-AbCdEfGhIjKlMnOpQrSt",
+  "isPlatformTransaction": true,
+  "channel": "USSD",
+  "platformTransactionType": "BANK_TRANSFER",
+  "isOtherBank": false,
+  "description": "2900000000011",
+  "serviceChargeValue": "ETB 5.38",
+  "vatValue": "ETB 0.81",
+  "drCharge": "ETB 0.27",
+  "chargeDescription": "Service charge of ETB 5.38 and VAT(15%) of ETB 0.81 and Disaster Recovery(5%) of ETB 0.27 with total charge of ETB 6.46.",
+  "status": "COMPLETED",
+  "statusDesc": "SUCCESS",
+  "thirdPartyStatus": "SUCCESS"
+}

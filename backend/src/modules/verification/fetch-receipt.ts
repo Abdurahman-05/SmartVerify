@@ -1,6 +1,7 @@
 import https from 'node:https';
 
-export type FetchFailure = 'TIMEOUT' | 'UNREACHABLE';
+/** NOT_FOUND: the bank answered that it has no such receipt (400/404). */
+export type FetchFailure = 'TIMEOUT' | 'UNREACHABLE' | 'NOT_FOUND';
 
 export class ReceiptFetchError extends Error {
   constructor(readonly reason: FetchFailure) {
@@ -17,6 +18,7 @@ export interface FetchOptions {
   tlsStrict: boolean;
   timeoutMs: number;
   maxBytes: number;
+  headers?: Record<string, string>;
 }
 
 const MAX_REDIRECTS = 3;
@@ -33,7 +35,8 @@ export function fetchReceipt(url: URL, options: FetchOptions): Promise<FetchedRe
       const remaining = deadline - Date.now();
       if (remaining <= 0) return reject(new ReceiptFetchError('TIMEOUT'));
 
-      const req = https.get(target, { rejectUnauthorized: options.tlsStrict }, (res) => {
+      const requestOptions = { rejectUnauthorized: options.tlsStrict, headers: options.headers };
+      const req = https.get(target, requestOptions, (res) => {
         const status = res.statusCode ?? 0;
         if (status >= 300 && status < 400 && res.headers.location) {
           res.resume();
@@ -52,7 +55,8 @@ export function fetchReceipt(url: URL, options: FetchOptions): Promise<FetchedRe
         if (status !== 200) {
           res.resume();
           clearTimeout(timer);
-          return reject(new ReceiptFetchError('UNREACHABLE'));
+          const reason = status === 400 || status === 404 ? 'NOT_FOUND' : 'UNREACHABLE';
+          return reject(new ReceiptFetchError(reason));
         }
 
         const chunks: Buffer[] = [];
