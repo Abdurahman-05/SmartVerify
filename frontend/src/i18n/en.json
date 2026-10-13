@@ -956,11 +956,11 @@
       "again": "Scan again"
     },
     "read": {
-      "weFind": "We find the {{things}} for you.",
       "photo": "Take a photo",
       "screenshot": "Choose a screenshot",
       "reading": "Reading the receipt",
-      "readingSub": "Finding the numbers for you"
+      "readingSub": "Finding the numbers for you",
+      "keepInFrame": "Keep the {{things}} inside the frame"
     },
     "found": {
       "title": "Is this right?",

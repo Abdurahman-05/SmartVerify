@@ -956,11 +956,11 @@
       "again": "እንደገና ይቃኙ"
     },
     "read": {
-      "weFind": "{{things}} እኛ እናገኝልዎታለን።",
       "photo": "ፎቶ ያንሱ",
       "screenshot": "ስክሪንሾት ይምረጡ",
       "reading": "ደረሰኙን በማንበብ ላይ",
-      "readingSub": "ቁጥሮቹን በመፈለግ ላይ"
+      "readingSub": "ቁጥሮቹን በመፈለግ ላይ",
+      "keepInFrame": "{{things}} በፍሬሙ ውስጥ እንዲሆን ያድርጉ"
     },
     "found": {
       "title": "ይህ ትክክል ነው?",
