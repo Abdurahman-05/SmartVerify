@@ -32,7 +32,7 @@ const schema = z
   })
   .superRefine(({ bankCode, accountNumber }, ctx) => {
     const telebirr = bankCode === TELEBIRR;
-    if (!(telebirr ? TELEBIRR_PHONE : /^\d{10,13}$/).test(accountNumber)) {
+    if (!(telebirr ? TELEBIRR_PHONE : /^\d{8,16}$/).test(accountNumber)) {
       ctx.addIssue({
         code: 'custom',
         path: ['accountNumber'],
@@ -169,11 +169,11 @@ export default function AddBankAccountScreen() {
                   : 'bankAccounts.accountNumberPlaceholder'
               )}
               value={field.value}
-              onChangeText={(text) => field.onChange(digitsOnly(text, telebirr ? 10 : 13))}
+              onChangeText={(text) => field.onChange(digitsOnly(text, telebirr ? 10 : 16))}
               onBlur={field.onBlur}
               keyboardType={telebirr ? 'phone-pad' : 'number-pad'}
               textContentType={telebirr ? 'telephoneNumber' : 'none'}
-              maxLength={telebirr ? 10 : 13}
+              maxLength={telebirr ? 10 : 16}
               style={{ letterSpacing: 0.7 }}
               error={errors.accountNumber?.message ? t(errors.accountNumber.message) : undefined}
             />

@@ -302,7 +302,7 @@
     "chooseBank": "ባንክ ይምረጡ",
     "bankNote": "ክፍያዎችን በቀጥታ ከኢትዮጵያ ባንኮች እና ከቴሌብር ጋር ማረጋገጥ እንችላለን።",
     "accountNumber": "የሂሳብ ቁጥር",
-    "accountNumberHint": "ከ10 እስከ 13 አሃዝ",
+    "accountNumberHint": "ከ8 እስከ 16 አሃዝ",
     "accountNumberPlaceholder": "ለምሳሌ፦ 1000293884758",
     "telebirrPhone": "የቴሌብር ስልክ ቁጥር",
     "telebirrPhoneHint": "10 አሃዝ",
@@ -316,7 +316,7 @@
     "connecting": "ሂሳቡን በማገናኘት ላይ",
     "connectingSubtitle": "ሂሳቡን ከባንኩ ጋር በማረጋገጥ ላይ",
     "errors": {
-      "accountNumber": "ከ10 እስከ 13 አሃዝ ያስገቡ",
+      "accountNumber": "ከ8 እስከ 16 አሃዝ ያስገቡ",
       "telebirrPhone": "እንደ 0911223344 ያለ ስልክ ቁጥር ያስገቡ",
       "duplicate": "ይህ ሂሳብ አስቀድሞ ተገናኝቷል።",
       "limit": "በእቅድዎ ያሉትን ሂሳቦች በሙሉ ተጠቅመዋል።",
