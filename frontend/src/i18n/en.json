@@ -502,7 +502,7 @@
     "receivingAccount": "Receiving account ••••{{last4}}",
     "change": "Change",
     "chooseAccount": "Choose receiving account",
-    "scanQr": "Scan QR · {{amount}}",
+    "scanQr": "Check payment · {{amount}}",
     "confirm": "Confirm payment",
     "devSimulate": "DEV: bank sends",
     "devExact": "Exact",
@@ -905,6 +905,72 @@
     "today": {
       "paid": "Paid bills",
       "open": "Open bills"
+    }
+  },
+  "verifyBank": {
+    "title": "Check payment",
+    "whichBank": "Which bank did the customer use?",
+    "findThings_one": "Find this 1 thing on the receipt",
+    "findThings_other": "Find these {{count}} things on the receipt",
+    "steps": {
+      "bank": "Bank",
+      "receipt": "Receipt",
+      "check": "Check"
+    },
+    "stepOf": "Step {{step}} of 3: {{name}}",
+    "payByBank": "Pay by bank",
+    "mostUsed": "Most used",
+    "otherBanks": "Other banks",
+    "canCheck": "Can check",
+    "otherBank": "Other bank",
+    "notSupportedTitle": "We can’t check this bank yet",
+    "notSupportedBody": "Only the banks on the list can be checked.",
+    "chooseAnother": "Choose another bank",
+    "saveNotChecked": "Save as “not checked”",
+    "saving": "Saving payment",
+    "customersBank": "Customer’s bank",
+    "change": "Change",
+    "changeBank": "Change the customer’s bank",
+    "receipt": "Receipt",
+    "qrGivesAll_one": "The QR gives it at once.",
+    "qrGivesAll_other": "The QR gives them all at once.",
+    "scanQr": "Scan the QR",
+    "readScreenshot": "Read from a screenshot",
+    "readReceipt": "Read the receipt",
+    "and": "and",
+    "fields": {
+      "reference": "Reference No",
+      "payerAccount": "Payer account",
+      "transactionNumber": "Transaction number"
+    },
+    "short": {
+      "reference": "Transaction ID",
+      "payerAccount": "Account last 8 digits",
+      "transactionNumber": "Transaction number"
+    },
+    "scan": {
+      "title": "Scan the QR",
+      "hint": "Point at the QR on the receipt",
+      "noQr": "No QR? Read the receipt",
+      "notFound": "No QR found",
+      "again": "Scan again"
+    },
+    "read": {
+      "weFind": "We find the {{things}} for you.",
+      "photo": "Take a photo",
+      "screenshot": "Choose a screenshot",
+      "reading": "Reading the receipt",
+      "readingSub": "Finding the numbers for you"
+    },
+    "found": {
+      "title": "Is this right?",
+      "found": "{{field}} · found",
+      "typeIt": "{{field}} · type it",
+      "digits": "{{count}} digits",
+      "typeHere": "Type it here",
+      "wrong": "Check this number on the receipt",
+      "check": "Check · {{amount}}",
+      "readAgain": "Read again"
     }
   }
 }

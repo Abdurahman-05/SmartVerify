@@ -32,7 +32,7 @@ function CloseButton({ onPress, light }: { onPress: () => void; light?: boolean 
   );
 }
 
-function ScanFrame() {
+export function ScanFrame() {
   const corner = 'absolute border-accent';
   const size = { width: CORNER, height: CORNER };
   return (
@@ -57,7 +57,7 @@ function ScanFrame() {
   );
 }
 
-function PermissionView({
+export function PermissionView({
   canAskAgain,
   onAllow,
   onClose,

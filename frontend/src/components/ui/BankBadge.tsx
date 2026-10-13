@@ -2,13 +2,13 @@ import { View } from 'react-native';
 
 import { Text } from './Text';
 
-export function BankBadge({ code, size = 48 }: { code: string; size?: 40 | 44 | 48 }) {
+export function BankBadge({ code, size = 48 }: { code: string; size?: 40 | 44 | 48 | 64 }) {
   return (
     <View
       className="items-center justify-center rounded-[14px] bg-primaryTile"
       style={{ width: size, height: size }}
     >
-      <Text font="bold" className="text-sm text-primary">
+      <Text font="bold" className={`text-primary ${size >= 64 ? 'text-base' : 'text-sm'}`}>
         {code}
       </Text>
     </View>

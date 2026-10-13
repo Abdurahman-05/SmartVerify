@@ -502,7 +502,7 @@
     "receivingAccount": "ተቀባይ ሂሳብ ••••{{last4}}",
     "change": "ቀይር",
     "chooseAccount": "ተቀባይ ሂሳብ ይምረጡ",
-    "scanQr": "QR ቃኝ · {{amount}}",
+    "scanQr": "ክፍያ ያረጋግጡ · {{amount}}",
     "confirm": "ክፍያውን አረጋግጥ",
     "devSimulate": "DEV: ባንኩ የሚልከው",
     "devExact": "ትክክል",
@@ -905,6 +905,72 @@
     "today": {
       "paid": "የተከፈሉ ሂሳቦች",
       "open": "ክፍት ሂሳቦች"
+    }
+  },
+  "verifyBank": {
+    "title": "ክፍያ ያረጋግጡ",
+    "whichBank": "ደንበኛው በየትኛው ባንክ ከፈለ?",
+    "findThings_one": "በደረሰኙ ላይ ይህን 1 ነገር ያግኙ",
+    "findThings_other": "በደረሰኙ ላይ እነዚህን {{count}} ነገሮች ያግኙ",
+    "steps": {
+      "bank": "ባንክ",
+      "receipt": "ደረሰኝ",
+      "check": "ማረጋገጥ"
+    },
+    "stepOf": "ደረጃ {{step}} ከ 3፦ {{name}}",
+    "payByBank": "በባንክ ክፍያ",
+    "mostUsed": "በብዛት የሚጠቀሙ",
+    "otherBanks": "ሌሎች ባንኮች",
+    "canCheck": "ማረጋገጥ ይቻላል",
+    "otherBank": "ሌላ ባንክ",
+    "notSupportedTitle": "ይህን ባንክ ገና ማረጋገጥ አንችልም",
+    "notSupportedBody": "ማረጋገጥ የሚቻለው በዝርዝሩ ላይ ያሉትን ባንኮች ብቻ ነው።",
+    "chooseAnother": "ሌላ ባንክ ይምረጡ",
+    "saveNotChecked": "«ያልተረጋገጠ» ብለው ያስቀምጡ",
+    "saving": "ክፍያውን በማስቀመጥ ላይ",
+    "customersBank": "የደንበኛው ባንክ",
+    "change": "ቀይር",
+    "changeBank": "የደንበኛውን ባንክ ይቀይሩ",
+    "receipt": "ደረሰኝ",
+    "qrGivesAll_one": "QR ኮዱ ወዲያውኑ ይሰጣል።",
+    "qrGivesAll_other": "QR ኮዱ ሁሉንም ወዲያውኑ ይሰጣል።",
+    "scanQr": "QR ኮዱን ይቃኙ",
+    "readScreenshot": "ከስክሪንሾት ያንብቡ",
+    "readReceipt": "ደረሰኙን ያንብቡ",
+    "and": "እና",
+    "fields": {
+      "reference": "የማጣቀሻ ቁጥር",
+      "payerAccount": "የከፋዩ ሂሳብ",
+      "transactionNumber": "የግብይት ቁጥር"
+    },
+    "short": {
+      "reference": "የግብይት መለያ",
+      "payerAccount": "የሂሳብ የመጨረሻ 8 አሃዞች",
+      "transactionNumber": "የግብይት ቁጥር"
+    },
+    "scan": {
+      "title": "QR ኮዱን ይቃኙ",
+      "hint": "ካሜራውን በደረሰኙ QR ላይ ያድርጉ",
+      "noQr": "QR የለም? ደረሰኙን ያንብቡ",
+      "notFound": "QR አልተገኘም",
+      "again": "እንደገና ይቃኙ"
+    },
+    "read": {
+      "weFind": "{{things}} እኛ እናገኝልዎታለን።",
+      "photo": "ፎቶ ያንሱ",
+      "screenshot": "ስክሪንሾት ይምረጡ",
+      "reading": "ደረሰኙን በማንበብ ላይ",
+      "readingSub": "ቁጥሮቹን በመፈለግ ላይ"
+    },
+    "found": {
+      "title": "ይህ ትክክል ነው?",
+      "found": "{{field}} · ተገኝቷል",
+      "typeIt": "{{field}} · ይጻፉት",
+      "digits": "{{count}} አሃዞች",
+      "typeHere": "እዚህ ይጻፉ",
+      "wrong": "ይህን ቁጥር በደረሰኙ ላይ ያረጋግጡ",
+      "check": "አረጋግጥ · {{amount}}",
+      "readAgain": "እንደገና ያንብቡ"
     }
   }
 }

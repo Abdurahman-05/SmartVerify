@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
-import { Landmark, Lock, QrCode, Wallet, type LucideIcon } from 'lucide-react-native';
+import { Landmark, Lock, ShieldCheck, Wallet, type LucideIcon } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, TextInput, View } from 'react-native';
@@ -120,7 +120,7 @@ export default function VerifyRestaurantScreen() {
       return;
     }
     setAmount(toScan);
-    router.push({ pathname: '/scan', params: { mode: 'restaurant' } });
+    router.push('/verify-bank');
   };
 
   const simulations: { value: BankCheckSimulation; label: string }[] = [
@@ -289,7 +289,7 @@ export default function VerifyRestaurantScreen() {
               ? t('verifyRestaurant.confirm')
               : t('verifyRestaurant.scanQr', { amount: formatMoney(toScan) })
           }
-          icon={QrCode}
+          icon={ShieldCheck}
           disabled={!canGo}
           onPress={proceed}
         />
