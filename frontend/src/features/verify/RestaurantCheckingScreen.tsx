@@ -35,10 +35,12 @@ type Failure =
 async function checkReceived(
   qrData: string,
   amount: number,
+  billId: string,
   fake: () => Promise<number>
 ): Promise<number | Failure> {
   if (!isCbeReceiptLink(qrData)) return fake();
-  const result = await verifyCbe(qrData, amount);
+  // A check that does not verify is saved with the bill, so it shows in history.
+  const result = await verifyCbe(qrData, amount, billId);
   if (result.status === 'verified') return result.amountEtb;
   if (result.status === 'not_matching') {
     return {
@@ -75,7 +77,7 @@ export default function RestaurantCheckingScreen() {
         simulate: useRestaurantPay.getState().simulate,
       }).then(({ received }) => received);
 
-    checkReceived(qrData, amount, fake)
+    checkReceived(qrData, amount, bill.id, fake)
       .then(async (received) => {
         if (typeof received !== 'number') {
           if (!cancelled) setFailure(received);

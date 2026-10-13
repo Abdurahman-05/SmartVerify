@@ -851,7 +851,8 @@
       "all": "All",
       "cash": "Cash",
       "bank": "Bank",
-      "cashBank": "Cash + bank"
+      "cashBank": "Cash + bank",
+      "failed": "Failed"
     },
     "empty": "No paid bills in this period yet.",
     "tipFor": "Tip {{amount}} ETB",
@@ -905,6 +906,11 @@
     "today": {
       "paid": "Paid bills",
       "open": "Open bills"
+    },
+    "failed": {
+      "tag": "Not verified",
+      "noBill": "No bill",
+      "empty": "No failed checks in this period."
     }
   },
   "verifyBank": {

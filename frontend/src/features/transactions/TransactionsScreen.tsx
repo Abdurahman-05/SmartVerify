@@ -17,11 +17,13 @@ import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { sharePdf } from '@/lib/export';
 import { getPayments, payMethods, paymentsKey, type PayMethod } from '@/lib/history';
 import { isPeriod, periods, type Period } from '@/lib/period';
+import { failedChecksKey, getFailedChecks } from '@/lib/verification';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
 import { methodKey } from './methods';
 import { PaymentRow } from './PaymentRow';
+import { FailedCheckRow } from './FailedCheckRow';
 import { buildStatement } from './statement';
 
 const isMethod = (value: unknown): value is PayMethod =>
@@ -63,7 +65,7 @@ function MethodChip({
   );
 }
 
-/** History: paid bills (cash, bank, cash + bank). Bank verification is not part of this yet. */
+/** History: paid bills (cash, bank, cash + bank), and bank checks that failed. */
 export default function TransactionsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -71,15 +73,23 @@ export default function TransactionsScreen() {
   const params = useLocalSearchParams<{ method?: string; period?: string }>();
   const period: Period = isPeriod(params.period) ? params.period : 'today';
   const method = isMethod(params.method) ? params.method : null;
+  // "Failed" lists bank receipt checks that did not verify instead of payments.
+  const showFailed = params.method === 'failed';
   const [sheet, setSheet] = useState<'period' | null>(null);
   const [downloading, setDownloading] = useState(false);
 
   const query = useQuery({ queryKey: paymentsKey(period), queryFn: () => getPayments(period) });
+  const failedQuery = useQuery({
+    queryKey: failedChecksKey(period),
+    queryFn: () => getFailedChecks(period),
+  });
   const { refetch } = query;
+  const { refetch: refetchFailed } = failedQuery;
   useFocusEffect(
     useCallback(() => {
       void refetch();
-    }, [refetch])
+      void refetchFailed();
+    }, [refetch, refetchFailed])
   );
 
   if (query.isPending) return <LoadingView screenTitle={t('transactions.title')} />;
@@ -88,7 +98,8 @@ export default function TransactionsScreen() {
   }
 
   const all = query.data ?? [];
-  const visible = method ? all.filter((p) => p.method === method) : all;
+  const visible = showFailed ? [] : method ? all.filter((p) => p.method === method) : all;
+  const failedChecks = failedQuery.data ?? [];
   const salesTotal = all.reduce((sum, p) => sum + p.salesEtb, 0);
   const methodLabel = method ? t(methodKey(method)) : t('history.method.all');
 
@@ -131,7 +142,7 @@ export default function TransactionsScreen() {
           <MethodChip
             label={t('history.method.all')}
             count={all.length}
-            selected={!method}
+            selected={!method && !showFailed}
             onPress={() => router.setParams({ method: undefined })}
           />
           {payMethods.map((m) => (
@@ -143,6 +154,12 @@ export default function TransactionsScreen() {
               onPress={() => router.setParams({ method: m })}
             />
           ))}
+          <MethodChip
+            label={t('history.method.failed')}
+            count={failedChecks.length}
+            selected={showFailed}
+            onPress={() => router.setParams({ method: 'failed' })}
+          />
         </ScrollView>
       </View>
     </View>
@@ -165,31 +182,53 @@ export default function TransactionsScreen() {
         }
       />
 
-      <FlatList
-        data={visible}
-        keyExtractor={(p) => p.id}
-        ListHeaderComponent={header}
-        contentContainerStyle={{ paddingBottom: 12 }}
-        ItemSeparatorComponent={() => <View className="h-2" />}
-        renderItem={({ item }) => (
-          <View className="px-4">
-            <PaymentRow
-              payment={item}
-              showDate={period !== 'today'}
-              onPress={() =>
-                router.push({ pathname: '/transaction/[id]', params: { id: item.id } })
-              }
-            />
-          </View>
-        )}
-        ListEmptyComponent={
-          <Text tone="muted" className="px-6 pt-10 text-center text-lg">
-            {query.isError
-              ? `${t('history.loadFailed')} ${t(errorMessageKey(query.error))}`
-              : t('history.empty')}
-          </Text>
-        }
-      />
+      {showFailed ? (
+        <FlatList
+          data={failedChecks}
+          keyExtractor={(c) => c.id}
+          ListHeaderComponent={header}
+          contentContainerStyle={{ paddingBottom: 12 }}
+          ItemSeparatorComponent={() => <View className="h-2" />}
+          renderItem={({ item }) => (
+            <View className="px-4">
+              <FailedCheckRow check={item} showDate={period !== 'today'} />
+            </View>
+          )}
+          ListEmptyComponent={
+            <Text tone="muted" className="px-6 pt-10 text-center text-lg">
+              {failedQuery.isError
+                ? `${t('history.loadFailed')} ${t(errorMessageKey(failedQuery.error))}`
+                : t('history.failed.empty')}
+            </Text>
+          }
+        />
+      ) : (
+        <FlatList
+          data={visible}
+          keyExtractor={(p) => p.id}
+          ListHeaderComponent={header}
+          contentContainerStyle={{ paddingBottom: 12 }}
+          ItemSeparatorComponent={() => <View className="h-2" />}
+          renderItem={({ item }) => (
+            <View className="px-4">
+              <PaymentRow
+                payment={item}
+                showDate={period !== 'today'}
+                onPress={() =>
+                  router.push({ pathname: '/transaction/[id]', params: { id: item.id } })
+                }
+              />
+            </View>
+          )}
+          ListEmptyComponent={
+            <Text tone="muted" className="px-6 pt-10 text-center text-lg">
+              {query.isError
+                ? `${t('history.loadFailed')} ${t(errorMessageKey(query.error))}`
+                : t('history.empty')}
+            </Text>
+          }
+        />
+      )}
 
       <View className="px-4 py-2.5">
         <Button
