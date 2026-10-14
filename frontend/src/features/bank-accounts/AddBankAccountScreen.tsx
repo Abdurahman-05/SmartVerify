@@ -24,13 +24,16 @@ import { colors } from '@/theme/tokens';
 
 import { TELEBIRR, TELEBIRR_PHONE } from './telebirr';
 
+/** CBE accounts need the holder name: CBE receipts show it and the check compares it. */
+const CBE = 'CBE';
+
 const schema = z
   .object({
     bankCode: z.string(),
     accountNumber: z.string(),
     holderName: z.string().trim().max(80),
   })
-  .superRefine(({ bankCode, accountNumber }, ctx) => {
+  .superRefine(({ bankCode, accountNumber, holderName }, ctx) => {
     const telebirr = bankCode === TELEBIRR;
     if (!(telebirr ? TELEBIRR_PHONE : /^\d{8,16}$/).test(accountNumber)) {
       ctx.addIssue({
@@ -39,6 +42,14 @@ const schema = z
         message: telebirr
           ? 'bankAccounts.errors.telebirrPhone'
           : 'bankAccounts.errors.accountNumber',
+      });
+    }
+    // CBE receipts show the receiver's name; payment checks compare it with this name.
+    if (bankCode === CBE && !holderName) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['holderName'],
+        message: 'bankAccounts.errors.holderRequired',
       });
     }
   });
@@ -187,17 +198,24 @@ export default function AddBankAccountScreen() {
             render={({ field }) => (
               <Input
                 label={t('bankAccounts.holderName')}
-                labelRight={<FieldHint>{t('bankAccounts.optional')}</FieldHint>}
+                labelRight={
+                  <FieldHint>
+                    {t(bank.code === CBE ? 'bankAccounts.required' : 'bankAccounts.optional')}
+                  </FieldHint>
+                }
                 placeholder={t('bankAccounts.holderPlaceholder')}
                 value={field.value}
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
                 autoCapitalize="words"
                 textContentType="name"
+                error={errors.holderName?.message ? t(errors.holderName.message) : undefined}
               />
             )}
           />
-          <Note>{t('bankAccounts.holderNote')}</Note>
+          <Note>
+            {t(bank.code === CBE ? 'bankAccounts.holderNoteCbe' : 'bankAccounts.holderNote')}
+          </Note>
         </View>
       </View>
 
@@ -236,7 +254,7 @@ export default function AddBankAccountScreen() {
           // A phone number and an account number are different things: start the field again.
           if ((code === TELEBIRR) !== telebirr) setValue('accountNumber', '');
           setValue('bankCode', code);
-          clearErrors('accountNumber');
+          clearErrors(['accountNumber', 'holderName']);
         }}
         onClose={() => setBankSheetOpen(false)}
       />

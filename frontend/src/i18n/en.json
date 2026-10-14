@@ -320,9 +320,12 @@
       "telebirrPhone": "Enter a phone number like 0911223344",
       "duplicate": "This account is already connected.",
       "limit": "You have used all accounts in your plan.",
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "holderRequired": "Enter the account holder name for CBE."
     },
-    "noAccountsVerify": "Add a bank account first so we know where the money should arrive."
+    "noAccountsVerify": "Add a bank account first so we know where the money should arrive.",
+    "required": "Required",
+    "holderNoteCbe": "Write the name exactly as CBE shows it. We check it on CBE receipts."
   },
   "subscription": {
     "title": "Subscription",
@@ -993,7 +996,8 @@
         "WRONG_RECEIVER": "The money went to an account that is not yours.",
         "AMOUNT_TOO_LOW": "The amount on the receipt is less than the bill.",
         "NOT_SUCCESS": "The bank says this payment did not go through.",
-        "EXPIRED": "This receipt is too old."
+        "EXPIRED": "This receipt is too old.",
+        "WRONG_RECEIVER_NAME": "The receiver name on the receipt is not your account's name."
       },
       "unableReasons": {
         "TIMEOUT": "The bank took too long to answer.",
@@ -1004,7 +1008,8 @@
       "titles": {
         "WRONG_RECEIVER": "Paid to another account",
         "NOT_SUCCESS": "Payment did not go through",
-        "EXPIRED": "Receipt is too old"
+        "EXPIRED": "Receipt is too old",
+        "WRONG_RECEIVER_NAME": "Paid to a different name"
       },
       "billOpen": "The bill is still open. Nothing was recorded."
     },

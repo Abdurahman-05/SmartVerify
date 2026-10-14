@@ -2,7 +2,8 @@ import type { Period } from '@/lib/period';
 
 import { mockDelay } from './mock';
 
-export type CbeMismatch = 'WRONG_RECEIVER' | 'AMOUNT_TOO_LOW' | 'NOT_SUCCESS' | 'EXPIRED';
+export type CbeMismatch =
+  'WRONG_RECEIVER' | 'WRONG_RECEIVER_NAME' | 'AMOUNT_TOO_LOW' | 'NOT_SUCCESS' | 'EXPIRED';
 export type CbeUnable = 'TIMEOUT' | 'UNREACHABLE' | 'NOT_FOUND' | 'UNPARSEABLE';
 
 /** The server's answer to a CBE receipt check (POST /verify/cbe). */
