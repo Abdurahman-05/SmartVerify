@@ -14,7 +14,9 @@ import { Text } from '@/components/ui/Text';
 export default function QrResultScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { text = '' } = useLocalSearchParams<{ text?: string }>();
+  // mode=read: what was read from a receipt picture (extraction only, temporary).
+  const { text = '', mode } = useLocalSearchParams<{ text?: string; mode?: 'read' }>();
+  const read = mode === 'read';
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -33,7 +35,10 @@ export default function QrResultScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader title={t('verifyBank.qrResult.title')} onBack={scanAgain} />
+      <ScreenHeader
+        title={t(read ? 'verifyBank.qrResult.readTitle' : 'verifyBank.qrResult.title')}
+        onBack={scanAgain}
+      />
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <View className="rounded-card border-[1.5px] border-border bg-surface p-4">
           <Text className="text-base" selectable>
@@ -42,7 +47,11 @@ export default function QrResultScreen() {
         </View>
       </ScrollView>
       <View className="gap-2.5 px-4 pb-6 pt-2">
-        <Button label={t('verifyBank.scan.again')} icon={RotateCcw} onPress={scanAgain} />
+        <Button
+          label={t(read ? 'verifyBank.found.readAgain' : 'verifyBank.scan.again')}
+          icon={RotateCcw}
+          onPress={scanAgain}
+        />
         <Button
           label={t(copied ? 'verifyBank.qrResult.copied' : 'verifyBank.qrResult.copy')}
           icon={copied ? Check : Copy}

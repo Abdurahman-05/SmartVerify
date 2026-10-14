@@ -19,9 +19,9 @@ export const verifyCbe = (url: string, expectedAmountEtb: number, billId?: strin
 export const getFailedChecks = (period: Period) =>
   api<FailedCheck[]>('/verify/failed', { query: { period } });
 
-/** POST /verify/read-reference — the CBE Transaction ID read from a receipt picture (base64). */
+/** POST /verify/read-reference — the text of a receipt picture (base64) and its Transaction ID. */
 export const readReference = (imageBase64: string) =>
-  api<{ reference: string | null }>('/verify/read-reference', {
+  api<{ reference: string | null; text: string }>('/verify/read-reference', {
     method: 'POST',
     body: { image: imageBase64 },
     timeoutMs: 45_000,

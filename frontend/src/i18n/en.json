@@ -987,7 +987,8 @@
     "qrResult": {
       "title": "QR result",
       "copy": "Copy",
-      "copied": "Copied"
+      "copied": "Copied",
+      "readTitle": "Reading result"
     },
     "check": {
       "unable": "Could not check the payment",
@@ -1018,6 +1019,12 @@
       "body": "The customer sent {{received}} for a {{bill}} bill. Ask the customer: keep the extra as {{name}}'s tip, or give it back in cash?",
       "keepTip": "Keep as tip",
       "giveBack": "Give back in cash"
+    },
+    "extracted": {
+      "qr": "QR code",
+      "reference": "Transaction ID",
+      "none": "not found",
+      "text": "Text read from the picture"
     }
   }
 }

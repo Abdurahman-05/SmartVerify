@@ -15,7 +15,7 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { errorMessageKey } from '@/lib/errors';
 import { readReceipt } from '@/lib/mock/receipt';
-import { isCbeReceiptLink, readReference } from '@/lib/verification';
+import { readReference } from '@/lib/verification';
 
 import { findPayerBank, onReceipt, type PayerBank } from './payerBanks';
 import { useReceiptFlow } from './receiptFlow';
@@ -92,7 +92,6 @@ export default function ReadReceiptScreen() {
   const amount = useVerifyFlow((s) => s.amount);
   const bank = findPayerBank(useReceiptFlow((s) => s.bankCode));
   const setFound = useReceiptFlow((s) => s.setFound);
-  const setQrData = useVerifyFlow((s) => s.setQrData);
   const [reading, setReading] = useState(false);
 
   if (!bank || amount <= 0) return <Redirect href="/verify-bank" />;
@@ -114,9 +113,8 @@ export default function ReadReceiptScreen() {
   };
 
   /**
-   * CBE: take or pick the receipt picture. Its QR (screenshots of CBE receipts have one) goes
-   * straight to the check; otherwise the server reads the Transaction ID and the confirm page
-   * asks for the rest.
+   * CBE: take or pick the receipt picture and show what it gives: its QR (screenshots of CBE
+   * receipts have one), else the Transaction ID and text the server reads (extraction only).
    */
   const readCbe = async (source: 'camera' | 'library') => {
     if (source === 'camera' && !(await ImagePicker.requestCameraPermissionsAsync()).granted) {
@@ -137,17 +135,27 @@ export default function ReadReceiptScreen() {
 
     setReading(true);
     try {
+      // Extraction only for now: show what the picture gives, no bank check yet.
       const codes = await scanFromURLAsync(asset.uri, ['qr']).catch(() => []);
-      const link = codes.map((c) => c.data.trim()).find(isCbeReceiptLink);
-      if (link) {
-        setQrData(link);
-        router.replace('/verify-restaurant/checking');
-        return;
+      const qr = codes[0]?.data.trim();
+      const lines: string[] = [];
+      if (qr) {
+        lines.push(`${t('verifyBank.extracted.qr')}:`, qr);
+      } else {
+        if (!asset.base64) throw new Error('no image data');
+        const { reference, text } = await readReference(asset.base64);
+        lines.push(
+          `${t('verifyBank.extracted.reference')}: ${reference ?? t('verifyBank.extracted.none')}`,
+          '',
+          `${t('verifyBank.extracted.text')}:`,
+          text.trim()
+        );
       }
-      if (!asset.base64) throw new Error('no image data');
-      const { reference } = await readReference(asset.base64);
-      setFound(reference ? { reference } : {});
-      router.replace('/verify-bank/found');
+      setReading(false);
+      router.push({
+        pathname: '/verify/qr-result',
+        params: { text: lines.join('\n'), mode: 'read' },
+      });
     } catch (error) {
       failed(error);
     }

@@ -60,7 +60,9 @@ export async function getFailedChecks(_period: Period): Promise<FailedCheck[]> {
 }
 
 /** Offline stand-in for reading a picture: always "finds" the same Transaction ID. */
-export async function readReference(_imageBase64: string): Promise<{ reference: string | null }> {
+export async function readReference(
+  _imageBase64: string
+): Promise<{ reference: string | null; text: string }> {
   await mockDelay(1200);
-  return { reference: 'FT26286JZH4B' };
+  return { reference: 'FT26286JZH4B', text: 'Transaction ID: FT26286JZH4B' };
 }
