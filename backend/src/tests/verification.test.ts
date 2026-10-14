@@ -125,13 +125,19 @@ beforeAll(async () => {
   app = await createTestApp();
   await resetDatabase(app);
   r = await createRestaurant(app);
-  await app.prisma.bankAccount.create({
-    data: {
-      businessId: r.businessId,
-      bankCode: 'CBE',
-      accountNumber: '1000123455678',
-      last4: '5678',
-    },
+  await app.prisma.bankAccount.createMany({
+    data: [
+      // CBE to CBE receipts: last 4 + holder name.
+      {
+        businessId: r.businessId,
+        bankCode: 'CBE',
+        accountNumber: '1000123455678',
+        last4: '5678',
+        holderName: 'Abebe Coffee',
+      },
+      // CBE to another bank: the full number is in the receipt's reason (fixture description).
+      { businessId: r.businessId, bankCode: 'AWA', accountNumber: '2900000000011', last4: '0011' },
+    ],
   });
 });
 afterAll(async () => {
@@ -299,7 +305,7 @@ describe('POST /verify/cbe', () => {
           },
         ],
         [
-          { creditAccountNo: 'E***********9999' },
+          { description: '2900000009999', paymentDetails: ['2900000009999'] },
           { status: 'not_matching', reasons: ['WRONG_RECEIVER'] },
         ],
         [
@@ -395,5 +401,61 @@ describe('failed checks history', () => {
     );
     expect(res.statusCode).toBe(404);
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('CBE to CBE and CBE to another bank', () => {
+  // CBE to CBE receipt: the receiver is the real account holder; the reason is the sender's note.
+  const cbeToCbe = {
+    platformTransactionType: 'A2A',
+    creditAccountHolder: 'ABEBE COFFEE',
+    creditAccountNo: '1****5678',
+    description: 'ball',
+    paymentDetails: ['ball'],
+  };
+
+  it('CBE to CBE: needs our CBE account last 4 and the holder name', async () => {
+    const cases: [Record<string, unknown>, unknown][] = [
+      [cbeToCbe, { status: 'verified' }],
+      // The same words in another order or with an extra name still match.
+      [{ ...cbeToCbe, creditAccountHolder: 'Coffee Abebe Tesfaye' }, { status: 'verified' }],
+      [
+        { ...cbeToCbe, creditAccountHolder: 'Fahmi Abdi Arebo' },
+        { status: 'not_matching', reasons: ['WRONG_RECEIVER_NAME'] },
+      ],
+      [
+        { ...cbeToCbe, creditAccountNo: '1****9999' },
+        { status: 'not_matching', reasons: ['WRONG_RECEIVER'] },
+      ],
+    ];
+    for (const [changes, expected] of cases) {
+      fetchMock.mockResolvedValueOnce(jsonReceipt(changes));
+      const res = await verify({ url: MB_URL, expectedAmountEtb: 600 }, r.owner.token);
+      expect(res.json(), JSON.stringify(changes)).toMatchObject(expected as object);
+    }
+  });
+
+  it('CBE to another bank: the account in the reason must be ours, the receiver is ignored', async () => {
+    const cases: [Record<string, unknown>, unknown][] = [
+      // "Inter Bank" receiver alone marks a transfer to another bank.
+      [
+        {
+          platformTransactionType: 'A2A',
+          creditAccountHolder: 'Inter Bank Account To Account Paya',
+        },
+        { status: 'verified' },
+      ],
+      // Our CBE account last 4 in the receiver does not count for another-bank transfers.
+      [
+        { creditAccountNo: '1****5678', description: '1000123455678', paymentDetails: [] },
+        { status: 'not_matching', reasons: ['WRONG_RECEIVER'] },
+      ],
+      [{ externalAccountNumber: '2900000000011', description: 'rent' }, { status: 'verified' }],
+    ];
+    for (const [changes, expected] of cases) {
+      fetchMock.mockResolvedValueOnce(jsonReceipt(changes));
+      const res = await verify({ url: MB_URL, expectedAmountEtb: 600 }, r.manager.token);
+      expect(res.json(), JSON.stringify(changes)).toMatchObject(expected as object);
+    }
   });
 });

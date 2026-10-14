@@ -145,13 +145,18 @@ export async function verifyCbe(
     return { status: 'unable_to_verify', reason: 'UNPARSEABLE' };
   }
 
-  const accounts = await prisma.bankAccount.findMany({
-    where: { businessId, bankCode: 'CBE', removedAt: null },
-    select: { last4: true },
-  });
+  // CBE accounts for CBE-to-CBE receipts; the other banks' for transfers to another bank.
+  const [accounts, business] = await Promise.all([
+    prisma.bankAccount.findMany({
+      where: { businessId, removedAt: null },
+      select: { bankCode: true, accountNumber: true, last4: true, holderName: true },
+    }),
+    prisma.business.findUniqueOrThrow({ where: { id: businessId }, select: { name: true } }),
+  ]);
   const compareInput = {
     expectedAmountEtb,
-    accountLast4s: accounts.map((a) => a.last4),
+    accounts,
+    businessName: business.name,
     now,
     maxAgeHours: env.CBE_RECEIPT_MAX_AGE_HOURS,
   };

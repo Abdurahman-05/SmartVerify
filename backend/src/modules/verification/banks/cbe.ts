@@ -5,7 +5,7 @@ const ADDIS_OFFSET_HOURS = 3;
 
 // Labels as printed on CBE PDF/HTML transfer receipts (apps.cbe.com.et links). Not yet checked
 // against a real receipt of that kind; mobile banking receipts come as JSON (parseDetail).
-const ACCOUNT = String.raw`([0-9][0-9*Xx]{3,})`;
+const ACCOUNT = String.raw`([0-9A-Z][0-9*Xx]{3,})`;
 const patterns = {
   payer: new RegExp(String.raw`Payer\s*:?\s*(.+?)\s+Account\s*(?:No\.?)?\s*:?\s*${ACCOUNT}`, 'i'),
   receiver: new RegExp(
@@ -16,6 +16,8 @@ const patterns = {
   reference: /Reference\s+No\.?\s*(?:\(VAT\s+Invoice\s+No\))?\s*:?\s*(FT[A-Z0-9]{10})/i,
   amount: /Transferred\s+Amount\s*:?\s*([\d,]+(?:\.\d{1,2})?)\s*([A-Z]{3})/i,
   status: /Status\s*:?\s*([A-Za-z]+)/i,
+  reason: /Reason\s*\/\s*Type\s+of\s+service\s*:?\s*(\S+)/i,
+  paymentType: /Payment\s+Type\s*:?\s*([A-Z0-9_]+)/,
 };
 
 /** "10/12/2026, 2:35:00 PM" (month/day/year, Addis Ababa time) → Date. */
@@ -40,6 +42,28 @@ function addisDate(m: RegExpExecArray): Date | null {
 }
 
 const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
+const digits = (v: string) => v.replace(/\D/g, '');
+
+/** CBE shows "Inter Bank Account To Account Paya…" as receiver for transfers to other banks. */
+const INTER_BANK = /^inter\s*bank/i;
+
+/** Which kind of transfer, and where the money really went for other-bank transfers. */
+function transferOf(input: {
+  paymentType: string;
+  receiverName: string;
+  reason: string;
+  external?: string;
+  isOtherBank?: boolean;
+}): Pick<ParsedReceipt, 'transfer' | 'destinationAccount'> {
+  const otherBank =
+    input.isOtherBank === true ||
+    /^BANK_TRANSFER$/i.test(input.paymentType) ||
+    INTER_BANK.test(input.receiverName) ||
+    Boolean(input.external);
+  return otherBank
+    ? { transfer: 'other_bank', destinationAccount: digits(input.external || input.reason) }
+    : { transfer: 'cbe', destinationAccount: '' };
+}
 
 /**
  * Mobile banking receipt JSON (mb.cbe.com.et transaction-detail), as in
@@ -73,7 +97,20 @@ function parseDetail(json: string): ParsedReceipt | null {
   const date = new Date(fields.date);
   if (!Number.isFinite(value) || Number.isNaN(date.getTime())) return null;
 
+  // Same order as CBE's own receipt page uses for "Reason / Type of service".
+  const details = Array.isArray(d['paymentDetails']) ? (d['paymentDetails'] as unknown[]) : [];
+  const reason = str(d['description']) || str(d['notes']) || str(details[0]);
+  const transfer = transferOf({
+    paymentType: str(d['paymentType']) || str(d['platformTransactionType']),
+    receiverName: fields.receiverName,
+    reason,
+    external: str(d['externalAccountNumber']),
+    isOtherBank: d['isOtherBank'] === true,
+  });
+
   return {
+    ...transfer,
+    reason,
     payerName: fields.payerName,
     payerAccount: fields.payerAccount,
     receiverName: fields.receiverName,
@@ -117,7 +154,11 @@ export const cbeParser: ReceiptParser = {
     const value = Number(amount.replace(/,/g, ''));
     if (!date || !Number.isFinite(value)) return null;
 
+    const [reason = ''] = groups(patterns.reason.exec(text)) ?? [];
+    const [paymentType = ''] = groups(patterns.paymentType.exec(text)) ?? [];
     const receipt: ParsedReceipt = {
+      ...transferOf({ paymentType, receiverName: receiverName.trim(), reason }),
+      reason,
       payerName: payerName.trim(),
       payerAccount,
       receiverName: receiverName.trim(),

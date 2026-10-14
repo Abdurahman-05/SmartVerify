@@ -33,9 +33,12 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         tags: ['verification'],
         security: [{ bearerAuth: [] }],
         description:
-          'Reads the CBE receipt behind a QR link and checks it: receiver is one of the ' +
-          "business's CBE accounts (last 4 digits), amount ≥ expected, status success, and not " +
-          'older than CBE_RECEIPT_MAX_AGE_HOURS. Answers verified / not_matching / ' +
+          'Reads the CBE receipt behind a QR link and checks it. CBE to CBE: receiver account ' +
+          "last 4 is one of the business's CBE accounts and the receiver name matches its holder " +
+          '(WRONG_RECEIVER_NAME). CBE to another bank (receiver "Inter Bank…"): the destination ' +
+          'account in "Reason / Type of service" is the full number of one of its other-bank ' +
+          'accounts. Both: amount ≥ expected, status success, not older than ' +
+          'CBE_RECEIPT_MAX_AGE_HOURS. Answers verified / not_matching / ' +
           'unable_to_verify (all 200). A check that does not verify is saved (with billId, if ' +
           'given) and listed by GET /verify/failed. Duplicates are not checked yet.',
         body: verifyCbeBodySchema,

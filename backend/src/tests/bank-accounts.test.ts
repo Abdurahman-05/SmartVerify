@@ -80,9 +80,19 @@ describe('bank accounts', () => {
   });
 
   it('refuses duplicates, a 7th account, bad numbers, unknown banks and waiters', async () => {
-    await add(r.owner.token, { bankCode: 'CBE', accountNumber: '1000293884582' });
+    await add(r.owner.token, {
+      bankCode: 'CBE',
+      accountNumber: '1000293884582',
+      holderName: 'Abebe Kebede',
+    });
     expect(
-      code(await add(r.owner.token, { bankCode: 'CBE', accountNumber: '1000293884582' }))
+      code(
+        await add(r.owner.token, {
+          bankCode: 'CBE',
+          accountNumber: '1000293884582',
+          holderName: 'Abebe Kebede',
+        })
+      )
     ).toBe('ACCOUNT_DUPLICATE');
     // Same number at another bank is a different account.
     expect(
@@ -104,6 +114,8 @@ describe('bank accounts', () => {
 
     for (const body of [
       { bankCode: 'CBE', accountNumber: '12345' },
+      // CBE needs the holder name: payment checks compare it with the receipt.
+      { bankCode: 'CBE', accountNumber: '1000293884599' },
       { bankCode: 'CBE', accountNumber: '12345678901234567' },
       { bankCode: 'BOA', accountNumber: '1234567' },
       { bankCode: 'CBE', accountNumber: '10002938845ab' },
@@ -114,14 +126,24 @@ describe('bank accounts', () => {
     ]) {
       expect(code(await add(r.manager.token, body)), JSON.stringify(body)).toBe('VALIDATION_ERROR');
     }
-    expect(code(await add(r.waiter.token, { bankCode: 'CBE', accountNumber: '3000000001' }))).toBe(
-      'FORBIDDEN'
-    );
+    expect(
+      code(
+        await add(r.waiter.token, {
+          bankCode: 'CBE',
+          accountNumber: '3000000001',
+          holderName: 'Abebe Kebede',
+        })
+      )
+    ).toBe('FORBIDDEN');
   });
 
   it('remove is soft: it leaves the list, frees a place and can be added again', async () => {
     const acc = (
-      await add(r.owner.token, { bankCode: 'CBE', accountNumber: '1000293884582' })
+      await add(r.owner.token, {
+        bankCode: 'CBE',
+        accountNumber: '1000293884582',
+        holderName: 'Abebe Kebede',
+      })
     ).json() as Account;
     expect((await call('DELETE', `/bank-accounts/${acc.id}`, r.owner.token)).statusCode).toBe(204);
     expect((await call('GET', '/bank-accounts', r.owner.token)).json()).toEqual([]);
@@ -130,7 +152,13 @@ describe('bank accounts', () => {
     ).toBe(1);
     expect(code(await call('DELETE', `/bank-accounts/${acc.id}`, r.owner.token))).toBe('NOT_FOUND');
     expect(
-      (await add(r.owner.token, { bankCode: 'CBE', accountNumber: '1000293884582' })).statusCode
+      (
+        await add(r.owner.token, {
+          bankCode: 'CBE',
+          accountNumber: '1000293884582',
+          holderName: 'Abebe Kebede',
+        })
+      ).statusCode
     ).toBe(201);
     expect(code(await call('DELETE', `/bank-accounts/${acc.id}`, r.waiter.token))).toBe(
       'FORBIDDEN'
@@ -139,7 +167,11 @@ describe('bank accounts', () => {
 
   it('other businesses cannot see or remove the accounts; works on the Normal plan', async () => {
     const acc = (
-      await add(r.owner.token, { bankCode: 'CBE', accountNumber: '1000293884582' })
+      await add(r.owner.token, {
+        bankCode: 'CBE',
+        accountNumber: '1000293884582',
+        holderName: 'Abebe Kebede',
+      })
     ).json() as Account;
     const other = await createRestaurant(app, 'normal');
     expect((await call('GET', '/bank-accounts', other.owner.token)).json()).toEqual([]);
@@ -148,7 +180,13 @@ describe('bank accounts', () => {
     );
     // The same account number can be connected by another business.
     expect(
-      (await add(other.owner.token, { bankCode: 'CBE', accountNumber: '1000293884582' })).statusCode
+      (
+        await add(other.owner.token, {
+          bankCode: 'CBE',
+          accountNumber: '1000293884582',
+          holderName: 'Abebe Kebede',
+        })
+      ).statusCode
     ).toBe(201);
   });
 });
