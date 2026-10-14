@@ -1,0 +1,57 @@
+import path from 'node:path';
+
+import { createWorker, type Worker } from 'tesseract.js';
+
+/**
+ * Text from a receipt screenshot (Tesseract, English). One worker is reused: starting one takes
+ * a few seconds, and it reads one image at a time (later calls wait their turn). The English
+ * data is downloaded once and kept in .cache/tesseract. Images are never stored.
+ */
+let worker: Promise<Worker> | null = null;
+
+function getWorker() {
+  worker ??= createWorker('eng', 1, {
+    cachePath: path.resolve('.cache', 'tesseract'),
+  }).catch((error: unknown) => {
+    // Let the next request try again (e.g. the language data could not be downloaded).
+    worker = null;
+    throw error;
+  });
+  return worker;
+}
+
+export async function readImageText(image: Buffer): Promise<string> {
+  const { data } = await (await getWorker()).recognize(image);
+  return data.text;
+}
+
+export async function closeOcr() {
+  const current = worker;
+  worker = null;
+  if (current) await (await current).terminate();
+}
+
+/** FT + 10 letters/digits, e.g. FT26286JZH4B. */
+const REFERENCE = /FT[A-Z0-9]{10}/;
+
+/**
+ * The CBE Transaction ID in OCR text. Reading may split it ("FT26286 JZH4B"), so the text is
+ * also tried without spaces. Letters O in the digit part are not guessed: the user confirms.
+ */
+export function findCbeReference(text: string): string | null {
+  const upper = text.toUpperCase();
+  const inLine = REFERENCE.exec(upper.replace(/[^A-Z0-9\s]/g, ' '));
+  if (inLine) return inLine[0];
+  const joined = REFERENCE.exec(upper.replace(/[^A-Z0-9]/g, ''));
+  return joined ? joined[0] : null;
+}
+
+const MAGIC: [string, number[]][] = [
+  ['png', [0x89, 0x50, 0x4e, 0x47]],
+  ['jpeg', [0xff, 0xd8, 0xff]],
+  ['webp', [0x52, 0x49, 0x46, 0x46]],
+];
+
+/** Only real PNG / JPEG / WebP pictures are read. */
+export const isImage = (image: Buffer) =>
+  MAGIC.some(([, bytes]) => bytes.every((b, i) => image[i] === b));
