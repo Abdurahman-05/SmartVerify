@@ -11,7 +11,7 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
 
-import { findPayerBank, type ReceiptField } from './payerBanks';
+import { findPayerBank, onReceipt, type ReceiptField } from './payerBanks';
 import { useReceiptFlow } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
 import { VerifySteps } from './VerifySteps';
@@ -23,7 +23,7 @@ function Line({ width }: { width: `${number}%` }) {
 
 function Highlight({ n, field }: { n: number; field: ReceiptField }) {
   const { t } = useTranslation();
-  const sample = field.key === 'payerAccount' ? `••••${field.sample}` : field.sample;
+  const sample = field.sample;
   return (
     <View className="flex-row items-center gap-3 rounded-[14px] border-[2.5px] border-amber bg-tipBg px-3 py-2">
       <View className="h-8 w-8 items-center justify-center rounded-full bg-primary">
@@ -54,7 +54,9 @@ export default function ReceiptGuideScreen() {
   if (!bank || amount <= 0) return <Redirect href="/verify-bank" />;
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/verify-bank'));
-  const count = bank.fields.length;
+  // Typed fields (not on the receipt) are asked for later, on the confirm page.
+  const fields = onReceipt(bank);
+  const count = fields.length;
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -92,7 +94,7 @@ export default function ReceiptGuideScreen() {
         <View
           className="gap-3 rounded-[20px] border-2 border-borderStrong bg-surface p-4"
           accessible
-          accessibilityLabel={bank.fields.map((f) => t(`verifyBank.fields.${f.key}`)).join(', ')}
+          accessibilityLabel={fields.map((f) => t(`verifyBank.fields.${f.key}`)).join(', ')}
         >
           <View className="flex-row items-center gap-2.5">
             <BankBadge code={bank.code} size={40} />
@@ -109,7 +111,7 @@ export default function ReceiptGuideScreen() {
               {formatMoney(amount)}
             </Text>
           </View>
-          {bank.fields.map((field, i) => (
+          {fields.map((field, i) => (
             <View key={field.key} className="gap-3">
               {i === 0 && count === 1 ? <Line width="70%" /> : null}
               <Highlight n={i + 1} field={field} />

@@ -10,6 +10,7 @@ export const USE_MOCK_VERIFICATION = process.env.EXPO_PUBLIC_USE_MOCK_VERIFICATI
 
 export const verifyCbe = USE_MOCK_VERIFICATION ? mock.verifyCbe : real.verifyCbe;
 export const getFailedChecks = USE_MOCK_VERIFICATION ? mock.getFailedChecks : real.getFailedChecks;
+export const readReference = USE_MOCK_VERIFICATION ? mock.readReference : real.readReference;
 
 export const failedChecksKey = (period: Period) => ['failed-checks', period] as const;
 
@@ -18,3 +19,7 @@ export const isCbeReceiptLink = (text: string) =>
   /^https:\/\/(mbreciept\.cbe\.com\.et\/v2-[A-Za-z0-9]{10,64}$|apps\.cbe\.com\.et(:100)?\/\?id=FT[A-Z0-9]{10}\d{8}$)/.test(
     text.trim()
   );
+
+/** The CBE receipt link for a Transaction ID and the receiver account's last 8 digits. */
+export const cbeReceiptLink = (reference: string, receiverLast8: string) =>
+  `https://apps.cbe.com.et:100/?id=${reference}${receiverLast8}`;

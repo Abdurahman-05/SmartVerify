@@ -9,6 +9,7 @@ import { FormScreen } from '@/components/ui/FormScreen';
 import { formatMoney } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
+import { cbeReceiptLink } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
 import { findPayerBank, type ReceiptField } from './payerBanks';
@@ -103,8 +104,13 @@ export default function ReceiptFoundScreen() {
 
   const check = () => {
     const values = Object.fromEntries(bank.fields.map((f) => [f.key, valueOf(f)]));
-    // The checking screen sends this to the (for now fake) bank check.
-    setQrData(JSON.stringify({ bank: bank.code, ...values }));
+    // CBE: the Transaction ID + receiver account's last 8 make the receipt link, checked by
+    // the server like a scanned QR. Other banks: the fake check for now.
+    setQrData(
+      bank.code === 'CBE'
+        ? cbeReceiptLink(values['reference'] ?? '', values['receiverAccount'] ?? '')
+        : JSON.stringify({ bank: bank.code, ...values })
+    );
     router.replace('/verify-restaurant/checking');
   };
 

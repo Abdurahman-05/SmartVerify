@@ -1,6 +1,6 @@
 /** One thing to find on the customer's receipt (or in its QR). */
 export interface ReceiptField {
-  key: 'reference' | 'payerAccount' | 'transactionNumber';
+  key: 'reference' | 'receiverAccount' | 'transactionNumber';
   /** What the user types when reading did not find it. */
   input: 'text' | 'digits';
   length?: number;
@@ -9,6 +9,8 @@ export interface ReceiptField {
   /** Fixes what the user types, e.g. upper case for references. */
   normalize: (value: string) => string;
   valid: (value: string) => boolean;
+  /** Not on the receipt: the user types it (e.g. CBE's receiver account digits). */
+  typed?: boolean;
 }
 
 /** A bank the customer paid from. Screens render from `fields`, never per bank. */
@@ -52,18 +54,21 @@ export const payerBanks: PayerBank[] = [
     fields: [
       reference,
       {
-        key: 'payerAccount',
+        // CBE's receipt link needs the receiver account's last 8 digits; receipts show only
+        // 4 of them, so the user types them.
+        key: 'receiverAccount',
         input: 'digits',
         length: 8,
-        sample: '00014582',
+        sample: '00001611',
+        typed: true,
         normalize: digits,
         valid: (v) => /^\d{8}$/.test(v),
       },
     ],
-    // CBE receipt link: ...?id=FT26283K4Z9P00014582 (reference + payer account last 8).
+    // CBE receipt link: ...?id=FT26283K4Z9P00001611 (reference + receiver account last 8).
     parseQr: (data) => {
       const m = /[?&]id=([A-Z0-9]{12})(\d{8})/i.exec(data);
-      return m ? { reference: m[1].toUpperCase(), payerAccount: m[2] } : null;
+      return m ? { reference: m[1].toUpperCase(), receiverAccount: m[2] } : null;
     },
   },
   {
@@ -96,3 +101,6 @@ export const payerBanks: PayerBank[] = [
 ];
 
 export const findPayerBank = (code: string | null) => payerBanks.find((b) => b.code === code);
+
+/** What can be found on the receipt picture (typed fields are asked for afterwards). */
+export const onReceipt = (bank: PayerBank) => bank.fields.filter((f) => !f.typed);

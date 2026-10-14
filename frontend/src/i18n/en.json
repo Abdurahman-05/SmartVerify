@@ -952,13 +952,13 @@
     "and": "and",
     "fields": {
       "reference": "Reference No",
-      "payerAccount": "Payer account",
-      "transactionNumber": "Transaction number"
+      "transactionNumber": "Transaction number",
+      "receiverAccount": "Receiver account"
     },
     "short": {
       "reference": "Transaction ID",
-      "payerAccount": "Account last 8 digits",
-      "transactionNumber": "Transaction number"
+      "transactionNumber": "Transaction number",
+      "receiverAccount": "Receiver account last 8 digits"
     },
     "scan": {
       "title": "Scan the QR",

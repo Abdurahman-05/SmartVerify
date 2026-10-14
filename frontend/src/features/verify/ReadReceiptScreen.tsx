@@ -1,3 +1,5 @@
+import { scanFromURLAsync } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 import { Redirect, useRouter } from 'expo-router';
 import { Camera, Image as ImageIcon } from 'lucide-react-native';
 import { useState } from 'react';
@@ -13,8 +15,9 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { errorMessageKey } from '@/lib/errors';
 import { readReceipt } from '@/lib/mock/receipt';
+import { isCbeReceiptLink, readReference } from '@/lib/verification';
 
-import { findPayerBank, type PayerBank } from './payerBanks';
+import { findPayerBank, onReceipt, type PayerBank } from './payerBanks';
 import { useReceiptFlow } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
 
@@ -65,13 +68,13 @@ function SampleReceipt({ bank }: { bank: PayerBank }) {
           </View>
         </View>
         <Line width="85%" />
-        {bank.fields.map((field) => (
+        {onReceipt(bank).map((field) => (
           <View key={field.key} className="rounded-[12px] border-2 border-amber bg-tipBg px-3 py-2">
             <Text font="semibold" className="text-sm text-warnFg">
               {t(`verifyBank.fields.${field.key}`)}
             </Text>
             <Text font="heading" className="text-base" numberOfLines={1}>
-              {field.key === 'payerAccount' ? `••••${field.sample}` : field.sample}
+              {field.sample}
             </Text>
           </View>
         ))}
@@ -89,6 +92,7 @@ export default function ReadReceiptScreen() {
   const amount = useVerifyFlow((s) => s.amount);
   const bank = findPayerBank(useReceiptFlow((s) => s.bankCode));
   const setFound = useReceiptFlow((s) => s.setFound);
+  const setQrData = useVerifyFlow((s) => s.setQrData);
   const [reading, setReading] = useState(false);
 
   if (!bank || amount <= 0) return <Redirect href="/verify-bank" />;
@@ -104,7 +108,52 @@ export default function ReadReceiptScreen() {
   const goBack = () =>
     router.canGoBack() ? router.back() : router.replace('/verify-bank/receipt');
 
-  // FAKE reading for now: the photo / screenshot picker and the real reader come later.
+  const failed = (error: unknown) => {
+    setReading(false);
+    Alert.alert(t('common.error'), t(errorMessageKey(error)));
+  };
+
+  /**
+   * CBE: take or pick the receipt picture. Its QR (screenshots of CBE receipts have one) goes
+   * straight to the check; otherwise the server reads the Transaction ID and the confirm page
+   * asks for the rest.
+   */
+  const readCbe = async (source: 'camera' | 'library') => {
+    if (source === 'camera' && !(await ImagePicker.requestCameraPermissionsAsync()).granted) {
+      Alert.alert(t('verify.scan.permissionTitle'), t('verify.scan.permissionBody'));
+      return;
+    }
+    const options: ImagePicker.ImagePickerOptions = {
+      mediaTypes: ['images'],
+      base64: true,
+      quality: 0.8,
+    };
+    const picked =
+      source === 'camera'
+        ? await ImagePicker.launchCameraAsync(options)
+        : await ImagePicker.launchImageLibraryAsync(options);
+    const asset = picked.canceled ? undefined : picked.assets[0];
+    if (!asset) return;
+
+    setReading(true);
+    try {
+      const codes = await scanFromURLAsync(asset.uri, ['qr']).catch(() => []);
+      const link = codes.map((c) => c.data.trim()).find(isCbeReceiptLink);
+      if (link) {
+        setQrData(link);
+        router.replace('/verify-restaurant/checking');
+        return;
+      }
+      if (!asset.base64) throw new Error('no image data');
+      const { reference } = await readReference(asset.base64);
+      setFound(reference ? { reference } : {});
+      router.replace('/verify-bank/found');
+    } catch (error) {
+      failed(error);
+    }
+  };
+
+  // Other banks: FAKE reading for now.
   const read = () => {
     setReading(true);
     readReceipt(bank.fields)
@@ -112,13 +161,11 @@ export default function ReadReceiptScreen() {
         setFound(found);
         router.replace('/verify-bank/found');
       })
-      .catch((error: unknown) => {
-        setReading(false);
-        Alert.alert(t('common.error'), t(errorMessageKey(error)));
-      });
+      .catch(failed);
   };
+  const cbe = bank.code === 'CBE';
 
-  const names = bank.fields.map((f) => t(`verifyBank.short.${f.key}`));
+  const names = onReceipt(bank).map((f) => t(`verifyBank.short.${f.key}`));
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -149,13 +196,17 @@ export default function ReadReceiptScreen() {
       </View>
 
       <View className="gap-2.5 px-4 pb-6 pt-2">
-        <Button label={t('verifyBank.read.photo')} icon={Camera} onPress={read} />
+        <Button
+          label={t('verifyBank.read.photo')}
+          icon={Camera}
+          onPress={cbe ? () => void readCbe('camera') : read}
+        />
         <Button
           label={t('verifyBank.read.screenshot')}
           icon={ImageIcon}
           variant="outline"
           size="md"
-          onPress={read}
+          onPress={cbe ? () => void readCbe('library') : read}
         />
       </View>
     </SafeAreaView>

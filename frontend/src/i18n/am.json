@@ -952,13 +952,13 @@
     "and": "እና",
     "fields": {
       "reference": "የማጣቀሻ ቁጥር",
-      "payerAccount": "የከፋዩ ሂሳብ",
-      "transactionNumber": "የግብይት ቁጥር"
+      "transactionNumber": "የግብይት ቁጥር",
+      "receiverAccount": "የተቀባይ ሂሳብ"
     },
     "short": {
       "reference": "የግብይት መለያ",
-      "payerAccount": "የሂሳብ የመጨረሻ 8 አሃዞች",
-      "transactionNumber": "የግብይት ቁጥር"
+      "transactionNumber": "የግብይት ቁጥር",
+      "receiverAccount": "የተቀባይ ሂሳብ የመጨረሻ 8 አሃዞች"
     },
     "scan": {
       "title": "QR ኮዱን ይቃኙ",

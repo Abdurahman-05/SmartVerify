@@ -18,3 +18,11 @@ export const verifyCbe = (url: string, expectedAmountEtb: number, billId?: strin
 /** GET /verify/failed — checks that did not verify in the period, newest first. */
 export const getFailedChecks = (period: Period) =>
   api<FailedCheck[]>('/verify/failed', { query: { period } });
+
+/** POST /verify/read-reference — the CBE Transaction ID read from a receipt picture (base64). */
+export const readReference = (imageBase64: string) =>
+  api<{ reference: string | null }>('/verify/read-reference', {
+    method: 'POST',
+    body: { image: imageBase64 },
+    timeoutMs: 45_000,
+  });
