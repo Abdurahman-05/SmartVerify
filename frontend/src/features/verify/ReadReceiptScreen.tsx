@@ -1,4 +1,3 @@
-import { scanFromURLAsync } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { Redirect, useRouter } from 'expo-router';
 import { Camera, Image as ImageIcon } from 'lucide-react-native';
@@ -113,8 +112,8 @@ export default function ReadReceiptScreen() {
   };
 
   /**
-   * CBE: take or pick the receipt picture and show what it gives: its QR (screenshots of CBE
-   * receipts have one), else the Transaction ID and text the server reads (extraction only).
+   * CBE: take or pick the receipt picture; the server reads all its text (OCR) and the result
+   * page shows it as read (extraction only, no check yet).
    */
   const readCbe = async (source: 'camera' | 'library') => {
     if (source === 'camera' && !(await ImagePicker.requestCameraPermissionsAsync()).granted) {
@@ -135,26 +134,13 @@ export default function ReadReceiptScreen() {
 
     setReading(true);
     try {
-      // Extraction only for now: show what the picture gives, no bank check yet.
-      const codes = await scanFromURLAsync(asset.uri, ['qr']).catch(() => []);
-      const qr = codes[0]?.data.trim();
-      const lines: string[] = [];
-      if (qr) {
-        lines.push(`${t('verifyBank.extracted.qr')}:`, qr);
-      } else {
-        if (!asset.base64) throw new Error('no image data');
-        const { reference, text } = await readReference(asset.base64);
-        lines.push(
-          `${t('verifyBank.extracted.reference')}: ${reference ?? t('verifyBank.extracted.none')}`,
-          '',
-          `${t('verifyBank.extracted.text')}:`,
-          text.trim()
-        );
-      }
+      // Extraction only for now: show all the text read from the picture, nothing else.
+      if (!asset.base64) throw new Error('no image data');
+      const { text } = await readReference(asset.base64);
       setReading(false);
       router.push({
         pathname: '/verify/qr-result',
-        params: { text: lines.join('\n'), mode: 'read' },
+        params: { text: text.trim() || t('verifyBank.extracted.empty'), mode: 'read' },
       });
     } catch (error) {
       failed(error);

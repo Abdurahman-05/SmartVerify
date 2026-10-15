@@ -1021,10 +1021,7 @@
       "giveBack": "Give back in cash"
     },
     "extracted": {
-      "qr": "QR code",
-      "reference": "Transaction ID",
-      "none": "not found",
-      "text": "Text read from the picture"
+      "empty": "No text found in the picture."
     }
   }
 }
