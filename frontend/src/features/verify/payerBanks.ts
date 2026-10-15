@@ -1,6 +1,6 @@
 /** One thing to find on the customer's receipt (or in its QR). */
 export interface ReceiptField {
-  key: 'reference' | 'receiverAccount' | 'transactionNumber';
+  key: 'reference' | 'senderAccount' | 'transactionNumber';
   /** What the user types when reading did not find it. */
   input: 'text' | 'digits';
   length?: number;
@@ -54,21 +54,21 @@ export const payerBanks: PayerBank[] = [
     fields: [
       reference,
       {
-        // CBE's receipt link needs the receiver account's last 8 digits; receipts show only
-        // 4 of them, so the user types them.
-        key: 'receiverAccount',
+        // CBE's receipt link is the Transaction ID + the SENDER's account last 8 digits
+        // (checked on a real receipt); receipts show only 4 of them, so the user types them.
+        key: 'senderAccount',
         input: 'digits',
         length: 8,
-        sample: '00001611',
+        sample: '29213267',
         typed: true,
         normalize: digits,
         valid: (v) => /^\d{8}$/.test(v),
       },
     ],
-    // CBE receipt link: ...?id=FT26283K4Z9P00001611 (reference + receiver account last 8).
+    // CBE receipt link: ...?id=FT26283K4Z9P29213267 (reference + sender account last 8).
     parseQr: (data) => {
       const m = /[?&]id=([A-Z0-9]{12})(\d{8})/i.exec(data);
-      return m ? { reference: m[1].toUpperCase(), receiverAccount: m[2] } : null;
+      return m ? { reference: m[1].toUpperCase(), senderAccount: m[2] } : null;
     },
   },
   {

@@ -112,8 +112,8 @@ export default function ReadReceiptScreen() {
   };
 
   /**
-   * CBE: take or pick the receipt picture; the server reads all its text (OCR) and the result
-   * page shows it as read (extraction only, no check yet).
+   * CBE: take or pick the receipt picture; the server reads it and finds the Transaction ID,
+   * then the confirm page completes the receipt link and the check runs.
    */
   const readCbe = async (source: 'camera' | 'library') => {
     if (source === 'camera' && !(await ImagePicker.requestCameraPermissionsAsync()).granted) {
@@ -134,14 +134,12 @@ export default function ReadReceiptScreen() {
 
     setReading(true);
     try {
-      // Extraction only for now: show all the text read from the picture, nothing else.
+      // The server reads the text and filters the Transaction ID (FT…); the confirm page shows
+      // it (or asks for it) and asks for the sender's account digits to build the receipt link.
       if (!asset.base64) throw new Error('no image data');
-      const { text } = await readReference(asset.base64);
-      setReading(false);
-      router.push({
-        pathname: '/verify/qr-result',
-        params: { text: text.trim() || t('verifyBank.extracted.empty'), mode: 'read' },
-      });
+      const { reference } = await readReference(asset.base64);
+      setFound(reference ? { reference } : {});
+      router.replace('/verify-bank/found');
     } catch (error) {
       failed(error);
     }

@@ -953,12 +953,12 @@
     "fields": {
       "reference": "የማጣቀሻ ቁጥር",
       "transactionNumber": "የግብይት ቁጥር",
-      "receiverAccount": "የተቀባይ ሂሳብ"
+      "senderAccount": "የላኪ ሂሳብ"
     },
     "short": {
       "reference": "የግብይት መለያ",
       "transactionNumber": "የግብይት ቁጥር",
-      "receiverAccount": "የተቀባይ ሂሳብ የመጨረሻ 8 አሃዞች"
+      "senderAccount": "የላኪ ሂሳብ የመጨረሻ 8 አሃዞች"
     },
     "scan": {
       "title": "QR ኮዱን ይቃኙ",
@@ -1019,9 +1019,6 @@
       "body": "ደንበኛው ለ{{bill}} ሂሳብ {{received}} ልኳል። ደንበኛውን ይጠይቁ፦ ተጨማሪውን ለ{{name}} ቲፕ ይሁን ወይስ በጥሬ ገንዘብ ይመለስ?",
       "keepTip": "ቲፕ ይሁን",
       "giveBack": "በጥሬ ገንዘብ መልስ"
-    },
-    "extracted": {
-      "empty": "በምስሉ ውስጥ ጽሑፍ አልተገኘም።"
     }
   }
 }

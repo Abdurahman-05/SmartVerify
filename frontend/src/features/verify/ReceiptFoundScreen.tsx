@@ -108,7 +108,7 @@ export default function ReceiptFoundScreen() {
     // the server like a scanned QR. Other banks: the fake check for now.
     setQrData(
       bank.code === 'CBE'
-        ? cbeReceiptLink(values['reference'] ?? '', values['receiverAccount'] ?? '')
+        ? cbeReceiptLink(values['reference'] ?? '', values['senderAccount'] ?? '')
         : JSON.stringify({ bank: bank.code, ...values })
     );
     router.replace('/verify-restaurant/checking');

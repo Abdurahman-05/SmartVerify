@@ -20,6 +20,6 @@ export const isCbeReceiptLink = (text: string) =>
     text.trim()
   );
 
-/** The CBE receipt link for a Transaction ID and the receiver account's last 8 digits. */
-export const cbeReceiptLink = (reference: string, receiverLast8: string) =>
-  `https://apps.cbe.com.et:100/?id=${reference}${receiverLast8}`;
+/** The CBE receipt link: Transaction ID + the sender account's last 8 digits. */
+export const cbeReceiptLink = (reference: string, senderLast8: string) =>
+  `https://apps.cbe.com.et:100/?id=${reference}${senderLast8}`;
