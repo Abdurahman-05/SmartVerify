@@ -1020,5 +1020,18 @@
       "keepTip": "ቲፕ ይሁን",
       "giveBack": "በጥሬ ገንዘብ መልስ"
     }
+  },
+  "devCompare": {
+    "title": "ንባብ ማወዳደሪያ",
+    "subtitle": "ለልማት ብቻ፦ Gemini ከ OCR + regex ጋር",
+    "open": "የደረሰኝ ንባብ አወዳድር",
+    "gemini": "Gemini",
+    "ocr": "OCR + regex",
+    "reading": "በሁለቱም በማንበብ ላይ…",
+    "noReference": "የግብይት መለያ አልተገኘም",
+    "noText": "ጽሑፍ የለም",
+    "amount": "መጠን",
+    "date": "ቀን",
+    "failed": "ማንበብ አልተቻለም፦ {{reason}}"
   }
 }

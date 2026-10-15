@@ -1020,5 +1020,18 @@
       "keepTip": "Keep as tip",
       "giveBack": "Give back in cash"
     }
+  },
+  "devCompare": {
+    "title": "Compare reading",
+    "subtitle": "Development only: Gemini vs OCR + regex",
+    "open": "Compare receipt reading",
+    "gemini": "Gemini",
+    "ocr": "OCR + regex",
+    "reading": "Reading with both…",
+    "noReference": "No Transaction ID found",
+    "noText": "No text",
+    "amount": "Amount",
+    "date": "Date",
+    "failed": "Could not read: {{reason}}"
   }
 }

@@ -7,6 +7,7 @@ import {
   Landmark,
   LifeBuoy,
   LogOut,
+  ScanText,
   Star,
   Users,
   UtensilsCrossed,
@@ -201,6 +202,13 @@ export default function ProfileScreen() {
                 />
               ))}
             </View>
+            <Button
+              label={t('devCompare.open')}
+              icon={ScanText}
+              variant="outline"
+              size="md"
+              onPress={() => router.push('/dev-read-compare')}
+            />
           </View>
         ) : null}
       </ScrollView>

@@ -4,6 +4,7 @@ import * as mock from '@/lib/mock/verification';
 import type { Period } from '@/lib/period';
 
 export type { CbeCheck, CbeMismatch, CbeUnable, FailedCheck } from '@/lib/mock/verification';
+export type { ReadResult } from '@/lib/api/verification';
 
 /** EXPO_PUBLIC_USE_MOCK_VERIFICATION=true uses the offline mock; default is the real backend. */
 export const USE_MOCK_VERIFICATION = process.env.EXPO_PUBLIC_USE_MOCK_VERIFICATION === 'true';
@@ -11,6 +12,7 @@ export const USE_MOCK_VERIFICATION = process.env.EXPO_PUBLIC_USE_MOCK_VERIFICATI
 export const verifyCbe = USE_MOCK_VERIFICATION ? mock.verifyCbe : real.verifyCbe;
 export const getFailedChecks = USE_MOCK_VERIFICATION ? mock.getFailedChecks : real.getFailedChecks;
 export const readReference = USE_MOCK_VERIFICATION ? mock.readReference : real.readReference;
+export const compareReading = USE_MOCK_VERIFICATION ? mock.compareReading : real.compareReading;
 
 export const failedChecksKey = (period: Period) => ['failed-checks', period] as const;
 

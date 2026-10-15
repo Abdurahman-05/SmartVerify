@@ -26,3 +26,22 @@ export const readReference = (imageBase64: string) =>
     body: { image: imageBase64 },
     timeoutMs: 45_000,
   });
+
+/** One reader's result on the dev compare page. */
+export interface ReadResult {
+  ok: boolean;
+  ms: number;
+  reference?: string | null;
+  amount?: number | null;
+  date?: string | null;
+  text?: string;
+  error?: string;
+}
+
+/** POST /verify/read-compare — DEVELOPMENT ONLY: Gemini vs Tesseract on the same picture. */
+export const compareReading = (imageBase64: string) =>
+  api<{ gemini: ReadResult; tesseract: ReadResult }>('/verify/read-compare', {
+    method: 'POST',
+    body: { image: imageBase64 },
+    timeoutMs: 60_000,
+  });

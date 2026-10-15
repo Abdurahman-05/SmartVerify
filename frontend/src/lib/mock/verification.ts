@@ -66,3 +66,20 @@ export async function readReference(
   await mockDelay(1200);
   return { reference: 'FT26286JZH4B', text: 'Transaction ID: FT26286JZH4B' };
 }
+
+/** Offline stand-in for the dev compare page. */
+export async function compareReading(_imageBase64: string) {
+  await mockDelay(1500);
+  const text = 'Completed ETB2300.00 transfer\non 05/10/2026 FT26279V27Y0';
+  return {
+    gemini: {
+      ok: true,
+      ms: 1800,
+      reference: 'FT26279V27Y0',
+      amount: 2300,
+      date: '05/10/2026',
+      text,
+    },
+    tesseract: { ok: true, ms: 4200, reference: 'FT26279V27Y0', text },
+  };
+}
