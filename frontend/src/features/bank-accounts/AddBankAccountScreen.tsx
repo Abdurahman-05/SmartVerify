@@ -45,7 +45,7 @@ const schema = z
       });
     }
     // CBE receipts show the receiver's name; payment checks compare it with this name.
-    if (bankCode === CBE && !holderName) {
+    if ((bankCode === CBE || bankCode === TELEBIRR) && !holderName) {
       ctx.addIssue({
         code: 'custom',
         path: ['holderName'],
@@ -122,6 +122,8 @@ export default function AddBankAccountScreen() {
 
   const bank = banks.find((b) => b.code === bankCode) ?? banks[0];
   const telebirr = bank.code === TELEBIRR;
+  // CBE and telebirr receipts show the receiver's name; payment checks compare it.
+  const nameNeeded = bank.code === CBE || telebirr;
   const generalError =
     mutation.error &&
     !(mutation.error instanceof BankAccountError && mutation.error.code === 'duplicate')
@@ -200,7 +202,7 @@ export default function AddBankAccountScreen() {
                 label={t('bankAccounts.holderName')}
                 labelRight={
                   <FieldHint>
-                    {t(bank.code === CBE ? 'bankAccounts.required' : 'bankAccounts.optional')}
+                    {t(nameNeeded ? 'bankAccounts.required' : 'bankAccounts.optional')}
                   </FieldHint>
                 }
                 placeholder={t('bankAccounts.holderPlaceholder')}
@@ -213,9 +215,7 @@ export default function AddBankAccountScreen() {
               />
             )}
           />
-          <Note>
-            {t(bank.code === CBE ? 'bankAccounts.holderNoteCbe' : 'bankAccounts.holderNote')}
-          </Note>
+          <Note>{t(nameNeeded ? 'bankAccounts.holderNoteCbe' : 'bankAccounts.holderNote')}</Note>
         </View>
       </View>
 

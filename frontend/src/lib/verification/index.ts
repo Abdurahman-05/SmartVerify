@@ -10,6 +10,7 @@ export type { ReadResult } from '@/lib/api/verification';
 export const USE_MOCK_VERIFICATION = process.env.EXPO_PUBLIC_USE_MOCK_VERIFICATION === 'true';
 
 export const verifyCbe = USE_MOCK_VERIFICATION ? mock.verifyCbe : real.verifyCbe;
+export const verifyTelebirr = USE_MOCK_VERIFICATION ? mock.verifyTelebirr : real.verifyTelebirr;
 export const getFailedChecks = USE_MOCK_VERIFICATION ? mock.getFailedChecks : real.getFailedChecks;
 export const readReference = USE_MOCK_VERIFICATION ? mock.readReference : real.readReference;
 export const compareReading = USE_MOCK_VERIFICATION ? mock.compareReading : real.compareReading;
@@ -25,3 +26,12 @@ export const isCbeReceiptLink = (text: string) =>
 /** The CBE receipt link: Transaction ID + the sender account's last 8 digits. */
 export const cbeReceiptLink = (reference: string, senderLast8: string) =>
   `https://apps.cbe.com.et:100/?id=${reference}${senderLast8}`;
+
+/** The telebirr receipt link for a transaction number (what the app checks for telebirr). */
+export const telebirrReceiptLink = (transactionNumber: string) =>
+  `https://transactioninfo.ethiotelecom.et/receipt/${transactionNumber}`;
+
+/** The transaction number of a telebirr receipt link, or null. */
+export const telebirrNumberOf = (text: string) =>
+  /^https:\/\/transactioninfo\.ethiotelecom\.et\/receipt\/([A-Z0-9]{10})$/.exec(text.trim())?.[1] ??
+  null;

@@ -17,7 +17,14 @@ import { newIdempotencyKey } from '@/lib/api/idempotency';
 import type { ExtraChoice } from '@/lib/api/payments';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { checkBankPayment } from '@/lib/mock/verify';
-import { isCbeReceiptLink, verifyCbe, type CbeMismatch, type CbeUnable } from '@/lib/verification';
+import {
+  isCbeReceiptLink,
+  telebirrNumberOf,
+  verifyCbe,
+  verifyTelebirr,
+  type CbeMismatch,
+  type CbeUnable,
+} from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
 import { DetailsCard } from './PaymentResultScreen';
@@ -40,9 +47,13 @@ async function checkReceived(
   billId: string,
   fake: () => Promise<number>
 ): Promise<number | Failure> {
-  if (!isCbeReceiptLink(qrData)) return fake();
-  // A check that does not verify is saved with the bill, so it shows in history.
-  const result = await verifyCbe(qrData, amount, billId);
+  // CBE receipt links and telebirr numbers are checked by the server; a check that does not
+  // verify is saved with the bill, so it shows in history.
+  const telebirr = telebirrNumberOf(qrData);
+  if (!telebirr && !isCbeReceiptLink(qrData)) return fake();
+  const result = telebirr
+    ? await verifyTelebirr(telebirr, amount, billId)
+    : await verifyCbe(qrData, amount, billId);
   if (result.status === 'verified') return result.amountEtb;
   if (result.status === 'not_matching') {
     return {

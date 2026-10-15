@@ -129,16 +129,18 @@ export default function ReceiptGuideScreen() {
       </ScrollView>
 
       <View className="gap-2.5 px-4 pb-6 pt-2">
-        <Button
-          label={t('verifyBank.scanQr')}
-          icon={QrCode}
-          onPress={() => router.push('/verify-bank/scan')}
-        />
+        {bank.hasQr ? (
+          <Button
+            label={t('verifyBank.scanQr')}
+            icon={QrCode}
+            onPress={() => router.push('/verify-bank/scan')}
+          />
+        ) : null}
         <Button
           label={t('verifyBank.readScreenshot')}
           icon={ImageIcon}
-          variant="outline"
-          size="md"
+          variant={bank.hasQr ? 'outline' : 'primary'}
+          size={bank.hasQr ? 'md' : undefined}
           onPress={() => router.push('/verify-bank/read')}
         />
       </View>

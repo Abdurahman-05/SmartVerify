@@ -134,11 +134,12 @@ export default function ReadReceiptScreen() {
 
     setReading(true);
     try {
-      // The server reads the text and filters the Transaction ID (FT…); the confirm page shows
-      // it (or asks for it) and asks for the sender's account digits to build the receipt link.
+      // The server reads the picture (Gemini) and filters the bank's number: CBE FT reference or
+      // telebirr transaction number. The confirm page shows it (or asks for it) and the rest.
       if (!asset.base64) throw new Error('no image data');
-      const { reference } = await readReference(asset.base64);
-      setFound(reference ? { reference } : {});
+      const tel = bank.code === 'TEL';
+      const { reference } = await readReference(asset.base64, tel ? 'TEL' : 'CBE');
+      setFound(reference ? (tel ? { transactionNumber: reference } : { reference }) : {});
       router.replace('/verify-bank/found');
     } catch (error) {
       failed(error);
@@ -155,7 +156,8 @@ export default function ReadReceiptScreen() {
       })
       .catch(failed);
   };
-  const cbe = bank.code === 'CBE';
+  // CBE and telebirr pictures are read by the server; other banks keep the fake reading.
+  const cbe = bank.code === 'CBE' || bank.code === 'TEL';
 
   const names = onReceipt(bank).map((f) => t(`verifyBank.short.${f.key}`));
 

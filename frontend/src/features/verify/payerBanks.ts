@@ -20,6 +20,8 @@ export interface PayerBank {
   shortName: string;
   /** Shown first, as big buttons. */
   mostUsed?: boolean;
+  /** Its receipts carry a QR with the receipt link (CBE). Telebirr's do not. */
+  hasQr?: boolean;
   fields: ReceiptField[];
   /** Reads the fields from the receipt QR, or null when the QR is not this bank's receipt. */
   parseQr: (data: string) => Partial<Record<ReceiptField['key'], string>> | null;
@@ -51,6 +53,7 @@ export const payerBanks: PayerBank[] = [
     name: 'Commercial Bank of Ethiopia',
     shortName: 'CBE',
     mostUsed: true,
+    hasQr: true,
     fields: [
       reference,
       {

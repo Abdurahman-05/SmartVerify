@@ -9,7 +9,7 @@ import { FormScreen } from '@/components/ui/FormScreen';
 import { formatMoney } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { cbeReceiptLink } from '@/lib/verification';
+import { cbeReceiptLink, telebirrReceiptLink } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
 import { findPayerBank, type ReceiptField } from './payerBanks';
@@ -104,12 +104,14 @@ export default function ReceiptFoundScreen() {
 
   const check = () => {
     const values = Object.fromEntries(bank.fields.map((f) => [f.key, valueOf(f)]));
-    // CBE: the Transaction ID + receiver account's last 8 make the receipt link, checked by
-    // the server like a scanned QR. Other banks: the fake check for now.
+    // CBE: Transaction ID + sender account's last 8 make the receipt link; telebirr: the
+    // transaction number does. Both are checked by the server. Other banks: fake check for now.
     setQrData(
       bank.code === 'CBE'
         ? cbeReceiptLink(values['reference'] ?? '', values['senderAccount'] ?? '')
-        : JSON.stringify({ bank: bank.code, ...values })
+        : bank.code === 'TEL'
+          ? telebirrReceiptLink(values['transactionNumber'] ?? '')
+          : JSON.stringify({ bank: bank.code, ...values })
     );
     router.replace('/verify-restaurant/checking');
   };
