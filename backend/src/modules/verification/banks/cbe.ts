@@ -3,8 +3,8 @@ import type { ParsedReceipt, ReceiptParser } from './types.js';
 /** Addis Ababa is UTC+3 all year (no daylight saving). */
 const ADDIS_OFFSET_HOURS = 3;
 
-// Labels as printed on CBE PDF/HTML transfer receipts (apps.cbe.com.et links). Not yet checked
-// against a real receipt of that kind; mobile banking receipts come as JSON (parseDetail).
+// Labels as printed on the CBE PDF receipt (apps.cbe.com.et:100 links), checked against a real
+// one. Mobile banking receipts (mbreciept links) come as JSON (parseDetail).
 const ACCOUNT = String.raw`([0-9A-Z][0-9*Xx]{3,})`;
 const patterns = {
   payer: new RegExp(String.raw`Payer\s*:?\s*(.+?)\s+Account\s*(?:No\.?)?\s*:?\s*${ACCOUNT}`, 'i'),
@@ -42,7 +42,11 @@ function addisDate(m: RegExpExecArray): Date | null {
 }
 
 const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
-const digits = (v: string) => v.replace(/\D/g, '');
+/**
+ * An account number as printed: full digits, or masked like 2********1611 (the PDF receipt shows
+ * only the first digit and the last 4). Masked numbers keep their stars.
+ */
+const accountOf = (v: string) => v.replace(/[^0-9*]/g, '');
 
 /** CBE shows "Inter Bank Account To Account Paya…" as receiver for transfers to other banks. */
 const INTER_BANK = /^inter\s*bank/i;
@@ -61,7 +65,7 @@ function transferOf(input: {
     INTER_BANK.test(input.receiverName) ||
     Boolean(input.external);
   return otherBank
-    ? { transfer: 'other_bank', destinationAccount: digits(input.external || input.reason) }
+    ? { transfer: 'other_bank', destinationAccount: accountOf(input.external || input.reason) }
     : { transfer: 'cbe', destinationAccount: '' };
 }
 
@@ -135,7 +139,8 @@ export const cbeParser: ReceiptParser = {
     const [receiverName, receiverAccount] = groups(patterns.receiver.exec(text)) ?? [];
     const [reference] = groups(patterns.reference.exec(text)) ?? [];
     const [amount, currency] = groups(patterns.amount.exec(text)) ?? [];
-    const [status] = groups(patterns.status.exec(text)) ?? [];
+    // The PDF receipt has no status line: CBE issues it only for transfers that went through.
+    const [status = 'COMPLETED'] = groups(patterns.status.exec(text)) ?? [];
     if (
       !dateMatch ||
       !payerName ||

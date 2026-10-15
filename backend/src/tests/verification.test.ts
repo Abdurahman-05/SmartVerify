@@ -59,6 +59,10 @@ interface ReceiptOptions {
   status?: string;
   date?: Date;
   omitReference?: boolean;
+  receiverName?: string;
+  reason?: string;
+  /** The real PDF receipt has no status line. */
+  omitStatus?: boolean;
 }
 
 function receiptLines(o: ReceiptOptions = {}) {
@@ -66,13 +70,13 @@ function receiptLines(o: ReceiptOptions = {}) {
     'Commercial Bank of Ethiopia',
     'Payer ABEBE KEBEDE',
     'Account 1****1234',
-    'Receiver ABEBE COFFEE',
+    `Receiver ${o.receiverName ?? 'ABEBE COFFEE'}`,
     `Account ${o.receiver ?? '1****5678'}`,
     `Payment Date & Time ${addisTime(o.date ?? new Date(Date.now() - HOUR))}`,
     ...(o.omitReference ? [] : ['Reference No. (VAT Invoice No) FT26283K4Z9P']),
-    'Reason / Type of service Transfer',
+    `Reason / Type of service ${o.reason ?? 'Transfer'}`,
     `Transferred Amount ${o.amount ?? '600.00'} ETB`,
-    `Status ${o.status ?? 'Success'}`,
+    ...(o.omitStatus ? [] : [`Status ${o.status ?? 'Success'}`]),
   ];
 }
 
@@ -457,5 +461,26 @@ describe('CBE to CBE and CBE to another bank', () => {
       const res = await verify({ url: MB_URL, expectedAmountEtb: 600 }, r.manager.token);
       expect(res.json(), JSON.stringify(changes)).toMatchObject(expected as object);
     }
+  });
+});
+
+describe('CBE PDF receipt (apps.cbe.com.et:100 link)', () => {
+  // Same layout as a real one: no status line, "Inter Bank" receiver, the full destination
+  // account in the reason (here our Awash account).
+  const otherBankPdf = {
+    receiverName: 'Inter Bank Account To Account Paya',
+    receiver: 'E****0950',
+    reason: '2900000000011',
+    omitStatus: true,
+  };
+
+  it('verifies a transfer to our account at another bank; another account does not count', async () => {
+    fetchMock.mockResolvedValueOnce(pdfReceipt(otherBankPdf));
+    const ok = await verify({ url: URL_OK, expectedAmountEtb: 600 }, r.waiter2.token);
+    expect(ok.json()).toMatchObject({ status: 'verified', amountEtb: 600 });
+
+    fetchMock.mockResolvedValueOnce(pdfReceipt({ ...otherBankPdf, reason: '2900000009999' }));
+    const wrong = await verify({ url: URL_OK, expectedAmountEtb: 600 }, r.waiter2.token);
+    expect(wrong.json()).toMatchObject({ status: 'not_matching', reasons: ['WRONG_RECEIVER'] });
   });
 });

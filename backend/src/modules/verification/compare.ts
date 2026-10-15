@@ -46,6 +46,16 @@ export function sameName(receiptName: string, savedName: string) {
 }
 
 /**
+ * A printed account against a saved full number: equal when printed in full; when masked
+ * (2********1611), the first digit and the last 4 must match.
+ */
+function sameAccount(printed: string, saved: string) {
+  if (!printed.includes('*')) return printed.length >= 8 && printed === saved;
+  const last4 = printed.slice(-4);
+  return /^\d{4}$/.test(last4) && printed[0] === saved[0] && saved.endsWith(last4);
+}
+
+/**
  * Where the money went, against our accounts.
  * CBE to CBE: receiver account last 4 is one of our CBE accounts, and the receiver name matches
  * that account's holder. CBE to another bank: the destination account in the reason is the full
@@ -54,9 +64,9 @@ export function sameName(receiptName: string, savedName: string) {
 function receiverCheck(receipt: ParsedReceipt, input: CompareInput) {
   if (receipt.transfer === 'other_bank') {
     const dest = receipt.destinationAccount;
-    const ok =
-      dest.length >= 8 &&
-      input.accounts.some((a) => a.bankCode !== 'CBE' && a.accountNumber === dest);
+    const ok = input.accounts.some(
+      (a) => a.bankCode !== 'CBE' && sameAccount(dest, a.accountNumber)
+    );
     return { account: ok, name: true, shown: dest.slice(-4) };
   }
   const last4 = receipt.receiverAccount.replace(/\D/g, '').slice(-4);
