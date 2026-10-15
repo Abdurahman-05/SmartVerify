@@ -25,7 +25,7 @@ const schema = z.object({
   /** Google Gemini API key, for reading receipt pictures. Server only: never sent to the app. */
   GEMINI_API_KEY: z.string().min(10).optional(),
   /** Gemini model for reading pictures (change when Google retires it). */
-  GEMINI_MODEL: z.string().min(1).default('gemini-2.5-flash'),
+  GEMINI_MODEL: z.string().min(1).default('gemini-3.8-flash'),
 });
 
 export type Env = z.infer<typeof schema>;
