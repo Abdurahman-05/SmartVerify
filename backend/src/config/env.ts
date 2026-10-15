@@ -22,6 +22,10 @@ const schema = z.object({
   CBE_TLS_STRICT: z.enum(['true', 'false']).default('true'),
   /** A CBE receipt older than this is EXPIRED. */
   CBE_RECEIPT_MAX_AGE_HOURS: z.coerce.number().int().positive().default(24),
+  /** Google Gemini API key, for reading receipt pictures. Server only: never sent to the app. */
+  GEMINI_API_KEY: z.string().min(10).optional(),
+  /** Gemini model for reading pictures (change when Google retires it). */
+  GEMINI_MODEL: z.string().min(1).default('gemini-2.5-flash'),
 });
 
 export type Env = z.infer<typeof schema>;

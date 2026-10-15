@@ -52,6 +52,11 @@ const MAGIC: [string, number[]][] = [
   ['webp', [0x52, 0x49, 0x46, 0x46]],
 ];
 
+/** The picture's type from its first bytes (image/png, …), or null when it is not one we read. */
+export function imageType(image: Buffer): string | null {
+  const found = MAGIC.find(([, bytes]) => bytes.every((b, i) => image[i] === b));
+  return found ? `image/${found[0]}` : null;
+}
+
 /** Only real PNG / JPEG / WebP pictures are read. */
-export const isImage = (image: Buffer) =>
-  MAGIC.some(([, bytes]) => bytes.every((b, i) => image[i] === b));
+export const isImage = (image: Buffer) => imageType(image) !== null;

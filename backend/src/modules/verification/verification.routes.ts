@@ -10,7 +10,8 @@ import {
   verifyCbeBodySchema,
   verifyResponseSchema,
 } from './verification.schemas.js';
-import { closeOcr, findCbeReference, isImage, readImageText } from './ocr.js';
+import { GeminiError, readWithGemini } from './gemini.js';
+import { closeOcr, findCbeReference, imageType, isImage, readImageText } from './ocr.js';
 import { listFailedChecks, saveFailedCheck, verifyCbe } from './verification.service.js';
 
 /** Each check fetches from the bank: keep it to a sane rate per user. */
@@ -164,4 +165,81 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
       return { reference, text };
     }
   );
+
+  // DEVELOPMENT ONLY: reads one picture with both Gemini and Tesseract (+ regex) to compare.
+  if (app.env.NODE_ENV !== 'production') {
+    const timed = async <T>(work: () => Promise<T>) => {
+      const started = Date.now();
+      try {
+        const result = await work();
+        return { ok: true as const, ms: Date.now() - started, ...result };
+      } catch (error) {
+        const reason = error instanceof GeminiError ? error.message : 'failed';
+        return { ok: false as const, ms: Date.now() - started, error: reason };
+      }
+    };
+    const resultSchema = z.object({
+      ok: z.boolean(),
+      ms: z.number().int(),
+      reference: z.string().nullable().optional(),
+      amount: z.number().nullable().optional(),
+      date: z.string().nullable().optional(),
+      text: z.string().optional(),
+      error: z.string().optional(),
+    });
+
+    app.post(
+      '/verify/read-compare',
+      {
+        preHandler: requireRoles('owner', 'manager'),
+        bodyLimit: 9 * 1024 * 1024,
+        config: {
+          rateLimit: {
+            max: READ_MAX_PER_MINUTE,
+            timeWindow: '1 minute',
+            keyGenerator: (request) => `compare:${request.headers.authorization ?? request.ip}`,
+          },
+        },
+        schema: {
+          tags: ['verification'],
+          security: [{ bearerAuth: [] }],
+          description:
+            'DEVELOPMENT ONLY (absent in production): reads a receipt picture with Gemini ' +
+            '(GEMINI_API_KEY) and with Tesseract + the FT regex, to compare them. Nothing is ' +
+            'stored or logged.',
+          body: z.object({ image: z.string().min(16).max(9_000_000) }),
+          response: {
+            200: z.object({ gemini: resultSchema, tesseract: resultSchema }),
+            400: errorResponseSchema.describe('VALIDATION_ERROR (not a picture, or too big)'),
+            401: errorResponseSchema.describe('UNAUTHORIZED'),
+            403: errorResponseSchema.describe('FORBIDDEN'),
+          },
+        },
+      },
+      async (request) => {
+        const image = Buffer.from(request.body.image, 'base64');
+        const type = imageType(image);
+        if (image.length > MAX_IMAGE_BYTES || !type) {
+          throw new AppError('VALIDATION_ERROR', { reason: 'image' });
+        }
+        const { GEMINI_API_KEY: apiKey, GEMINI_MODEL: model } = app.env;
+        const [gemini, tesseract] = await Promise.all([
+          timed(async () => {
+            if (!apiKey) throw new GeminiError('GEMINI_API_KEY is not set');
+            return readWithGemini(image, type, { apiKey, model });
+          }),
+          timed(async () => {
+            const text = await readImageText(image);
+            return { reference: findCbeReference(text), text };
+          }),
+        ]);
+        // Timing only: no picture, no text.
+        request.log.info(
+          { geminiMs: gemini.ms, geminiOk: gemini.ok, tesseractMs: tesseract.ms },
+          'Receipt picture compared'
+        );
+        return { gemini, tesseract };
+      }
+    );
+  }
 };
