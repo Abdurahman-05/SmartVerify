@@ -55,6 +55,15 @@ function sameAccount(printed: string, saved: string) {
   return /^\d{4}$/.test(last4) && printed[0] === saved[0] && saved.endsWith(last4);
 }
 
+/** A phone as Telebirr prints it (2519****8175) against a saved 09xxxxxxxx / 07xxxxxxxx. */
+function samePhone(printed: string, saved: string) {
+  const intl = `251${saved.replace(/^0/, '')}`;
+  if (!printed.includes('*')) return printed === intl;
+  return (
+    printed.length >= 8 && intl.startsWith(printed.slice(0, 4)) && intl.endsWith(printed.slice(-4))
+  );
+}
+
 /**
  * Where the money went, against our accounts.
  * CBE to CBE: receiver account last 4 is one of our CBE accounts, and the receiver name matches
@@ -62,6 +71,24 @@ function sameAccount(printed: string, saved: string) {
  * number of one of our accounts at another bank.
  */
 function receiverCheck(receipt: ParsedReceipt, input: CompareInput) {
+  const nameOf = (a: OwnAccount) => a.holderName ?? input.businessName;
+  if (receipt.transfer === 'wallet') {
+    // 2519****8175 against a saved Telebirr number 09xxxx8175 (as 2519xxxx8175).
+    const printed = receipt.receiverAccount.replace(/[^0-9*]/g, '');
+    const matches = input.accounts.filter(
+      (a) => a.bankCode === 'TEL' && samePhone(printed, a.accountNumber)
+    );
+    const account = matches.length > 0;
+    const name = matches.some((a) => sameName(receipt.receiverName, nameOf(a)));
+    return { account, name: !account || name, shown: printed.slice(-4) };
+  }
+  if (receipt.transfer === 'wallet_to_bank') {
+    const dest = receipt.destinationAccount;
+    const matches = input.accounts.filter((a) => a.bankCode !== 'TEL' && a.accountNumber === dest);
+    const account = dest.length >= 8 && matches.length > 0;
+    const name = matches.some((a) => sameName(receipt.receiverName, nameOf(a)));
+    return { account, name: !account || name, shown: dest.slice(-4) };
+  }
   if (receipt.transfer === 'other_bank') {
     const dest = receipt.destinationAccount;
     const ok = input.accounts.some(
@@ -119,20 +146,35 @@ export function explainComparison(receipt: ParsedReceipt, input: CompareInput) {
     date: ageHours <= input.maxAgeHours,
   };
   const otherBank = receipt.transfer === 'other_bank';
+  const wallet = receipt.transfer === 'wallet';
+  const walletToBank = receipt.transfer === 'wallet_to_bank';
   const ours = (filter: (a: OwnAccount) => boolean) => {
     const list = input.accounts.filter(filter).map((a) => `...${a.last4}`);
     return list.length ? list.join(', ') : 'none saved';
   };
-  const receiverLines = otherBank
+  const nameLine = `receiver name matches the saved holder name ${receiver.account ? mark(receiver.name) : '(skipped)'}`;
+  const receiverLines = wallet
     ? [
-        `CBE -> other bank: destination account in reason ...${receiver.shown || '(none)'} ` +
-          `in our other-bank accounts [${ours((a) => a.bankCode !== 'CBE')}] ${mark(receiver.account)}`,
+        `Telebirr -> Telebirr: receiver phone ...${receiver.shown} in our Telebirr numbers ` +
+          `[${ours((a) => a.bankCode === 'TEL')}] ${mark(receiver.account)}`,
+        nameLine,
       ]
-    : [
-        `CBE -> CBE: receiver account ...${receiver.shown} in our CBE accounts ` +
-          `[${ours((a) => a.bankCode === 'CBE')}] ${mark(receiver.account)}`,
-        `receiver name matches the saved holder name ${receiver.account ? mark(receiver.name) : '(skipped)'}`,
-      ];
+    : walletToBank
+      ? [
+          `Telebirr -> bank: bank account ...${receiver.shown} in our bank accounts ` +
+            `[${ours((a) => a.bankCode !== 'TEL')}] ${mark(receiver.account)}`,
+          nameLine,
+        ]
+      : otherBank
+        ? [
+            `CBE -> other bank: destination account in reason ...${receiver.shown || '(none)'} ` +
+              `in our other-bank accounts [${ours((a) => a.bankCode !== 'CBE')}] ${mark(receiver.account)}`,
+          ]
+        : [
+            `CBE -> CBE: receiver account ...${receiver.shown} in our CBE accounts ` +
+              `[${ours((a) => a.bankCode === 'CBE')}] ${mark(receiver.account)}`,
+            nameLine,
+          ];
   return {
     checks,
     fields: {

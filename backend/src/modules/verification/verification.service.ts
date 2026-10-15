@@ -6,6 +6,8 @@ import type { Env } from '../../config/env.js';
 import type { PrismaClient } from '../../generated/prisma/client.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { cbeParser } from './banks/cbe.js';
+import { TELEBIRR_NOT_FOUND, telebirrParser } from './banks/telebirr.js';
+import type { ReceiptParser } from './banks/types.js';
 import { compareReceipt, explainComparison } from './compare.js';
 import { fetchReceipt, ReceiptFetchError } from './fetch-receipt.js';
 import type { FailedCheck, VerifyResponse } from './verification.schemas.js';
@@ -122,6 +124,71 @@ export async function verifyCbe(
   const source = parseCbeUrl(rawUrl);
   // TLS can only be relaxed outside production (CBE's certificate chain breaks some dev setups).
   const tlsStrict = env.NODE_ENV === 'production' || env.CBE_TLS_STRICT !== 'false';
+  return checkReceipt({
+    prisma,
+    env,
+    businessId,
+    source,
+    tlsStrict,
+    parser: cbeParser,
+    bank: 'CBE',
+    expectedAmountEtb,
+    log,
+    now,
+  });
+}
+
+/** Telebirr transaction number (10 letters/digits, e.g. DJD2QW8XTE). */
+export const TELEBIRR_NUMBER = /^[A-Z0-9]{10}$/;
+
+/** Fetches a Telebirr receipt by transaction number and checks it like a CBE one. */
+export async function verifyTelebirr(
+  prisma: PrismaClient,
+  env: Env,
+  businessId: string,
+  transactionNumber: string,
+  expectedAmountEtb: number,
+  log?: Pick<FastifyBaseLogger, 'info'>,
+  now = new Date()
+): Promise<VerifyResponse> {
+  if (!TELEBIRR_NUMBER.test(transactionNumber)) throw new AppError('INVALID_URL');
+  return checkReceipt({
+    prisma,
+    env,
+    businessId,
+    source: {
+      url: new URL(`https://transactioninfo.ethiotelecom.et/receipt/${transactionNumber}`),
+    },
+    tlsStrict: true,
+    parser: telebirrParser,
+    bank: 'Telebirr',
+    expectedAmountEtb,
+    log,
+    now,
+    // Telebirr answers 200 with this text for an unknown number.
+    isNotFound: (text) => TELEBIRR_NOT_FOUND.test(text) && text.length < 2000,
+    html: true,
+  });
+}
+
+/** Fetch → read → compare with the business's accounts → log why. Same for every bank. */
+async function checkReceipt(input: {
+  prisma: PrismaClient;
+  env: Env;
+  businessId: string;
+  source: ReceiptSource;
+  tlsStrict: boolean;
+  parser: ReceiptParser;
+  bank: string;
+  expectedAmountEtb: number;
+  log?: Pick<FastifyBaseLogger, 'info'>;
+  now: Date;
+  isNotFound?: (text: string) => boolean;
+  /** The parser reads the HTML page itself (its table rows), not plain text. */
+  html?: boolean;
+}): Promise<VerifyResponse> {
+  const { prisma, env, businessId, source, tlsStrict, parser, bank, expectedAmountEtb, log, now } =
+    input;
 
   let fetched;
   try {
@@ -129,18 +196,33 @@ export async function verifyCbe(
   } catch (error) {
     const reason = error instanceof ReceiptFetchError ? error.reason : 'UNREACHABLE';
     log?.info(
-      { cbeCheck: 'unable_to_verify', reason },
-      `CBE check: could not fetch the receipt (${reason})`
+      { receiptCheck: 'unable_to_verify', bank, reason },
+      `${bank} check: could not fetch the receipt (${reason})`
     );
     return { status: 'unable_to_verify', reason };
   }
 
-  const text = await receiptText(fetched.contentType, fetched.body);
-  const receipt = text ? cbeParser.parse(text) : null;
+  const text =
+    input.html && fetched.contentType.startsWith('text/html')
+      ? fetched.body.toString('utf8')
+      : await receiptText(fetched.contentType, fetched.body);
+  if (text && input.isNotFound?.(text)) {
+    log?.info(
+      { receiptCheck: 'unable_to_verify', bank, reason: 'NOT_FOUND' },
+      `${bank} check: no such receipt (NOT_FOUND)`
+    );
+    return { status: 'unable_to_verify', reason: 'NOT_FOUND' };
+  }
+  const receipt = text ? parser.parse(text) : null;
   if (!receipt) {
     log?.info(
-      { cbeCheck: 'unable_to_verify', reason: 'UNPARSEABLE', contentType: fetched.contentType },
-      `CBE check: could not read the receipt (content-type ${fetched.contentType || 'none'})`
+      {
+        receiptCheck: 'unable_to_verify',
+        bank,
+        reason: 'UNPARSEABLE',
+        contentType: fetched.contentType,
+      },
+      `${bank} check: could not read the receipt (content-type ${fetched.contentType || 'none'})`
     );
     return { status: 'unable_to_verify', reason: 'UNPARSEABLE' };
   }
@@ -167,8 +249,13 @@ export async function verifyCbe(
       ? `VERIFIED (extra ${result.extraEtb} ETB)`
       : `NOT MATCHING (${result.reasons.join(', ')})`;
     log.info(
-      { cbeCheck: result.ok ? 'verified' : 'not_matching', ...why.fields, checks: why.checks },
-      `CBE check ${verdict}: ${why.lines.join(' | ')}`
+      {
+        receiptCheck: result.ok ? 'verified' : 'not_matching',
+        bank,
+        ...why.fields,
+        checks: why.checks,
+      },
+      `${bank} check ${verdict}: ${why.lines.join(' | ')}`
     );
   }
   if (!result.ok) {

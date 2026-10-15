@@ -11,8 +11,14 @@ import {
   verifyResponseSchema,
 } from './verification.schemas.js';
 import { GeminiError, readWithGemini } from './gemini.js';
-import { closeOcr, findCbeReference, imageType, readImageText } from './ocr.js';
-import { listFailedChecks, saveFailedCheck, verifyCbe } from './verification.service.js';
+import { closeOcr, findReference, imageType, readImageText, type PictureBank } from './ocr.js';
+import {
+  listFailedChecks,
+  saveFailedCheck,
+  TELEBIRR_NUMBER,
+  verifyCbe,
+  verifyTelebirr,
+} from './verification.service.js';
 
 /** Each check fetches from the bank: keep it to a sane rate per user. */
 const VERIFY_MAX_PER_MINUTE = 30;
@@ -32,12 +38,13 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
   async function readPicture(
     image: Buffer,
     type: string,
+    bank: PictureBank,
     log: { warn: (obj: object, msg: string) => void }
   ): Promise<{ reference: string | null; text: string; source: 'gemini' | 'ocr' }> {
     const { GEMINI_API_KEY: apiKey, GEMINI_MODEL: model } = app.env;
     for (let attempt = 1; apiKey && attempt <= 2; attempt++) {
       try {
-        const read = await readWithGemini(image, type, { apiKey, model });
+        const read = await readWithGemini(image, type, { apiKey, model }, bank);
         return { reference: read.reference, text: read.text, source: 'gemini' };
       } catch (error) {
         const reason = error instanceof GeminiError ? error.message : 'failed';
@@ -47,7 +54,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
       }
     }
     const text = await readImageText(image);
-    return { reference: findCbeReference(text), text, source: 'ocr' };
+    return { reference: findReference(bank, text), text, source: 'ocr' };
   }
 
   app.post(
@@ -118,6 +125,78 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
     }
   );
 
+  app.post(
+    '/verify/telebirr',
+    {
+      preHandler: requireRoles('owner', 'manager', 'waiter'),
+      config: {
+        rateLimit: {
+          max: VERIFY_MAX_PER_MINUTE,
+          timeWindow: '1 minute',
+          keyGenerator: (request) => `verify:${request.headers.authorization ?? request.ip}`,
+        },
+      },
+      schema: {
+        tags: ['verification'],
+        security: [{ bearerAuth: [] }],
+        description:
+          'Reads the telebirr receipt (transactioninfo.ethiotelecom.et/receipt/<number>) and ' +
+          'checks it from its HTML. Telebirr to telebirr: receiver phone (first and last 4 ' +
+          "digits) is one of the business's Telebirr numbers and the receiver name matches its " +
+          'holder. Telebirr to a bank: the bank account number is one of its bank accounts and ' +
+          'the name matches. Both: settled amount ≥ expected, status Completed, not too old. ' +
+          'Unknown numbers give unable_to_verify NOT_FOUND. Failed checks are saved like CBE.',
+        body: z.object({
+          transactionNumber: z
+            .string()
+            .trim()
+            .toUpperCase()
+            .regex(TELEBIRR_NUMBER, '10 letters or digits'),
+          expectedAmountEtb: z.number().int().positive().max(100_000_000),
+          billId: z.string().min(1).max(64).optional(),
+        }),
+        response: {
+          200: verifyResponseSchema,
+          400: errorResponseSchema.describe('VALIDATION_ERROR'),
+          401: errorResponseSchema.describe('UNAUTHORIZED'),
+          403: errorResponseSchema.describe('FORBIDDEN'),
+          404: errorResponseSchema.describe('NOT_FOUND (billId is not a bill of this business)'),
+          429: errorResponseSchema.describe('RATE_LIMITED'),
+        },
+      },
+    },
+    async (request) => {
+      const { businessId, memberId } = request.auth;
+      const { transactionNumber, expectedAmountEtb, billId } = request.body;
+      if (billId) {
+        const bill = await app.prisma.bill.findFirst({
+          where: { id: billId, businessId },
+          select: { id: true },
+        });
+        if (!bill) throw new AppError('NOT_FOUND');
+      }
+      const result = await verifyTelebirr(
+        app.prisma,
+        app.env,
+        businessId,
+        transactionNumber,
+        expectedAmountEtb,
+        request.log
+      );
+      if (result.status !== 'verified') {
+        await saveFailedCheck(app.prisma, {
+          businessId,
+          checkedById: memberId,
+          billId,
+          bankCode: 'TEL',
+          expectedAmountEtb,
+          result,
+        });
+      }
+      return result;
+    }
+  );
+
   app.get(
     '/verify/failed',
     {
@@ -161,6 +240,10 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
           'reference is null when none was found.',
         body: z.object({
           image: z.string().min(16).max(9_000_000).describe('PNG / JPEG / WebP, base64'),
+          bank: z
+            .enum(['CBE', 'TEL'])
+            .default('CBE')
+            .describe('Whose receipt: CBE (FT reference) or TEL (telebirr number)'),
         }),
         response: {
           200: z.object({
@@ -181,7 +264,12 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
       if (image.length > MAX_IMAGE_BYTES || !type) {
         throw new AppError('VALIDATION_ERROR', { reason: 'image' });
       }
-      const { reference, text, source } = await readPicture(image, type, request.log);
+      const { reference, text, source } = await readPicture(
+        image,
+        type,
+        request.body.bank,
+        request.log
+      );
       request.log.info(
         { readReference: reference ? 'found' : 'not_found', source },
         reference
@@ -233,7 +321,10 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
             'DEVELOPMENT ONLY (absent in production): reads a receipt picture with Gemini ' +
             '(GEMINI_API_KEY) and with Tesseract + the FT regex, to compare them. Nothing is ' +
             'stored or logged.',
-          body: z.object({ image: z.string().min(16).max(9_000_000) }),
+          body: z.object({
+            image: z.string().min(16).max(9_000_000),
+            bank: z.enum(['CBE', 'TEL']).default('CBE'),
+          }),
           response: {
             200: z.object({ gemini: resultSchema, tesseract: resultSchema }),
             400: errorResponseSchema.describe('VALIDATION_ERROR (not a picture, or too big)'),
@@ -252,11 +343,11 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         const [gemini, tesseract] = await Promise.all([
           timed(async () => {
             if (!apiKey) throw new GeminiError('GEMINI_API_KEY is not set');
-            return readWithGemini(image, type, { apiKey, model });
+            return readWithGemini(image, type, { apiKey, model }, request.body.bank);
           }),
           timed(async () => {
             const text = await readImageText(image);
-            return { reference: findCbeReference(text), text };
+            return { reference: findReference(request.body.bank, text), text };
           }),
         ]);
         // Timing only: no picture, no text.

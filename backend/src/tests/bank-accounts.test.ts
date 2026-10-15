@@ -71,9 +71,17 @@ describe('bank accounts', () => {
     expect(JSON.stringify(res.json())).not.toContain('1000293884582');
 
     const tele = (
-      await add(r.manager.token, { bankCode: 'TEL', accountNumber: '0911227788' })
+      await add(r.manager.token, {
+        bankCode: 'TEL',
+        accountNumber: '0911227788',
+        holderName: 'Abebe Kebede',
+      })
     ).json() as Account;
-    expect(tele).toMatchObject({ shortName: 'Telebirr', last4: '7788', holderName: 'Test Cafe' });
+    expect(tele).toMatchObject({
+      shortName: 'Telebirr',
+      last4: '7788',
+      holderName: 'Abebe Kebede',
+    });
 
     const list = (await call('GET', '/bank-accounts', r.waiter.token)).json() as Account[];
     expect(list.map((a) => a.shortName)).toEqual(['CBE', 'Telebirr']);
@@ -100,7 +108,13 @@ describe('bank accounts', () => {
     ).toBe(201);
 
     expect(
-      (await add(r.owner.token, { bankCode: 'TEL', accountNumber: '0912345678' })).statusCode
+      (
+        await add(r.owner.token, {
+          bankCode: 'TEL',
+          accountNumber: '0912345678',
+          holderName: 'Abebe Kebede',
+        })
+      ).statusCode
     ).toBe(201);
     // Abyssinia accounts can be 9 digits.
     for (const n of ['100000001', '1000000002', '1000000003']) {

@@ -60,3 +60,23 @@ export function imageType(image: Buffer): string | null {
 
 /** Only real PNG / JPEG / WebP pictures are read. */
 export const isImage = (image: Buffer) => imageType(image) !== null;
+
+/**
+ * The Telebirr transaction number (10 letters/digits, e.g. DJD2QW8XTE) in text: from the
+ * receipt link in the SMS, or after "transaction number" (SMS and app). Not guessed otherwise.
+ */
+export function findTelebirrNumber(text: string): string | null {
+  const upper = text.toUpperCase();
+  const fromLink = /RECEIPT\s*\/\s*([A-Z0-9]{10})\b/.exec(upper);
+  if (fromLink?.[1]) return fromLink[1];
+  const afterLabel = /TRANSACTION\s+(?:NUMBER|NO\.?)\s*(?:IS|:)?\s*([A-Z0-9]{10})\b/.exec(upper);
+  return afterLabel?.[1] && /\d/.test(afterLabel[1]) && /[A-Z]/.test(afterLabel[1])
+    ? afterLabel[1]
+    : null;
+}
+
+export type PictureBank = 'CBE' | 'TEL';
+
+/** The reference to look for in a picture of this bank's receipt. */
+export const findReference = (bank: PictureBank, text: string) =>
+  bank === 'TEL' ? findTelebirrNumber(text) : findCbeReference(text);
