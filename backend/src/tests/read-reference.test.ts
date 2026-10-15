@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
+import { GeminiError, readWithGemini } from '../modules/verification/gemini.js';
 import { findCbeReference, isImage, readImageText } from '../modules/verification/ocr.js';
 import {
   createRestaurant,
@@ -16,6 +17,12 @@ vi.mock('../modules/verification/ocr.js', async (importOriginal) => {
   return { ...real, readImageText: vi.fn(), closeOcr: vi.fn() };
 });
 const ocrMock = vi.mocked(readImageText);
+// Gemini is never called for real in tests.
+vi.mock('../modules/verification/gemini.js', async (importOriginal) => {
+  const real = await importOriginal<typeof import('../modules/verification/gemini.js')>();
+  return { ...real, readWithGemini: vi.fn() };
+});
+const geminiMock = vi.mocked(readWithGemini);
 
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3, 4, 5, 6, 7, 8]);
 // The USSD confirmation from a real CBE transfer, as OCR reads it.
@@ -63,13 +70,16 @@ describe('POST /verify/read-reference', () => {
     ocrMock.mockResolvedValueOnce(USSD_TEXT);
     const found = await read(PNG.toString('base64'));
     expect(found.statusCode).toBe(200);
-    expect(found.json()).toEqual({ reference: 'FT26286JZH4B', text: USSD_TEXT });
+    expect(found.json()).toEqual({ reference: 'FT26286JZH4B', text: USSD_TEXT, source: 'ocr' });
 
     ocrMock.mockResolvedValueOnce('A photo of a cat');
     expect((await read(PNG.toString('base64'))).json()).toEqual({
       reference: null,
       text: 'A photo of a cat',
+      source: 'ocr',
     });
+    // Without a Gemini key, Gemini is not tried.
+    expect(geminiMock).not.toHaveBeenCalled();
   });
 
   it('refuses something that is not a picture without reading it, and needs sign-in', async () => {
@@ -80,5 +90,56 @@ describe('POST /verify/read-reference', () => {
     expect(ocrMock).not.toHaveBeenCalled();
 
     expect((await read(PNG.toString('base64'), null)).statusCode).toBe(401);
+  });
+});
+
+describe('POST /verify/read-reference with Gemini', () => {
+  let gemApp: TestApp;
+  let owner: string;
+
+  beforeAll(async () => {
+    gemApp = await createTestApp({ GEMINI_API_KEY: 'test-key-not-real' });
+    owner = (await createRestaurant(gemApp)).owner.token;
+  });
+  afterAll(async () => {
+    await gemApp.close();
+  });
+
+  const readGem = () =>
+    gemApp.inject({
+      method: 'POST',
+      url: '/api/v1/verify/read-reference',
+      headers: headers(owner),
+      payload: { image: PNG.toString('base64') },
+    });
+
+  it('uses Gemini first; when Google is busy it retries once, then falls back to OCR', async () => {
+    geminiMock.mockReset();
+    ocrMock.mockReset();
+    geminiMock.mockResolvedValueOnce({
+      reference: 'FT26279V27Y0',
+      amount: 2300,
+      date: '05/10/2026',
+      text: 'Completed ETB2300.00 transfer',
+    });
+    expect((await readGem()).json()).toEqual({
+      reference: 'FT26279V27Y0',
+      text: 'Completed ETB2300.00 transfer',
+      source: 'gemini',
+    });
+    expect(ocrMock).not.toHaveBeenCalled();
+
+    // Busy twice: one retry, then Tesseract.
+    geminiMock.mockRejectedValueOnce(new GeminiError('http 503'));
+    geminiMock.mockRejectedValueOnce(new GeminiError('http 503'));
+    ocrMock.mockResolvedValueOnce(USSD_TEXT);
+    expect((await readGem()).json()).toMatchObject({ reference: 'FT26286JZH4B', source: 'ocr' });
+    expect(geminiMock).toHaveBeenCalledTimes(3);
+
+    // A bad answer is not retried: straight to Tesseract.
+    geminiMock.mockRejectedValueOnce(new GeminiError('bad answer'));
+    ocrMock.mockResolvedValueOnce(USSD_TEXT);
+    expect((await readGem()).json()).toMatchObject({ source: 'ocr' });
+    expect(geminiMock).toHaveBeenCalledTimes(4);
   });
 });

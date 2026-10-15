@@ -3,7 +3,8 @@ import { z } from 'zod';
 import { findCbeReference } from './ocr.js';
 
 const API = 'https://generativelanguage.googleapis.com/v1beta/models';
-const TIMEOUT_MS = 20_000;
+/** Then Tesseract takes over, so the user never waits too long. */
+const TIMEOUT_MS = 15_000;
 
 /** What Gemini is asked to return: a fixed shape, never free text. */
 const answerSchema = z.object({

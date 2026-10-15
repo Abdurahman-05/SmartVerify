@@ -11,7 +11,7 @@ import {
   verifyResponseSchema,
 } from './verification.schemas.js';
 import { GeminiError, readWithGemini } from './gemini.js';
-import { closeOcr, findCbeReference, imageType, isImage, readImageText } from './ocr.js';
+import { closeOcr, findCbeReference, imageType, readImageText } from './ocr.js';
 import { listFailedChecks, saveFailedCheck, verifyCbe } from './verification.service.js';
 
 /** Each check fetches from the bank: keep it to a sane rate per user. */
@@ -24,6 +24,31 @@ const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
 /** Payment checks against bank receipts (both plans). Failed checks are kept for history. */
 export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
   app.addHook('onClose', closeOcr);
+
+  /**
+   * Reads a receipt picture: Gemini first (far better on photos of screens), retried once when
+   * Google is busy (429 / 503); Tesseract OCR when there is no key or Gemini cannot answer.
+   */
+  async function readPicture(
+    image: Buffer,
+    type: string,
+    log: { warn: (obj: object, msg: string) => void }
+  ): Promise<{ reference: string | null; text: string; source: 'gemini' | 'ocr' }> {
+    const { GEMINI_API_KEY: apiKey, GEMINI_MODEL: model } = app.env;
+    for (let attempt = 1; apiKey && attempt <= 2; attempt++) {
+      try {
+        const read = await readWithGemini(image, type, { apiKey, model });
+        return { reference: read.reference, text: read.text, source: 'gemini' };
+      } catch (error) {
+        const reason = error instanceof GeminiError ? error.message : 'failed';
+        log.warn({ gemini: reason, attempt }, `Gemini could not read the picture (${reason})`);
+        if (!/^http (429|503)$/.test(reason)) break;
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+    const text = await readImageText(image);
+    return { reference: findCbeReference(text), text, source: 'ocr' };
+  }
 
   app.post(
     '/verify/cbe',
@@ -131,8 +156,8 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         tags: ['verification'],
         security: [{ bearerAuth: [] }],
         description:
-          'Reads the CBE Transaction ID (FT + 10) from a receipt screenshot or photo (OCR on ' +
-          'the server), plus all the text read. The picture and text are not stored or logged. ' +
+          'Reads the CBE Transaction ID (FT + 10) from a receipt screenshot or photo: Gemini ' +
+          '(GEMINI_API_KEY; one retry when busy), else Tesseract OCR; plus all the text read. The picture and text are not stored or logged. ' +
           'reference is null when none was found.',
         body: z.object({
           image: z.string().min(16).max(9_000_000).describe('PNG / JPEG / WebP, base64'),
@@ -141,6 +166,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
           200: z.object({
             reference: z.string().nullable(),
             text: z.string().describe('All text read from the picture'),
+            source: z.enum(['gemini', 'ocr']).describe('Which reader answered'),
           }),
           400: errorResponseSchema.describe('VALIDATION_ERROR (not a picture, or too big)'),
           401: errorResponseSchema.describe('UNAUTHORIZED'),
@@ -151,18 +177,18 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (request) => {
       const image = Buffer.from(request.body.image, 'base64');
-      if (image.length > MAX_IMAGE_BYTES || !isImage(image)) {
+      const type = imageType(image);
+      if (image.length > MAX_IMAGE_BYTES || !type) {
         throw new AppError('VALIDATION_ERROR', { reason: 'image' });
       }
-      const text = await readImageText(image);
-      const reference = findCbeReference(text);
+      const { reference, text, source } = await readPicture(image, type, request.log);
       request.log.info(
-        { readReference: reference ? 'found' : 'not_found' },
+        { readReference: reference ? 'found' : 'not_found', source },
         reference
-          ? `Receipt picture: found ${reference}`
-          : 'Receipt picture: no Transaction ID found'
+          ? `Receipt picture (${source}): found ${reference}`
+          : `Receipt picture (${source}): no Transaction ID found`
       );
-      return { reference, text };
+      return { reference, text, source };
     }
   );
 

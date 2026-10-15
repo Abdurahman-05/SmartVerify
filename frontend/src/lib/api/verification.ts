@@ -19,13 +19,19 @@ export const verifyCbe = (url: string, expectedAmountEtb: number, billId?: strin
 export const getFailedChecks = (period: Period) =>
   api<FailedCheck[]>('/verify/failed', { query: { period } });
 
-/** POST /verify/read-reference — the text of a receipt picture (base64) and its Transaction ID. */
+/**
+ * POST /verify/read-reference — the Transaction ID and text of a receipt picture (base64), read
+ * by Gemini on the server (OCR when Gemini is unavailable).
+ */
 export const readReference = (imageBase64: string) =>
-  api<{ reference: string | null; text: string }>('/verify/read-reference', {
-    method: 'POST',
-    body: { image: imageBase64 },
-    timeoutMs: 45_000,
-  });
+  api<{ reference: string | null; text: string; source: 'gemini' | 'ocr' }>(
+    '/verify/read-reference',
+    {
+      method: 'POST',
+      body: { image: imageBase64 },
+      timeoutMs: 45_000,
+    }
+  );
 
 /** One reader's result on the dev compare page. */
 export interface ReadResult {

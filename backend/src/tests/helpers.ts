@@ -8,7 +8,9 @@ import { testDatabaseUrl } from './test-database.js';
 export type TestApp = Awaited<ReturnType<typeof buildApp>>;
 
 export async function createTestApp(envOverrides: Record<string, string> = {}) {
-  const app = await buildApp({ env: loadEnv({ ...process.env, ...envOverrides }), logger: false });
+  // Tests never call Gemini with the developer's key from .env (tests pass a fake one).
+  const env = loadEnv({ ...process.env, GEMINI_API_KEY: undefined, ...envOverrides });
+  const app = await buildApp({ env, logger: false });
   await app.ready();
   return app;
 }
