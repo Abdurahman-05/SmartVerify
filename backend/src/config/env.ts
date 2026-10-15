@@ -24,8 +24,8 @@ const schema = z.object({
   CBE_RECEIPT_MAX_AGE_HOURS: z.coerce.number().int().positive().default(24),
   /** Google Gemini API key, for reading receipt pictures. Server only: never sent to the app. */
   GEMINI_API_KEY: z.string().min(10).optional(),
-  /** Gemini model for reading pictures (change when Google retires it). */
-  GEMINI_MODEL: z.string().min(1).default('gemini-3.8-flash'),
+  /** Gemini model for reading pictures: fast and accurate on receipts (change when retired). */
+  GEMINI_MODEL: z.string().min(1).default('gemini-3.5-flash-lite'),
 });
 
 export type Env = z.infer<typeof schema>;
