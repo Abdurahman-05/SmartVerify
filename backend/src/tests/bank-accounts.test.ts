@@ -118,9 +118,15 @@ describe('bank accounts', () => {
     ).toBe(201);
     // Abyssinia accounts can be 9 digits.
     for (const n of ['100000001', '1000000002', '1000000003']) {
-      expect((await add(r.owner.token, { bankCode: 'DAS', accountNumber: n })).statusCode).toBe(
-        201
-      );
+      expect(
+        (
+          await add(r.owner.token, {
+            bankCode: 'DAS',
+            accountNumber: n,
+            holderName: 'Abebe Kebede',
+          })
+        ).statusCode
+      ).toBe(201);
     }
     expect(code(await add(r.owner.token, { bankCode: 'BOA', accountNumber: '2000000001' }))).toBe(
       'ACCOUNT_LIMIT'

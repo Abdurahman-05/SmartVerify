@@ -75,8 +75,25 @@ export function findTelebirrNumber(text: string): string | null {
     : null;
 }
 
-export type PictureBank = 'CBE' | 'TEL';
+/**
+ * The Dashen FT Ref (e.g. C65WDTI262870002) in text: after "FT Ref" / "Transaction Reference",
+ * or at the end of a receipts.dashenbanksc.com/receipt/ link. Not guessed otherwise.
+ */
+export function findDashenReference(text: string): string | null {
+  const upper = text.toUpperCase();
+  const m =
+    /RECEIPT\s*\/\s*([A-Z0-9]{10,24})\b/.exec(upper) ??
+    /(?:FT\s*REF|TRANSACTION\s+REFERENCE)\s*:?\s*([A-Z0-9]{10,24})\b/.exec(upper);
+  const ref = m?.[1];
+  return ref && /\d/.test(ref) && /[A-Z]/.test(ref) ? ref : null;
+}
+
+export type PictureBank = 'CBE' | 'TEL' | 'DAS';
 
 /** The reference to look for in a picture of this bank's receipt. */
 export const findReference = (bank: PictureBank, text: string) =>
-  bank === 'TEL' ? findTelebirrNumber(text) : findCbeReference(text);
+  bank === 'TEL'
+    ? findTelebirrNumber(text)
+    : bank === 'DAS'
+      ? findDashenReference(text)
+      : findCbeReference(text);

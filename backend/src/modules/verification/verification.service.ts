@@ -6,6 +6,7 @@ import type { Env } from '../../config/env.js';
 import type { PrismaClient } from '../../generated/prisma/client.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { cbeParser } from './banks/cbe.js';
+import { dashenParser } from './banks/dashen.js';
 import { TELEBIRR_NOT_FOUND, telebirrParser } from './banks/telebirr.js';
 import type { ReceiptParser } from './banks/types.js';
 import { compareReceipt, explainComparison } from './compare.js';
@@ -167,6 +168,36 @@ export async function verifyTelebirr(
     now,
     // Telebirr answers 200 with this text for an unknown number.
     isNotFound: (text) => TELEBIRR_NOT_FOUND.test(text) && text.length < 2000,
+    html: true,
+  });
+}
+
+/** Dashen FT Ref (e.g. C65WDTI262870002). */
+export const DASHEN_REFERENCE = /^[A-Z0-9]{10,24}$/;
+
+/** Fetches a Dashen receipt by FT Ref (receipts.dashenbanksc.com/receipt/<ref>) and checks it. */
+export async function verifyDashen(
+  prisma: PrismaClient,
+  env: Env,
+  businessId: string,
+  reference: string,
+  expectedAmountEtb: number,
+  log?: Pick<FastifyBaseLogger, 'info'>,
+  now = new Date()
+): Promise<VerifyResponse> {
+  if (!DASHEN_REFERENCE.test(reference)) throw new AppError('INVALID_URL');
+  return checkReceipt({
+    prisma,
+    env,
+    businessId,
+    // Dashen answers 400 "Transaction not found" for an unknown reference (NOT_FOUND).
+    source: { url: new URL(`https://receipts.dashenbanksc.com/receipt/${reference}`) },
+    tlsStrict: true,
+    parser: dashenParser,
+    bank: 'Dashen',
+    expectedAmountEtb,
+    log,
+    now,
     html: true,
   });
 }

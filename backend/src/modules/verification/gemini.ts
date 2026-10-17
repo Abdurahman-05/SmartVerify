@@ -22,6 +22,10 @@ const WHAT: Record<PictureBank, string> = {
     'from telebirr (Ethio telecom), an app screen or an SMS. transactionId: the telebirr ' +
     'transaction number exactly as printed: 10 letters or digits, e.g. DJD2QW8XTE (also at ' +
     'the end of a transactioninfo.ethiotelecom.et/receipt/ link)',
+  DAS:
+    'from Dashen Bank (Dashen Super App or receipt). transactionId: the "FT Ref" / ' +
+    '"Transaction Reference" exactly as printed, e.g. C65WDTI262870002 (not the longer ' +
+    '"Transaction Ref" / "Transfer Reference" that starts with WDTI)',
 };
 
 const promptFor = (bank: PictureBank) =>
@@ -45,6 +49,11 @@ export class GeminiError extends Error {}
 function bankReference(bank: PictureBank, id: string): string | null {
   const value = id.trim().toUpperCase();
   if (bank === 'TEL') return /^[A-Z0-9]{10}$/.test(value) && /\d/.test(value) ? value : null;
+  if (bank === 'DAS') {
+    return /^[A-Z0-9]{10,24}$/.test(value) && /\d/.test(value) && /[A-Z]/.test(value)
+      ? value
+      : null;
+  }
   return findReference(bank, value);
 }
 

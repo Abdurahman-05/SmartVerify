@@ -15,8 +15,10 @@ import { closeOcr, findReference, imageType, readImageText, type PictureBank } f
 import {
   listFailedChecks,
   saveFailedCheck,
+  DASHEN_REFERENCE,
   TELEBIRR_NUMBER,
   verifyCbe,
+  verifyDashen,
   verifyTelebirr,
 } from './verification.service.js';
 
@@ -125,77 +127,109 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
     }
   );
 
-  app.post(
-    '/verify/telebirr',
-    {
-      preHandler: requireRoles('owner', 'manager', 'waiter'),
-      config: {
-        rateLimit: {
-          max: VERIFY_MAX_PER_MINUTE,
-          timeWindow: '1 minute',
-          keyGenerator: (request) => `verify:${request.headers.authorization ?? request.ip}`,
+  /** POST /verify/<bank>: check a receipt found by its reference (no QR), save failed tries. */
+  const referenceCheck = (config: {
+    path: string;
+    bankCode: string;
+    field: 'transactionNumber' | 'reference';
+    format: RegExp;
+    description: string;
+    verify: typeof verifyTelebirr;
+  }) =>
+    app.post(
+      config.path,
+      {
+        preHandler: requireRoles('owner', 'manager', 'waiter'),
+        config: {
+          rateLimit: {
+            max: VERIFY_MAX_PER_MINUTE,
+            timeWindow: '1 minute',
+            keyGenerator: (request) => `verify:${request.headers.authorization ?? request.ip}`,
+          },
+        },
+        schema: {
+          tags: ['verification'],
+          security: [{ bearerAuth: [] }],
+          description: config.description,
+          body: z.object({
+            [config.field]: z.string().trim().toUpperCase().regex(config.format),
+            expectedAmountEtb: z.number().int().positive().max(100_000_000),
+            billId: z.string().min(1).max(64).optional(),
+          }),
+          response: {
+            200: verifyResponseSchema,
+            400: errorResponseSchema.describe('VALIDATION_ERROR'),
+            401: errorResponseSchema.describe('UNAUTHORIZED'),
+            403: errorResponseSchema.describe('FORBIDDEN'),
+            404: errorResponseSchema.describe('NOT_FOUND (billId is not a bill of this business)'),
+            429: errorResponseSchema.describe('RATE_LIMITED'),
+          },
         },
       },
-      schema: {
-        tags: ['verification'],
-        security: [{ bearerAuth: [] }],
-        description:
-          'Reads the telebirr receipt (transactioninfo.ethiotelecom.et/receipt/<number>) and ' +
-          'checks it from its HTML. Telebirr to telebirr: receiver phone (first and last 4 ' +
-          "digits) is one of the business's Telebirr numbers and the receiver name matches its " +
-          'holder. Telebirr to a bank: the bank account number is one of its bank accounts and ' +
-          'the name matches. Both: settled amount ≥ expected, status Completed, not too old. ' +
-          'Unknown numbers give unable_to_verify NOT_FOUND. Failed checks are saved like CBE.',
-        body: z.object({
-          transactionNumber: z
-            .string()
-            .trim()
-            .toUpperCase()
-            .regex(TELEBIRR_NUMBER, '10 letters or digits'),
-          expectedAmountEtb: z.number().int().positive().max(100_000_000),
-          billId: z.string().min(1).max(64).optional(),
-        }),
-        response: {
-          200: verifyResponseSchema,
-          400: errorResponseSchema.describe('VALIDATION_ERROR'),
-          401: errorResponseSchema.describe('UNAUTHORIZED'),
-          403: errorResponseSchema.describe('FORBIDDEN'),
-          404: errorResponseSchema.describe('NOT_FOUND (billId is not a bill of this business)'),
-          429: errorResponseSchema.describe('RATE_LIMITED'),
-        },
-      },
-    },
-    async (request) => {
-      const { businessId, memberId } = request.auth;
-      const { transactionNumber, expectedAmountEtb, billId } = request.body;
-      if (billId) {
-        const bill = await app.prisma.bill.findFirst({
-          where: { id: billId, businessId },
-          select: { id: true },
-        });
-        if (!bill) throw new AppError('NOT_FOUND');
-      }
-      const result = await verifyTelebirr(
-        app.prisma,
-        app.env,
-        businessId,
-        transactionNumber,
-        expectedAmountEtb,
-        request.log
-      );
-      if (result.status !== 'verified') {
-        await saveFailedCheck(app.prisma, {
+      async (request) => {
+        const { businessId, memberId } = request.auth;
+        const body = request.body as Record<string, unknown> & {
+          expectedAmountEtb: number;
+          billId?: string;
+        };
+        const { expectedAmountEtb, billId } = body;
+        if (billId) {
+          const bill = await app.prisma.bill.findFirst({
+            where: { id: billId, businessId },
+            select: { id: true },
+          });
+          if (!bill) throw new AppError('NOT_FOUND');
+        }
+        const result = await config.verify(
+          app.prisma,
+          app.env,
           businessId,
-          checkedById: memberId,
-          billId,
-          bankCode: 'TEL',
+          String(body[config.field]),
           expectedAmountEtb,
-          result,
-        });
+          request.log
+        );
+        if (result.status !== 'verified') {
+          await saveFailedCheck(app.prisma, {
+            businessId,
+            checkedById: memberId,
+            billId,
+            bankCode: config.bankCode,
+            expectedAmountEtb,
+            result,
+          });
+        }
+        return result;
       }
-      return result;
-    }
-  );
+    );
+
+  referenceCheck({
+    path: '/verify/telebirr',
+    bankCode: 'TEL',
+    field: 'transactionNumber',
+    format: TELEBIRR_NUMBER,
+    verify: verifyTelebirr,
+    description:
+      'Reads the telebirr receipt (transactioninfo.ethiotelecom.et/receipt/<number>) and ' +
+      'checks it from its HTML. Telebirr to telebirr: receiver phone (first and last 4 ' +
+      "digits) is one of the business's Telebirr numbers and the receiver name matches its " +
+      'holder. Telebirr to a bank: the bank account number is one of its bank accounts and ' +
+      'the name matches. Both: settled amount ≥ expected, status Completed, not too old. ' +
+      'Unknown numbers give unable_to_verify NOT_FOUND. Failed checks are saved like CBE.',
+  });
+
+  referenceCheck({
+    path: '/verify/dashen',
+    bankCode: 'DAS',
+    field: 'reference',
+    format: DASHEN_REFERENCE,
+    verify: verifyDashen,
+    description:
+      'Reads the Dashen receipt (receipts.dashenbanksc.com/receipt/<FT Ref>) and checks it ' +
+      'from its HTML: the receiver account (printed with its middle hidden, 2926******311) ' +
+      "fits one of the business's accounts (a Dashen one when sent to Dashen) and the receiver " +
+      'name matches its holder; transaction amount ≥ expected; not too old. The page only ' +
+      'exists for completed transfers; an unknown FT Ref gives NOT_FOUND.',
+  });
 
   app.get(
     '/verify/failed',
@@ -241,9 +275,11 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         body: z.object({
           image: z.string().min(16).max(9_000_000).describe('PNG / JPEG / WebP, base64'),
           bank: z
-            .enum(['CBE', 'TEL'])
+            .enum(['CBE', 'TEL', 'DAS'])
             .default('CBE')
-            .describe('Whose receipt: CBE (FT reference) or TEL (telebirr number)'),
+            .describe(
+              'Whose receipt: CBE (FT reference), TEL (telebirr number), DAS (Dashen FT Ref)'
+            ),
         }),
         response: {
           200: z.object({
@@ -323,7 +359,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
             'stored or logged.',
           body: z.object({
             image: z.string().min(16).max(9_000_000),
-            bank: z.enum(['CBE', 'TEL']).default('CBE'),
+            bank: z.enum(['CBE', 'TEL', 'DAS']).default('CBE'),
           }),
           response: {
             200: z.object({ gemini: resultSchema, tesseract: resultSchema }),

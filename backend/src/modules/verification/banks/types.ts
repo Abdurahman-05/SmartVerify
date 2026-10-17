@@ -17,11 +17,16 @@ export interface ParsedReceipt {
    * wallet = Telebirr to Telebirr (receiver name + phone masked to first and last 4 digits).
    * wallet_to_bank = Telebirr to a bank account (full account number + holder name).
    */
-  transfer: 'cbe' | 'other_bank' | 'wallet' | 'wallet_to_bank';
+  transfer: 'cbe' | 'other_bank' | 'wallet' | 'wallet_to_bank' | 'masked_account';
   /** "Reason / Type of service": the sender's note (CBE to CBE) or the destination account. */
   reason: string;
   /** Destination account at another bank / from a wallet ('' when the receiver is used). */
   destinationAccount: string;
+  /**
+   * masked_account (Dashen): the receiving bank's name as printed ("Dashen Bank Sc"); the
+   * receiver account is masked to its first and last digits (2926******311).
+   */
+  destinationBank?: string;
 }
 
 export interface ReceiptParser {

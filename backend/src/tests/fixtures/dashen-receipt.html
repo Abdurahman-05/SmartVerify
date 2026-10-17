@@ -1,0 +1,579 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Receipt</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Inter", sans-serif;
+    }
+    body {
+      background: #f2f4f8;
+      color: #003366;
+    }
+    .receipt {
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 24px;
+      background: #fff;
+      border: 1px solid #003366;
+    }
+    .receipt-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .logo {
+      height: 60px;
+    }
+    .receipt-header h1 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .receipt-header span {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      font-size: 12px;
+    }
+    .info-grid h3 {
+      margin-bottom: 8px;
+    }
+    .info-grid p {
+      margin-bottom: 4px;
+    }
+    hr {
+      margin: 20px 0;
+      border: none;
+      border-top: 2px solid #003366;
+    }
+    .section-title {
+      text-align: center;
+      margin-bottom: 5px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .receipt-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .receipt-table td {
+      font-size: 12px;
+      padding: 4px;
+      border-bottom: 1px solid #ddd;
+    }
+    .receipt-table td:last-child {
+      text-align: right;
+      font-weight: 600;
+    }
+    .receipt-table .total td {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .amount-words {
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    .qr {
+      text-align: center;
+      margin: 10px 0;
+    }
+    .qr img {
+      width: 80px;
+    }
+    .receipt-footer {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      border-top: 1px solid #003366;
+      padding-top: 15px;
+      font-size: 12px;
+    }
+    .receipt-footer a {
+      color: #003366;
+      text-decoration: none;
+    }
+    /* Prevent auto-linkified URLs/emails in dynamic fields from looking like links */
+    .receipt .info-grid a,
+    .receipt .receipt-table a {
+      color: inherit;
+      text-decoration: none;
+      pointer-events: none;
+    }
+    .print-action {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .print-action button {
+      background: #003366;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* COMPAT: social share temporarily commented out
+    .share-social-container {
+      margin-top: 15px;
+    }
+    .share-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #003366;
+      margin-bottom: 8px;
+      transition: color 0.2s;
+    }
+    .social-icons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+    }
+    .social-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      color: #fff;
+      text-decoration: none;
+      transition: opacity 0.2s, transform 0.1s;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 0;
+    }
+    .social-icon:hover {
+      opacity: 0.85;
+      transform: translateY(-1px);
+    }
+    .social-icon:active {
+      transform: translateY(0);
+    }
+    .social-icon.whatsapp { background-color: #25D366; }
+    .social-icon.telegram { background-color: #0088cc; }
+    .social-icon.messenger { background-color: #006AFF; }
+    .social-icon.sms { background-color: #10B981; }
+    .social-icon.copylink { background-color: #003366; }
+    */
+
+    .transaction-section {
+      position: relative;
+    }
+    .transaction-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: var(--stamp-url);
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 220px auto;
+      mix-blend-mode: multiply;
+      z-index: 2;
+      pointer-events: none;
+      image-rendering: -webkit-optimize-contrast;
+    }
+    .transaction-section > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    @media screen and (max-width: 430px) {
+      .receipt {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #003366;
+      }
+      .receipt-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .logo {
+        height: 40px;
+      }
+      .receipt-header h1 {
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .receipt-header span {
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        font-size: 9px;
+      }
+      .info-grid h3 {
+        margin-bottom: 8px;
+      }
+      .info-grid p {
+        margin-bottom: 4px;
+      }
+      hr {
+        margin: 5px 0;
+        border: none;
+        border-top: 2px solid #003366;
+      }
+      .section-title {
+        text-align: center;
+        margin-bottom: 5px;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .receipt-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .receipt-table td {
+        font-size: 10px;
+        padding: 4px;
+        border-bottom: 1px solid #ddd;
+      }
+      .receipt-table td:last-child {
+        text-align: right;
+        font-weight: 600;
+      }
+      .receipt-table .total td {
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .amount-words {
+        margin-top: 12px;
+        font-size: 10px;
+      }
+      .qr {
+        text-align: center;
+        margin: 10px 0;
+      }
+      .qr img {
+        width: 50px;
+      }
+      .receipt-footer {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        border-top: 1px solid #003366;
+        padding-top: 15px;
+        font-size: 8px;
+      }
+      .receipt-footer a {
+        color: #003366;
+        text-decoration: none;
+      }
+      .print-action {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .print-action button {
+        background: #003366;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 10px;
+      }
+      /* COMPAT: social share temporarily commented out
+      .share-label {
+        font-size: 10px;
+      }
+      .social-icons {
+        gap: 10px;
+      }
+      .social-icon {
+        width: 34px;
+        height: 34px;
+      }
+      .social-icon svg {
+        width: 17px;
+        height: 17px;
+      }
+      */
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+      .print-action {
+        display: none !important;
+      }
+      .receipt {
+        border: none;
+        margin: 0;
+        width: 100%;
+      }
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="receipt">
+    <header class="receipt-header">
+      <img
+        src="data:image/png;base64,AAAA"
+        alt="Dashen Bank"
+        class="logo"
+      />
+      <h1>
+        Dashen Bank Super App<br />
+        <span>Electronic Receipt</span>
+      </h1>
+    </header>
+
+    <section class="info-grid">
+      <div>
+        <h3>Dashen Bank S.C.</h3>
+        <p>Sudan St, Addis Ababa, Ethiopia</p>
+        <p>info@dashenbanksc.com</p>
+        <p>www.dashenbanksc.com</p>
+        <p><strong>P.O.Box:</strong> 12752</p>
+        <p><strong>TIN No.:</strong> 0000007523</p>
+        <p><strong>VAT Reg.:</strong> 12970</p>
+        <p><strong>VAT Reg. Date:</strong> 23/04/1995</p>
+      </div>
+      <div>
+        <!-- YOUR DYNAMIC FIELDS GO HERE -->
+        <p><strong>Sender Name:</strong> Kebede Tesfaye Alemu</p><p><strong>Sender Account Number:</strong> 5555******111</p><p><strong>Service Type:</strong> Transfer to Dashen Bank</p><p><strong>Transaction Channel:</strong> Dashen Bank Super App</p><p><strong>Narrative:</strong> Transfer to Dashen Bank</p><p><strong>Receiver Name:</strong> Abebe Coffee Bekele</p><p><strong>Beneficiary Bank Name: </strong> Dashen Bank Sc</p><p><strong>Institution Name: </strong> Dashen Bank sc</p><p><strong>Receiver Account Number: </strong> 5555******678</p><p><strong>Transaction Reference:</strong> C65WDTI261110001</p><p><strong>Transfer Reference:</strong> WDTI10000000000000000001</p><p><strong>Transaction Date:</strong> Oct 14, 2026, 09:23:02 am</p>
+        
+      </div>
+    </section>
+
+    <hr />
+
+    <section
+      class="transaction-section"
+      style="--stamp-url: url('data:image/png;base64,AAAA');"
+    >
+      
+      <h2 class="section-title">Transaction Details</h2>
+      <table class="receipt-table">
+        <tbody>
+          
+          <tr>
+          <td>Transaction Amount</td>
+          <td >ETB 12.00</td>
+        </tr><tr>
+          <td>Service Charge</td>
+          <td >ETB 0.00</td>
+        </tr><tr>
+          <td>Excise Tax (15%)</td>
+          <td >ETB 0.00</td>
+        </tr><tr>
+          <td>VAT (15%)</td>
+          <td >ETB 0.00</td>
+        </tr><tr>
+          <td>DRRF Fee</td>
+          <td >ETB 0.00</td>
+        </tr><tr>
+          <td>Penalty Fee</td>
+          <td >ETB 0.00</td>
+        </tr><tr>
+          <td>Income Tax Fee</td>
+          <td >ETB 0.00</td>
+        </tr><tr>
+          <td>Tax</td>
+          <td >ETB 0.00</td>
+        </tr><tr>
+          <td>Interest Fee</td>
+          <td >ETB 0.00</td>
+        </tr><tr>
+          <td>Stamp Duty</td>
+          <td >ETB 0.00</td>
+        </tr><tr>
+          <td>Discount Amount</td>
+          <td >ETB 0.00</td>
+        </tr>
+          <tr class="total">
+            <td>Total</td>
+            <td>ETB 12.00</td>
+          </tr>
+          <tr>
+            <td>
+              Amount in words:<br />
+              <p>Twelve Birr</p>
+            </td>
+            <td></td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    <div class="qr">
+      <img src="data:image/png;base64,AAAA" alt="QR Code" />
+    </div>
+
+    <footer class="receipt-footer">
+      <div style="flex: 1; text-align: end;">
+        <h3>Dashen Bank</h3>
+        <p>Always One Step Ahead!</p>
+      </div>
+      <div style="width: 2px; height: 40px; background-color: #003366;"></div>
+      <div style="flex: 1;">
+        <p>Terms & Conditions:</p>
+        <a
+          href="https://www.dashenbanksc.com/privacy-and-security/"
+          target="_blank"
+        >
+          www.dashenbanksc.com/privacy-and-security/
+        </a>
+        <p>Support: <a href="tel:6333">6333</a></p>
+      </div>
+    </footer>
+  </main>
+
+  <div class="print-action">
+    <button id="downloadBtn">📥 Download Receipt</button>
+
+    <!-- Social Sharing Icons Container (temporarily commented out)
+    -->
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</body>
+<script>
+  document
+    .getElementById("downloadBtn")
+    .addEventListener("click", function () {
+      const element = document.querySelector(".receipt");
+      const serviceType = "Transfer to Dashen Bank";
+      const ftNumber = "";
+      const transactionReference = "C65WDTI261110001";
+      const baseFilename = ftNumber
+        ? ftNumber
+        : transactionReference
+          ? transactionReference
+          : "Dashen_Receipt";
+      const filename = serviceType
+        ? serviceType + "_" + baseFilename + ".pdf"
+        : baseFilename + ".pdf";
+
+      const opt = {
+        margin: 10,
+        filename: filename,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 3,
+          useCORS: true,
+          scrollY: 0,
+          ignoreElements: function (el) {
+            return (
+              el.classList &&
+              (el.classList.contains("print-action") ||
+                el.classList.contains("share-social-container") ||
+                el.id === "downloadBtn")
+            );
+          },
+        },
+        jsPDF: {
+          unit: "mm",
+          format: "a4",
+          orientation: "portrait",
+        },
+      };
+
+      html2pdf().set(opt).from(element).save();
+    });
+
+  /*
+  (function () {
+    var shareText = "Dashen Bank Electronic Receipt";
+    var shareUrl = window.location.href;
+
+    var whatsappBtn = document.getElementById("whatsappShare");
+    var telegramBtn = document.getElementById("telegramShare");
+    var messengerBtn = document.getElementById("messengerShare");
+    var smsBtn = document.getElementById("smsShare");
+    var copyLinkBtn = document.getElementById("copyLinkBtn");
+    var shareLabel = document.getElementById("shareLabel");
+
+    if (whatsappBtn) {
+      whatsappBtn.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(shareText + ": " + shareUrl);
+    }
+    if (telegramBtn) {
+      telegramBtn.href = "https://t.me/share/url?url=" + encodeURIComponent(shareUrl) + "&text=" + encodeURIComponent(shareText);
+    }
+    if (smsBtn) {
+      var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      smsBtn.href = (isIOS ? "sms:&body=" : "sms:?body=") + encodeURIComponent(shareText + ": " + shareUrl);
+    }
+    if (messengerBtn) {
+      messengerBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        if (isMobile) {
+          window.location.href = "fb-messenger://share/?link=" + encodeURIComponent(shareUrl);
+        } else if (navigator.share) {
+          navigator.share({
+            title: shareText,
+            url: shareUrl,
+          }).catch(function () {});
+        } else {
+          window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(shareUrl), "_blank", "width=600,height=400");
+        }
+      });
+    }
+    if (copyLinkBtn) {
+      copyLinkBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        var originalLabel = shareLabel ? shareLabel.textContent : "";
+        function showSuccess() {
+          if (shareLabel) {
+            shareLabel.textContent = "Receipt link copied!";
+            shareLabel.style.color = "#25D366";
+            setTimeout(function () {
+              shareLabel.textContent = originalLabel;
+              shareLabel.style.color = "";
+            }, 2500);
+          }
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(shareUrl).then(showSuccess).catch(function () {
+            fallbackCopy();
+          });
+        } else {
+          fallbackCopy();
+        }
+        function fallbackCopy() {
+          var tempInput = document.createElement("input");
+          tempInput.value = shareUrl;
+          document.body.appendChild(tempInput);
+          tempInput.select();
+          try {
+            document.execCommand("copy");
+            showSuccess();
+          } catch (err) {}
+          document.body.removeChild(tempInput);
+        }
+      });
+    }
+  })();
+  */
+</script>
+</html>
