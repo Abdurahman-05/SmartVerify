@@ -1035,5 +1035,12 @@
     "amount": "Amount",
     "date": "Date",
     "failed": "Could not read: {{reason}}"
+  },
+  "waiterNav": {
+    "newOrder": "New order",
+    "activity": "Activity",
+    "transactions": "Transactions",
+    "tips": "Tips",
+    "reports": "Reports"
   }
 }

@@ -65,7 +65,9 @@ export function getHomeActions(plan: Plan | null, role: Role): HomeAction[] {
   const manages = role === 'owner' || role === 'manager';
   const keys: HomeActionKey[] =
     plan === 'restaurant' && manages ? [...base.slice(0, 2), 'overview', ...base.slice(2)] : base;
-  return keys.map((key) => {
+  // Bank accounts and the subscription are the owner's and manager's.
+  const visible = manages ? keys : keys.filter((k) => k !== 'bankAccount' && k !== 'subscription');
+  return visible.map((key) => {
     if (key === 'verify' && plan === 'restaurant') return { ...actions.verify, href: '/bills' };
     // Owner and manager see every waiter's tips, not their own.
     if (key === 'tips' && manages) return { ...actions.tips, href: '/tips-admin' };

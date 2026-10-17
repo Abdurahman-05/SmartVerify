@@ -1035,5 +1035,12 @@
     "amount": "መጠን",
     "date": "ቀን",
     "failed": "ማንበብ አልተቻለም፦ {{reason}}"
+  },
+  "waiterNav": {
+    "newOrder": "አዲስ ትዕዛዝ",
+    "activity": "እንቅስቃሴ",
+    "transactions": "ግብይቶች",
+    "tips": "ቲፕ",
+    "reports": "ሪፖርቶች"
   }
 }
