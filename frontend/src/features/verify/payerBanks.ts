@@ -1,6 +1,6 @@
 /** One thing to find on the customer's receipt (or in its QR). */
 export interface ReceiptField {
-  key: 'reference' | 'senderAccount' | 'transactionNumber';
+  key: 'reference' | 'senderAccount' | 'senderLast5' | 'transactionNumber';
   /** What the user types when reading did not find it. */
   input: 'text' | 'digits';
   length?: number;
@@ -110,7 +110,25 @@ export const payerBanks: PayerBank[] = [
     ],
     parseQr: () => null,
   },
-  referenceOnly('BOA', 'Bank of Abyssinia', 'Abyssinia'),
+  {
+    code: 'BOA',
+    name: 'Bank of Abyssinia',
+    shortName: 'Abyssinia',
+    fields: [
+      reference,
+      {
+        // BOA's receipt id is the FT reference + the SENDER's account last 5 digits.
+        key: 'senderLast5',
+        input: 'digits',
+        length: 5,
+        sample: '10431',
+        typed: true,
+        normalize: digits,
+        valid: (v) => /^\d{5}$/.test(v),
+      },
+    ],
+    parseQr: () => null,
+  },
   referenceOnly('AWA', 'Awash Bank', 'Awash'),
   referenceOnly('ZEM', 'Zemen Bank', 'Zemen'),
   referenceOnly('MPS', 'M-Pesa', 'M-Pesa'),

@@ -23,7 +23,7 @@ export const getFailedChecks = (period: Period) =>
  * POST /verify/read-reference — the Transaction ID and text of a receipt picture (base64), read
  * by Gemini on the server (OCR when Gemini is unavailable).
  */
-export const readReference = (imageBase64: string, bank: 'CBE' | 'TEL' | 'DAS' = 'CBE') =>
+export const readReference = (imageBase64: string, bank: 'CBE' | 'TEL' | 'DAS' | 'BOA' = 'CBE') =>
   api<{ reference: string | null; text: string; source: 'gemini' | 'ocr' }>(
     '/verify/read-reference',
     {
@@ -72,5 +72,13 @@ export const verifyDashen = (reference: string, expectedAmountEtb: number, billI
   api<CbeCheck>('/verify/dashen', {
     method: 'POST',
     body: { reference, expectedAmountEtb, ...(billId && { billId }) },
+    timeoutMs: 25_000,
+  });
+
+/** POST /verify/boa — the server reads the BOA receipt (FT reference + sender's last 5). */
+export const verifyBoa = (receiptId: string, expectedAmountEtb: number, billId?: string) =>
+  api<CbeCheck>('/verify/boa', {
+    method: 'POST',
+    body: { reference: receiptId, expectedAmountEtb, ...(billId && { billId }) },
     timeoutMs: 25_000,
   });

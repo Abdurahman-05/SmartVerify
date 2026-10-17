@@ -140,9 +140,20 @@ export default function ReadReceiptScreen() {
       const tel = bank.code === 'TEL';
       const { reference } = await readReference(
         asset.base64,
-        tel ? 'TEL' : bank.code === 'DAS' ? 'DAS' : 'CBE'
+        tel ? 'TEL' : bank.code === 'DAS' ? 'DAS' : bank.code === 'BOA' ? 'BOA' : 'CBE'
       );
-      setFound(reference ? (tel ? { transactionNumber: reference } : { reference }) : {});
+      // BOA's SMS link gives FT reference + sender's last 5 at once.
+      const boaId =
+        bank.code === 'BOA' && reference ? /^(FT[A-Z0-9]{10})(\d{5})$/.exec(reference) : null;
+      setFound(
+        !reference
+          ? {}
+          : tel
+            ? { transactionNumber: reference }
+            : boaId
+              ? { reference: boaId[1], senderLast5: boaId[2] }
+              : { reference }
+      );
       router.replace('/verify-bank/found');
     } catch (error) {
       failed(error);
@@ -160,7 +171,7 @@ export default function ReadReceiptScreen() {
       .catch(failed);
   };
   // CBE and telebirr pictures are read by the server; other banks keep the fake reading.
-  const cbe = bank.code === 'CBE' || bank.code === 'TEL' || bank.code === 'DAS';
+  const cbe = ['CBE', 'TEL', 'DAS', 'BOA'].includes(bank.code);
 
   const names = onReceipt(bank).map((f) => t(`verifyBank.short.${f.key}`));
 

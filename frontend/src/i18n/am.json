@@ -953,12 +953,14 @@
     "fields": {
       "reference": "የማጣቀሻ ቁጥር",
       "transactionNumber": "የግብይት ቁጥር",
-      "senderAccount": "የላኪ ሂሳብ"
+      "senderAccount": "የላኪ ሂሳብ",
+      "senderLast5": "የላኪ ሂሳብ"
     },
     "short": {
       "reference": "የግብይት መለያ",
       "transactionNumber": "የግብይት ቁጥር",
-      "senderAccount": "የላኪ ሂሳብ የመጨረሻ 8 አሃዞች"
+      "senderAccount": "የላኪ ሂሳብ የመጨረሻ 8 አሃዞች",
+      "senderLast5": "የላኪ ሂሳብ የመጨረሻ 5 አሃዞች"
     },
     "scan": {
       "title": "QR ኮዱን ይቃኙ",

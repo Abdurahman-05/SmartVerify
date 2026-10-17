@@ -26,7 +26,8 @@ import { TELEBIRR, TELEBIRR_PHONE } from './telebirr';
 
 /** CBE accounts need the holder name: CBE receipts show it and the check compares it. */
 const CBE = 'CBE';
-const DASHEN = 'DAS';
+/** Banks whose receipts show the receiver's name, which payment checks compare. */
+const NAME_CHECKED = [CBE, TELEBIRR, 'DAS', 'BOA'];
 
 const schema = z
   .object({
@@ -46,7 +47,7 @@ const schema = z
       });
     }
     // CBE receipts show the receiver's name; payment checks compare it with this name.
-    if ((bankCode === CBE || bankCode === TELEBIRR || bankCode === DASHEN) && !holderName) {
+    if (NAME_CHECKED.includes(bankCode) && !holderName) {
       ctx.addIssue({
         code: 'custom',
         path: ['holderName'],
@@ -124,7 +125,7 @@ export default function AddBankAccountScreen() {
   const bank = banks.find((b) => b.code === bankCode) ?? banks[0];
   const telebirr = bank.code === TELEBIRR;
   // CBE and telebirr receipts show the receiver's name; payment checks compare it.
-  const nameNeeded = bank.code === CBE || telebirr || bank.code === DASHEN;
+  const nameNeeded = NAME_CHECKED.includes(bank.code);
   const generalError =
     mutation.error &&
     !(mutation.error instanceof BankAccountError && mutation.error.code === 'duplicate')

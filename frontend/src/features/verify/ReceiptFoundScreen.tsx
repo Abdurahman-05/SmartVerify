@@ -9,7 +9,12 @@ import { FormScreen } from '@/components/ui/FormScreen';
 import { formatMoney } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { cbeReceiptLink, dashenReceiptLink, telebirrReceiptLink } from '@/lib/verification';
+import {
+  boaReceiptLink,
+  cbeReceiptLink,
+  dashenReceiptLink,
+  telebirrReceiptLink,
+} from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
 import { findPayerBank, type ReceiptField } from './payerBanks';
@@ -113,7 +118,9 @@ export default function ReceiptFoundScreen() {
           ? telebirrReceiptLink(values['transactionNumber'] ?? '')
           : bank.code === 'DAS'
             ? dashenReceiptLink(values['reference'] ?? '')
-            : JSON.stringify({ bank: bank.code, ...values })
+            : bank.code === 'BOA'
+              ? boaReceiptLink(values['reference'] ?? '', values['senderLast5'] ?? '')
+              : JSON.stringify({ bank: bank.code, ...values })
     );
     router.replace('/verify-restaurant/checking');
   };

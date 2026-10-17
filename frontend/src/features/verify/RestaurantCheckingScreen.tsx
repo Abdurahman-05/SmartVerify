@@ -18,9 +18,11 @@ import type { ExtraChoice } from '@/lib/api/payments';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { checkBankPayment } from '@/lib/mock/verify';
 import {
+  boaReceiptIdOf,
   dashenReferenceOf,
   isCbeReceiptLink,
   telebirrNumberOf,
+  verifyBoa,
   verifyCbe,
   verifyDashen,
   verifyTelebirr,
@@ -53,12 +55,15 @@ async function checkReceived(
   // verify is saved with the bill, so it shows in history.
   const telebirr = telebirrNumberOf(qrData);
   const dashen = dashenReferenceOf(qrData);
-  if (!telebirr && !dashen && !isCbeReceiptLink(qrData)) return fake();
+  const boa = boaReceiptIdOf(qrData);
+  if (!telebirr && !dashen && !boa && !isCbeReceiptLink(qrData)) return fake();
   const result = telebirr
     ? await verifyTelebirr(telebirr, amount, billId)
     : dashen
       ? await verifyDashen(dashen, amount, billId)
-      : await verifyCbe(qrData, amount, billId);
+      : boa
+        ? await verifyBoa(boa, amount, billId)
+        : await verifyCbe(qrData, amount, billId);
   if (result.status === 'verified') return result.amountEtb;
   if (result.status === 'not_matching') {
     return {

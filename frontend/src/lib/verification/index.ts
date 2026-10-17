@@ -12,6 +12,7 @@ export const USE_MOCK_VERIFICATION = process.env.EXPO_PUBLIC_USE_MOCK_VERIFICATI
 export const verifyCbe = USE_MOCK_VERIFICATION ? mock.verifyCbe : real.verifyCbe;
 export const verifyTelebirr = USE_MOCK_VERIFICATION ? mock.verifyTelebirr : real.verifyTelebirr;
 export const verifyDashen = USE_MOCK_VERIFICATION ? mock.verifyDashen : real.verifyDashen;
+export const verifyBoa = USE_MOCK_VERIFICATION ? mock.verifyBoa : real.verifyBoa;
 export const getFailedChecks = USE_MOCK_VERIFICATION ? mock.getFailedChecks : real.getFailedChecks;
 export const readReference = USE_MOCK_VERIFICATION ? mock.readReference : real.readReference;
 export const compareReading = USE_MOCK_VERIFICATION ? mock.compareReading : real.compareReading;
@@ -45,3 +46,13 @@ export const dashenReceiptLink = (reference: string) =>
 export const dashenReferenceOf = (text: string) =>
   /^https:\/\/receipts\.dashenbanksc\.com\/receipt\/([A-Z0-9]{10,24})$/.exec(text.trim())?.[1] ??
   null;
+
+/** The BOA receipt link: FT reference + the sender account's last 5 digits. */
+export const boaReceiptLink = (reference: string, senderLast5: string) =>
+  `https://cs.bankofabyssinia.com/slip/?trx=${reference}${senderLast5}`;
+
+/** The receipt id (FT… + 5 digits) of a BOA receipt link, or null. */
+export const boaReceiptIdOf = (text: string) =>
+  /^https:\/\/cs\.bankofabyssinia\.com\/slip\/\?trx=(FT[A-Z0-9]{10}\d{5})$/.exec(
+    text.trim()
+  )?.[1] ?? null;
