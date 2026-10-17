@@ -106,8 +106,8 @@ export const bankAccountRoutes: FastifyPluginAsyncZod = async (app) => {
         description:
           `Connect a receiving account (max ${MAX_BANK_ACCOUNTS}). The same bank and number ` +
           'twice gives ACCOUNT_DUPLICATE; a full list gives ACCOUNT_LIMIT. Without holderName ' +
-          'the business name is shown until the bank can tell us the real name (CBE, Telebirr and ' +
-          'Dashen accounts must have holderName: payment checks compare it with the receipt). Telebirr takes the ' +
+          'the business name is shown until the bank can tell us the real name (CBE, Telebirr, Dashen ' +
+          'and BOA accounts must have holderName: payment checks compare it with the receipt). Telebirr takes the ' +
           'wallet phone number (10 digits, 09… or 07…) as accountNumber.',
         body: z.object({
           bankCode: z.string().min(1).max(10),
@@ -129,7 +129,7 @@ export const bankAccountRoutes: FastifyPluginAsyncZod = async (app) => {
       const bank = await prisma.bank.findFirst({ where: { code: bankCode, active: true } });
       if (!bank) throw new AppError('VALIDATION_ERROR', { reason: 'unknownBank' });
       // CBE and telebirr receipts show the receiver's name; the check compares it with this.
-      if (['CBE', TELEBIRR, 'DAS'].includes(bankCode) && !holderName) {
+      if (['CBE', TELEBIRR, 'DAS', 'BOA'].includes(bankCode) && !holderName) {
         throw new AppError('VALIDATION_ERROR', { reason: 'holderNameRequired' });
       }
       if (bankCode === TELEBIRR && !customerPhoneSchema.safeParse(accountNumber).success) {

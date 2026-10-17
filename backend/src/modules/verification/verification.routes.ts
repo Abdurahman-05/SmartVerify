@@ -15,8 +15,10 @@ import { closeOcr, findReference, imageType, readImageText, type PictureBank } f
 import {
   listFailedChecks,
   saveFailedCheck,
+  BOA_RECEIPT_ID,
   DASHEN_REFERENCE,
   TELEBIRR_NUMBER,
+  verifyBoa,
   verifyCbe,
   verifyDashen,
   verifyTelebirr,
@@ -231,6 +233,20 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
       'exists for completed transfers; an unknown FT Ref gives NOT_FOUND.',
   });
 
+  referenceCheck({
+    path: '/verify/boa',
+    bankCode: 'BOA',
+    field: 'reference',
+    format: BOA_RECEIPT_ID,
+    verify: verifyBoa,
+    description:
+      'Reads the Bank of Abyssinia receipt (cs.bankofabyssinia.com, id = FT reference + the ' +
+      "sender account's last 5 digits) and checks it: Receiver's Account is one of the " +
+      "business's accounts (in full, or first/last digits when masked) and Receiver's Name " +
+      'matches its holder; transferred amount ≥ expected; not too old. "Invalid reference ' +
+      'number" gives NOT_FOUND.',
+  });
+
   app.get(
     '/verify/failed',
     {
@@ -275,7 +291,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         body: z.object({
           image: z.string().min(16).max(9_000_000).describe('PNG / JPEG / WebP, base64'),
           bank: z
-            .enum(['CBE', 'TEL', 'DAS'])
+            .enum(['CBE', 'TEL', 'DAS', 'BOA'])
             .default('CBE')
             .describe(
               'Whose receipt: CBE (FT reference), TEL (telebirr number), DAS (Dashen FT Ref)'
@@ -359,7 +375,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
             'stored or logged.',
           body: z.object({
             image: z.string().min(16).max(9_000_000),
-            bank: z.enum(['CBE', 'TEL', 'DAS']).default('CBE'),
+            bank: z.enum(['CBE', 'TEL', 'DAS', 'BOA']).default('CBE'),
           }),
           response: {
             200: z.object({ gemini: resultSchema, tesseract: resultSchema }),

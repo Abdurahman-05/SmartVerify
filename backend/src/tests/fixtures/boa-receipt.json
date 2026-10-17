@@ -1,0 +1,35 @@
+{
+  "header": {
+    "audit": {
+      "T24_time": 466,
+      "responseParse_time": 4,
+      "requestParse_time": 7
+    },
+    "page_start": 1,
+    "page_token": "0.01,99",
+    "total_size": 1,
+    "page_size": 99,
+    "status": "success"
+  },
+  "body": [
+    {
+      "Source Account Name": "KEBEDE TESFAYE ALEMU",
+      "VAT (15%)": "1.5",
+      "Transferred Amount in word": "SIX THOUSAND SEVEN HUNDRED AND TWELVE ETB ONLY",
+      "Address": "Addis Ababa, ETHIOPIA",
+      "Transaction Type": "Account to Account",
+      "Service Charge": "10",
+      "Source Account": "1******11",
+      "Payment Reference": "1000000001",
+      "Tel.": "+251900000000",
+      "Payer's Name": "KEBEDE TESFAYE ALEMU",
+      "Transferred Amount": "6700.00",
+      "currency": "ETB",
+      "Transaction Reference": "FT26238AAAAA",
+      "Transaction Date": "26/08/26 14:36",
+      "Total Amount including VAT": "6712.00",
+      "Receiver's Account": "100000001",
+      "Receiver's Name": "ABEBE COFFEE BEKELE"
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import type { Env } from '../../config/env.js';
 import type { PrismaClient } from '../../generated/prisma/client.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { cbeParser } from './banks/cbe.js';
+import { BOA_NOT_FOUND, boaParser } from './banks/boa.js';
 import { dashenParser } from './banks/dashen.js';
 import { TELEBIRR_NOT_FOUND, telebirrParser } from './banks/telebirr.js';
 import type { ReceiptParser } from './banks/types.js';
@@ -199,6 +200,39 @@ export async function verifyDashen(
     log,
     now,
     html: true,
+  });
+}
+
+/** BOA receipt id: FT reference + the sender account's last 5 digits (FT26238SRG1T10431). */
+export const BOA_RECEIPT_ID = /^FT[A-Z0-9]{10}\d{5}$/;
+
+/** Fetches a Bank of Abyssinia receipt (its JSON) by receipt id and checks it. */
+export async function verifyBoa(
+  prisma: PrismaClient,
+  env: Env,
+  businessId: string,
+  receiptId: string,
+  expectedAmountEtb: number,
+  log?: Pick<FastifyBaseLogger, 'info'>,
+  now = new Date()
+): Promise<VerifyResponse> {
+  if (!BOA_RECEIPT_ID.test(receiptId)) throw new AppError('INVALID_URL');
+  return checkReceipt({
+    prisma,
+    env,
+    businessId,
+    source: {
+      url: new URL(`https://cs.bankofabyssinia.com/api/onlineSlip/getDetails/?id=${receiptId}`),
+      headers: { accept: 'application/json', 'user-agent': 'SmartVerify/1.0' },
+    },
+    tlsStrict: true,
+    parser: boaParser,
+    bank: 'BOA',
+    expectedAmountEtb,
+    log,
+    now,
+    // BOA answers 200 with this for an unknown id.
+    isNotFound: (text) => BOA_NOT_FOUND.test(text),
   });
 }
 

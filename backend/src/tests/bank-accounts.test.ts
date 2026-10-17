@@ -128,9 +128,15 @@ describe('bank accounts', () => {
         ).statusCode
       ).toBe(201);
     }
-    expect(code(await add(r.owner.token, { bankCode: 'BOA', accountNumber: '2000000001' }))).toBe(
-      'ACCOUNT_LIMIT'
-    );
+    expect(
+      code(
+        await add(r.owner.token, {
+          bankCode: 'BOA',
+          accountNumber: '2000000001',
+          holderName: 'Abebe Kebede',
+        })
+      )
+    ).toBe('ACCOUNT_LIMIT');
 
     for (const body of [
       { bankCode: 'CBE', accountNumber: '12345' },

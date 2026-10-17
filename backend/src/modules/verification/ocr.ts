@@ -88,7 +88,17 @@ export function findDashenReference(text: string): string | null {
   return ref && /\d/.test(ref) && /[A-Z]/.test(ref) ? ref : null;
 }
 
-export type PictureBank = 'CBE' | 'TEL' | 'DAS';
+/**
+ * BOA: the receipt id (FT reference + sender's last 5 digits) from the SMS link
+ * (cs.bankofabyssinia.com/slip/?trx=FT26238SRG1T10431), else just the FT reference.
+ */
+export function findBoaReference(text: string): string | null {
+  const upper = text.toUpperCase();
+  const fromLink = /TRX\s*=\s*(FT[A-Z0-9]{10}\d{5})\b/.exec(upper);
+  return fromLink?.[1] ?? findCbeReference(text);
+}
+
+export type PictureBank = 'CBE' | 'TEL' | 'DAS' | 'BOA';
 
 /** The reference to look for in a picture of this bank's receipt. */
 export const findReference = (bank: PictureBank, text: string) =>
@@ -96,4 +106,6 @@ export const findReference = (bank: PictureBank, text: string) =>
     ? findTelebirrNumber(text)
     : bank === 'DAS'
       ? findDashenReference(text)
-      : findCbeReference(text);
+      : bank === 'BOA'
+        ? findBoaReference(text)
+        : findCbeReference(text);
