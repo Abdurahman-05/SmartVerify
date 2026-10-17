@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import {
+  X,
+  Search,
   ArrowLeftRight,
   Bike,
   ChevronDown,
@@ -11,7 +13,14 @@ import {
 } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
@@ -107,6 +116,7 @@ export default function NewOrderScreen() {
   const [cart, setCart] = useState<Record<string, number>>({});
   const [notes, setNotes] = useState<OrderNote[]>([]);
   const [category, setCategory] = useState<'all' | MenuCategory>('all');
+  const [search, setSearch] = useState('');
   const [sheet, setSheet] = useState<Sheet>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [takeaway, setTakeaway] = useState({ customerName: '', customerPhone: '' });
@@ -172,7 +182,14 @@ export default function NewOrderScreen() {
     }));
   const itemCount = lines.reduce((sum, l) => sum + l.quantity, 0);
   const total = lines.reduce((sum, l) => sum + l.priceEtb * l.quantity, 0);
-  const shownMenu = category === 'all' ? menu : menu.filter((item) => item.category === category);
+  // Each item keeps its number in the full menu; search matches the name or the number.
+  const numbered = menu.map((item, i) => ({ item, number: i + 1 }));
+  const query = search.trim().toLowerCase();
+  const shownMenu = numbered.filter(
+    ({ item, number }) =>
+      (category === 'all' || item.category === category) &&
+      (!query || item.name.toLowerCase().includes(query) || String(number) === query)
+  );
   const err = (key: string) => (errors[key] ? t(errors[key]) : undefined);
 
   const setQuantity = (itemId: string, quantity: number) =>
@@ -380,13 +397,38 @@ export default function NewOrderScreen() {
             </View>
           ) : null}
 
+          <View className="mx-4 mt-3 h-12 flex-row items-center gap-2 rounded-input border-[1.5px] border-border bg-surface px-3">
+            <Search size={20} color={colors.muted} strokeWidth={2.2} />
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder={t('orders.search')}
+              placeholderTextColor={colors.placeholder}
+              accessibilityLabel={t('orders.search')}
+              returnKeyType="search"
+              autoCorrect={false}
+              className="h-full flex-1 font-body text-base text-text"
+            />
+            {search ? (
+              <Pressable
+                onPress={() => setSearch('')}
+                accessibilityRole="button"
+                accessibilityLabel={t('orders.clearSearch')}
+                hitSlop={8}
+                className="h-11 w-11 items-center justify-center rounded-full active:bg-border"
+              >
+                <X size={20} color={colors.muted} strokeWidth={2.2} />
+              </Pressable>
+            ) : null}
+          </View>
+
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{
               gap: 8,
               paddingHorizontal: 16,
-              paddingTop: 12,
+              paddingTop: 10,
               paddingBottom: 10,
             }}
             accessibilityRole="radiogroup"
@@ -413,10 +455,16 @@ export default function NewOrderScreen() {
           ) : null}
 
           <View className="gap-2 px-4">
-            {shownMenu.map((item) => (
+            {menu.length > 0 && shownMenu.length === 0 ? (
+              <Text tone="muted" className="py-4 text-center text-base">
+                {t('orders.noMatch')}
+              </Text>
+            ) : null}
+            {shownMenu.map(({ item, number }) => (
               <MenuItemRow
                 key={item.id}
                 item={item}
+                number={number}
                 quantity={cart[item.id] ?? 0}
                 onChange={(q) => setQuantity(item.id, q)}
               />

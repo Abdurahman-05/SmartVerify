@@ -448,7 +448,10 @@
     "noTables": "No tables in this area yet.",
     "noTablesHint": "Owner or manager: add tables in Profile → Tables.",
     "noAreas": "No delivery areas yet.",
-    "noAreasHint": "Owner or manager: add them in Profile → Fees & delivery."
+    "noAreasHint": "Owner or manager: add them in Profile → Fees & delivery.",
+    "search": "Search food by name or number",
+    "clearSearch": "Clear search",
+    "noMatch": "No food matches your search."
   },
   "bills": {
     "title": "Open bills",

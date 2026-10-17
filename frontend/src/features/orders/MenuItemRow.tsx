@@ -15,6 +15,8 @@ export const categoryIcon: Record<MenuCategory, LucideIcon> = {
 
 interface MenuItemRowProps {
   item: MenuItem;
+  /** Simple number in the menu (1, 2, 3…), to find and call out an item quickly. */
+  number: number;
   quantity: number;
   onChange: (quantity: number) => void;
 }
@@ -53,7 +55,7 @@ function RoundButton({
   );
 }
 
-export function MenuItemRow({ item, quantity, onChange }: MenuItemRowProps) {
+export function MenuItemRow({ item, number, quantity, onChange }: MenuItemRowProps) {
   const brand = useBrandColors();
   const { t } = useTranslation();
   const Icon = categoryIcon[item.category];
@@ -69,6 +71,11 @@ export function MenuItemRow({ item, quantity, onChange }: MenuItemRowProps) {
     >
       <View className="h-16 w-16 items-center justify-center rounded-[14px] bg-primaryTile">
         <Icon size={28} color={brand.primary} strokeWidth={1.8} />
+        <View className="absolute -left-1 -top-1 h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1.5">
+          <Text font="bold" tone="inverse" className="text-sm leading-4">
+            {number}
+          </Text>
+        </View>
       </View>
       <View className="min-w-0 flex-1">
         <Text font="bold" className="text-[17px] leading-tight">
