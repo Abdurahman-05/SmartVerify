@@ -1,9 +1,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
-import { Banknote, HandCoins, Info, Lock, Undo2, type LucideIcon } from 'lucide-react-native';
+import { Banknote, Info, Lock } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
@@ -50,37 +50,6 @@ async function saveCashPayment(bill: Bill, cash: number, extraChoice: ExtraChoic
   });
 }
 
-function ChoiceButton({
-  label,
-  icon: Icon,
-  selected,
-  onPress,
-}: {
-  label: string;
-  icon: LucideIcon;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  const brand = useBrandColors();
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="radio"
-      accessibilityState={{ selected }}
-      className={`h-[68px] flex-1 flex-row items-center justify-center gap-2 rounded-[18px] px-2 ${
-        selected
-          ? 'border-[3px] border-primary bg-primarySoft'
-          : 'border-2 border-borderStrong bg-surface'
-      }`}
-    >
-      <Icon size={22} color={brand.primary} strokeWidth={2.2} />
-      <Text font="bold" className="text-[17px]">
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 function SummaryRow({
   label,
   value,
@@ -119,7 +88,8 @@ export default function CashPaymentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { bill, pending } = usePaymentBill(id);
   const [cash, setCash] = useState(0);
-  const [extraChoice, setExtraChoice] = useState<ExtraChoice>('tip');
+  // Cash: extra money is always the customer's change (no tip question).
+  const extraChoice: ExtraChoice = 'giveback';
   const [submitted, setSubmitted] = useState(false);
   // One key per cash payment: confirming again after a lost answer pays once.
   const [payKey] = useState(newIdempotencyKey);
@@ -198,28 +168,6 @@ export default function CashPaymentScreen() {
             />
           </View>
         </View>
-
-        {calc.extra > 0 ? (
-          <View className="gap-1.5">
-            <Text font="bold" className="text-[17px]">
-              {t('cash.extraQuestion', { amount: formatMoney(calc.extra) })}
-            </Text>
-            <View className="flex-row gap-2" accessibilityRole="radiogroup">
-              <ChoiceButton
-                label={t('cash.waiterTip')}
-                icon={HandCoins}
-                selected={extraChoice === 'tip'}
-                onPress={() => setExtraChoice('tip')}
-              />
-              <ChoiceButton
-                label={t('cash.giveBack')}
-                icon={Undo2}
-                selected={extraChoice === 'giveback'}
-                onPress={() => setExtraChoice('giveback')}
-              />
-            </View>
-          </View>
-        ) : null}
 
         {calc.valid ? (
           <View className="gap-1 rounded-[20px] bg-primary px-[18px] py-3">
