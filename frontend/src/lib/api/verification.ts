@@ -23,7 +23,7 @@ export const getFailedChecks = (period: Period) =>
  * POST /verify/read-reference — the Transaction ID and text of a receipt picture (base64), read
  * by Gemini on the server (OCR when Gemini is unavailable).
  */
-export const readReference = (imageBase64: string, bank: 'CBE' | 'TEL' = 'CBE') =>
+export const readReference = (imageBase64: string, bank: 'CBE' | 'TEL' | 'DAS' = 'CBE') =>
   api<{ reference: string | null; text: string; source: 'gemini' | 'ocr' }>(
     '/verify/read-reference',
     {
@@ -64,5 +64,13 @@ export const verifyTelebirr = (
   api<CbeCheck>('/verify/telebirr', {
     method: 'POST',
     body: { transactionNumber, expectedAmountEtb, ...(billId && { billId }) },
+    timeoutMs: 25_000,
+  });
+
+/** POST /verify/dashen — the server reads the Dashen receipt for this FT Ref and compares it. */
+export const verifyDashen = (reference: string, expectedAmountEtb: number, billId?: string) =>
+  api<CbeCheck>('/verify/dashen', {
+    method: 'POST',
+    body: { reference, expectedAmountEtb, ...(billId && { billId }) },
     timeoutMs: 25_000,
   });

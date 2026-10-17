@@ -62,7 +62,7 @@ export async function getFailedChecks(_period: Period): Promise<FailedCheck[]> {
 /** Offline stand-in for reading a picture: always "finds" the same Transaction ID. */
 export async function readReference(
   _imageBase64: string,
-  _bank: 'CBE' | 'TEL' = 'CBE'
+  _bank: 'CBE' | 'TEL' | 'DAS' = 'CBE'
 ): Promise<{ reference: string | null; text: string; source: 'gemini' | 'ocr' }> {
   await mockDelay(1200);
   return { reference: 'FT26286JZH4B', text: 'Transaction ID: FT26286JZH4B', source: 'gemini' };
@@ -88,3 +88,7 @@ export async function compareReading(_imageBase64: string) {
 /** Offline stand-in for the telebirr check: paid exactly. */
 export const verifyTelebirr = (number: string, expectedAmountEtb: number, billId?: string) =>
   verifyCbe(number, expectedAmountEtb, billId);
+
+/** Offline stand-in for the Dashen check: paid exactly. */
+export const verifyDashen = (reference: string, expectedAmountEtb: number, billId?: string) =>
+  verifyCbe(reference, expectedAmountEtb, billId);

@@ -94,7 +94,22 @@ export const payerBanks: PayerBank[] = [
       return m ? { transactionNumber: m[1].toUpperCase() } : null;
     },
   },
-  referenceOnly('DAS', 'Dashen Bank', 'Dashen'),
+  {
+    code: 'DAS',
+    name: 'Dashen Bank',
+    shortName: 'Dashen',
+    fields: [
+      {
+        // Dashen's "FT Ref" (not the longer "Transaction Ref" starting with WDTI).
+        key: 'reference',
+        input: 'text',
+        sample: 'C65WDTI262870002',
+        normalize: upper,
+        valid: (v) => /^[A-Z0-9]{10,24}$/.test(v),
+      },
+    ],
+    parseQr: () => null,
+  },
   referenceOnly('BOA', 'Bank of Abyssinia', 'Abyssinia'),
   referenceOnly('AWA', 'Awash Bank', 'Awash'),
   referenceOnly('ZEM', 'Zemen Bank', 'Zemen'),

@@ -138,7 +138,10 @@ export default function ReadReceiptScreen() {
       // telebirr transaction number. The confirm page shows it (or asks for it) and the rest.
       if (!asset.base64) throw new Error('no image data');
       const tel = bank.code === 'TEL';
-      const { reference } = await readReference(asset.base64, tel ? 'TEL' : 'CBE');
+      const { reference } = await readReference(
+        asset.base64,
+        tel ? 'TEL' : bank.code === 'DAS' ? 'DAS' : 'CBE'
+      );
       setFound(reference ? (tel ? { transactionNumber: reference } : { reference }) : {});
       router.replace('/verify-bank/found');
     } catch (error) {
@@ -157,7 +160,7 @@ export default function ReadReceiptScreen() {
       .catch(failed);
   };
   // CBE and telebirr pictures are read by the server; other banks keep the fake reading.
-  const cbe = bank.code === 'CBE' || bank.code === 'TEL';
+  const cbe = bank.code === 'CBE' || bank.code === 'TEL' || bank.code === 'DAS';
 
   const names = onReceipt(bank).map((f) => t(`verifyBank.short.${f.key}`));
 

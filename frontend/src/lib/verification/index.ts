@@ -11,6 +11,7 @@ export const USE_MOCK_VERIFICATION = process.env.EXPO_PUBLIC_USE_MOCK_VERIFICATI
 
 export const verifyCbe = USE_MOCK_VERIFICATION ? mock.verifyCbe : real.verifyCbe;
 export const verifyTelebirr = USE_MOCK_VERIFICATION ? mock.verifyTelebirr : real.verifyTelebirr;
+export const verifyDashen = USE_MOCK_VERIFICATION ? mock.verifyDashen : real.verifyDashen;
 export const getFailedChecks = USE_MOCK_VERIFICATION ? mock.getFailedChecks : real.getFailedChecks;
 export const readReference = USE_MOCK_VERIFICATION ? mock.readReference : real.readReference;
 export const compareReading = USE_MOCK_VERIFICATION ? mock.compareReading : real.compareReading;
@@ -34,4 +35,13 @@ export const telebirrReceiptLink = (transactionNumber: string) =>
 /** The transaction number of a telebirr receipt link, or null. */
 export const telebirrNumberOf = (text: string) =>
   /^https:\/\/transactioninfo\.ethiotelecom\.et\/receipt\/([A-Z0-9]{10})$/.exec(text.trim())?.[1] ??
+  null;
+
+/** The Dashen receipt link for an FT Ref (what the app checks for Dashen). */
+export const dashenReceiptLink = (reference: string) =>
+  `https://receipts.dashenbanksc.com/receipt/${reference}`;
+
+/** The FT Ref of a Dashen receipt link, or null. */
+export const dashenReferenceOf = (text: string) =>
+  /^https:\/\/receipts\.dashenbanksc\.com\/receipt\/([A-Z0-9]{10,24})$/.exec(text.trim())?.[1] ??
   null;
