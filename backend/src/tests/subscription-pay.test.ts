@@ -147,3 +147,59 @@ describe('paying for a plan with a CBE transfer', () => {
     await bare.close();
   });
 });
+
+describe('paying for a plan with telebirr', () => {
+  // Real telebirr receipt page (made-up people): to "Abebe Coffee Bekele", 2519****5678.
+  const WALLET = readFileSync(new URL('./fixtures/telebirr-wallet.html', import.meta.url), 'utf8');
+  const addis = (d: Date) => {
+    const a = new Date(d.getTime() + 3 * HOUR);
+    const p = (n: number) => String(n).padStart(2, '0');
+    return `${p(a.getUTCDate())}-${p(a.getUTCMonth() + 1)}-${a.getUTCFullYear()} ${p(a.getUTCHours())}:${p(a.getUTCMinutes())}:${p(a.getUTCSeconds())}`;
+  };
+  const telebirrPage = (amount: string): FetchedReceipt => ({
+    contentType: 'text/html; charset=utf-8',
+    body: Buffer.from(
+      WALLET.replace(/\d{2}-\d{2}-2026 \d{2}:\d{2}:\d{2}/, addis(new Date(Date.now() - HOUR)))
+        .split('10 Birr')
+        .join(`${amount} Birr`)
+    ),
+  });
+
+  it('a telebirr transfer to our number starts the plan; to another number it does not', async () => {
+    const tApp = await createTestApp({
+      ...PAY_TO,
+      SUBSCRIPTION_TELEBIRR: '0911115678',
+      SUBSCRIPTION_TELEBIRR_NAME: 'Abebe Coffee Bekele',
+    });
+    const owner = (await createRestaurant(tApp)).owner.token;
+    const payTel = () =>
+      tApp.inject({
+        method: 'POST',
+        url: '/api/v1/subscription/pay',
+        headers: headers(owner, newKey()),
+        payload: { plan: 'normal', period: 'monthly', telebirrNumber: 'DJD2QW8XTE' },
+      });
+
+    fetchMock.mockResolvedValueOnce(telebirrPage('500'));
+    expect((await payTel()).json()).toMatchObject({
+      check: { status: 'not_matching', reasons: ['AMOUNT_TOO_LOW'] },
+      subscription: null,
+    });
+
+    fetchMock.mockResolvedValueOnce(telebirrPage('700'));
+    expect((await payTel()).json()).toMatchObject({
+      check: { status: 'verified', reference: 'DJD2QW8XTE' },
+      subscription: { plan: 'normal', period: 'monthly', priceEtb: 700 },
+    });
+
+    const info = await tApp.inject({
+      method: 'GET',
+      url: '/api/v1/subscription/payment-info',
+      headers: headers(owner),
+    });
+    expect(info.json()).toMatchObject({
+      telebirr: { number: '0911115678', name: 'Abebe Coffee Bekele' },
+    });
+    await tApp.close();
+  });
+});

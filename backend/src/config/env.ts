@@ -31,6 +31,12 @@ const schema = z.object({
     .regex(/^\d{13}$/)
     .optional(),
   SUBSCRIPTION_CBE_NAME: z.string().min(3).optional(),
+  /** Smart Verify's telebirr number (09… / 07…) and name, a second way to pay for plans. */
+  SUBSCRIPTION_TELEBIRR: z
+    .string()
+    .regex(/^0[79]\d{8}$/)
+    .optional(),
+  SUBSCRIPTION_TELEBIRR_NAME: z.string().min(3).optional(),
   /** Google Gemini API key, for reading receipt pictures. Server only: never sent to the app. */
   GEMINI_API_KEY: z.string().min(10).optional(),
   /** Gemini model for reading pictures: fast and accurate on receipts (change when retired). */

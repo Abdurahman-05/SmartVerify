@@ -7,7 +7,11 @@ import { AppError } from '../../shared/errors/app-error.js';
 import { errorResponseSchema, planSchema } from '../../shared/schemas/common.js';
 import { subscriptionSchema } from '../auth/session-user.js';
 import { verifyResponseSchema } from '../verification/verification.schemas.js';
-import { verifyCbe } from '../verification/verification.service.js';
+import {
+  TELEBIRR_NUMBER,
+  verifyCbe,
+  verifyTelebirr,
+} from '../verification/verification.service.js';
 
 /** Prices and lengths are decided here, never by the app. Restaurant Plus is monthly only. */
 const PRICING: Record<
@@ -154,6 +158,11 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
     env.SUBSCRIPTION_CBE_ACCOUNT && env.SUBSCRIPTION_CBE_NAME
       ? { accountNumber: env.SUBSCRIPTION_CBE_ACCOUNT, accountName: env.SUBSCRIPTION_CBE_NAME }
       : null;
+  /** Smart Verify's telebirr for plan payments, when configured. */
+  const payToTelebirr =
+    env.SUBSCRIPTION_TELEBIRR && env.SUBSCRIPTION_TELEBIRR_NAME
+      ? { number: env.SUBSCRIPTION_TELEBIRR, name: env.SUBSCRIPTION_TELEBIRR_NAME }
+      : null;
 
   app.get(
     '/subscription/payment-info',
@@ -170,6 +179,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
             bank: z.literal('CBE'),
             accountNumber: z.string(),
             accountName: z.string(),
+            telebirr: z.object({ number: z.string(), name: z.string() }).nullable(),
             prices: z.object({
               normal: z.object({ monthly: z.number().int(), quarterly: z.number().int() }),
               restaurant: z.object({ monthly: z.number().int() }),
@@ -185,6 +195,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
       return {
         bank: 'CBE' as const,
         ...payTo,
+        telebirr: payToTelebirr,
         prices: {
           normal: {
             monthly: PRICING.normal.monthly?.priceEtb ?? 0,
@@ -205,7 +216,8 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
         tags: ['subscription'],
         security: [{ bearerAuth: [] }],
         description:
-          'Pays for a plan with a CBE transfer to Smart Verify: url is the CBE receipt link (from ' +
+          'Pays for a plan with a CBE transfer (url: the CBE receipt link) or a telebirr transfer ' +
+          '(telebirrNumber) to Smart Verify. CBE url: the receipt link (from ' +
           'its QR, or built from the FT reference + sender account last 8). The receipt must ' +
           'show Smart Verify as receiver (account + name), at least the plan price, success and ' +
           'be recent; then the plan starts at once. One receipt pays once (RECEIPT_USED). ' +
@@ -216,7 +228,14 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
         body: z.object({
           plan: planSchema,
           period: z.enum(['monthly', 'quarterly']),
-          url: z.string().min(1).max(500),
+          url: z.string().min(1).max(500).optional().describe('CBE receipt link'),
+          telebirrNumber: z
+            .string()
+            .trim()
+            .toUpperCase()
+            .regex(TELEBIRR_NUMBER)
+            .optional()
+            .describe('Or: the telebirr transaction number of a payment to Smart Verify'),
         }),
         response: {
           200: z.object({
@@ -232,7 +251,10 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
     async (request) => {
       if (!payTo) throw new AppError('PAYMENT_NOT_CONFIGURED');
       const { businessId } = request.auth;
-      const { plan, url } = request.body;
+      const { plan, url, telebirrNumber } = request.body;
+      if (!url === !telebirrNumber)
+        throw new AppError('VALIDATION_ERROR', { reason: 'urlOrTelebirr' });
+      if (telebirrNumber && !payToTelebirr) throw new AppError('PAYMENT_NOT_CONFIGURED');
       const period: BillingPeriod = plan === 'restaurant' ? 'monthly' : request.body.period;
       const pricing = PRICING[plan][period];
       if (!pricing) throw new AppError('VALIDATION_ERROR');
@@ -257,26 +279,48 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
         };
       }
 
-      const check = await verifyCbe(
-        prisma,
-        env,
-        businessId,
-        url,
-        pricing.priceEtb,
-        request.log,
-        new Date(),
-        {
-          accounts: [
-            {
-              bankCode: 'CBE',
-              accountNumber: payTo.accountNumber,
-              last4: payTo.accountNumber.slice(-4),
-              holderName: payTo.accountName,
-            },
-          ],
-          name: payTo.accountName,
-        }
-      );
+      const check =
+        telebirrNumber && payToTelebirr
+          ? await verifyTelebirr(
+              prisma,
+              env,
+              businessId,
+              telebirrNumber,
+              pricing.priceEtb,
+              request.log,
+              new Date(),
+              {
+                accounts: [
+                  {
+                    bankCode: 'TEL',
+                    accountNumber: payToTelebirr.number,
+                    last4: payToTelebirr.number.slice(-4),
+                    holderName: payToTelebirr.name,
+                  },
+                ],
+                name: payToTelebirr.name,
+              }
+            )
+          : await verifyCbe(
+              prisma,
+              env,
+              businessId,
+              url ?? '',
+              pricing.priceEtb,
+              request.log,
+              new Date(),
+              {
+                accounts: [
+                  {
+                    bankCode: 'CBE',
+                    accountNumber: payTo.accountNumber,
+                    last4: payTo.accountNumber.slice(-4),
+                    holderName: payTo.accountName,
+                  },
+                ],
+                name: payTo.accountName,
+              }
+            );
       if (check.status !== 'verified') return { check, subscription: null };
 
       const used = await prisma.subscription.findUnique({

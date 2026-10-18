@@ -14,6 +14,8 @@ export async function createTestApp(envOverrides: Record<string, string> = {}) {
     GEMINI_API_KEY: undefined,
     SUBSCRIPTION_CBE_ACCOUNT: undefined,
     SUBSCRIPTION_CBE_NAME: undefined,
+    SUBSCRIPTION_TELEBIRR: undefined,
+    SUBSCRIPTION_TELEBIRR_NAME: undefined,
     ...envOverrides,
   });
   const app = await buildApp({ env, logger: false });

@@ -154,7 +154,9 @@ export async function verifyTelebirr(
   transactionNumber: string,
   expectedAmountEtb: number,
   log?: Pick<FastifyBaseLogger, 'info'>,
-  now = new Date()
+  now = new Date(),
+  /** Check against these accounts instead of the business's (subscription payments). */
+  receiver?: { accounts: OwnAccount[]; name: string }
 ): Promise<VerifyResponse> {
   if (!TELEBIRR_NUMBER.test(transactionNumber)) throw new AppError('INVALID_URL');
   return checkReceipt({
@@ -173,6 +175,7 @@ export async function verifyTelebirr(
     // Telebirr answers 200 with this text for an unknown number.
     isNotFound: (text) => TELEBIRR_NOT_FOUND.test(text) && text.length < 2000,
     html: true,
+    receiver,
   });
 }
 
