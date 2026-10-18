@@ -11,12 +11,17 @@ export async function getPaymentInfo(): Promise<PaymentInfo> {
     bank: 'CBE',
     accountNumber: '1000000000000',
     accountName: 'Smart Verify (offline)',
+    telebirr: { number: '0900000000', name: 'Smart Verify (offline)' },
     prices: { normal: { monthly: 700, quarterly: 1500 }, restaurant: { monthly: 4000 } },
   };
 }
 
 /** Offline: every receipt pays; the plan starts like before. */
-export async function payForPlan(plan: Plan, period: BillingPeriod, _url: string) {
+export async function payForPlan(
+  plan: Plan,
+  period: BillingPeriod,
+  _receipt: { url: string } | { telebirrNumber: string }
+) {
   const subscription: Subscription = await startSubscription(plan, period);
   return {
     check: {

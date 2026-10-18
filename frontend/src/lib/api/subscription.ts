@@ -22,6 +22,8 @@ export interface PaymentInfo {
   bank: 'CBE';
   accountNumber: string;
   accountName: string;
+  /** Smart Verify's telebirr, when it accepts telebirr payments. */
+  telebirr: { number: string; name: string } | null;
   prices: { normal: { monthly: number; quarterly: number }; restaurant: { monthly: number } };
 }
 
@@ -32,12 +34,12 @@ export const getPaymentInfo = () => api<PaymentInfo>('/subscription/payment-info
 export const payForPlan = (
   plan: Plan,
   period: BillingPeriod,
-  url: string,
+  receipt: { url: string } | { telebirrNumber: string },
   idempotencyKey = newIdempotencyKey()
 ) =>
   api<{ check: CbeCheck; subscription: Subscription | null }>('/subscription/pay', {
     method: 'POST',
-    body: { plan, period, url },
+    body: { plan, period, ...receipt },
     idempotencyKey,
     timeoutMs: 30_000,
   });

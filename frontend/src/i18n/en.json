@@ -1056,12 +1056,14 @@
     "copied": "Copied",
     "step2": "2. Upload the receipt screenshot",
     "upload": "Upload receipt screenshot",
-    "orType": "We read it for you. If the receipt has no QR, check the Transaction ID and type your account's last 8 digits.",
+    "orType": "We read it for you. Check the Transaction ID (CBE: also type your account's last 8 digits).",
     "reference": "Transaction ID (FT…)",
     "last8": "Your account last 8 digits",
     "check": "Check payment and start plan",
     "checking": "Checking your payment with CBE",
     "notStarted": "Plan not started",
-    "ownerOnly": "Only the owner can change the plan."
+    "ownerOnly": "Only the owner can change the plan.",
+    "telebirr": "telebirr",
+    "telebirrNumber": "Telebirr transaction number"
   }
 }

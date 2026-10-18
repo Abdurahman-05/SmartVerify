@@ -26,6 +26,9 @@ import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
 const FT = /^FT[A-Z0-9]{10}$/;
+const TELEBIRR = /^[A-Z0-9]{10}$/;
+
+type Method = 'CBE' | 'TEL';
 
 /**
  * Pay for a plan by CBE transfer to Smart Verify, then upload the receipt: the server checks it
@@ -44,6 +47,7 @@ export default function SubscriptionPayScreen() {
   const [last8, setLast8] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [payKey] = useState(newIdempotencyKey);
+  const [method, setMethod] = useState<Method>('CBE');
 
   const plan: Plan = params.plan === 'restaurant' ? 'restaurant' : 'normal';
   const period: BillingPeriod =
@@ -52,7 +56,8 @@ export default function SubscriptionPayScreen() {
   const info = useQuery({ queryKey: ['subscription-payment-info'], queryFn: getPaymentInfo });
 
   const pay = useMutation({
-    mutationFn: (url: string) => payForPlan(plan, period, url, payKey),
+    mutationFn: (receipt: { url: string } | { telebirrNumber: string }) =>
+      payForPlan(plan, period, receipt, payKey),
     onSuccess: ({ check, subscription }) => {
       if (subscription) {
         setSubscription(subscription);
@@ -95,7 +100,8 @@ export default function SubscriptionPayScreen() {
 
   const copy = () => {
     if (!payTo) return;
-    void Clipboard.setStringAsync(payTo.accountNumber).then(() => {
+    const number = method === 'TEL' ? (payTo.telebirr?.number ?? '') : payTo.accountNumber;
+    void Clipboard.setStringAsync(number).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -112,15 +118,17 @@ export default function SubscriptionPayScreen() {
     if (!asset) return;
     setReading(true);
     try {
-      const codes = await scanFromURLAsync(asset.uri, ['qr']).catch(() => []);
-      const link = codes.map((c) => c.data.trim()).find(isCbeReceiptLink);
-      if (link) {
-        setReading(false);
-        pay.mutate(link);
-        return;
+      if (method === 'CBE') {
+        const codes = await scanFromURLAsync(asset.uri, ['qr']).catch(() => []);
+        const link = codes.map((c) => c.data.trim()).find(isCbeReceiptLink);
+        if (link) {
+          setReading(false);
+          pay.mutate({ url: link });
+          return;
+        }
       }
       if (asset.base64) {
-        const read = await readReference(asset.base64, 'CBE');
+        const read = await readReference(asset.base64, method);
         if (read.reference) setReference(read.reference);
       }
     } catch (e) {
@@ -130,7 +138,8 @@ export default function SubscriptionPayScreen() {
     }
   };
 
-  const ready = FT.test(reference) && /^\d{8}$/.test(last8);
+  const ready =
+    method === 'TEL' ? TELEBIRR.test(reference) : FT.test(reference) && /^\d{8}$/.test(last8);
 
   return (
     <FormScreen>
@@ -153,18 +162,47 @@ export default function SubscriptionPayScreen() {
             <MoneyText value={price} tone="inverse" className="text-4xl" />
           </View>
 
+          {payTo.telebirr ? (
+            <View className="flex-row gap-2" accessibilityRole="radiogroup">
+              {(['CBE', 'TEL'] as const).map((m) => (
+                <Pressable
+                  key={m}
+                  onPress={() => {
+                    setMethod(m);
+                    setReference('');
+                  }}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: method === m }}
+                  className={`h-12 flex-1 flex-row items-center justify-center gap-2 rounded-[24px] ${
+                    method === m ? 'bg-primary' : 'border-2 border-borderStrong bg-surface'
+                  }`}
+                >
+                  <Text
+                    font="bold"
+                    tone={method === m ? 'inverse' : 'default'}
+                    className="text-base"
+                  >
+                    {t(m === 'CBE' ? 'subscriptionPay.bank' : 'subscriptionPay.telebirr')}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          ) : null}
+
           <View className="gap-1">
             <Text font="bold" className="text-[17px]">
               {t('subscriptionPay.step1')}
             </Text>
             <View className="flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface p-3">
-              <BankBadge code="CBE" size={44} />
+              <BankBadge code={method === 'TEL' ? 'TEL' : 'CBE'} size={44} />
               <View className="min-w-0 flex-1">
                 <Text font="heading" className="text-xl" selectable>
-                  {payTo.accountNumber}
+                  {method === 'TEL' ? payTo.telebirr?.number : payTo.accountNumber}
                 </Text>
                 <Text tone="muted" className="text-sm" numberOfLines={1}>
-                  {payTo.accountName} · {t('subscriptionPay.bank')}
+                  {method === 'TEL'
+                    ? `${payTo.telebirr?.name ?? ''} · ${t('subscriptionPay.telebirr')}`
+                    : `${payTo.accountName} · ${t('subscriptionPay.bank')}`}
                 </Text>
               </View>
               <Pressable
@@ -201,23 +239,34 @@ export default function SubscriptionPayScreen() {
             </Text>
             <TextInput
               value={reference}
-              onChangeText={(v) => setReference(v.replace(/\s/g, '').toUpperCase().slice(0, 12))}
-              placeholder="FT26286JZH4B"
+              onChangeText={(v) =>
+                setReference(
+                  v
+                    .replace(/\s/g, '')
+                    .toUpperCase()
+                    .slice(0, method === 'TEL' ? 10 : 12)
+                )
+              }
+              placeholder={method === 'TEL' ? 'DJD2QW8XTE' : 'FT26286JZH4B'}
               placeholderTextColor={colors.placeholder}
               autoCapitalize="characters"
               autoCorrect={false}
-              accessibilityLabel={t('subscriptionPay.reference')}
+              accessibilityLabel={t(
+                method === 'TEL' ? 'subscriptionPay.telebirrNumber' : 'subscriptionPay.reference'
+              )}
               className="h-14 rounded-input border-[1.5px] border-borderStrong bg-surface px-4 font-heading text-xl text-text"
             />
-            <TextInput
-              value={last8}
-              onChangeText={(v) => setLast8(v.replace(/\D/g, '').slice(0, 8))}
-              placeholder={t('subscriptionPay.last8')}
-              placeholderTextColor={colors.placeholder}
-              keyboardType="number-pad"
-              accessibilityLabel={t('subscriptionPay.last8')}
-              className="h-14 rounded-input border-[1.5px] border-borderStrong bg-surface px-4 font-heading text-xl text-text"
-            />
+            {method === 'CBE' ? (
+              <TextInput
+                value={last8}
+                onChangeText={(v) => setLast8(v.replace(/\D/g, '').slice(0, 8))}
+                placeholder={t('subscriptionPay.last8')}
+                placeholderTextColor={colors.placeholder}
+                keyboardType="number-pad"
+                accessibilityLabel={t('subscriptionPay.last8')}
+                className="h-14 rounded-input border-[1.5px] border-borderStrong bg-surface px-4 font-heading text-xl text-text"
+              />
+            ) : null}
           </View>
         </View>
       )}
@@ -229,7 +278,13 @@ export default function SubscriptionPayScreen() {
             label={t('subscriptionPay.check')}
             icon={Landmark}
             disabled={!ready}
-            onPress={() => pay.mutate(cbeReceiptLink(reference, last8))}
+            onPress={() =>
+              pay.mutate(
+                method === 'TEL'
+                  ? { telebirrNumber: reference }
+                  : { url: cbeReceiptLink(reference, last8) }
+              )
+            }
           />
         </View>
       ) : null}
