@@ -69,7 +69,7 @@ export default function TipsAdminScreen() {
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/admin'));
 
   if (query.isPending) return <LoadingView screenTitle={t('tipsAdmin.title')} onBack={goBack} />;
-  if (query.isError && isNetworkError(query.error)) {
+  if (query.isError && !query.data && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void refetch()} />;
   }
 

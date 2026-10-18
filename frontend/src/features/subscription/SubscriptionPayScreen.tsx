@@ -77,7 +77,7 @@ export default function SubscriptionPayScreen() {
 
   if (!isOwner) return <Redirect href="/subscription" />;
   if (info.isPending) return <LoadingView screenTitle={t('subscriptionPay.title')} />;
-  if (info.isError && isNetworkError(info.error)) {
+  if (info.isError && !info.data && isNetworkError(info.error)) {
     return <NoConnection onRetry={() => void info.refetch()} />;
   }
   if (reading) return <LoadingView title={t('verifyBank.read.reading')} />;

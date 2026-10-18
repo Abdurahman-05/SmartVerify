@@ -204,7 +204,7 @@ export default function TableBillScreen() {
   );
 
   if (query.isPending) return <LoadingView />;
-  if (query.isError && isNetworkError(query.error)) {
+  if (query.isError && !query.data && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void refetch()} />;
   }
   const bill = query.data;

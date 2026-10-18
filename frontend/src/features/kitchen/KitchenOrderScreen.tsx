@@ -35,7 +35,7 @@ export default function KitchenOrderScreen() {
   const backToKitchen = () => (router.canGoBack() ? router.back() : router.replace('/kitchen'));
 
   if (query.isPending || start.isPending || ready.isPending) return <LoadingView />;
-  if (query.isError && isNetworkError(query.error)) {
+  if (query.isError && !query.data && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void query.refetch()} />;
   }
   const order = query.data?.find((o) => o.id === id);

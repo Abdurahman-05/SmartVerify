@@ -162,7 +162,7 @@ export default function BankAccountsScreen() {
     onSuccess: () => queryClient.invalidateQueries(),
   });
 
-  if (query.isError && isNetworkError(query.error)) {
+  if (query.isError && !query.data && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void refetch()} />;
   }
   const accounts = query.data;

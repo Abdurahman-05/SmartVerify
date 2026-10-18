@@ -85,7 +85,7 @@ export default function OpenBillsScreen() {
   );
 
   if (query.isPending) return <LoadingView screenTitle={t('bills.title')} />;
-  if (query.isError && isNetworkError(query.error)) {
+  if (query.isError && !query.data && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void refetch()} />;
   }
   const shown = query.data ?? [];

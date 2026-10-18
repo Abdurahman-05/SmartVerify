@@ -144,7 +144,7 @@ export default function KitchenScreen() {
   const now = useNow();
 
   if (query.isPending) return <LoadingView screenTitle={t('kitchen.title')} />;
-  if (query.isError && isNetworkError(query.error)) {
+  if (query.isError && !query.data && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void query.refetch()} />;
   }
   const orders = query.data ?? [];

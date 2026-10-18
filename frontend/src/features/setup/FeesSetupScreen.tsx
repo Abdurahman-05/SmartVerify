@@ -226,7 +226,7 @@ export default function FeesSetupScreen() {
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/profile'));
 
   if (query.isPending) return <LoadingView screenTitle={t('setup.fees.title')} onBack={goBack} />;
-  if (query.isError && isNetworkError(query.error)) {
+  if (query.isError && !query.data && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void query.refetch()} />;
   }
 

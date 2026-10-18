@@ -56,7 +56,7 @@ export default function TransactionDetailsScreen() {
 
   if (query.isPending)
     return <LoadingView screenTitle={t('history.detail.title')} onBack={goBack} />;
-  if (query.isError && isNetworkError(query.error)) {
+  if (query.isError && !query.data && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void query.refetch()} />;
   }
   const payment = query.data;

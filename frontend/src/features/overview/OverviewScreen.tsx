@@ -109,7 +109,7 @@ export default function OverviewScreen() {
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/home'));
 
   if (query.isPending) return <LoadingView screenTitle={t('overview.title')} onBack={goBack} />;
-  if (query.isError && isNetworkError(query.error)) {
+  if (query.isError && !query.data && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void refetch()} />;
   }
 

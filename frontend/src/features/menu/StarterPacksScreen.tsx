@@ -37,7 +37,7 @@ export default function StarterPacksScreen() {
 
   if (query.isPending)
     return <LoadingView screenTitle={t('menuAdmin.starter.title')} onBack={goBack} />;
-  if (query.isError && isNetworkError(query.error)) {
+  if (query.isError && !query.data && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void refetch()} />;
   }
 
