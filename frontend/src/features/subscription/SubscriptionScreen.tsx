@@ -1,4 +1,3 @@
-import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { Check, Clock } from 'lucide-react-native';
 import { useRef, useState } from 'react';
@@ -7,13 +6,10 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
-import { LoadingView } from '@/components/ui/LoadingView';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
-import { errorMessageKey } from '@/lib/errors';
-import { startSubscription } from '@/lib/subscription';
 import { useSession, type BillingPeriod, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
@@ -167,32 +163,22 @@ export default function SubscriptionScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const user = useSession((s) => s.user);
-  const setSubscription = useSession((s) => s.setSubscription);
   const scrollRef = useRef<ScrollView>(null);
   const [plansY, setPlansY] = useState(0);
 
-  const mutation = useMutation({
-    mutationFn: ({ plan, period }: { plan: Plan; period: BillingPeriod }) =>
-      startSubscription(plan, period),
-    onSuccess: (subscription) => {
-      setSubscription(subscription);
-      router.replace('/subscription-started');
-    },
-  });
-
-  if (mutation.isPending) {
-    return (
-      <LoadingView
-        title={t('subscription.starting')}
-        subtitle={t('subscription.startingSubtitle')}
-      />
-    );
-  }
+  // Plans are paid by the owner (CBE transfer + receipt), on the pay page.
+  const [ownerOnly, setOwnerOnly] = useState(false);
 
   const current = user?.subscription ?? null;
   const isCurrent = (plan: Plan, period: BillingPeriod) =>
     current?.plan === plan && (plan === 'restaurant' || current.period === period);
-  const choose = (plan: Plan, period: BillingPeriod) => mutation.mutate({ plan, period });
+  const choose = (plan: Plan, period: BillingPeriod) => {
+    if (user?.role !== 'owner') {
+      setOwnerOnly(true);
+      return;
+    }
+    router.push({ pathname: '/subscription-pay', params: { plan, period } });
+  };
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/home'));
 
   return (
@@ -314,11 +300,11 @@ export default function SubscriptionScreen() {
       </ScrollView>
 
       <ErrorDialog
-        visible={mutation.isError}
+        visible={ownerOnly}
         title={t('subscription.errorTitle')}
-        message={t(errorMessageKey(mutation.error))}
-        actionLabel={t('errors.retry')}
-        onClose={mutation.reset}
+        message={t('subscriptionPay.ownerOnly')}
+        actionLabel={t('common.done')}
+        onClose={() => setOwnerOnly(false)}
       />
     </SafeAreaView>
   );

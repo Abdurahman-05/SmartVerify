@@ -691,7 +691,8 @@
     "validation": "Please check the details and try again.",
     "rateLimited": "Too many tries. Please wait a few minutes and try again.",
     "subscriptionRequired": "This needs the Restaurant Plus plan.",
-    "paymentNotConfigured": "Paid plans are not available yet."
+    "paymentNotConfigured": "Paid plans are not available yet.",
+    "receiptUsed": "This receipt was already used to pay a plan."
   },
   "menuAdmin": {
     "title": "Menu",
@@ -1045,5 +1046,22 @@
     "transactions": "Transactions",
     "tips": "Tips",
     "reports": "Reports"
+  },
+  "subscriptionPay": {
+    "title": "Pay for your plan",
+    "amount": "Amount to pay",
+    "step1": "1. Send this amount from your bank app to:",
+    "bank": "Commercial Bank of Ethiopia",
+    "copy": "Copy",
+    "copied": "Copied",
+    "step2": "2. Upload the receipt screenshot",
+    "upload": "Upload receipt screenshot",
+    "orType": "We read it for you. If the receipt has no QR, check the Transaction ID and type your account's last 8 digits.",
+    "reference": "Transaction ID (FT…)",
+    "last8": "Your account last 8 digits",
+    "check": "Check payment and start plan",
+    "checking": "Checking your payment with CBE",
+    "notStarted": "Plan not started",
+    "ownerOnly": "Only the owner can change the plan."
   }
 }

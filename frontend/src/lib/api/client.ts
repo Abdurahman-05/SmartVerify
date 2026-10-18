@@ -39,6 +39,7 @@ export type ApiErrorCode =
   | 'ITEM_UNAVAILABLE'
   | 'BILL_CLOSED'
   | 'INVALID_URL'
+  | 'RECEIPT_USED'
   | 'INTERNAL_ERROR'
   | 'NETWORK_ERROR';
 
