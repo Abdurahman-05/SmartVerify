@@ -9,7 +9,13 @@ export type TestApp = Awaited<ReturnType<typeof buildApp>>;
 
 export async function createTestApp(envOverrides: Record<string, string> = {}) {
   // Tests never call Gemini with the developer's key from .env (tests pass a fake one).
-  const env = loadEnv({ ...process.env, GEMINI_API_KEY: undefined, ...envOverrides });
+  const env = loadEnv({
+    ...process.env,
+    GEMINI_API_KEY: undefined,
+    SUBSCRIPTION_CBE_ACCOUNT: undefined,
+    SUBSCRIPTION_CBE_NAME: undefined,
+    ...envOverrides,
+  });
   const app = await buildApp({ env, logger: false });
   await app.ready();
   return app;

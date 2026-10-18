@@ -6,6 +6,8 @@ import { requireRoles } from '../../plugins/auth.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { errorResponseSchema, planSchema } from '../../shared/schemas/common.js';
 import { subscriptionSchema } from '../auth/session-user.js';
+import { verifyResponseSchema } from '../verification/verification.schemas.js';
+import { verifyCbe } from '../verification/verification.service.js';
 
 /** Prices and lengths are decided here, never by the app. Restaurant Plus is monthly only. */
 const PRICING: Record<
@@ -141,6 +143,177 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
           const winner = await replay();
           if (winner) return reply.status(201).send(toSubscription(winner));
+        }
+        throw error;
+      }
+    }
+  );
+
+  /** Smart Verify's CBE account for plan payments, when configured. */
+  const payTo =
+    env.SUBSCRIPTION_CBE_ACCOUNT && env.SUBSCRIPTION_CBE_NAME
+      ? { accountNumber: env.SUBSCRIPTION_CBE_ACCOUNT, accountName: env.SUBSCRIPTION_CBE_NAME }
+      : null;
+
+  app.get(
+    '/subscription/payment-info',
+    {
+      preHandler: requireRoles('owner'),
+      schema: {
+        tags: ['subscription'],
+        security: [{ bearerAuth: [] }],
+        description:
+          'Where to pay for a plan (Smart Verify CBE account) and the prices. 501 ' +
+          'PAYMENT_NOT_CONFIGURED when SUBSCRIPTION_CBE_ACCOUNT / _NAME are not set.',
+        response: {
+          200: z.object({
+            bank: z.literal('CBE'),
+            accountNumber: z.string(),
+            accountName: z.string(),
+            prices: z.object({
+              normal: z.object({ monthly: z.number().int(), quarterly: z.number().int() }),
+              restaurant: z.object({ monthly: z.number().int() }),
+            }),
+          }),
+          ...errors,
+          501: errorResponseSchema.describe('PAYMENT_NOT_CONFIGURED'),
+        },
+      },
+    },
+    async () => {
+      if (!payTo) throw new AppError('PAYMENT_NOT_CONFIGURED');
+      return {
+        bank: 'CBE' as const,
+        ...payTo,
+        prices: {
+          normal: {
+            monthly: PRICING.normal.monthly?.priceEtb ?? 0,
+            quarterly: PRICING.normal.quarterly?.priceEtb ?? 0,
+          },
+          restaurant: { monthly: PRICING.restaurant.monthly?.priceEtb ?? 0 },
+        },
+      };
+    }
+  );
+
+  app.post(
+    '/subscription/pay',
+    {
+      preHandler: requireRoles('owner'),
+      config: { rateLimit: { max: 10, timeWindow: '1 minute' } },
+      schema: {
+        tags: ['subscription'],
+        security: [{ bearerAuth: [] }],
+        description:
+          'Pays for a plan with a CBE transfer to Smart Verify: url is the CBE receipt link (from ' +
+          'its QR, or built from the FT reference + sender account last 8). The receipt must ' +
+          'show Smart Verify as receiver (account + name), at least the plan price, success and ' +
+          'be recent; then the plan starts at once. One receipt pays once (RECEIPT_USED). ' +
+          'Answers { check, subscription }: subscription is null when the check did not pass.',
+        headers: z.object({
+          'idempotency-key': z.string().min(8).max(100).describe('A new UUID per user action'),
+        }),
+        body: z.object({
+          plan: planSchema,
+          period: z.enum(['monthly', 'quarterly']),
+          url: z.string().min(1).max(500),
+        }),
+        response: {
+          200: z.object({
+            check: verifyResponseSchema,
+            subscription: subscriptionSchema.nullable(),
+          }),
+          ...errors,
+          409: errorResponseSchema.describe('RECEIPT_USED'),
+          501: errorResponseSchema.describe('PAYMENT_NOT_CONFIGURED'),
+        },
+      },
+    },
+    async (request) => {
+      if (!payTo) throw new AppError('PAYMENT_NOT_CONFIGURED');
+      const { businessId } = request.auth;
+      const { plan, url } = request.body;
+      const period: BillingPeriod = plan === 'restaurant' ? 'monthly' : request.body.period;
+      const pricing = PRICING[plan][period];
+      if (!pricing) throw new AppError('VALIDATION_ERROR');
+      const idempotencyKey = request.headers['idempotency-key'];
+
+      // A retry of the same action returns what the first one did.
+      const earlier = await prisma.subscription.findUnique({
+        where: { businessId_idempotencyKey: { businessId, idempotencyKey } },
+      });
+      if (earlier?.paymentReference) {
+        return {
+          check: {
+            status: 'verified' as const,
+            reference: earlier.paymentReference,
+            amountEtb: earlier.priceEtb,
+            extraEtb: 0,
+            payerName: '',
+            receiverName: payTo.accountName,
+            date: earlier.startedAt.toISOString(),
+          },
+          subscription: toSubscription(earlier),
+        };
+      }
+
+      const check = await verifyCbe(
+        prisma,
+        env,
+        businessId,
+        url,
+        pricing.priceEtb,
+        request.log,
+        new Date(),
+        {
+          accounts: [
+            {
+              bankCode: 'CBE',
+              accountNumber: payTo.accountNumber,
+              last4: payTo.accountNumber.slice(-4),
+              holderName: payTo.accountName,
+            },
+          ],
+          name: payTo.accountName,
+        }
+      );
+      if (check.status !== 'verified') return { check, subscription: null };
+
+      const used = await prisma.subscription.findUnique({
+        where: { paymentReference: check.reference },
+      });
+      if (used) throw new AppError('RECEIPT_USED');
+
+      const startedAt = new Date();
+      try {
+        const subscription = await prisma.$transaction(async (tx) => {
+          await tx.subscription.updateMany({
+            where: { businessId, status: 'active' },
+            data: { status: 'cancelled' },
+          });
+          await tx.business.update({ where: { id: businessId }, data: { plan } });
+          return tx.subscription.create({
+            data: {
+              businessId,
+              plan,
+              period,
+              priceEtb: pricing.priceEtb,
+              startedAt,
+              endsAt: addMonths(startedAt, pricing.months),
+              idempotencyKey,
+              paymentReference: check.reference,
+            },
+          });
+        });
+        request.log.info(
+          { subscriptionPaid: check.reference, plan, period },
+          `Subscription paid with CBE ${check.reference}: ${plan} ${period}`
+        );
+        return { check, subscription: toSubscription(subscription) };
+      } catch (error) {
+        // The same receipt used at the same moment by another request.
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+          throw new AppError('RECEIPT_USED');
         }
         throw error;
       }

@@ -22,6 +22,15 @@ const schema = z.object({
   CBE_TLS_STRICT: z.enum(['true', 'false']).default('true'),
   /** A CBE receipt older than this is EXPIRED. */
   CBE_RECEIPT_MAX_AGE_HOURS: z.coerce.number().int().positive().default(24),
+  /**
+   * Smart Verify's own CBE account that receives subscription payments (full number) and its
+   * holder name as CBE shows it. Without them, paying for a plan is not available.
+   */
+  SUBSCRIPTION_CBE_ACCOUNT: z
+    .string()
+    .regex(/^\d{13}$/)
+    .optional(),
+  SUBSCRIPTION_CBE_NAME: z.string().min(3).optional(),
   /** Google Gemini API key, for reading receipt pictures. Server only: never sent to the app. */
   GEMINI_API_KEY: z.string().min(10).optional(),
   /** Gemini model for reading pictures: fast and accurate on receipts (change when retired). */

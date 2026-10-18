@@ -10,7 +10,7 @@ import { BOA_NOT_FOUND, boaParser } from './banks/boa.js';
 import { dashenParser } from './banks/dashen.js';
 import { TELEBIRR_NOT_FOUND, telebirrParser } from './banks/telebirr.js';
 import type { ReceiptParser } from './banks/types.js';
-import { compareReceipt, explainComparison } from './compare.js';
+import { compareReceipt, explainComparison, type OwnAccount } from './compare.js';
 import { fetchReceipt, ReceiptFetchError } from './fetch-receipt.js';
 import type { FailedCheck, VerifyResponse } from './verification.schemas.js';
 
@@ -121,7 +121,9 @@ export async function verifyCbe(
   expectedAmountEtb: number,
   /** Logs why a check passed or failed (no names, account last 4 only). */
   log?: Pick<FastifyBaseLogger, 'info'>,
-  now = new Date()
+  now = new Date(),
+  /** Check against these accounts instead of the business's (subscription payments). */
+  receiver?: { accounts: OwnAccount[]; name: string }
 ): Promise<VerifyResponse> {
   const source = parseCbeUrl(rawUrl);
   // TLS can only be relaxed outside production (CBE's certificate chain breaks some dev setups).
@@ -137,6 +139,7 @@ export async function verifyCbe(
     expectedAmountEtb,
     log,
     now,
+    receiver,
   });
 }
 
@@ -251,6 +254,8 @@ async function checkReceipt(input: {
   isNotFound?: (text: string) => boolean;
   /** The parser reads the HTML page itself (its table rows), not plain text. */
   html?: boolean;
+  /** Check against these accounts instead of the business's (e.g. Smart Verify's own). */
+  receiver?: { accounts: OwnAccount[]; name: string };
 }): Promise<VerifyResponse> {
   const { prisma, env, businessId, source, tlsStrict, parser, bank, expectedAmountEtb, log, now } =
     input;
@@ -293,13 +298,15 @@ async function checkReceipt(input: {
   }
 
   // CBE accounts for CBE-to-CBE receipts; the other banks' for transfers to another bank.
-  const [accounts, business] = await Promise.all([
-    prisma.bankAccount.findMany({
-      where: { businessId, removedAt: null },
-      select: { bankCode: true, accountNumber: true, last4: true, holderName: true },
-    }),
-    prisma.business.findUniqueOrThrow({ where: { id: businessId }, select: { name: true } }),
-  ]);
+  const [accounts, business] = input.receiver
+    ? [input.receiver.accounts, { name: input.receiver.name }]
+    : await Promise.all([
+        prisma.bankAccount.findMany({
+          where: { businessId, removedAt: null },
+          select: { bankCode: true, accountNumber: true, last4: true, holderName: true },
+        }),
+        prisma.business.findUniqueOrThrow({ where: { id: businessId }, select: { name: true } }),
+      ]);
   const compareInput = {
     expectedAmountEtb,
     accounts,
