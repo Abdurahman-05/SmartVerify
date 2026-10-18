@@ -22,6 +22,8 @@ const schema = z.object({
   CBE_TLS_STRICT: z.enum(['true', 'false']).default('true'),
   /** A CBE receipt older than this is EXPIRED. */
   CBE_RECEIPT_MAX_AGE_HOURS: z.coerce.number().int().positive().default(24),
+  /** A plan-payment receipt older than this is EXPIRED (default 1 week). */
+  SUBSCRIPTION_RECEIPT_MAX_AGE_HOURS: z.coerce.number().int().positive().default(168),
   /**
    * Smart Verify's own CBE account that receives subscription payments (full number) and its
    * holder name as CBE shows it. Without them, paying for a plan is not available.

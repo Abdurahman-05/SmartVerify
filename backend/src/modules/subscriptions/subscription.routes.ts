@@ -299,6 +299,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
                   },
                 ],
                 name: payToTelebirr.name,
+                maxAgeHours: env.SUBSCRIPTION_RECEIPT_MAX_AGE_HOURS,
               }
             )
           : await verifyCbe(
@@ -319,6 +320,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
                   },
                 ],
                 name: payTo.accountName,
+                maxAgeHours: env.SUBSCRIPTION_RECEIPT_MAX_AGE_HOURS,
               }
             );
       if (check.status !== 'verified') return { check, subscription: null };

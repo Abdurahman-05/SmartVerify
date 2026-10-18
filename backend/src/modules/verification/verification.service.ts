@@ -123,7 +123,7 @@ export async function verifyCbe(
   log?: Pick<FastifyBaseLogger, 'info'>,
   now = new Date(),
   /** Check against these accounts instead of the business's (subscription payments). */
-  receiver?: { accounts: OwnAccount[]; name: string }
+  receiver?: { accounts: OwnAccount[]; name: string; maxAgeHours?: number }
 ): Promise<VerifyResponse> {
   const source = parseCbeUrl(rawUrl);
   // TLS can only be relaxed outside production (CBE's certificate chain breaks some dev setups).
@@ -156,7 +156,7 @@ export async function verifyTelebirr(
   log?: Pick<FastifyBaseLogger, 'info'>,
   now = new Date(),
   /** Check against these accounts instead of the business's (subscription payments). */
-  receiver?: { accounts: OwnAccount[]; name: string }
+  receiver?: { accounts: OwnAccount[]; name: string; maxAgeHours?: number }
 ): Promise<VerifyResponse> {
   if (!TELEBIRR_NUMBER.test(transactionNumber)) throw new AppError('INVALID_URL');
   return checkReceipt({
@@ -258,7 +258,7 @@ async function checkReceipt(input: {
   /** The parser reads the HTML page itself (its table rows), not plain text. */
   html?: boolean;
   /** Check against these accounts instead of the business's (e.g. Smart Verify's own). */
-  receiver?: { accounts: OwnAccount[]; name: string };
+  receiver?: { accounts: OwnAccount[]; name: string; maxAgeHours?: number };
 }): Promise<VerifyResponse> {
   const { prisma, env, businessId, source, tlsStrict, parser, bank, expectedAmountEtb, log, now } =
     input;
@@ -315,7 +315,7 @@ async function checkReceipt(input: {
     accounts,
     businessName: business.name,
     now,
-    maxAgeHours: env.CBE_RECEIPT_MAX_AGE_HOURS,
+    maxAgeHours: input.receiver?.maxAgeHours ?? env.CBE_RECEIPT_MAX_AGE_HOURS,
   };
   const result = compareReceipt(receipt, compareInput);
   if (log) {
