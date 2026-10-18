@@ -11,6 +11,7 @@ import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { NoConnection } from '@/components/ui/NoConnection';
+import { loadSavedUser } from '@/lib/api/token';
 import { getMe } from '@/lib/auth';
 import { homeRouteFor, useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
@@ -49,7 +50,15 @@ export default function SplashScreen() {
           useSession.getState().signIn(user);
           router.replace(homeRouteFor(user));
         } catch {
-          if (!cancelled) setPhase('offline');
+          // No internet: open with the remembered user; the server checks again when online.
+          const saved = await loadSavedUser().catch(() => null);
+          if (cancelled) return;
+          if (saved) {
+            useSession.getState().signIn(saved);
+            router.replace(homeRouteFor(saved));
+            return;
+          }
+          setPhase('offline');
         }
       },
       attempt === 0 ? SPLASH_MS : 0
