@@ -12,6 +12,7 @@ export async function createTestApp(envOverrides: Record<string, string> = {}) {
   const env = loadEnv({
     ...process.env,
     GEMINI_API_KEY: undefined,
+    UNLIMITED_OCR_URL: undefined,
     SUBSCRIPTION_CBE_ACCOUNT: undefined,
     SUBSCRIPTION_CBE_NAME: undefined,
     SUBSCRIPTION_TELEBIRR: undefined,

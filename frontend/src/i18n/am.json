@@ -1038,7 +1038,8 @@
     "noText": "ጽሑፍ የለም",
     "amount": "መጠን",
     "date": "ቀን",
-    "failed": "ማንበብ አልተቻለም፦ {{reason}}"
+    "failed": "ማንበብ አልተቻለም፦ {{reason}}",
+    "unlimited": "Unlimited-OCR (ባይዱ)"
   },
   "waiterNav": {
     "newOrder": "አዲስ ትዕዛዝ",

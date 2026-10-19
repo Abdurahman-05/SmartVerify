@@ -44,13 +44,16 @@ export interface ReadResult {
   error?: string;
 }
 
-/** POST /verify/read-compare — DEVELOPMENT ONLY: Gemini vs Tesseract on the same picture. */
+/** POST /verify/read-compare — DEVELOPMENT ONLY: Gemini vs Tesseract vs Unlimited-OCR. */
 export const compareReading = (imageBase64: string) =>
-  api<{ gemini: ReadResult; tesseract: ReadResult }>('/verify/read-compare', {
-    method: 'POST',
-    body: { image: imageBase64 },
-    timeoutMs: 60_000,
-  });
+  api<{ gemini: ReadResult; tesseract: ReadResult; unlimited?: ReadResult }>(
+    '/verify/read-compare',
+    {
+      method: 'POST',
+      body: { image: imageBase64 },
+      timeoutMs: 60_000,
+    }
+  );
 
 /**
  * POST /verify/telebirr — the server reads the telebirr receipt for this transaction number

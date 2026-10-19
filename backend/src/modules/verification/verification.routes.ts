@@ -11,6 +11,7 @@ import {
   verifyResponseSchema,
 } from './verification.schemas.js';
 import { GeminiError, readWithGemini } from './gemini.js';
+import { readWithUnlimitedOcr, UnlimitedOcrError } from './unlimited-ocr.js';
 import { closeOcr, findReference, imageType, readImageText, type PictureBank } from './ocr.js';
 import {
   listFailedChecks,
@@ -340,7 +341,10 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         const result = await work();
         return { ok: true as const, ms: Date.now() - started, ...result };
       } catch (error) {
-        const reason = error instanceof GeminiError ? error.message : 'failed';
+        const reason =
+          error instanceof GeminiError || error instanceof UnlimitedOcrError
+            ? error.message
+            : 'failed';
         return { ok: false as const, ms: Date.now() - started, error: reason };
       }
     };
@@ -371,14 +375,19 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
           security: [{ bearerAuth: [] }],
           description:
             'DEVELOPMENT ONLY (absent in production): reads a receipt picture with Gemini ' +
-            '(GEMINI_API_KEY) and with Tesseract + the FT regex, to compare them. Nothing is ' +
+            '(GEMINI_API_KEY), with Tesseract + the FT regex and with Unlimited-OCR ' +
+            '(UNLIMITED_OCR_URL), to compare them. Nothing is ' +
             'stored or logged.',
           body: z.object({
             image: z.string().min(16).max(9_000_000),
             bank: z.enum(['CBE', 'TEL', 'DAS', 'BOA']).default('CBE'),
           }),
           response: {
-            200: z.object({ gemini: resultSchema, tesseract: resultSchema }),
+            200: z.object({
+              gemini: resultSchema,
+              tesseract: resultSchema,
+              unlimited: resultSchema,
+            }),
             400: errorResponseSchema.describe('VALIDATION_ERROR (not a picture, or too big)'),
             401: errorResponseSchema.describe('UNAUTHORIZED'),
             403: errorResponseSchema.describe('FORBIDDEN'),
@@ -392,7 +401,8 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
           throw new AppError('VALIDATION_ERROR', { reason: 'image' });
         }
         const { GEMINI_API_KEY: apiKey, GEMINI_MODEL: model } = app.env;
-        const [gemini, tesseract] = await Promise.all([
+        const { UNLIMITED_OCR_URL: ocrUrl, UNLIMITED_OCR_MODEL: ocrModel } = app.env;
+        const [gemini, tesseract, unlimited] = await Promise.all([
           timed(async () => {
             if (!apiKey) throw new GeminiError('GEMINI_API_KEY is not set');
             return readWithGemini(image, type, { apiKey, model }, request.body.bank);
@@ -401,13 +411,28 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
             const text = await readImageText(image);
             return { reference: findReference(request.body.bank, text), text };
           }),
+          timed(async () => {
+            if (!ocrUrl) throw new UnlimitedOcrError('UNLIMITED_OCR_URL is not set');
+            return readWithUnlimitedOcr(
+              image,
+              type,
+              { url: ocrUrl, model: ocrModel, apiKey: app.env.UNLIMITED_OCR_API_KEY },
+              request.body.bank
+            );
+          }),
         ]);
         // Timing only: no picture, no text.
         request.log.info(
-          { geminiMs: gemini.ms, geminiOk: gemini.ok, tesseractMs: tesseract.ms },
+          {
+            geminiMs: gemini.ms,
+            geminiOk: gemini.ok,
+            tesseractMs: tesseract.ms,
+            unlimitedMs: unlimited.ms,
+            unlimitedOk: unlimited.ok,
+          },
           'Receipt picture compared'
         );
-        return { gemini, tesseract };
+        return { gemini, tesseract, unlimited };
       }
     );
   }

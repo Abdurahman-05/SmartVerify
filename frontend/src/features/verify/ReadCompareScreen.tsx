@@ -74,9 +74,11 @@ export default function ReadCompareScreen() {
   const router = useRouter();
   const [uri, setUri] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [results, setResults] = useState<{ gemini: ReadResult; tesseract: ReadResult } | null>(
-    null
-  );
+  const [results, setResults] = useState<{
+    gemini: ReadResult;
+    tesseract: ReadResult;
+    unlimited?: ReadResult;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const pick = async (source: 'camera' | 'library') => {
@@ -157,6 +159,9 @@ export default function ReadCompareScreen() {
           <>
             <ResultCard title={t('devCompare.gemini')} result={results.gemini} />
             <ResultCard title={t('devCompare.ocr')} result={results.tesseract} />
+            {results.unlimited ? (
+              <ResultCard title={t('devCompare.unlimited')} result={results.unlimited} />
+            ) : null}
           </>
         ) : null}
       </ScrollView>

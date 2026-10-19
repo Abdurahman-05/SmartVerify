@@ -43,6 +43,10 @@ const schema = z.object({
   GEMINI_API_KEY: z.string().min(10).optional(),
   /** Gemini model for reading pictures: fast and accurate on receipts (change when retired). */
   GEMINI_MODEL: z.string().min(1).default('gemini-3.5-flash-lite'),
+  /** DEVELOPMENT: Unlimited-OCR's OpenAI-compatible API (vLLM/Ollama), e.g. http://host:8000/v1. */
+  UNLIMITED_OCR_URL: z.string().url().optional(),
+  UNLIMITED_OCR_MODEL: z.string().min(1).default('baidu/Unlimited-OCR'),
+  UNLIMITED_OCR_API_KEY: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof schema>;

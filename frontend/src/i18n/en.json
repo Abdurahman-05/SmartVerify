@@ -1038,7 +1038,8 @@
     "noText": "No text",
     "amount": "Amount",
     "date": "Date",
-    "failed": "Could not read: {{reason}}"
+    "failed": "Could not read: {{reason}}",
+    "unlimited": "Unlimited-OCR (Baidu)"
   },
   "waiterNav": {
     "newOrder": "New order",
