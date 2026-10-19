@@ -11,6 +11,7 @@ import {
   verifyResponseSchema,
 } from './verification.schemas.js';
 import { GeminiError, readWithGemini } from './gemini.js';
+import { geminiKeyFor } from '../../config/env.js';
 import { readWithUnlimitedOcr, UnlimitedOcrError } from './unlimited-ocr.js';
 import { closeOcr, findReference, imageType, readImageText, type PictureBank } from './ocr.js';
 import {
@@ -46,7 +47,8 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
     bank: PictureBank,
     log: { warn: (obj: object, msg: string) => void }
   ): Promise<{ reference: string | null; text: string; source: 'gemini' | 'ocr' }> {
-    const { GEMINI_API_KEY: apiKey, GEMINI_MODEL: model } = app.env;
+    const { GEMINI_MODEL: model } = app.env;
+    const apiKey = geminiKeyFor(app.env, bank);
     for (let attempt = 1; apiKey && attempt <= 2; attempt++) {
       try {
         const read = await readWithGemini(image, type, { apiKey, model }, bank);
@@ -287,7 +289,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         security: [{ bearerAuth: [] }],
         description:
           'Reads the CBE Transaction ID (FT + 10) from a receipt screenshot or photo: Gemini ' +
-          '(GEMINI_API_KEY; one retry when busy), else Tesseract OCR; plus all the text read. The picture and text are not stored or logged. ' +
+          '(GEMINI_API_KEY_<bank>, else GEMINI_API_KEY; one retry when busy), else Tesseract OCR; plus all the text read. The picture and text are not stored or logged. ' +
           'reference is null when none was found.',
         body: z.object({
           image: z.string().min(16).max(9_000_000).describe('PNG / JPEG / WebP, base64'),
@@ -400,7 +402,8 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         if (image.length > MAX_IMAGE_BYTES || !type) {
           throw new AppError('VALIDATION_ERROR', { reason: 'image' });
         }
-        const { GEMINI_API_KEY: apiKey, GEMINI_MODEL: model } = app.env;
+        const { GEMINI_MODEL: model } = app.env;
+        const apiKey = geminiKeyFor(app.env, request.body.bank);
         const { UNLIMITED_OCR_URL: ocrUrl, UNLIMITED_OCR_MODEL: ocrModel } = app.env;
         const [gemini, tesseract, unlimited] = await Promise.all([
           timed(async () => {

@@ -41,6 +41,11 @@ const schema = z.object({
   SUBSCRIPTION_TELEBIRR_NAME: z.string().min(3).optional(),
   /** Google Gemini API key, for reading receipt pictures. Server only: never sent to the app. */
   GEMINI_API_KEY: z.string().min(10).optional(),
+  /** Optional key per bank (each from its own Google project, so each has its own rate limit). */
+  GEMINI_API_KEY_CBE: z.string().min(10).optional(),
+  GEMINI_API_KEY_TEL: z.string().min(10).optional(),
+  GEMINI_API_KEY_DAS: z.string().min(10).optional(),
+  GEMINI_API_KEY_BOA: z.string().min(10).optional(),
   /** Gemini model for reading pictures: fast and accurate on receipts (change when retired). */
   GEMINI_MODEL: z.string().min(1).default('gemini-3.5-flash-lite'),
   /** DEVELOPMENT: Unlimited-OCR's OpenAI-compatible API (vLLM/Ollama), e.g. http://host:8000/v1. */
@@ -61,4 +66,9 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
     throw new Error(`Invalid environment configuration:\n${problems}`);
   }
   return parsed.data;
+}
+
+/** The Gemini key for this bank's pictures: its own key if set, else the shared GEMINI_API_KEY. */
+export function geminiKeyFor(env: Env, bank: 'CBE' | 'TEL' | 'DAS' | 'BOA'): string | undefined {
+  return env[`GEMINI_API_KEY_${bank}`] ?? env.GEMINI_API_KEY;
 }
