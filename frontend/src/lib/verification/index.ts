@@ -56,3 +56,23 @@ export const boaReceiptIdOf = (text: string) =>
   /^https:\/\/cs\.bankofabyssinia\.com\/slip\/\?trx=(FT[A-Z0-9]{10}\d{5})$/.exec(
     text.trim()
   )?.[1] ?? null;
+
+/** Dashen's receipt QR hides the FT Ref: 16 bytes XOR this fixed key (worked out from real QRs). */
+const DASHEN_QR_KEY = 'a6ad5615fdcc45f1bc8ec322c3db1943';
+
+/**
+ * The FT Ref inside a Dashen Super App receipt QR ("superappreceipt_<32 hex>.<…>"), or null.
+ * The server still fetches the real receipt, so a wrong decode only fails as "not found".
+ */
+export function dashenReferenceFromQr(text: string): string | null {
+  const hex = /^superappreceipt_([0-9a-f]{32})\./i.exec(text.trim())?.[1]?.toLowerCase();
+  if (!hex) return null;
+  let reference = '';
+  for (let i = 0; i < 32; i += 2) {
+    const byte = parseInt(hex.slice(i, i + 2), 16) ^ parseInt(DASHEN_QR_KEY.slice(i, i + 2), 16);
+    reference += String.fromCharCode(byte);
+  }
+  return /^[A-Z0-9]{16}$/.test(reference) && /\d/.test(reference) && /[A-Z]/.test(reference)
+    ? reference
+    : null;
+}

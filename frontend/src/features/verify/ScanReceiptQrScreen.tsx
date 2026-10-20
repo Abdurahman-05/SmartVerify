@@ -12,7 +12,12 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { Text } from '@/components/ui/Text';
-import { isCbeReceiptLink } from '@/lib/verification';
+import {
+  dashenReceiptLink,
+  dashenReferenceFromQr,
+  dashenReferenceOf,
+  isCbeReceiptLink,
+} from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
 import { findPayerBank } from './payerBanks';
@@ -65,6 +70,17 @@ export default function ScanReceiptQrScreen() {
   const handleScanned = ({ data }: BarcodeScanningResult) => {
     if (locked) return;
     setLocked(true);
+    // Dashen: the FT Ref is decoded from the QR on the phone (no OCR), then checked by the server.
+    if (bank.code === 'DAS') {
+      const reference = dashenReferenceFromQr(data) ?? dashenReferenceOf(data);
+      if (!reference) {
+        setNotFound(true);
+        return;
+      }
+      setQrData(dashenReceiptLink(reference));
+      router.replace('/verify-restaurant/checking');
+      return;
+    }
     if (bank.code !== 'CBE') {
       router.push({ pathname: '/verify/qr-result', params: { text: data } });
       return;
