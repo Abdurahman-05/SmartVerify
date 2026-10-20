@@ -12,15 +12,7 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { Text } from '@/components/ui/Text';
-import {
-  dashenReceiptLink,
-  dashenReferenceFromQr,
-  dashenReferenceOf,
-  isCbeReceiptLink,
-  telebirrNumberFromQr,
-  telebirrNumberOf,
-  telebirrReceiptLink,
-} from '@/lib/verification';
+import { receiptLinkFromQr } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
 import { findPayerBank } from './payerBanks';
@@ -73,37 +65,17 @@ export default function ScanReceiptQrScreen() {
   const handleScanned = ({ data }: BarcodeScanningResult) => {
     if (locked) return;
     setLocked(true);
-    // telebirr: the transaction number is decoded from the QR (no OCR), then checked by the server.
-    if (bank.code === 'TEL') {
-      const number = telebirrNumberFromQr(data) ?? telebirrNumberOf(data);
-      if (!number) {
-        setNotFound(true);
-        return;
-      }
-      setQrData(telebirrReceiptLink(number));
-      router.replace('/verify-restaurant/checking');
-      return;
-    }
-    // Dashen: the FT Ref is decoded from the QR on the phone (no OCR), then checked by the server.
-    if (bank.code === 'DAS') {
-      const reference = dashenReferenceFromQr(data) ?? dashenReferenceOf(data);
-      if (!reference) {
-        setNotFound(true);
-        return;
-      }
-      setQrData(dashenReceiptLink(reference));
-      router.replace('/verify-restaurant/checking');
-      return;
-    }
-    if (bank.code !== 'CBE') {
+    // CBE, telebirr and Dashen: the QR gives the receipt link (decoded here, no OCR).
+    if (!['CBE', 'TEL', 'DAS'].includes(bank.code)) {
       router.push({ pathname: '/verify/qr-result', params: { text: data } });
       return;
     }
-    if (!isCbeReceiptLink(data)) {
+    const link = receiptLinkFromQr(bank.code, data);
+    if (!link) {
       setNotFound(true);
       return;
     }
-    setQrData(data.trim());
+    setQrData(link);
     router.replace('/verify-restaurant/checking');
   };
 

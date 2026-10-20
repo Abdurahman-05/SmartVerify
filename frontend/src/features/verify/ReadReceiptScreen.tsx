@@ -1,3 +1,4 @@
+import { scanFromURLAsync } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { Redirect, useRouter } from 'expo-router';
 import { Camera, Image as ImageIcon } from 'lucide-react-native';
@@ -14,7 +15,7 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { errorMessageKey } from '@/lib/errors';
 import { readReceipt } from '@/lib/mock/receipt';
-import { readReference } from '@/lib/verification';
+import { readReference, receiptLinkFromQr } from '@/lib/verification';
 
 import { findPayerBank, onReceipt, type PayerBank } from './payerBanks';
 import { useReceiptFlow } from './receiptFlow';
@@ -91,6 +92,7 @@ export default function ReadReceiptScreen() {
   const amount = useVerifyFlow((s) => s.amount);
   const bank = findPayerBank(useReceiptFlow((s) => s.bankCode));
   const setFound = useReceiptFlow((s) => s.setFound);
+  const setQrData = useVerifyFlow((s) => s.setQrData);
   const [reading, setReading] = useState(false);
 
   if (!bank || amount <= 0) return <Redirect href="/verify-bank" />;
@@ -134,6 +136,16 @@ export default function ReadReceiptScreen() {
 
     setReading(true);
     try {
+      // A receipt QR in the picture gives the receipt link on the phone: no Gemini call.
+      const codes = await scanFromURLAsync(asset.uri, ['qr']).catch(() => []);
+      const link = codes
+        .map((c) => receiptLinkFromQr(bank.code, c.data))
+        .find((l): l is string => l !== null);
+      if (link) {
+        setQrData(link);
+        router.replace('/verify-restaurant/checking');
+        return;
+      }
       // The server reads the picture (Gemini) and filters the bank's number: CBE FT reference or
       // telebirr transaction number. The confirm page shows it (or asks for it) and the rest.
       if (!asset.base64) throw new Error('no image data');

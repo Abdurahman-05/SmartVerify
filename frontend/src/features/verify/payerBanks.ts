@@ -79,6 +79,7 @@ export const payerBanks: PayerBank[] = [
     name: 'Telebirr',
     shortName: 'Telebirr',
     mostUsed: true,
+    hasQr: true,
     fields: [
       {
         key: 'transactionNumber',
@@ -98,6 +99,7 @@ export const payerBanks: PayerBank[] = [
     code: 'DAS',
     name: 'Dashen Bank',
     shortName: 'Dashen',
+    hasQr: true,
     fields: [
       {
         // Dashen's "FT Ref" (not the longer "Transaction Ref" starting with WDTI).

@@ -107,3 +107,20 @@ export function telebirrNumberFromQr(text: string): string | null {
     number += String.fromCharCode(parseInt(match[1].slice(i, i + 2), 16));
   return /^[A-Z0-9]{10}$/.test(number) ? number : null;
 }
+
+/**
+ * The receipt link to check for a scanned receipt QR of this bank (CBE, telebirr, Dashen), or
+ * null when the QR is not one of its receipts. No OCR needed.
+ */
+export function receiptLinkFromQr(bankCode: string, data: string): string | null {
+  if (bankCode === 'CBE') return isCbeReceiptLink(data) ? data.trim() : null;
+  if (bankCode === 'TEL') {
+    const number = telebirrNumberFromQr(data) ?? telebirrNumberOf(data);
+    return number ? telebirrReceiptLink(number) : null;
+  }
+  if (bankCode === 'DAS') {
+    const reference = dashenReferenceFromQr(data) ?? dashenReferenceOf(data);
+    return reference ? dashenReceiptLink(reference) : null;
+  }
+  return null;
+}
