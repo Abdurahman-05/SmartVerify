@@ -76,3 +76,34 @@ export function dashenReferenceFromQr(text: string): string | null {
     ? reference
     : null;
 }
+
+/** CRC-16/CCITT-FALSE, the checksum at the end of a telebirr receipt QR (as in EMV QR codes). */
+function crc16(text: string): string {
+  let crc = 0xffff;
+  for (let i = 0; i < text.length; i++) {
+    crc ^= text.charCodeAt(i) << 8;
+    for (let bit = 0; bit < 8; bit++) {
+      crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+
+/**
+ * The transaction number inside a telebirr receipt QR (Base64 of "…000A<10 chars as hex>6304<CRC>"),
+ * or null when it is not one or its checksum is wrong.
+ */
+export function telebirrNumberFromQr(text: string): string | null {
+  let data: string;
+  try {
+    data = atob(text.trim());
+  } catch {
+    return null;
+  }
+  const match = /000A([0-9A-Fa-f]{20})6304([0-9A-Fa-f]{4})$/.exec(data);
+  if (!match?.[1] || !match[2] || crc16(data.slice(0, -4)) !== match[2].toUpperCase()) return null;
+  let number = '';
+  for (let i = 0; i < 20; i += 2)
+    number += String.fromCharCode(parseInt(match[1].slice(i, i + 2), 16));
+  return /^[A-Z0-9]{10}$/.test(number) ? number : null;
+}

@@ -17,6 +17,9 @@ import {
   dashenReferenceFromQr,
   dashenReferenceOf,
   isCbeReceiptLink,
+  telebirrNumberFromQr,
+  telebirrNumberOf,
+  telebirrReceiptLink,
 } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
@@ -70,6 +73,17 @@ export default function ScanReceiptQrScreen() {
   const handleScanned = ({ data }: BarcodeScanningResult) => {
     if (locked) return;
     setLocked(true);
+    // telebirr: the transaction number is decoded from the QR (no OCR), then checked by the server.
+    if (bank.code === 'TEL') {
+      const number = telebirrNumberFromQr(data) ?? telebirrNumberOf(data);
+      if (!number) {
+        setNotFound(true);
+        return;
+      }
+      setQrData(telebirrReceiptLink(number));
+      router.replace('/verify-restaurant/checking');
+      return;
+    }
     // Dashen: the FT Ref is decoded from the QR on the phone (no OCR), then checked by the server.
     if (bank.code === 'DAS') {
       const reference = dashenReferenceFromQr(data) ?? dashenReferenceOf(data);
