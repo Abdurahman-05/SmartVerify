@@ -147,23 +147,37 @@ model Business {
   /// Next human order number (#1001, #1002, …), incremented inside the order transaction.
   nextOrderNumber Int       @default(1001)
   deactivatedAt   DateTime?
+  /// Profile the owner fills in (shown to the Smart Verify admin).
+  businessType    String?
+  city            String?
+  address         String?
+  latitude        Float?
+  longitude       Float?
+  locationSetAt   DateTime?
+  /// Admin: suspended by hand (only sign-in and the pay page work).
+  suspendedAt     DateTime?
+  /// Admin: never restricted for late payment (partner, special case).
+  exemptFromRules Boolean   @default(false)
+  exemptReason    String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  members       BusinessMember[]
-  subscriptions Subscription[]
-  bankAccounts  BankAccount[]
-  transactions  Transaction[]
-  menuItems     MenuItem[]
-  tables        RestaurantTable[]
-  deliveryAreas DeliveryArea[]
-  bills         Bill[]
-  orders        Order[]
-  payments      Payment[]
-  tips          Tip[]
-  kitchenOrders KitchenOrder[]
-  paymentScans  BillPaymentScan[]
-  receiptChecks ReceiptCheck[]
+  members        BusinessMember[]
+  adminNotes     AdminNote[]
+  paymentReviews PaymentReview[]
+  subscriptions  Subscription[]
+  bankAccounts   BankAccount[]
+  transactions   Transaction[]
+  menuItems      MenuItem[]
+  tables         RestaurantTable[]
+  deliveryAreas  DeliveryArea[]
+  bills          Bill[]
+  orders         Order[]
+  payments       Payment[]
+  tips           Tip[]
+  kitchenOrders  KitchenOrder[]
+  paymentScans   BillPaymentScan[]
+  receiptChecks  ReceiptCheck[]
 }
 
 /// A person's role inside a business. The owner also has a member row (role = owner).
@@ -228,6 +242,10 @@ model Subscription {
   idempotencyKey   String?
   /// Reference of the CBE receipt that paid for it; one receipt pays once.
   paymentReference String?            @unique
+  /// cbe | telebirr | manual (admin) | trial | free (development)
+  paymentMethod    String?
+  /// Admin's note when started or extended by hand.
+  note             String?
   createdAt        DateTime           @default(now())
 
   @@unique([businessId, idempotencyKey])
@@ -589,6 +607,9 @@ model AdminUser {
   sessions           AdminSession[]
   backupCodes        AdminBackupCode[]
   activity           AdminActivity[]
+  notes              AdminNote[]
+  decidedReviews     PaymentReview[]
+  announcements      Announcement[]
 }
 
 /// One-time backup codes for two-step sign-in. Only SHA-256 hashes are stored.
@@ -646,4 +667,111 @@ model AdminActivity {
 
   @@index([createdAt])
   @@index([category, createdAt])
+}
+
+/// Private notes from the Smart Verify team about one business.
+model AdminNote {
+  id         String    @id @default(cuid())
+  businessId String
+  business   Business  @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  adminId    String
+  admin      AdminUser @relation(fields: [adminId], references: [id], onDelete: Restrict)
+  text       String
+  createdAt  DateTime  @default(now())
+
+  @@index([businessId, createdAt])
+}
+
+enum PaymentReviewStatus {
+  pending
+  approved
+  rejected
+  asked_rest
+}
+
+/// A plan-payment receipt the server could not decide alone (amount low, bank site down, ...).
+model PaymentReview {
+  id          String              @id @default(cuid())
+  businessId  String
+  business    Business            @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  plan        Plan
+  period      BillingPeriod
+  expectedEtb Int
+  /// CBE | TEL
+  bankCode    String
+  /// The receipt link (CBE) or transaction number (telebirr): one review per receipt.
+  receiptKey  String
+  reference   String?
+  paidEtb     Int?
+  payerName   String?
+  receiptDate DateTime?
+  /// not_matching reasons, or the unable_to_verify reason.
+  reasons     String[]
+  status      PaymentReviewStatus @default(pending)
+  note        String?
+  decidedById String?
+  decidedBy   AdminUser?          @relation(fields: [decidedById], references: [id], onDelete: Restrict)
+  decidedAt   DateTime?
+  createdAt   DateTime            @default(now())
+
+  @@unique([businessId, receiptKey])
+  @@index([status, createdAt])
+}
+
+/// The admin's rules and prices (one row, id 1).
+model PlatformSettings {
+  id                     Int      @id @default(1)
+  trialEnabled           Boolean  @default(true)
+  trialDays              Int      @default(14)
+  reminderDays           Int[]    @default([7, 3, 1])
+  graceDays              Int      @default(3)
+  restrictedDays         Int      @default(7)
+  /// What Restricted blocks: receipt_checks | orders | reports | staff
+  restrictedBlocks       String[] @default(["receipt_checks", "orders", "reports", "staff"])
+  priceNormalMonthly     Int      @default(700)
+  priceNormalQuarterly   Int      @default(1500)
+  priceRestaurantMonthly Int      @default(4000)
+  updatedAt              DateTime @updatedAt
+}
+
+/// Server problems grouped by cause: one row per kind, counted.
+model ErrorLog {
+  id         String    @id @default(cuid())
+  key        String    @unique
+  /// receipt_check | read_picture | database | server
+  area       String
+  /// Short machine cause, e.g. bank_timeout:DAS, gemini_rate_limit, db_unreachable, error:TypeError
+  cause      String
+  route      String?
+  count      Int       @default(1)
+  firstSeen  DateTime  @default(now())
+  lastSeen   DateTime  @default(now())
+  resolvedAt DateTime?
+}
+
+/// Daily counters (Gemini calls, rate-limit hits, Tesseract fallbacks, ...).
+model DailyCounter {
+  day   String
+  key   String
+  count Int    @default(0)
+
+  @@id([day, key])
+}
+
+/// A banner shown in the business app.
+model Announcement {
+  id          String    @id @default(cuid())
+  bodyEn      String
+  bodyAm      String
+  /// all | plan | city
+  audience    String    @default("all")
+  plan        Plan?
+  city        String?
+  showFrom    DateTime
+  hideOn      DateTime
+  createdById String
+  createdBy   AdminUser @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt   DateTime  @default(now())
+
+  @@index([showFrom, hideOn])
 }

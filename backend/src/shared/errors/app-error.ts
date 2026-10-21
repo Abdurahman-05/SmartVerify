@@ -16,6 +16,7 @@ export type ErrorCode =
   | 'PAYMENT_NOT_CONFIGURED'
   | 'RECEIPT_USED'
   | 'INVALID_URL'
+  | 'CONFLICT'
   | 'WRONG_CODE'
   | 'ACCOUNT_LOCKED'
   | 'ADMIN_NOT_CONFIGURED'
@@ -48,6 +49,8 @@ const statusByCode: Record<ErrorCode, number> = {
   RECEIPT_USED: 409,
   /** Not a receipt link we accept (wrong scheme, host or receipt id). */
   INVALID_URL: 400,
+  /** Already decided or changed by someone else. */
+  CONFLICT: 409,
   /** Wrong two-step code (details.triesLeft). */
   WRONG_CODE: 401,
   /** Too many wrong tries: locked for a while (details.until). */

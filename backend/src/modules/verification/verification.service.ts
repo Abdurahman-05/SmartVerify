@@ -1,5 +1,6 @@
 import { PDFParse } from 'pdf-parse';
 
+import { recordIssue } from '../../services/issues.js';
 import type { FastifyBaseLogger } from 'fastify';
 
 import type { Env } from '../../config/env.js';
@@ -268,6 +269,13 @@ async function checkReceipt(input: {
     fetched = await fetchReceipt(source.url, { ...FETCH, tlsStrict, headers: source.headers });
   } catch (error) {
     const reason = error instanceof ReceiptFetchError ? error.reason : 'UNREACHABLE';
+    if (reason === 'TIMEOUT' || reason === 'UNREACHABLE') {
+      // The bank's site, not our app: shown on the admin's health page.
+      void recordIssue(prisma, env, {
+        area: 'receipt_check',
+        cause: `bank_${reason.toLowerCase()}:${bank}`,
+      });
+    }
     log?.info(
       { receiptCheck: 'unable_to_verify', bank, reason },
       `${bank} check: could not fetch the receipt (${reason})`

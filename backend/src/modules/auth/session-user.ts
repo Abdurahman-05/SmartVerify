@@ -26,8 +26,8 @@ export type SessionUser = z.infer<typeof sessionUserSchema>;
 
 async function currentSubscription(prisma: PrismaClient, businessId: string) {
   const sub = await prisma.subscription.findFirst({
-    where: { businessId, status: 'active', endsAt: { gt: new Date() } },
-    orderBy: { startedAt: 'desc' },
+    where: { businessId, status: { not: 'cancelled' }, endsAt: { gt: new Date() } },
+    orderBy: { endsAt: 'desc' },
   });
   return sub
     ? {

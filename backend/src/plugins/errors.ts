@@ -2,6 +2,7 @@ import type { FastifyError } from 'fastify';
 import fp from 'fastify-plugin';
 import { hasZodFastifySchemaValidationErrors } from 'fastify-type-provider-zod';
 
+import { causeOf, recordIssue } from '../services/issues.js';
 import { AppError, errorBody } from '../shared/errors/app-error.js';
 
 /** One consistent error shape. Stack traces and database details never reach the client. */
@@ -27,6 +28,13 @@ export default fp(
       }
 
       request.log.error({ err: error }, 'unhandled error');
+      // Grouped in the admin's error log (cause and route only, never the request).
+      if ('prisma' in app) {
+        void recordIssue(app.prisma, app.env, {
+          ...causeOf(error),
+          route: `${request.method} ${request.routeOptions.url ?? ''}`,
+        });
+      }
       return reply.status(500).send(errorBody('INTERNAL_ERROR'));
     });
 

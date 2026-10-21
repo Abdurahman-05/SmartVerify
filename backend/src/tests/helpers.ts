@@ -1,6 +1,7 @@
 import { buildApp } from '../app.js';
 import { loadEnv } from '../config/env.js';
 import type { Plan, Role } from '../generated/prisma/client.js';
+import { forgetSettings } from '../services/platform-settings.js';
 import { hashSessionToken, newSessionToken } from '../services/session-token.js';
 
 import { testDatabaseUrl } from './test-database.js';
@@ -22,6 +23,8 @@ export async function createTestApp(envOverrides: Record<string, string> = {}) {
     SUBSCRIPTION_TELEBIRR: undefined,
     SUBSCRIPTION_TELEBIRR_NAME: undefined,
     // A fixed test key (never the real one).
+    TELEGRAM_BOT_TOKEN: undefined,
+    TELEGRAM_CHAT_ID: undefined,
     ADMIN_SECRET_KEY: Buffer.alloc(32, 7).toString('base64'),
     ...envOverrides,
   });
@@ -32,6 +35,12 @@ export async function createTestApp(envOverrides: Record<string, string> = {}) {
 
 /** Tables these tests write to. Always schema-qualified, so only the test schema is emptied. */
 const USED_TABLES = [
+  'Announcement',
+  'AdminNote',
+  'PaymentReview',
+  'ErrorLog',
+  'DailyCounter',
+  'PlatformSettings',
   'AdminActivity',
   'AdminBackupCode',
   'AdminSession',
@@ -56,6 +65,7 @@ const USED_TABLES = [
 ];
 
 export async function resetDatabase(app: TestApp) {
+  forgetSettings();
   const { schema } = testDatabaseUrl();
   const list = USED_TABLES.map((t) => `"${schema}"."${t}"`).join(', ');
   await app.prisma.$executeRawUnsafe(`TRUNCATE ${list} CASCADE`);

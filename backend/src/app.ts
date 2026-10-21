@@ -8,8 +8,10 @@ import {
 import { z } from 'zod';
 
 import type { Env } from './config/env.js';
+import { adminConsoleRoutes } from './modules/admin/admin-console.routes.js';
 import { adminRoutes } from './modules/admin/admin.routes.js';
 import { authRoutes, publicAuthRoutes } from './modules/auth/auth.routes.js';
+import { businessRoutes } from './modules/business/business.routes.js';
 import { bankAccountRoutes } from './modules/bank-accounts/bank-account.routes.js';
 import { verificationRoutes } from './modules/verification/verification.routes.js';
 import { billRoutes } from './modules/bills/bill.routes.js';
@@ -27,6 +29,10 @@ import authPlugin from './plugins/auth.js';
 import errorsPlugin from './plugins/errors.js';
 import prismaPlugin from './plugins/prisma.js';
 import swaggerPlugin from './plugins/swagger.js';
+import { businessAccess } from './services/business-access.js';
+import { recordDuration } from './services/health.js';
+import { alwaysOpen, blockOf } from './services/lifecycle.js';
+import { getSettings } from './services/platform-settings.js';
 import { AppError } from './shared/errors/app-error.js';
 
 declare module 'fastify' {
@@ -55,6 +61,8 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
   app.decorate('env', env);
 
   await app.register(errorsPlugin);
+  // Response times for the admin's health page (numbers only).
+  app.addHook('onResponse', async (_request, reply) => recordDuration(reply.elapsedTime));
 
   // Browsers (the admin console on the web) may call the API only from the listed origins.
   // Bearer tokens, no cookies: credentials are never allowed.
@@ -111,10 +119,27 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
       await api.register(publicAuthRoutes);
       // The Smart Verify team's admin: its own accounts and sessions (not business tokens).
       await api.register(adminRoutes);
+      await api.register(adminConsoleRoutes);
 
       // Everything below requires a valid, non-revoked session.
       await api.register(async (secured) => {
         secured.addHook('onRequest', secured.authenticate);
+        // Late payment: the admin's rules decide what still works (history always does).
+        secured.addHook('preHandler', async (request) => {
+          if (alwaysOpen(request.method, request.url)) return;
+          const access = await businessAccess(secured.prisma, request.auth.businessId);
+          if (access.status === 'suspended') {
+            throw new AppError('SUBSCRIPTION_REQUIRED', { access: 'suspended' });
+          }
+          if (access.status === 'restricted') {
+            const block = blockOf(request.method, request.url);
+            const settings = await getSettings(secured.prisma);
+            if (block && settings.restrictedBlocks.includes(block)) {
+              throw new AppError('SUBSCRIPTION_REQUIRED', { access: 'restricted', block });
+            }
+          }
+        });
+        await secured.register(businessRoutes);
         await secured.register(authRoutes);
         await secured.register(subscriptionRoutes);
         await secured.register(bankAccountRoutes);

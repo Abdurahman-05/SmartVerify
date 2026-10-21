@@ -5,6 +5,8 @@ import { Prisma, type BillingPeriod, type Plan } from '../../generated/prisma/cl
 import { requireRoles } from '../../plugins/auth.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { errorResponseSchema, planSchema } from '../../shared/schemas/common.js';
+import { startPaidPeriod } from '../../services/business-access.js';
+import { addMonths, getSettings, planPricing } from '../../services/platform-settings.js';
 import { subscriptionSchema } from '../auth/session-user.js';
 import { verifyResponseSchema } from '../verification/verification.schemas.js';
 import {
@@ -12,21 +14,6 @@ import {
   verifyCbe,
   verifyTelebirr,
 } from '../verification/verification.service.js';
-
-/** Prices and lengths are decided here, never by the app. Restaurant Plus is monthly only. */
-const PRICING: Record<
-  Plan,
-  Partial<Record<BillingPeriod, { priceEtb: number; months: number }>>
-> = {
-  normal: { monthly: { priceEtb: 700, months: 1 }, quarterly: { priceEtb: 1500, months: 3 } },
-  restaurant: { monthly: { priceEtb: 4000, months: 1 } },
-};
-
-const addMonths = (date: Date, months: number) => {
-  const result = new Date(date);
-  result.setUTCMonth(result.getUTCMonth() + months);
-  return result;
-};
 
 const toSubscription = (s: {
   plan: Plan;
@@ -109,7 +96,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
       const { businessId } = request.auth;
       const { plan } = request.body;
       const period: BillingPeriod = plan === 'restaurant' ? 'monthly' : request.body.period;
-      const pricing = PRICING[plan][period];
+      const pricing = planPricing(await getSettings(prisma), plan, period);
       if (!pricing) throw new AppError('VALIDATION_ERROR');
       const idempotencyKey = request.headers['idempotency-key'];
 
@@ -138,6 +125,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
               startedAt,
               endsAt: addMonths(startedAt, pricing.months),
               idempotencyKey,
+              paymentMethod: 'free',
             },
           });
         });
@@ -192,16 +180,17 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async () => {
       if (!payTo) throw new AppError('PAYMENT_NOT_CONFIGURED');
+      const settings = await getSettings(prisma);
       return {
         bank: 'CBE' as const,
         ...payTo,
         telebirr: payToTelebirr,
         prices: {
           normal: {
-            monthly: PRICING.normal.monthly?.priceEtb ?? 0,
-            quarterly: PRICING.normal.quarterly?.priceEtb ?? 0,
+            monthly: settings.priceNormalMonthly,
+            quarterly: settings.priceNormalQuarterly,
           },
-          restaurant: { monthly: PRICING.restaurant.monthly?.priceEtb ?? 0 },
+          restaurant: { monthly: settings.priceRestaurantMonthly },
         },
       };
     }
@@ -241,6 +230,10 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
           200: z.object({
             check: verifyResponseSchema,
             subscription: subscriptionSchema.nullable(),
+            review: z
+              .enum(['pending'])
+              .nullable()
+              .describe('Sent to the Smart Verify team to decide'),
           }),
           ...errors,
           409: errorResponseSchema.describe('RECEIPT_USED'),
@@ -256,7 +249,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
         throw new AppError('VALIDATION_ERROR', { reason: 'urlOrTelebirr' });
       if (telebirrNumber && !payToTelebirr) throw new AppError('PAYMENT_NOT_CONFIGURED');
       const period: BillingPeriod = plan === 'restaurant' ? 'monthly' : request.body.period;
-      const pricing = PRICING[plan][period];
+      const pricing = planPricing(await getSettings(prisma), plan, period);
       if (!pricing) throw new AppError('VALIDATION_ERROR');
       const idempotencyKey = request.headers['idempotency-key'];
 
@@ -276,6 +269,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
             date: earlier.startedAt.toISOString(),
           },
           subscription: toSubscription(earlier),
+          review: null,
         };
       }
 
@@ -323,39 +317,55 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
                 maxAgeHours: env.SUBSCRIPTION_RECEIPT_MAX_AGE_HOURS,
               }
             );
-      if (check.status !== 'verified') return { check, subscription: null };
+      if (check.status !== 'verified') {
+        // Not clearly wrong (amount a little low, bank site down, old receipt…): the admin decides.
+        const reviewable =
+          check.status === 'not_matching'
+            ? !check.reasons.some((r) => r === 'WRONG_RECEIVER' || r === 'NOT_SUCCESS')
+            : check.status === 'unable_to_verify' && check.reason !== 'NOT_FOUND';
+        if (!reviewable) return { check, subscription: null, review: null };
+        const receiptKey = telebirrNumber ?? url ?? '';
+        await prisma.paymentReview.upsert({
+          where: { businessId_receiptKey: { businessId, receiptKey } },
+          update: {},
+          create: {
+            businessId,
+            plan,
+            period,
+            expectedEtb: pricing.priceEtb,
+            bankCode: telebirrNumber ? 'TEL' : 'CBE',
+            receiptKey,
+            reference: check.status === 'not_matching' ? check.reference : null,
+            paidEtb: check.status === 'not_matching' ? check.amountEtb : null,
+            reasons: check.status === 'not_matching' ? check.reasons : [check.reason],
+          },
+        });
+        return { check, subscription: null, review: 'pending' as const };
+      }
 
       const used = await prisma.subscription.findUnique({
         where: { paymentReference: check.reference },
       });
       if (used) throw new AppError('RECEIPT_USED');
 
-      const startedAt = new Date();
       try {
-        const subscription = await prisma.$transaction(async (tx) => {
-          await tx.subscription.updateMany({
-            where: { businessId, status: 'active' },
-            data: { status: 'cancelled' },
-          });
-          await tx.business.update({ where: { id: businessId }, data: { plan } });
-          return tx.subscription.create({
-            data: {
-              businessId,
-              plan,
-              period,
-              priceEtb: pricing.priceEtb,
-              startedAt,
-              endsAt: addMonths(startedAt, pricing.months),
-              idempotencyKey,
-              paymentReference: check.reference,
-            },
-          });
-        });
+        const subscription = await prisma.$transaction((tx) =>
+          startPaidPeriod(tx, {
+            businessId,
+            plan,
+            period,
+            priceEtb: pricing.priceEtb,
+            months: pricing.months,
+            paymentMethod: telebirrNumber ? 'telebirr' : 'cbe',
+            paymentReference: check.reference,
+            idempotencyKey,
+          })
+        );
         request.log.info(
           { subscriptionPaid: check.reference, plan, period },
           `Subscription paid with CBE ${check.reference}: ${plan} ${period}`
         );
-        return { check, subscription: toSubscription(subscription) };
+        return { check, subscription: toSubscription(subscription), review: null };
       } catch (error) {
         // The same receipt used at the same moment by another request.
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {

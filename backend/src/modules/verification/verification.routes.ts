@@ -10,6 +10,8 @@ import {
   verifyCbeBodySchema,
   verifyResponseSchema,
 } from './verification.schemas.js';
+import { countToday, recordIssue } from '../../services/issues.js';
+
 import { GeminiError, readWithGemini } from './gemini.js';
 import { geminiKeyFor } from '../../config/env.js';
 import { readWithUnlimitedOcr, UnlimitedOcrError } from './unlimited-ocr.js';
@@ -51,15 +53,24 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
     const apiKey = geminiKeyFor(app.env, bank);
     for (let attempt = 1; apiKey && attempt <= 2; attempt++) {
       try {
+        void countToday(app.prisma, 'gemini_calls');
         const read = await readWithGemini(image, type, { apiKey, model }, bank);
         return { reference: read.reference, text: read.text, source: 'gemini' };
       } catch (error) {
         const reason = error instanceof GeminiError ? error.message : 'failed';
         log.warn({ gemini: reason, attempt }, `Gemini could not read the picture (${reason})`);
+        if (reason === 'http 429') {
+          void countToday(app.prisma, 'gemini_rate_limited');
+          void recordIssue(app.prisma, app.env, {
+            area: 'read_picture',
+            cause: 'gemini_rate_limit',
+          });
+        }
         if (!/^http (429|503)$/.test(reason)) break;
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
+    void countToday(app.prisma, 'ocr_fallback');
     const text = await readImageText(image);
     return { reference: findReference(bank, text), text, source: 'ocr' };
   }

@@ -43,6 +43,9 @@ const schema = z.object({
   /** Admin: 32 random bytes, base64 (`openssl rand -base64 32`). Encrypts authenticator secrets. */
   ADMIN_SECRET_KEY: z.string().min(40).optional(),
   /** Web pages allowed to call the API from a browser (the admin console), comma-separated. */
+  /** Alerts to the team (a Telegram bot and the chat it posts to). */
+  TELEGRAM_BOT_TOKEN: z.string().min(20).optional(),
+  TELEGRAM_CHAT_ID: z.string().min(1).optional(),
   WEB_ORIGINS: z.string().default('http://localhost:8081'),
   GEMINI_API_KEY: z.string().min(10).optional(),
   /** Optional key per bank (each from its own Google project, so each has its own rate limit). */
