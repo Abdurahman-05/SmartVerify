@@ -21,6 +21,8 @@ export async function createTestApp(envOverrides: Record<string, string> = {}) {
     SUBSCRIPTION_CBE_NAME: undefined,
     SUBSCRIPTION_TELEBIRR: undefined,
     SUBSCRIPTION_TELEBIRR_NAME: undefined,
+    // A fixed test key (never the real one).
+    ADMIN_SECRET_KEY: Buffer.alloc(32, 7).toString('base64'),
     ...envOverrides,
   });
   const app = await buildApp({ env, logger: false });
@@ -30,6 +32,10 @@ export async function createTestApp(envOverrides: Record<string, string> = {}) {
 
 /** Tables these tests write to. Always schema-qualified, so only the test schema is emptied. */
 const USED_TABLES = [
+  'AdminActivity',
+  'AdminBackupCode',
+  'AdminSession',
+  'AdminUser',
   'ReceiptCheck',
   'Tip',
   'Payment',

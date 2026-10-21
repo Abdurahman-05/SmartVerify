@@ -8,6 +8,7 @@ import {
 import { z } from 'zod';
 
 import type { Env } from './config/env.js';
+import { adminRoutes } from './modules/admin/admin.routes.js';
 import { authRoutes, publicAuthRoutes } from './modules/auth/auth.routes.js';
 import { bankAccountRoutes } from './modules/bank-accounts/bank-account.routes.js';
 import { verificationRoutes } from './modules/verification/verification.routes.js';
@@ -88,6 +89,8 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
       );
 
       await api.register(publicAuthRoutes);
+      // The Smart Verify team's admin: its own accounts and sessions (not business tokens).
+      await api.register(adminRoutes);
 
       // Everything below requires a valid, non-revoked session.
       await api.register(async (secured) => {

@@ -559,3 +559,91 @@ model ReceiptCheck {
 
   @@index([businessId, createdAt])
 }
+
+// ─── Platform admin (the Smart Verify team, not businesses) ─────────────────
+
+enum AdminRole {
+  super_admin
+}
+
+/// A member of the Smart Verify team. Separate from business users: never part of a business.
+model AdminUser {
+  id                 String            @id @default(cuid())
+  email              String            @unique
+  name               String
+  role               AdminRole         @default(super_admin)
+  /// Argon2id hash. The password itself is never stored.
+  passwordHash       String
+  /// Authenticator secret, AES-256-GCM encrypted with ADMIN_SECRET_KEY. Null until set up.
+  totpSecretEnc      String?
+  totpEnabledAt      DateTime?
+  /// Last accepted 30-second step, so a code cannot be used twice.
+  totpLastStep       Int?
+  failedSignIns      Int               @default(0)
+  lockedUntil        DateTime?
+  /// Signed out after this many minutes without activity (30, 120 or 480).
+  idleTimeoutMinutes Int               @default(120)
+  active             Boolean           @default(true)
+  lastSignInAt       DateTime?
+  createdAt          DateTime          @default(now())
+  sessions           AdminSession[]
+  backupCodes        AdminBackupCode[]
+  activity           AdminActivity[]
+}
+
+/// One-time backup codes for two-step sign-in. Only SHA-256 hashes are stored.
+model AdminBackupCode {
+  id        String    @id @default(cuid())
+  adminId   String
+  admin     AdminUser @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  codeHash  String
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([adminId])
+}
+
+enum AdminSessionStage {
+  /// Password accepted; the two-step code (or its first setup) is still needed.
+  password
+  /// Fully signed in.
+  full
+}
+
+/// Server-side admin session. Only the SHA-256 of its token is stored.
+model AdminSession {
+  id         String            @id @default(cuid())
+  tokenHash  String            @unique
+  adminId    String
+  admin      AdminUser         @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  stage      AdminSessionStage
+  lastSeenAt DateTime          @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  userAgent  String?
+  ip         String?
+  createdAt  DateTime          @default(now())
+
+  @@index([adminId])
+}
+
+/// Every admin action and sign-in. Append-only: there is no route to edit or delete it.
+model AdminActivity {
+  id         String     @id @default(cuid())
+  /// Null for a sign-in try with an unknown email.
+  adminId    String?
+  admin      AdminUser? @relation(fields: [adminId], references: [id], onDelete: Restrict)
+  /// money | customers | rules | sign_in | private_data
+  category   String
+  /// e.g. signed_in, sign_in_failed, two_step_enabled, viewed_location
+  action     String
+  businessId String?
+  /// Before/after values and other facts. Never PINs, passwords, tokens or codes.
+  details    Json?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime   @default(now())
+
+  @@index([createdAt])
+  @@index([category, createdAt])
+}

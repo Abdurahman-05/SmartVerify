@@ -16,6 +16,9 @@ export type ErrorCode =
   | 'PAYMENT_NOT_CONFIGURED'
   | 'RECEIPT_USED'
   | 'INVALID_URL'
+  | 'WRONG_CODE'
+  | 'ACCOUNT_LOCKED'
+  | 'ADMIN_NOT_CONFIGURED'
   | 'RATE_LIMITED'
   | 'INTERNAL_ERROR';
 
@@ -45,6 +48,12 @@ const statusByCode: Record<ErrorCode, number> = {
   RECEIPT_USED: 409,
   /** Not a receipt link we accept (wrong scheme, host or receipt id). */
   INVALID_URL: 400,
+  /** Wrong two-step code (details.triesLeft). */
+  WRONG_CODE: 401,
+  /** Too many wrong tries: locked for a while (details.until). */
+  ACCOUNT_LOCKED: 423,
+  /** ADMIN_SECRET_KEY is not set on the server. */
+  ADMIN_NOT_CONFIGURED: 501,
   RATE_LIMITED: 429,
   INTERNAL_ERROR: 500,
 };

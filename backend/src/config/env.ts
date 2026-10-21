@@ -40,6 +40,8 @@ const schema = z.object({
     .optional(),
   SUBSCRIPTION_TELEBIRR_NAME: z.string().min(3).optional(),
   /** Google Gemini API key, for reading receipt pictures. Server only: never sent to the app. */
+  /** Admin: 32 random bytes, base64 (`openssl rand -base64 32`). Encrypts authenticator secrets. */
+  ADMIN_SECRET_KEY: z.string().min(40).optional(),
   GEMINI_API_KEY: z.string().min(10).optional(),
   /** Optional key per bank (each from its own Google project, so each has its own rate limit). */
   GEMINI_API_KEY_CBE: z.string().min(10).optional(),
