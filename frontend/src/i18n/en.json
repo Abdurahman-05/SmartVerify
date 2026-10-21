@@ -1066,5 +1066,118 @@
     "ownerOnly": "Only the owner can change the plan.",
     "telebirr": "telebirr",
     "telebirrNumber": "Telebirr transaction number"
+  },
+  "platformAdmin": {
+    "brand": "Smart Verify",
+    "admin": "Admin",
+    "teamOnly": "For the Smart Verify team only.",
+    "webOnly": "The admin opens in a web browser on a computer.",
+    "signIn": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to the admin.",
+      "tagline": "Know every customer. Catch every payment.",
+      "point1": "Two-step sign-in, every time",
+      "point2": "Every action saved in the activity log",
+      "point3": "Signed out automatically when you stop",
+      "email": "Email",
+      "emailPlaceholder": "you@smartverify.et",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "continue": "Continue",
+      "lockNote": "After 5 wrong tries the account locks for 15 minutes.",
+      "wrong": "Wrong email or password.",
+      "forgot": "Forgot your password? Ask the super admin to reset it."
+    },
+    "twoStep": {
+      "title": "Enter your code",
+      "tagline": "One more step.",
+      "taglineSub": "A password alone cannot open the customer list.",
+      "body": "Open your authenticator app and type the 6-digit code for Smart Verify.",
+      "code": "6-digit code",
+      "changes": "The code changes every 30 seconds.",
+      "signIn": "Sign in",
+      "useBackup": "Use a backup code",
+      "useApp": "Use the authenticator app",
+      "backup": "Backup code",
+      "backupPlaceholder": "XXXX-XXXX",
+      "lostPhone": "Lost your phone? Use one of your backup codes.",
+      "back": "Back"
+    },
+    "setup": {
+      "title": "Two-step setup",
+      "tagline": "Protect the admin.",
+      "taglineSub": "This takes one minute and happens only the first time you sign in.",
+      "step1": "Add Smart Verify to an authenticator app",
+      "step1Body": "In Google Authenticator or Microsoft Authenticator, choose \"Enter a setup key\" and type this key:",
+      "copyKey": "Copy key",
+      "copied": "Copied",
+      "step2": "Type the code the app shows",
+      "confirm": "Turn on two-step",
+      "codesTitle": "Save your backup codes",
+      "codesBody": "Use one if you lose your phone. Each code works once. They are shown only now.",
+      "copyCodes": "Copy all codes",
+      "saved": "I saved my backup codes",
+      "done": "Open the admin"
+    },
+    "nav": {
+      "home": "Home",
+      "customers": "Customers",
+      "payments": "Payments",
+      "rules": "Trial and rules",
+      "plans": "Plans and settings",
+      "health": "Health and errors",
+      "messages": "Messages",
+      "activity": "Activity log",
+      "soon": "Soon",
+      "signOut": "Sign out"
+    },
+    "roles": {
+      "super_admin": "Super admin"
+    },
+    "home": {
+      "greeting": "Hello, {{name}}",
+      "account": "Your account",
+      "twoStepOn": "Two-step sign-in is on",
+      "backupLeft": "{{count}} backup codes left",
+      "signOutAfter": "Signed out after {{count}} minutes without activity",
+      "recent": "Recent sign-ins",
+      "seeAll": "See all",
+      "nextTitle": "Coming next",
+      "nextBody": "Customers, payments to review, trial and rules, plans, health and messages are added in the next steps."
+    },
+    "activity": {
+      "title": "Activity log",
+      "subtitle": "Every admin action: who did it, to whom, and what changed. It cannot be edited.",
+      "all": "All",
+      "when": "When",
+      "who": "Who",
+      "what": "What",
+      "customer": "Customer",
+      "unknown": "Unknown",
+      "showing": "Showing {{shown}} of {{total}}",
+      "more": "Load more",
+      "empty": "Nothing here yet."
+    },
+    "categories": {
+      "money": "Money",
+      "customers": "Customers",
+      "rules": "Rules",
+      "sign_in": "Sign-ins",
+      "private_data": "Viewed private data"
+    },
+    "actions": {
+      "signed_in": "Signed in",
+      "sign_in_failed": "Wrong password",
+      "two_step_failed": "Wrong two-step code",
+      "two_step_enabled": "Turned on two-step sign-in",
+      "backup_code_used": "Used a backup code"
+    },
+    "locked": "Locked",
+    "errors": {
+      "wrongCode": "That code is wrong.",
+      "triesLeft": "That code is wrong. {{count}} tries left.",
+      "locked": "Too many wrong tries. The account is locked for 15 minutes.",
+      "notConfigured": "The admin is not set up on the server (ADMIN_SECRET_KEY)."
+    }
   }
 }

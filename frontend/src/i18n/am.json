@@ -1066,5 +1066,118 @@
     "ownerOnly": "ዕቅዱን መቀየር የሚችለው ባለቤቱ ብቻ ነው።",
     "telebirr": "ቴሌብር",
     "telebirrNumber": "የቴሌብር የግብይት ቁጥር"
+  },
+  "platformAdmin": {
+    "brand": "Smart Verify",
+    "admin": "አስተዳዳሪ",
+    "teamOnly": "ለSmart Verify ቡድን ብቻ።",
+    "webOnly": "አስተዳዳሪው በኮምፒውተር የድር አሳሽ ይከፈታል።",
+    "signIn": {
+      "title": "እንኳን ደህና መጡ",
+      "subtitle": "ወደ አስተዳዳሪው ይግቡ።",
+      "tagline": "እያንዳንዱን ደንበኛ ይወቁ። እያንዳንዱን ክፍያ ይያዙ።",
+      "point1": "ሁልጊዜ ባለሁለት ደረጃ መግቢያ",
+      "point2": "እያንዳንዱ ተግባር በእንቅስቃሴ መዝገብ ይቀመጣል",
+      "point3": "ሲያቆሙ በራስ-ሰር ይወጣሉ",
+      "email": "ኢሜይል",
+      "emailPlaceholder": "you@smartverify.et",
+      "password": "የይለፍ ቃል",
+      "passwordPlaceholder": "የይለፍ ቃልዎ",
+      "continue": "ቀጥል",
+      "lockNote": "ከ5 የተሳሳቱ ሙከራዎች በኋላ መለያው ለ15 ደቂቃ ይቆለፋል።",
+      "wrong": "የተሳሳተ ኢሜይል ወይም የይለፍ ቃል።",
+      "forgot": "የይለፍ ቃልዎን ረሱ? ዋናውን አስተዳዳሪ እንዲቀይርልዎ ይጠይቁ።"
+    },
+    "twoStep": {
+      "title": "ኮድዎን ያስገቡ",
+      "tagline": "አንድ ደረጃ ብቻ ቀረ።",
+      "taglineSub": "የይለፍ ቃል ብቻውን የደንበኞችን ዝርዝር አይከፍትም።",
+      "body": "የማረጋገጫ መተግበሪያዎን ከፍተው ለSmart Verify ያለውን ባለ6 አሃዝ ኮድ ይጻፉ።",
+      "code": "ባለ6 አሃዝ ኮድ",
+      "changes": "ኮዱ በየ30 ሰከንዱ ይቀየራል።",
+      "signIn": "ግባ",
+      "useBackup": "የመጠባበቂያ ኮድ ተጠቀም",
+      "useApp": "የማረጋገጫ መተግበሪያውን ተጠቀም",
+      "backup": "የመጠባበቂያ ኮድ",
+      "backupPlaceholder": "XXXX-XXXX",
+      "lostPhone": "ስልክዎ ጠፋ? ከመጠባበቂያ ኮዶችዎ አንዱን ይጠቀሙ።",
+      "back": "ተመለስ"
+    },
+    "setup": {
+      "title": "ባለሁለት ደረጃ ማዋቀር",
+      "tagline": "አስተዳዳሪውን ይጠብቁ።",
+      "taglineSub": "ይህ አንድ ደቂቃ ይወስዳል፤ የሚሆነውም ለመጀመሪያ ጊዜ ሲገቡ ብቻ ነው።",
+      "step1": "Smart Verifyን ወደ ማረጋገጫ መተግበሪያ ያክሉ",
+      "step1Body": "በGoogle Authenticator ወይም Microsoft Authenticator ውስጥ \"Enter a setup key\" መርጠው ይህን ቁልፍ ይጻፉ፦",
+      "copyKey": "ቁልፉን ቅዳ",
+      "copied": "ተቀድቷል",
+      "step2": "መተግበሪያው የሚያሳየውን ኮድ ይጻፉ",
+      "confirm": "ባለሁለት ደረጃን አብራ",
+      "codesTitle": "የመጠባበቂያ ኮዶችዎን ያስቀምጡ",
+      "codesBody": "ስልክዎ ከጠፋ አንዱን ይጠቀሙ። እያንዳንዱ ኮድ አንድ ጊዜ ብቻ ይሰራል። የሚታዩት አሁን ብቻ ነው።",
+      "copyCodes": "ሁሉንም ኮዶች ቅዳ",
+      "saved": "የመጠባበቂያ ኮዶቼን አስቀምጫለሁ",
+      "done": "አስተዳዳሪውን ክፈት"
+    },
+    "nav": {
+      "home": "መነሻ",
+      "customers": "ደንበኞች",
+      "payments": "ክፍያዎች",
+      "rules": "ሙከራ እና ደንቦች",
+      "plans": "ዕቅዶች እና ቅንብሮች",
+      "health": "ጤና እና ስህተቶች",
+      "messages": "መልዕክቶች",
+      "activity": "የእንቅስቃሴ መዝገብ",
+      "soon": "በቅርቡ",
+      "signOut": "ውጣ"
+    },
+    "roles": {
+      "super_admin": "ዋና አስተዳዳሪ"
+    },
+    "home": {
+      "greeting": "ሰላም፣ {{name}}",
+      "account": "መለያዎ",
+      "twoStepOn": "ባለሁለት ደረጃ መግቢያ በርቷል",
+      "backupLeft": "{{count}} የመጠባበቂያ ኮዶች ቀርተዋል",
+      "signOutAfter": "ያለ እንቅስቃሴ ከ{{count}} ደቂቃ በኋላ ይወጣሉ",
+      "recent": "የቅርብ ጊዜ መግቢያዎች",
+      "seeAll": "ሁሉንም እይ",
+      "nextTitle": "ቀጥሎ የሚመጣ",
+      "nextBody": "ደንበኞች፣ የሚገመገሙ ክፍያዎች፣ ሙከራ እና ደንቦች፣ ዕቅዶች፣ ጤና እና መልዕክቶች በቀጣዮቹ ደረጃዎች ይታከላሉ።"
+    },
+    "activity": {
+      "title": "የእንቅስቃሴ መዝገብ",
+      "subtitle": "እያንዳንዱ የአስተዳዳሪ ተግባር፦ ማን እንደሰራው፣ ለማን እና ምን እንደተቀየረ። ሊስተካከል አይችልም።",
+      "all": "ሁሉም",
+      "when": "መቼ",
+      "who": "ማን",
+      "what": "ምን",
+      "customer": "ደንበኛ",
+      "unknown": "ያልታወቀ",
+      "showing": "ከ{{total}} {{shown}} በማሳየት ላይ",
+      "more": "ተጨማሪ ጫን",
+      "empty": "እስካሁን ምንም የለም።"
+    },
+    "categories": {
+      "money": "ገንዘብ",
+      "customers": "ደንበኞች",
+      "rules": "ደንቦች",
+      "sign_in": "መግቢያዎች",
+      "private_data": "የግል መረጃ የታየበት"
+    },
+    "actions": {
+      "signed_in": "ገብቷል",
+      "sign_in_failed": "የተሳሳተ የይለፍ ቃል",
+      "two_step_failed": "የተሳሳተ ባለሁለት ደረጃ ኮድ",
+      "two_step_enabled": "ባለሁለት ደረጃ መግቢያን አብርቷል",
+      "backup_code_used": "የመጠባበቂያ ኮድ ተጠቅሟል"
+    },
+    "locked": "ተቆልፏል",
+    "errors": {
+      "wrongCode": "ኮዱ የተሳሳተ ነው።",
+      "triesLeft": "ኮዱ የተሳሳተ ነው። {{count}} ሙከራዎች ቀርተዋል።",
+      "locked": "በጣም ብዙ የተሳሳቱ ሙከራዎች። መለያው ለ15 ደቂቃ ተቆልፏል።",
+      "notConfigured": "አስተዳዳሪው በአገልጋዩ ላይ አልተዋቀረም (ADMIN_SECRET_KEY)።"
+    }
   }
 }

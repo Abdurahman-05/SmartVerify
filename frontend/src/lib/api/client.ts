@@ -40,6 +40,9 @@ export type ApiErrorCode =
   | 'BILL_CLOSED'
   | 'INVALID_URL'
   | 'RECEIPT_USED'
+  | 'WRONG_CODE'
+  | 'ACCOUNT_LOCKED'
+  | 'ADMIN_NOT_CONFIGURED'
   | 'INTERNAL_ERROR'
   | 'NETWORK_ERROR';
 
@@ -75,10 +78,13 @@ interface RequestOptions {
   /** Send the same key when retrying, so the server does not create duplicates. */
   idempotencyKey?: string;
   timeoutMs?: number;
+  /** Admin calls: this token instead of the business session's (never mixed). */
+  token?: string | null;
 }
 
 export async function api<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, query, idempotencyKey, timeoutMs = 15_000 } = options;
+  const bearer = options.token !== undefined ? options.token : authToken;
   const params = new URLSearchParams(
     Object.entries(query ?? {}).filter((e): e is [string, string] => e[1] !== undefined)
   ).toString();
@@ -94,7 +100,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
       headers: {
         Accept: 'application/json',
         ...(body !== undefined && { 'Content-Type': 'application/json' }),
-        ...(authToken && { Authorization: `Bearer ${authToken}` }),
+        ...(bearer && { Authorization: `Bearer ${bearer}` }),
         ...(idempotencyKey && { 'Idempotency-Key': idempotencyKey }),
       },
       body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -111,7 +117,7 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
     const error = json?.error;
     const code: ApiErrorCode = error?.code ?? 'INTERNAL_ERROR';
     // WRONG_CREDENTIALS is also a 401, but only UNAUTHORIZED means "this session is no longer valid".
-    if (code === 'UNAUTHORIZED' && authToken) onUnauthorized?.();
+    if (code === 'UNAUTHORIZED' && authToken && options.token === undefined) onUnauthorized?.();
     throw new ApiError(code, response.status, error?.details);
   }
   return json as T;

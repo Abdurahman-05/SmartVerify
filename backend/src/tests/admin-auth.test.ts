@@ -124,3 +124,23 @@ describe('admin sign-in', () => {
     expect((await get('/admin/me', fullToken)).statusCode).toBe(401);
   });
 });
+
+describe('browser access (admin console)', () => {
+  it('allows only the listed web origins', async () => {
+    const preflight = await app.inject({
+      method: 'OPTIONS',
+      url: '/api/v1/admin/auth/sign-in',
+      headers: { origin: 'http://localhost:8081', 'access-control-request-method': 'POST' },
+    });
+    expect(preflight.statusCode).toBe(204);
+    expect(preflight.headers['access-control-allow-origin']).toBe('http://localhost:8081');
+    expect(preflight.headers['access-control-allow-credentials']).toBeUndefined();
+
+    const other = await app.inject({
+      method: 'GET',
+      url: '/api/v1/health',
+      headers: { origin: 'https://evil.example' },
+    });
+    expect(other.headers['access-control-allow-origin']).toBeUndefined();
+  });
+});

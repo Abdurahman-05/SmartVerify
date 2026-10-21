@@ -55,6 +55,26 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
   app.decorate('env', env);
 
   await app.register(errorsPlugin);
+
+  // Browsers (the admin console on the web) may call the API only from the listed origins.
+  // Bearer tokens, no cookies: credentials are never allowed.
+  const webOrigins = new Set(
+    env.WEB_ORIGINS.split(',')
+      .map((o) => o.trim())
+      .filter(Boolean)
+  );
+  app.addHook('onRequest', async (request, reply) => {
+    const origin = request.headers.origin;
+    if (!origin || !webOrigins.has(origin)) return;
+    reply.header('Access-Control-Allow-Origin', origin);
+    reply.header('Vary', 'Origin');
+    if (request.method === 'OPTIONS') {
+      reply.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE');
+      reply.header('Access-Control-Allow-Headers', 'Authorization, Content-Type, Idempotency-Key');
+      reply.header('Access-Control-Max-Age', '600');
+      return reply.status(204).send();
+    }
+  });
   await app.register(fastifyRateLimit, {
     max: 300,
     timeWindow: '1 minute',
