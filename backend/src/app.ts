@@ -29,7 +29,7 @@ import authPlugin from './plugins/auth.js';
 import errorsPlugin from './plugins/errors.js';
 import prismaPlugin from './plugins/prisma.js';
 import swaggerPlugin from './plugins/swagger.js';
-import { businessAccess } from './services/business-access.js';
+import { cachedBusinessAccess } from './services/business-access.js';
 import { recordDuration } from './services/health.js';
 import { alwaysOpen, blockOf } from './services/lifecycle.js';
 import { getSettings } from './services/platform-settings.js';
@@ -127,7 +127,7 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
         // Late payment: the admin's rules decide what still works (history always does).
         secured.addHook('preValidation', async (request) => {
           if (alwaysOpen(request.method, request.url)) return;
-          const access = await businessAccess(secured.prisma, request.auth.businessId);
+          const access = await cachedBusinessAccess(secured.prisma, request.auth.businessId);
           if (access.status === 'suspended') {
             throw new AppError('SUBSCRIPTION_REQUIRED', { access: 'suspended' });
           }

@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 import { hashPassword } from '../modules/admin/admin-auth.js';
 import { fetchReceipt, type FetchedReceipt } from '../modules/verification/fetch-receipt.js';
+import { forgetAccess } from '../services/business-access.js';
 import { forgetSettings } from '../services/platform-settings.js';
 import { hashSessionToken, newSessionToken } from '../services/session-token.js';
 
@@ -77,6 +78,8 @@ async function endedDaysAgo(days: number) {
     data: { createdAt: new Date(Date.now() - (14 + days) * DAY) },
   });
   await app.prisma.subscription.deleteMany({ where: { businessId: r.businessId } });
+  // Changed behind the app's back: drop the remembered status.
+  forgetAccess();
 }
 
 describe('admin console', () => {

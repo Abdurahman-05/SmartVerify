@@ -5,7 +5,11 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 
 import { Prisma } from '../../generated/prisma/client.js';
-import { startPaidPeriod, latestSubscription } from '../../services/business-access.js';
+import {
+  forgetAccess,
+  latestSubscription,
+  startPaidPeriod,
+} from '../../services/business-access.js';
 import { checkBankSites, responseTimes } from '../../services/health.js';
 import { sendTelegram } from '../../services/issues.js';
 import { accessOf, RESTRICTED_BLOCKS } from '../../services/lifecycle.js';
@@ -82,7 +86,11 @@ export const adminConsoleRoutes: FastifyPluginAsyncZod = async (app) => {
   const log = (
     request: FastifyRequest,
     entry: Omit<Parameters<typeof recordActivity>[2], 'adminId'>
-  ) => recordActivity(prisma, request, { adminId: request.admin.admin.id, ...entry });
+  ) => {
+    // Any admin change to a customer applies to their app on the next request.
+    if (entry.businessId) forgetAccess(entry.businessId);
+    return recordActivity(prisma, request, { adminId: request.admin.admin.id, ...entry });
+  };
   const businessExists = async (id: string) => {
     const b = await prisma.business.findUnique({ where: { id }, select: { id: true, name: true } });
     if (!b) throw new AppError('NOT_FOUND');
@@ -931,6 +939,7 @@ export const adminConsoleRoutes: FastifyPluginAsyncZod = async (app) => {
         update: body,
       });
       forgetSettings();
+      forgetAccess();
       const after = settingsOut(saved);
       const changes = Object.fromEntries(
         Object.entries(after).flatMap(([key, value]) =>

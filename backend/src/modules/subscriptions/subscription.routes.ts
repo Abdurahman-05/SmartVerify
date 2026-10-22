@@ -5,7 +5,7 @@ import { Prisma, type BillingPeriod, type Plan } from '../../generated/prisma/cl
 import { requireRoles } from '../../plugins/auth.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { errorResponseSchema, planSchema } from '../../shared/schemas/common.js';
-import { startPaidPeriod } from '../../services/business-access.js';
+import { forgetAccess, startPaidPeriod } from '../../services/business-access.js';
 import { addMonths, getSettings, planPricing } from '../../services/platform-settings.js';
 import { subscriptionSchema } from '../auth/session-user.js';
 import { verifyResponseSchema } from '../verification/verification.schemas.js';
@@ -129,6 +129,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
             },
           });
         });
+        forgetAccess(businessId);
         return reply.status(201).send(toSubscription(subscription));
       } catch (error) {
         // The same request arrived twice at once: return the one that was saved.
@@ -365,6 +366,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
           { subscriptionPaid: check.reference, plan, period },
           `Subscription paid with CBE ${check.reference}: ${plan} ${period}`
         );
+        forgetAccess(businessId);
         return { check, subscription: toSubscription(subscription), review: null };
       } catch (error) {
         // The same receipt used at the same moment by another request.

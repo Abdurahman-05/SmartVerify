@@ -37,6 +37,30 @@ export async function businessAccess(
 }
 
 /**
+ * The same, remembered for 30 seconds per business: checked on every business request, so it
+ * must not cost database round trips each time. Anything that changes it calls forgetAccess.
+ */
+const ACCESS_TTL_MS = 30_000;
+const accessCache = new Map<string, { at: number; access: AccessInfo }>();
+
+export async function cachedBusinessAccess(
+  prisma: PrismaClient,
+  businessId: string
+): Promise<AccessInfo> {
+  const hit = accessCache.get(businessId);
+  if (hit && Date.now() - hit.at < ACCESS_TTL_MS) return hit.access;
+  const access = await businessAccess(prisma, businessId);
+  accessCache.set(businessId, { at: Date.now(), access });
+  return access;
+}
+
+/** A payment, an admin action or new rules: the next request sees the new status at once. */
+export function forgetAccess(businessId?: string) {
+  if (businessId) accessCache.delete(businessId);
+  else accessCache.clear();
+}
+
+/**
  * Starts a paid period. Paying early adds on top of the time left; paying late starts today.
  * The business gets the plan at once. Runs inside the caller's transaction.
  */
