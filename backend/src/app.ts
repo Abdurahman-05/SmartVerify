@@ -125,7 +125,7 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
       await api.register(async (secured) => {
         secured.addHook('onRequest', secured.authenticate);
         // Late payment: the admin's rules decide what still works (history always does).
-        secured.addHook('preHandler', async (request) => {
+        secured.addHook('preValidation', async (request) => {
           if (alwaysOpen(request.method, request.url)) return;
           const access = await businessAccess(secured.prisma, request.auth.businessId);
           if (access.status === 'suspended') {
