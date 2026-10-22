@@ -18,7 +18,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "admin:create": "tsx src/scripts/create-admin.ts"
+    "admin:create": "tsx src/scripts/create-admin.ts",
+    "admin:reset-password": "tsx src/scripts/reset-admin-password.ts"
   },
   "dependencies": {
     "@fastify/rate-limit": "^11.2.1",
