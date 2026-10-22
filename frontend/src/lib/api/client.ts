@@ -14,7 +14,9 @@ const API_PORT = 3000;
 function resolveBaseUrl() {
   const fromEnv = process.env.EXPO_PUBLIC_API_URL;
   if (fromEnv) return fromEnv.replace(/\/$/, '');
-  const host = Constants.expoConfig?.hostUri?.split(':')[0];
+  // Web (the admin console): the computer that served the page, so a phone on the same Wi-Fi works.
+  const webHost = typeof window !== 'undefined' ? window.location?.hostname : undefined;
+  const host = webHost ?? Constants.expoConfig?.hostUri?.split(':')[0];
   return `http://${host ?? 'localhost'}:${API_PORT}/api/v1`;
 }
 
