@@ -9,6 +9,7 @@ import {
   LogOut,
   ScanText,
   Star,
+  Store,
   Users,
   UtensilsCrossed,
 } from 'lucide-react-native';
@@ -120,6 +121,11 @@ export default function ProfileScreen() {
                 icon={Star}
                 label={t('profile.subscription')}
                 onPress={() => router.push('/subscription')}
+              />
+              <ListRow
+                icon={Store}
+                label={t('business.businessInfo.entry')}
+                onPress={() => router.push('/business-info')}
               />
             </>
           ) : null}

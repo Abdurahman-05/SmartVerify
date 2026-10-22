@@ -35,7 +35,10 @@ export function createBill(order: Order, waiterId: string): Bill {
     servedStatus: 'kitchen',
     createdAt: order.createdAt,
     ...(target.type === 'dineIn' && { tableNo: target.tableNumber, tableArea: target.area }),
-    ...(target.type === 'takeaway' && { customerName: target.customerName, phone: target.customerPhone }),
+    ...(target.type === 'takeaway' && {
+      customerName: target.customerName,
+      phone: target.customerPhone,
+    }),
     ...(target.type === 'delivery' && {
       area: target.areaName,
       address: target.address,

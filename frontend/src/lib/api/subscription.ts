@@ -37,9 +37,12 @@ export const payForPlan = (
   receipt: { url: string } | { telebirrNumber: string },
   idempotencyKey = newIdempotencyKey()
 ) =>
-  api<{ check: CbeCheck; subscription: Subscription | null }>('/subscription/pay', {
-    method: 'POST',
-    body: { plan, period, ...receipt },
-    idempotencyKey,
-    timeoutMs: 30_000,
-  });
+  api<{ check: CbeCheck; subscription: Subscription | null; review?: 'pending' | null }>(
+    '/subscription/pay',
+    {
+      method: 'POST',
+      body: { plan, period, ...receipt },
+      idempotencyKey,
+      timeoutMs: 30_000,
+    }
+  );

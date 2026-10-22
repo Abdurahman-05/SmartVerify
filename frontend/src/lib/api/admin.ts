@@ -35,6 +35,9 @@ export interface ActivityItem {
 
 const call = <T>(path: string, options: Parameters<typeof api>[1] = {}) =>
   api<T>(path, { ...options, token: adminToken });
+/** For the console's other calls (./adminConsole). */
+export const adminCall = call;
+export const currentAdminToken = () => adminToken;
 
 /** Step 1. The answer's token is only good for step 2. */
 export async function adminSignIn(email: string, password: string) {

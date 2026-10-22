@@ -22,6 +22,10 @@ const keyByCode: Partial<Record<ApiErrorCode, string>> = {
 
 export function errorMessageKey(error: unknown): string {
   if (error instanceof WrongCredentialsError) return 'auth.errors.wrongCredentials';
+  // Paused for late payment (not the Restaurant Plus check).
+  if (error instanceof ApiError && error.code === 'SUBSCRIPTION_REQUIRED' && error.details?.access) {
+    return 'business.access.blocked';
+  }
   if (error instanceof ApiError) return keyByCode[error.code] ?? 'common.somethingWrong';
   return 'common.somethingWrong';
 }

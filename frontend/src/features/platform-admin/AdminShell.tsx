@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
-import { adminSignOut, getAdminProfile, hasAdminToken } from '@/lib/admin';
+import { adminSignOut, getAdminProfile, getDashboard, hasAdminToken } from '@/lib/admin';
 import { ApiError } from '@/lib/api/client';
 import { colors } from '@/theme/tokens';
 
@@ -31,12 +31,12 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { key: 'home', icon: Home, href: '/console' },
-  { key: 'customers', icon: Users },
-  { key: 'payments', icon: CreditCard },
-  { key: 'rules', icon: SlidersHorizontal },
-  { key: 'plans', icon: Tag },
-  { key: 'health', icon: Activity },
-  { key: 'messages', icon: MessageSquare },
+  { key: 'customers', icon: Users, href: '/console/customers' },
+  { key: 'payments', icon: CreditCard, href: '/console/payments' },
+  { key: 'rules', icon: SlidersHorizontal, href: '/console/rules' },
+  { key: 'plans', icon: Tag, href: '/console/plans' },
+  { key: 'health', icon: Activity, href: '/console/health' },
+  { key: 'messages', icon: MessageSquare, href: '/console/messages' },
   { key: 'activity', icon: Clock, href: '/console/activity' },
 ];
 
@@ -59,6 +59,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
     queryFn: getAdminProfile,
     enabled: hasAdminToken(),
   });
+  // Menu badges: payments waiting, new server problems (refreshed every minute).
+  const dashboard = useQuery({
+    queryKey: ['admin-dashboard'],
+    queryFn: getDashboard,
+    enabled: hasAdminToken(),
+    refetchInterval: 60_000,
+  });
 
   // Signed out, idle too long, or never signed in: back to sign-in.
   if (
@@ -76,6 +83,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
   };
 
   const admin = profile.data;
+  const badges: Record<string, number> = {
+    payments: dashboard.data?.needs.reviews ?? 0,
+    health: dashboard.data?.needs.errors ?? 0,
+  };
   return (
     <View className="flex-1 flex-row flex-wrap bg-background">
       <View className="w-full gap-1 border-r-[1.5px] border-border bg-surface px-4 py-6 md:w-[244px]">
@@ -93,7 +104,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
           </View>
         </View>
         {NAV.map(({ key, icon: Icon, href }) => {
-          const active = href !== undefined && pathname === href;
+          const active =
+            href !== undefined &&
+            (pathname === href || (href !== '/console' && pathname.startsWith(`${String(href)}/`)));
+          const badge = badges[key] ?? 0;
           return (
             <Pressable
               key={key}
@@ -113,10 +127,12 @@ export function AdminShell({ children }: { children: ReactNode }) {
               >
                 {t(`platformAdmin.nav.${key}`)}
               </Text>
-              {!href ? (
-                <Text tone="muted" className="text-sm">
-                  {t('platformAdmin.nav.soon')}
-                </Text>
+              {badge > 0 ? (
+                <View className="min-w-6 items-center rounded-[10px] bg-amber px-2 py-0.5">
+                  <Text font="bold" className="text-sm">
+                    {badge}
+                  </Text>
+                </View>
               ) : null}
             </Pressable>
           );

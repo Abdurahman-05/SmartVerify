@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useFocusEffect } from 'expo-router';
+import { Download } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
@@ -8,10 +9,11 @@ import { Button } from '@/components/ui/Button';
 import { NoConnection } from '@/components/ui/NoConnection';
 import { SmallSpinner } from '@/components/ui/Spinner';
 import { Text } from '@/components/ui/Text';
-import { getActivity, type ActivityCategory } from '@/lib/admin';
+import { downloadCsv, getActivity, type ActivityCategory } from '@/lib/admin';
 import { isNetworkError } from '@/lib/errors';
 
 import { AdminShell } from './AdminShell';
+import { ActionButton, PageTitle } from './ui';
 import { ActivityRow } from './ActivityRow';
 
 const TABS: (ActivityCategory | 'all')[] = [
@@ -47,14 +49,17 @@ export default function ActivityScreen() {
 
   return (
     <AdminShell>
-      <View className="gap-1">
-        <Text font="heading" className="text-[32px]" accessibilityRole="header">
-          {t('platformAdmin.activity.title')}
-        </Text>
-        <Text tone="muted" className="text-[15px]">
-          {t('platformAdmin.activity.subtitle')}
-        </Text>
-      </View>
+      <PageTitle
+        title={t('platformAdmin.activity.title')}
+        subtitle={t('platformAdmin.activity.subtitle')}
+        right={
+          <ActionButton
+            label={t('platformAdmin.activityExtra.export')}
+            icon={Download}
+            onPress={() => void downloadCsv('activity')}
+          />
+        }
+      />
 
       <View className="flex-row flex-wrap gap-2.5" accessibilityRole="tablist">
         {TABS.map((key) => (

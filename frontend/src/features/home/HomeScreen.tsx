@@ -12,6 +12,7 @@ import { billsKey, getBills } from '@/lib/bills';
 import { getPayments, paymentsKey } from '@/lib/history';
 import { useSession, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';
+import { AccessBanner } from '@/features/business/AccessBanner';
 
 import { getHomeActions, type HomeAction } from './homeActions';
 
@@ -252,6 +253,7 @@ export default function HomeScreen() {
     <SafeAreaView edges={['top']} className="flex-1 bg-background">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
         <HomeHeader user={user} />
+        <AccessBanner />
         <HeroCard
           name={user.displayName}
           tablesWaiting={user.plan === 'restaurant' ? tablesWaiting : undefined}

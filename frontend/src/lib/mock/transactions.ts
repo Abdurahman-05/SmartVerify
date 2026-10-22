@@ -148,7 +148,10 @@ export async function getBankReport(period: Period): Promise<BankReport> {
   const total = verified.reduce((sum, tx) => sum + tx.receivedAmount, 0);
 
   // Removed accounts still appear when they received money in this period.
-  const accountIds = new Set([...activeAccounts().map((a) => a.id), ...verified.map((tx) => tx.accountId)]);
+  const accountIds = new Set([
+    ...activeAccounts().map((a) => a.id),
+    ...verified.map((tx) => tx.accountId),
+  ]);
   const rows = [...accountIds]
     .map((id) => findAccount(id) ?? unknownAccount)
     .map((account) => {

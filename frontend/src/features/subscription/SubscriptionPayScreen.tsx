@@ -58,10 +58,15 @@ export default function SubscriptionPayScreen() {
   const pay = useMutation({
     mutationFn: (receipt: { url: string } | { telebirrNumber: string }) =>
       payForPlan(plan, period, receipt, payKey),
-    onSuccess: ({ check, subscription }) => {
+    onSuccess: (result) => {
+      const { check, subscription } = result;
       if (subscription) {
         setSubscription(subscription);
         router.replace('/subscription-started');
+        return;
+      }
+      if ('review' in result && result.review === 'pending') {
+        setError(t('subscriptionPay.inReview'));
         return;
       }
       setError(
