@@ -161,7 +161,7 @@ export default function CustomerDetailScreen() {
   return (
     <AdminShell>
       <Pressable
-        onPress={() => router.push('/console/customers')}
+        onPress={() => router.push('/customers')}
         accessibilityRole="link"
         className="min-h-11 flex-row items-center gap-1 self-start"
       >
@@ -347,7 +347,7 @@ export default function CustomerDetailScreen() {
               </Text>
               <ActionButton
                 label={t('platformAdmin.customer.reviewIt')}
-                onPress={() => router.push('/console/payments')}
+                onPress={() => router.push('/payments')}
               />
             </View>
           ) : null}

@@ -125,7 +125,7 @@ export default function AdminHomeScreen() {
                 title={t('platformAdmin.home.reviews')}
                 count={d.needs.reviews}
                 sub={t('platformAdmin.home.reviewsSub', { count: d.needs.reviewsOlderThanDay })}
-                href="/console/payments"
+                href="/payments"
                 icon={CreditCard}
                 urgent={d.needs.reviews > 0}
               />
@@ -133,7 +133,7 @@ export default function AdminHomeScreen() {
                 title={t('platformAdmin.home.overdue')}
                 count={d.needs.overdue}
                 sub={t('platformAdmin.home.overdueSub', { count: d.needs.restrictedThisWeek })}
-                href="/console/customers"
+                href="/customers"
                 icon={Clock}
               />
               <Need
@@ -144,7 +144,7 @@ export default function AdminHomeScreen() {
                     ? causeText(t, d.needs.topError)
                     : t('platformAdmin.home.errorsNone')
                 }
-                href="/console/health"
+                href="/health"
                 icon={AlertTriangle}
               />
             </View>
@@ -246,7 +246,7 @@ export default function AdminHomeScreen() {
                 title={t('platformAdmin.home.dueSoon')}
                 right={
                   <Pressable
-                    onPress={() => router.push('/console/customers')}
+                    onPress={() => router.push('/customers')}
                     accessibilityRole="link"
                     className="min-h-11 justify-center"
                   >
@@ -264,7 +264,7 @@ export default function AdminHomeScreen() {
                 d.dueSoon.map((c) => (
                   <Pressable
                     key={c.id}
-                    onPress={() => router.push(`/console/customers/${c.id}`)}
+                    onPress={() => router.push(`/customers/${c.id}`)}
                     accessibilityRole="link"
                     className="min-h-11 flex-row flex-wrap items-center gap-3 border-t-[1.5px] border-divider py-3"
                   >
@@ -314,7 +314,7 @@ export default function AdminHomeScreen() {
                     {t('platformAdmin.home.banks')}
                   </Text>
                   <Pressable
-                    onPress={() => router.push('/console/health')}
+                    onPress={() => router.push('/health')}
                     accessibilityRole="link"
                     className="min-h-11 justify-center"
                   >

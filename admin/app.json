@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "Smart Verify Admin",
+    "slug": "smartverify-admin",
+    "version": "1.0.0",
+    "scheme": "smartverify-admin",
+    "userInterfaceStyle": "light",
+    "platforms": ["web"],
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": ["expo-router", "expo-font"],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

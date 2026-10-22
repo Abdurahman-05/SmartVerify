@@ -22,17 +22,17 @@ export default function TwoStepScreen() {
 
   const verify = useMutation({
     mutationFn: () => verifyTwoStep(useBackup ? { backupCode: value.trim() } : { code: value }),
-    onSuccess: () => router.replace('/console'),
+    onSuccess: () => router.replace('/'),
     onError: (error) => {
       setValue('');
       // The step-1 session ended (too slow, or locked): start again.
       if (error instanceof ApiError && error.code === 'UNAUTHORIZED') {
-        router.replace('/console/sign-in');
+        router.replace('/sign-in');
       }
     },
   });
 
-  if (!hasAdminToken()) return <Redirect href="/console/sign-in" />;
+  if (!hasAdminToken()) return <Redirect href="/sign-in" />;
 
   const error = verify.error;
   const triesLeft =
@@ -105,7 +105,7 @@ export default function TwoStepScreen() {
         </Text>
       </Pressable>
       <Pressable
-        onPress={() => router.replace('/console/sign-in')}
+        onPress={() => router.replace('/sign-in')}
         accessibilityRole="button"
         className="min-h-11 justify-center"
       >

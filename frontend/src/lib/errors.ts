@@ -15,9 +15,6 @@ const keyByCode: Partial<Record<ApiErrorCode, string>> = {
   NETWORK_ERROR: 'errors.noConnection',
   INVALID_URL: 'verifyBank.check.invalidUrl',
   RECEIPT_USED: 'errors.receiptUsed',
-  WRONG_CODE: 'platformAdmin.errors.wrongCode',
-  ACCOUNT_LOCKED: 'platformAdmin.errors.locked',
-  ADMIN_NOT_CONFIGURED: 'platformAdmin.errors.notConfigured',
 };
 
 export function errorMessageKey(error: unknown): string {

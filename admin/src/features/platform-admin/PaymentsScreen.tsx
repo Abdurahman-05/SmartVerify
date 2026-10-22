@@ -170,7 +170,7 @@ export default function PaymentsScreen() {
                   </Text>
                 </View>
                 <Pressable
-                  onPress={() => router.push(`/console/customers/${selected.businessId}`)}
+                  onPress={() => router.push(`/customers/${selected.businessId}`)}
                   accessibilityRole="link"
                   className="min-h-11 justify-center"
                 >

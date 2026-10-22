@@ -18,7 +18,7 @@ px expo install, not plain npm
 
 ## Structure
 
-Two folders: `frontend/` (Expo app) and `backend/` (API). App paths below (src/...) are inside `frontend/`; run app commands from `frontend/`.
+Three folders: `frontend/` (Expo phone app), `admin/` (Smart Verify team's web console, separate Expo web app) and `backend/` (API). Admin code never goes in `frontend/`. App paths below (src/...) are inside `frontend/`; run app commands from `frontend/`.
 
 - src/app/ - Routes (file-based Expo Router)
 - src/components/ui/ - Base UI components

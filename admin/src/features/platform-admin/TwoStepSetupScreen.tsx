@@ -8,7 +8,7 @@ import { Pressable, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
-import { LoadingView } from '@/components/ui/LoadingView';
+import { SmallSpinner } from '@/components/ui/Spinner';
 import { Text } from '@/components/ui/Text';
 import { confirmTwoStepSetup, hasAdminToken, startTwoStepSetup } from '@/lib/admin';
 import { ApiError } from '@/lib/api/client';
@@ -47,13 +47,19 @@ export default function TwoStepSetupScreen() {
     onError: (error) => {
       setCode('');
       if (error instanceof ApiError && error.code === 'UNAUTHORIZED') {
-        router.replace('/console/sign-in');
+        router.replace('/sign-in');
       }
     },
   });
 
-  if (!hasAdminToken() && !confirm.data) return <Redirect href="/console/sign-in" />;
-  if (setup.isPending) return <LoadingView />;
+  if (!hasAdminToken() && !confirm.data) return <Redirect href="/sign-in" />;
+  if (setup.isPending) {
+    return (
+      <View className="flex-1 items-center justify-center bg-background">
+        <SmallSpinner />
+      </View>
+    );
+  }
 
   const copy = (text: string, what: 'key' | 'codes') =>
     void Clipboard.setStringAsync(text).then(() => {
@@ -121,7 +127,7 @@ export default function TwoStepSetupScreen() {
           <Button
             label={t('platformAdmin.setup.done')}
             disabled={!saved}
-            onPress={() => router.replace('/console')}
+            onPress={() => router.replace('/')}
           />
         </>
       ) : (

@@ -29,14 +29,14 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { key: 'home', icon: Home, href: '/console' },
-  { key: 'customers', icon: Users, href: '/console/customers' },
-  { key: 'payments', icon: CreditCard, href: '/console/payments' },
-  { key: 'rules', icon: SlidersHorizontal, href: '/console/rules' },
-  { key: 'plans', icon: Tag, href: '/console/plans' },
-  { key: 'health', icon: Activity, href: '/console/health' },
-  { key: 'messages', icon: MessageSquare, href: '/console/messages' },
-  { key: 'activity', icon: Clock, href: '/console/activity' },
+  { key: 'home', icon: Home, href: '/' },
+  { key: 'customers', icon: Users, href: '/customers' },
+  { key: 'payments', icon: CreditCard, href: '/payments' },
+  { key: 'rules', icon: SlidersHorizontal, href: '/rules' },
+  { key: 'plans', icon: Tag, href: '/plans' },
+  { key: 'health', icon: Activity, href: '/health' },
+  { key: 'messages', icon: MessageSquare, href: '/messages' },
+  { key: 'activity', icon: Clock, href: '/activity' },
 ];
 
 /** At this width and wider the menu is a side bar; narrower, a bar on top. */
@@ -102,14 +102,14 @@ export function AdminShell({ children }: { children: ReactNode }) {
     !hasAdminToken() ||
     (profile.error instanceof ApiError && profile.error.code === 'UNAUTHORIZED')
   ) {
-    return <Redirect href="/console/sign-in" />;
+    return <Redirect href="/sign-in" />;
   }
 
   const signOut = async () => {
     await adminSignOut().catch(() => undefined);
     // Nothing of the admin's stays in memory.
     queryClient.removeQueries({ predicate: (q) => String(q.queryKey[0]).startsWith('admin') });
-    router.replace('/console/sign-in');
+    router.replace('/sign-in');
   };
 
   const admin = profile.data;
@@ -118,7 +118,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     health: dashboard.data?.needs.errors ?? 0,
   };
   const isActive = (href: Href) =>
-    pathname === href || (href !== '/console' && pathname.startsWith(`${String(href)}/`));
+    pathname === href || (href !== '/' && pathname.startsWith(`${String(href)}/`));
 
   const signOutButton = (
     <Pressable

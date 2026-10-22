@@ -130,10 +130,10 @@ describe('browser access (admin console)', () => {
     const preflight = await app.inject({
       method: 'OPTIONS',
       url: '/api/v1/admin/auth/sign-in',
-      headers: { origin: 'http://localhost:8081', 'access-control-request-method': 'POST' },
+      headers: { origin: 'http://localhost:8082', 'access-control-request-method': 'POST' },
     });
     expect(preflight.statusCode).toBe(204);
-    expect(preflight.headers['access-control-allow-origin']).toBe('http://localhost:8081');
+    expect(preflight.headers['access-control-allow-origin']).toBe('http://localhost:8082');
     expect(preflight.headers['access-control-allow-credentials']).toBeUndefined();
 
     const other = await app.inject({

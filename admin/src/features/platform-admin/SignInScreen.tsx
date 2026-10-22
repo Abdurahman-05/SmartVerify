@@ -24,7 +24,7 @@ export default function SignInScreen() {
     mutationFn: () => adminSignIn(email.trim(), password),
     onSuccess: (next) => {
       setPassword('');
-      router.replace(next === 'setup' ? '/console/two-step-setup' : '/console/two-step');
+      router.replace(next === 'setup' ? '/two-step-setup' : '/two-step');
     },
   });
   const error = signIn.error;

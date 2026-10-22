@@ -153,7 +153,7 @@ export default function CustomersScreen() {
             data.items.map((c) => (
               <Pressable
                 key={c.id}
-                onPress={() => router.push(`/console/customers/${c.id}`)}
+                onPress={() => router.push(`/customers/${c.id}`)}
                 accessibilityRole="link"
                 accessibilityLabel={c.name}
                 className="min-h-16 flex-row items-center gap-4 rounded-xl border-t-[1.5px] border-divider py-3 active:bg-background"

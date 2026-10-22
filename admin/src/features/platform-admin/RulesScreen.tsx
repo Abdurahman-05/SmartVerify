@@ -312,7 +312,7 @@ export default function RulesScreen() {
             page.data.exceptions.map((e) => (
               <Pressable
                 key={e.businessId}
-                onPress={() => router.push(`/console/customers/${e.businessId}`)}
+                onPress={() => router.push(`/customers/${e.businessId}`)}
                 accessibilityRole="link"
                 className="min-h-11 flex-row flex-wrap items-center gap-3 border-t-[1.5px] border-divider py-3"
               >
