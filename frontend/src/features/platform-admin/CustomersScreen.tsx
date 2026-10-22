@@ -3,7 +3,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { ChevronRight, Download, Search } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, TextInput, View } from 'react-native';
+import { Pressable, TextInput, useWindowDimensions, View } from 'react-native';
 
 import { NoConnection } from '@/components/ui/NoConnection';
 import { SmallSpinner } from '@/components/ui/Spinner';
@@ -37,6 +37,9 @@ export default function CustomersScreen() {
     return () => clearTimeout(timer);
   }, [typed]);
 
+  const narrow = useWindowDimensions().width < 760;
+  const planName = (p: PlanCode | null) =>
+    p ? t(`platformAdmin.plans.${p}`) : t('platformAdmin.plans.none');
   const q = { search, plan, city, filter, page };
   const list = useQuery({
     queryKey: ['admin-customers', q],
@@ -123,19 +126,21 @@ export default function CustomersScreen() {
         <NoConnection onRetry={() => void refetch()} />
       ) : (
         <Card className="gap-0 px-5 py-3">
-          <View className="flex-row gap-4 pb-2">
-            {(['business', 'city', 'plan', 'statusCol'] as const).map((h) => (
-              <Text
-                key={h}
-                font="bold"
-                tone="muted"
-                className={`text-sm uppercase ${h === 'business' ? 'flex-[2.2]' : h === 'statusCol' ? 'flex-[1.4]' : 'flex-1'}`}
-              >
-                {t(`platformAdmin.customers.${h}`)}
-              </Text>
-            ))}
-            <View className="w-6" />
-          </View>
+          {narrow ? null : (
+            <View className="flex-row gap-4 pb-2">
+              {(['business', 'city', 'plan', 'statusCol'] as const).map((h) => (
+                <Text
+                  key={h}
+                  font="bold"
+                  tone="muted"
+                  className={`text-sm uppercase ${h === 'business' ? 'flex-[2.2]' : h === 'statusCol' ? 'flex-[1.4]' : 'flex-1'}`}
+                >
+                  {t(`platformAdmin.customers.${h}`)}
+                </Text>
+              ))}
+              <View className="w-6" />
+            </View>
+          )}
           {!data ? (
             <View className="items-center py-8">
               <SmallSpinner />
@@ -169,19 +174,30 @@ export default function CustomersScreen() {
                       {c.name}
                     </Text>
                     <Text tone="muted" className="text-sm" numberOfLines={1}>
-                      {c.ownerPhone}
+                      {narrow
+                        ? [c.ownerPhone, c.city, planName(c.plan)].filter(Boolean).join(' · ')
+                        : c.ownerPhone}
                     </Text>
+                    {narrow ? (
+                      <View className="pt-1.5">
+                        <StatusChip status={c.status} daysLeft={c.daysLeft} exempt={c.exempt} />
+                      </View>
+                    ) : null}
                   </View>
                 </View>
-                <Text className="flex-1 text-[15px]" numberOfLines={1}>
-                  {c.city ?? '–'}
-                </Text>
-                <Text className="flex-1 text-[15px]" numberOfLines={1}>
-                  {c.plan ? t(`platformAdmin.plans.${c.plan}`) : t('platformAdmin.plans.none')}
-                </Text>
-                <View className="flex-[1.4]">
-                  <StatusChip status={c.status} daysLeft={c.daysLeft} exempt={c.exempt} />
-                </View>
+                {narrow ? null : (
+                  <>
+                    <Text className="flex-1 text-[15px]" numberOfLines={1}>
+                      {c.city ?? '–'}
+                    </Text>
+                    <Text className="flex-1 text-[15px]" numberOfLines={1}>
+                      {planName(c.plan)}
+                    </Text>
+                    <View className="flex-[1.4]">
+                      <StatusChip status={c.status} daysLeft={c.daysLeft} exempt={c.exempt} />
+                    </View>
+                  </>
+                )}
                 <ChevronRight size={20} color={colors.muted} strokeWidth={2} />
               </Pressable>
             ))

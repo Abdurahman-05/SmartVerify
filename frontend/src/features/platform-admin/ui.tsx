@@ -82,9 +82,9 @@ const chipStyle: Record<ChipTone, { box: string; text: string }> = {
 export function Chip({ label, tone = 'neutral' }: { label: string; tone?: ChipTone }) {
   return (
     <View
-      className={`h-7 flex-row items-center self-start rounded-[14px] px-2.5 ${chipStyle[tone].box}`}
+      className={`min-h-7 max-w-full flex-row items-center self-start rounded-[14px] px-2.5 py-1 ${chipStyle[tone].box}`}
     >
-      <Text font="bold" className={`text-sm ${chipStyle[tone].text}`} numberOfLines={1}>
+      <Text font="bold" className={`shrink text-sm ${chipStyle[tone].text}`}>
         {label}
       </Text>
     </View>
@@ -213,17 +213,20 @@ export function Field({
   label,
   hint,
   ...input
-}: TextInputProps & { label: string; hint?: string }) {
+}: TextInputProps & { label: string; hint?: string; hideLabel?: boolean }) {
+  const { hideLabel, ...rest } = input;
   return (
     <View className="gap-1.5">
-      <Text font="bold" className="text-[15px]">
-        {label}
-      </Text>
+      {!hideLabel ? (
+        <Text font="bold" className="text-[15px]">
+          {label}
+        </Text>
+      ) : null}
       <TextInput
         placeholderTextColor={colors.placeholder}
         accessibilityLabel={label}
         className="min-h-12 rounded-[14px] border-2 border-borderStrong bg-surface px-3.5 py-2 font-body text-base text-text"
-        {...input}
+        {...rest}
       />
       {hint ? (
         <Text tone="muted" className="text-sm">

@@ -1159,7 +1159,16 @@
       "unable": "ማረጋገጥ ያልተቻለ",
       "banks": "የባንክ ድረ-ገጾች",
       "details": "ዝርዝር",
-      "gemini": "የዛሬ የGemini ጥሪዎች"
+      "gemini": "የዛሬ የGemini ጥሪዎች",
+      "greeting": "ሰላም፣ {{name}}",
+      "account": "መለያዎ",
+      "twoStepOn": "ባለሁለት ደረጃ መግቢያ በርቷል",
+      "backupLeft": "{{count}} የመጠባበቂያ ኮዶች ቀርተዋል",
+      "signOutAfter": "ያለ እንቅስቃሴ ከ{{count}} ደቂቃ በኋላ ይወጣሉ",
+      "recent": "የቅርብ ጊዜ መግቢያዎች",
+      "seeAll": "ሁሉንም እይ",
+      "nextTitle": "ቀጥሎ የሚመጣ",
+      "nextBody": "ደንበኞች፣ የሚገመገሙ ክፍያዎች፣ ሙከራ እና ደንቦች፣ ዕቅዶች፣ ጤና እና መልዕክቶች በቀጣዮቹ ደረጃዎች ይታከላሉ።"
     },
     "activity": {
       "title": "የእንቅስቃሴ መዝገብ",

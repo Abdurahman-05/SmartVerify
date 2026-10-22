@@ -222,9 +222,10 @@ export default function RulesScreen() {
             title={t('platformAdmin.rules.reminders')}
             body={t('platformAdmin.rules.remindersBody')}
           >
-            <View className="w-[240px]">
+            <View className="w-[280px]">
               <Field
                 label={t('platformAdmin.rules.reminders')}
+                hideLabel
                 hint={t('platformAdmin.rules.remindersHint')}
                 value={reminders}
                 onChangeText={setReminders}

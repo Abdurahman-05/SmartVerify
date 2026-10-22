@@ -1,12 +1,37 @@
 import { Check } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, useWindowDimensions, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/theme/tokens';
 
-/** The admin's sign-in pages: brand panel on the left, the form on the right (stacked when narrow). */
+/** At this width and wider the brand panel sits beside the form. */
+const WIDE = 900;
+
+function Brand() {
+  const { t } = useTranslation();
+  return (
+    <View className="flex-row items-center gap-3">
+      <View className="h-11 w-11 items-center justify-center rounded-xl bg-amber">
+        <Check size={24} color={colors.primary} strokeWidth={3} />
+      </View>
+      <View>
+        <Text font="heading" tone="inverse" className="text-xl">
+          {t('platformAdmin.brand')}
+        </Text>
+        <Text tone="inverse" className="text-sm opacity-80">
+          {t('platformAdmin.admin')}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+/**
+ * The admin's sign-in pages. Wide screens: brand panel (full height) beside the form, centred.
+ * Phones: a short brand header, then the form.
+ */
 export function AuthFrame({
   tagline,
   taglineSub,
@@ -19,51 +44,62 @@ export function AuthFrame({
   children: ReactNode;
 }) {
   const { t } = useTranslation();
-  return (
-    <ScrollView
-      className="flex-1 bg-background"
-      contentContainerClassName="min-h-full flex-row flex-wrap"
-    >
-      <View className="min-h-[320px] flex-1 basis-[420px] justify-between gap-10 bg-primary p-10">
-        <View className="flex-row items-center gap-3">
-          <View className="h-11 w-11 items-center justify-center rounded-xl bg-amber">
-            <Check size={24} color={colors.primary} strokeWidth={3} />
-          </View>
-          <View>
-            <Text font="heading" tone="inverse" className="text-xl">
-              {t('platformAdmin.brand')}
-            </Text>
-            <Text tone="inverse" className="text-sm opacity-80">
-              {t('platformAdmin.admin')}
-            </Text>
-          </View>
-        </View>
-        <View className="max-w-[440px] gap-4">
-          <Text font="heading" tone="inverse" className="text-[34px] leading-[42px]">
+  const { width, height } = useWindowDimensions();
+  const wide = width >= WIDE;
+
+  const form = (
+    <View className="w-full max-w-[440px] gap-5 rounded-3xl border-[1.5px] border-border bg-surface p-8 shadow-sm">
+      {children}
+    </View>
+  );
+
+  if (!wide) {
+    return (
+      <ScrollView className="flex-1 bg-background" contentContainerStyle={{ minHeight: height }}>
+        <View className="gap-3 bg-primary px-5 pb-8 pt-6">
+          <Brand />
+          <Text font="heading" tone="inverse" className="text-2xl">
             {tagline}
           </Text>
-          {taglineSub ? (
-            <Text tone="inverse" className="text-lg opacity-90">
-              {taglineSub}
-            </Text>
-          ) : null}
-          {points?.map((point) => (
-            <View key={point} className="flex-row items-center gap-3">
-              <View className="h-7 w-7 items-center justify-center rounded-full bg-white/15">
-                <Check size={16} color={colors.amber} strokeWidth={3} />
-              </View>
-              <Text tone="inverse" className="text-base">
-                {point}
-              </Text>
-            </View>
-          ))}
         </View>
-        <Text tone="inverse" className="text-sm opacity-80">
+        <View className="-mt-4 flex-1 items-center px-4 pb-8">{form}</View>
+        <Text tone="muted" className="px-5 pb-6 text-center text-sm">
           {t('platformAdmin.teamOnly')}
         </Text>
-      </View>
-      <View className="flex-1 basis-[420px] items-center justify-center p-8">
-        <View className="w-full max-w-[420px] gap-5">{children}</View>
+      </ScrollView>
+    );
+  }
+
+  return (
+    <ScrollView className="flex-1 bg-background" contentContainerStyle={{ minHeight: height }}>
+      <View className="flex-1 flex-row" style={{ minHeight: height }}>
+        <View className="w-[45%] max-w-[640px] justify-between bg-primary p-12">
+          <Brand />
+          <View className="max-w-[460px] gap-5">
+            <Text font="heading" tone="inverse" className="text-[40px] leading-[48px]">
+              {tagline}
+            </Text>
+            {taglineSub ? (
+              <Text tone="inverse" className="text-lg opacity-90">
+                {taglineSub}
+              </Text>
+            ) : null}
+            {points?.map((point) => (
+              <View key={point} className="flex-row items-center gap-3">
+                <View className="h-7 w-7 items-center justify-center rounded-full bg-white/15">
+                  <Check size={16} color={colors.amber} strokeWidth={3} />
+                </View>
+                <Text tone="inverse" className="text-base">
+                  {point}
+                </Text>
+              </View>
+            ))}
+          </View>
+          <Text tone="inverse" className="text-sm opacity-80">
+            {t('platformAdmin.teamOnly')}
+          </Text>
+        </View>
+        <View className="flex-1 items-center justify-center p-10">{form}</View>
       </View>
     </ScrollView>
   );

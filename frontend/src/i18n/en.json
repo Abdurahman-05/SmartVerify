@@ -1159,7 +1159,20 @@
       "unable": "Could not check",
       "banks": "Bank sites",
       "details": "Details",
-      "gemini": "Gemini calls today"
+      "gemini": "Gemini calls today",
+      "greeting": "Hello, {{name}}",
+      "account": "Your account",
+      "twoStepOn": "Two-step sign-in is on",
+      "backupLeft": "{{count}} backup codes left",
+      "signOutAfter": "Signed out after {{count}} minutes without activity",
+      "recent": "Recent sign-ins",
+      "seeAll": "See all",
+      "nextTitle": "Coming next",
+      "nextBody": "Customers, payments to review, trial and rules, plans, health and messages are added in the next steps.",
+      "customersCount_one": "{{count}} business",
+      "reviewsSub_one": "{{count}} waiting more than a day",
+      "overdueSub_one": "{{count}} becomes restricted this week",
+      "backupLeft_one": "{{count}} backup code left"
     },
     "activity": {
       "title": "Activity log",
@@ -1243,7 +1256,9 @@
       "daysLeft": "{{count}} days left",
       "overdue": "Overdue {{count}} days",
       "today": "Ends today",
-      "exempt": "Never restricted"
+      "exempt": "Never restricted",
+      "daysLeft_one": "{{count}} day left",
+      "overdue_one": "Overdue {{count}} day"
     },
     "plans": {
       "normal": "Normal",
@@ -1281,7 +1296,8 @@
       "showing": "Showing {{from}} to {{to}} of {{total}}",
       "previous": "Previous",
       "next": "Next",
-      "empty": "No customers match."
+      "empty": "No customers match.",
+      "count_one": "{{count}} business"
     },
     "customer": {
       "back": "All customers",
@@ -1461,7 +1477,10 @@
       "idle480": "8 hours",
       "otherDevices": "Other devices",
       "otherCount": "{{count}} other devices signed in",
-      "signOutOthers": "Sign out all"
+      "signOutOthers": "Sign out all",
+      "customers_one": "{{count}} customer",
+      "otherCount_one": "{{count}} other device signed in",
+      "backupLeft_one": "{{count}} backup code left"
     },
     "health": {
       "title": "Health and errors",

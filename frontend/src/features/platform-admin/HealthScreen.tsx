@@ -168,6 +168,11 @@ export default function HealthScreen() {
             title={t('platformAdmin.health.banks')}
             subtitle={t('platformAdmin.health.banksBody')}
           />
+          {h.banks.length === 0 ? (
+            <Text tone="muted" className="text-[15px]">
+              {t('platformAdmin.banks.unknown')}
+            </Text>
+          ) : null}
           {h.banks.map((b) => (
             <View
               key={b.code}

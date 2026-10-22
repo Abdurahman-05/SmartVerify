@@ -208,7 +208,7 @@ export default function CustomerDetailScreen() {
                 <Chip label={t('platformAdmin.customer.suspendedNote')} tone="error" />
               ) : null}
             </View>
-            <View className="flex-row flex-wrap gap-2">
+            <View className="min-w-0 max-w-full shrink flex-row flex-wrap gap-2">
               <ActionButton
                 label={t('platformAdmin.customer.extend')}
                 onPress={() => open('extend')}
