@@ -11,11 +11,9 @@ const TTL_MS = 30_000;
 
 export async function getSettings(prisma: PrismaClient): Promise<PlatformSettings> {
   if (cached && Date.now() - cached.at < TTL_MS) return cached.value;
-  const value = await prisma.platformSettings.upsert({
-    where: { id: 1 },
-    create: { id: 1 },
-    update: {},
-  });
+  // First use: create the row with the defaults (safe when two requests do it at once).
+  await prisma.platformSettings.createMany({ data: [{ id: 1 }], skipDuplicates: true });
+  const value = await prisma.platformSettings.findUniqueOrThrow({ where: { id: 1 } });
   cached = { at: Date.now(), value };
   return value;
 }
