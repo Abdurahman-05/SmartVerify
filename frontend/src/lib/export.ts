@@ -2,10 +2,10 @@ import { File, Paths } from 'expo-file-system';
 import { printToFileAsync } from 'expo-print';
 import { shareAsync } from 'expo-sharing';
 
-const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-const escapeCsv = (value: string) =>
-  /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+const escapeCsv = (value: string) => (/[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value);
 
 export interface ExportTable {
   title: string;
@@ -37,11 +37,7 @@ export async function sharePdf(table: ExportTable) {
     </body></html>`;
 
   const { uri } = await printToFileAsync({ html });
-  await shareAsync(uri, {
-    mimeType: 'application/pdf',
-    UTI: 'com.adobe.pdf',
-    dialogTitle: table.title,
-  });
+  await shareAsync(uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf', dialogTitle: table.title });
 }
 
 export async function shareCsv(fileName: string, table: ExportTable) {
@@ -50,9 +46,5 @@ export async function shareCsv(fileName: string, table: ExportTable) {
   file.create({ overwrite: true });
   // BOM so Excel opens Amharic text correctly.
   file.write(`﻿${lines.join('\n')}`);
-  await shareAsync(file.uri, {
-    mimeType: 'text/csv',
-    UTI: 'public.comma-separated-values-text',
-    dialogTitle: table.title,
-  });
+  await shareAsync(file.uri, { mimeType: 'text/csv', UTI: 'public.comma-separated-values-text', dialogTitle: table.title });
 }

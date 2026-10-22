@@ -59,8 +59,7 @@ const stored: StoredAccount[] = [
   fromBank('AWA', 'acc-awash', '01320456781290', 'Abebe Coffee'),
 ];
 
-const toPublic = ({ accountNumber: _n, removed: _r, ...account }: StoredAccount): BankAccount =>
-  account;
+const toPublic = ({ accountNumber: _n, removed: _r, ...account }: StoredAccount): BankAccount => account;
 
 /** Connected accounts only. */
 export const activeAccounts = () => stored.filter((a) => !a.removed).map(toPublic);
@@ -86,9 +85,7 @@ export async function addBankAccount(input: AddBankAccountInput): Promise<BankAc
   await mockDelay(1500);
   const active = stored.filter((a) => !a.removed);
   if (active.length >= MAX_BANK_ACCOUNTS) throw new BankAccountError('limit');
-  if (
-    active.some((a) => a.bankCode === input.bankCode && a.accountNumber === input.accountNumber)
-  ) {
+  if (active.some((a) => a.bankCode === input.bankCode && a.accountNumber === input.accountNumber)) {
     throw new BankAccountError('duplicate');
   }
   // Mock: a real backend would look the name up from the bank when it's left empty.
