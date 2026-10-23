@@ -15,7 +15,7 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { sharePdf } from '@/lib/export';
-import { getPayments, payMethods, paymentsKey, type PayMethod } from '@/lib/history';
+import { syncPayments, payMethods, paymentsKey, type PayMethod } from '@/lib/history';
 import { isPeriod, periods, type Period } from '@/lib/period';
 import { failedChecksKey, getFailedChecks } from '@/lib/verification';
 import { useSession } from '@/store/session';
@@ -78,7 +78,7 @@ export default function TransactionsScreen() {
   const [sheet, setSheet] = useState<'period' | null>(null);
   const [downloading, setDownloading] = useState(false);
 
-  const query = useQuery({ queryKey: paymentsKey(period), queryFn: () => getPayments(period) });
+  const query = useQuery({ queryKey: paymentsKey(period), queryFn: () => syncPayments(period) });
   const failedQuery = useQuery({
     queryKey: failedChecksKey(period),
     queryFn: () => getFailedChecks(period),

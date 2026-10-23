@@ -9,7 +9,7 @@ import { BrandMark } from '@/components/ui/BrandMark';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
 import { billsKey, getBills } from '@/lib/bills';
-import { getPayments, paymentsKey } from '@/lib/history';
+import { paymentsKey, syncPayments } from '@/lib/history';
 import { useSession, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';
 import { AccessBanner } from '@/features/business/AccessBanner';
@@ -239,7 +239,7 @@ export default function HomeScreen() {
   const tablesWaiting = (openList ?? []).filter((b) => b.type === 'dine').length;
   const { data: paidToday } = useQuery({
     queryKey: paymentsKey('today'),
-    queryFn: () => getPayments('today'),
+    queryFn: () => syncPayments('today'),
     enabled: isRestaurant,
   });
   const subtitleFor = useActionSubtitle(user?.plan ?? null, tablesWaiting);

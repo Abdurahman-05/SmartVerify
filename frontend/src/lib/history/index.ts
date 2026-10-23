@@ -9,6 +9,7 @@ import { useBills } from '@/features/bills/store';
 import { usePayments } from '@/features/payments/store';
 import { USE_MOCK_BILLS } from '@/lib/bills';
 import { periodRange, type Period } from '@/lib/period';
+import { queryClient } from '@/lib/queryClient';
 
 export type {
   PaymentRecord,
@@ -61,6 +62,29 @@ function mockPayments(period: Period): PaymentRecordDetail[] {
 export const getPayments: (period: Period) => Promise<PaymentRecord[]> = USE_MOCK_BILLS
   ? async (period) => mockPayments(period)
   : real.getPayments;
+
+/** Re-ask a little earlier than the newest saved payment, so none is missed (merged by id). */
+const OVERLAP_MS = 1000;
+
+/**
+ * Paid bills for a screen: keeps the list already loaded and asks the server only for payments
+ * recorded since its newest one. Without a loaded list (or offline mock) it loads everything.
+ */
+export async function syncPayments(period: Period): Promise<PaymentRecord[]> {
+  const saved = USE_MOCK_BILLS
+    ? undefined
+    : queryClient.getQueryData<PaymentRecord[]>(paymentsKey(period));
+  const newest = saved?.[0]?.createdAt;
+  if (!saved || !newest) return getPayments(period);
+
+  const since = new Date(new Date(newest).getTime() - OVERLAP_MS).toISOString();
+  const fresh = await real.getPayments(period, since);
+  const freshIds = new Set(fresh.map((p) => p.id));
+  const { from } = periodRange(period);
+  // A new day moves the period start: older saved rows drop out.
+  const kept = saved.filter((p) => !freshIds.has(p.id) && new Date(p.createdAt) >= from);
+  return [...fresh, ...kept].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
 
 export const getPayment: (id: string) => Promise<PaymentRecordDetail | null> = USE_MOCK_BILLS
   ? async (id) => mockPayments('30d').find((p) => p.id === id) ?? null

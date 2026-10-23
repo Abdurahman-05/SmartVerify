@@ -38,9 +38,12 @@ export interface PaymentsReport {
   rows: { method: PayMethod; count: number; totalEtb: number; share: number }[];
 }
 
-/** GET /payments — paid bills in the period, newest first. */
-export const getPayments = (period: Period) =>
-  api<PaymentRecord[]>('/payments', { query: { period } });
+/**
+ * GET /payments — paid bills in the period, newest first. With `since` (an ISO time) only the
+ * payments recorded after it come back; payments never change once saved.
+ */
+export const getPayments = (period: Period, since?: string) =>
+  api<PaymentRecord[]>('/payments', { query: { period, since } });
 
 /** GET /payments/:id — null when it does not exist (or is not yours). */
 export async function getPayment(id: string): Promise<PaymentRecordDetail | null> {
