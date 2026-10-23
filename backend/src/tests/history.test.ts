@@ -66,6 +66,7 @@ interface Payment {
   tipEtb: number;
   changeEtb: number;
   waiterName: string;
+  createdAt: string;
 }
 
 describe('payment history and report', () => {
@@ -106,6 +107,32 @@ describe('payment history and report', () => {
     const mine = (await get('/payments', r.waiter.token)).json() as Payment[];
     expect(mine.map((p) => p.billId)).toEqual([cashBill]);
     expect(code(await get('/payments', r.chef.token))).toBe('FORBIDDEN');
+  });
+
+  it('`since` returns only payments recorded after that time; `limit` caps the list', async () => {
+    await paidBill(r.waiter.token, 0, { method: 'cash', cashEtb: 1000, extraChoice: 'giveback' });
+    const first = (await get('/payments?period=today', r.owner.token)).json() as Payment[];
+    expect(first).toHaveLength(1);
+    const newest = first[0]!.createdAt;
+
+    // Nothing new yet.
+    const none = await get(`/payments?period=today&since=${newest}`, r.owner.token);
+    expect(none.json()).toEqual([]);
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const second = await paidBill(r.waiter2.token, 1, {
+      method: 'cash+bank',
+      cashEtb: 200,
+      bankReceivedEtb: 860,
+    });
+    const fresh = (
+      await get(`/payments?period=today&since=${newest}`, r.owner.token)
+    ).json() as Payment[];
+    expect(fresh.map((p) => p.billId)).toEqual([second]);
+
+    const capped = (await get('/payments?period=today&limit=1', r.owner.token)).json() as Payment[];
+    expect(capped).toHaveLength(1);
+    expect(code(await get('/payments?since=yesterday', r.owner.token))).toBe('VALIDATION_ERROR');
   });
 
   it('payment detail has the bill items and totals', async () => {

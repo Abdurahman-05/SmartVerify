@@ -38,6 +38,20 @@ const paymentDetailSchema = paymentSchema.extend({
   ),
 });
 
+/** The list only needs the first order's number (for the label), not every order and item. */
+const listInclude = {
+  recordedBy: { select: { user: { select: { name: true } } } },
+  bill: {
+    select: {
+      type: true,
+      totalEtb: true,
+      waiter: { select: { user: { select: { name: true } } } },
+      table: { select: { number: true } },
+      orders: { orderBy: { number: 'asc' }, take: 1, select: { number: true } },
+    },
+  },
+} satisfies Prisma.PaymentInclude;
+
 const include = {
   recordedBy: { select: { user: { select: { name: true } } } },
   bill: {
@@ -61,7 +75,7 @@ const include = {
   },
 } satisfies Prisma.PaymentInclude;
 
-type Row = Prisma.PaymentGetPayload<{ include: typeof include }>;
+type Row = Prisma.PaymentGetPayload<{ include: typeof listInclude }>;
 
 /** A cash payment's tip and change come out of the cash; a bank tip comes out of the bank. */
 function split(row: Pick<Row, 'method' | 'cashEtb' | 'bankEtb' | 'tipEtb' | 'changeEtb'>) {
@@ -123,22 +137,29 @@ export const historyRoutes: FastifyPluginAsyncZod = async (app) => {
         tags: ['history'],
         security,
         description:
-          'Payments of paid bills in the period, newest first. Waiters see only their own bills.',
-        querystring: z.object({ period: periodSchema, method: methodSchema.optional() }),
+          'Payments of paid bills in the period, newest first. Waiters see only their own bills. ' +
+          'Payments never change once saved, so `since` (an ISO time) returns only the ones ' +
+          'recorded after it.',
+        querystring: z.object({
+          period: periodSchema,
+          method: methodSchema.optional(),
+          since: z.iso.datetime().optional(),
+          limit: z.coerce.number().int().min(1).max(500).default(500),
+        }),
         response: { 200: z.array(paymentSchema), ...errors },
       },
     },
     async (request) => {
-      const { period, method } = request.query;
+      const { period, method, since, limit } = request.query;
       const rows = await prisma.payment.findMany({
         where: {
           ...visiblePayments(request.auth),
-          createdAt: { gte: periodStart(period) },
+          createdAt: { gte: periodStart(period), ...(since && { gt: new Date(since) }) },
           ...(method && { method: fromMethod(method) }),
         },
         orderBy: { createdAt: 'desc' },
-        take: 500,
-        include,
+        take: limit,
+        include: listInclude,
       });
       return rows.map(toPayment);
     }
@@ -211,39 +232,64 @@ export const historyRoutes: FastifyPluginAsyncZod = async (app) => {
       const { auth } = request;
       if (auth.role === 'waiter' && !auth.canSeeReports) throw new AppError('FORBIDDEN');
       const { period } = request.query;
-      const payments = await prisma.payment.findMany({
-        where: { businessId: auth.businessId, createdAt: { gte: periodStart(period) } },
-        select: {
-          method: true,
-          cashEtb: true,
-          bankEtb: true,
-          tipEtb: true,
-          changeEtb: true,
-          bill: { select: { totalEtb: true } },
-        },
-      });
+      // The database adds everything up; only one small row per payment method comes back.
+      const where = { businessId: auth.businessId, createdAt: { gte: periodStart(period) } };
+      const [groups, billSales] = await Promise.all([
+        prisma.payment.groupBy({
+          by: ['method'],
+          where,
+          _count: { _all: true },
+          _sum: { cashEtb: true, bankEtb: true, tipEtb: true, changeEtb: true },
+        }),
+        Promise.all(
+          (['cash', 'bank', 'cash_bank'] as const).map(async (method) => ({
+            method,
+            sales:
+              (
+                await prisma.bill.aggregate({
+                  where: { payment: { is: { ...where, method } } },
+                  _sum: { totalEtb: true },
+                })
+              )._sum.totalEtb ?? 0,
+          }))
+        ),
+      ]);
+      const sums = groups.map((g) => ({
+        method: g.method,
+        count: g._count._all,
+        sales: billSales.find((b) => b.method === g.method)?.sales ?? 0,
+        cash: g._sum.cashEtb ?? 0,
+        bank: g._sum.bankEtb ?? 0,
+        tip: g._sum.tipEtb ?? 0,
+        change: g._sum.changeEtb ?? 0,
+      }));
 
       let cashEtb = 0;
       let bankEtb = 0;
       let tipsEtb = 0;
+      let count = 0;
       const byMethod = new Map<Method, { count: number; totalEtb: number }>();
-      for (const p of payments) {
-        const parts = split(p);
+      for (const g of sums) {
+        // split() is linear per payment method, so it works on the group's sums.
+        const parts = split({
+          method: g.method,
+          cashEtb: g.cash,
+          bankEtb: g.bank,
+          tipEtb: g.tip,
+          changeEtb: g.change,
+        });
         cashEtb += parts.cashEtb;
         bankEtb += parts.bankEtb;
-        tipsEtb += p.tipEtb;
-        const m = toMethod(p.method);
-        const entry = byMethod.get(m) ?? { count: 0, totalEtb: 0 };
-        entry.count += 1;
-        entry.totalEtb += p.bill.totalEtb;
-        byMethod.set(m, entry);
+        tipsEtb += g.tip;
+        count += g.count;
+        byMethod.set(toMethod(g.method), { count: g.count, totalEtb: g.sales });
       }
       const totalEtb = cashEtb + bankEtb;
       const methods: Method[] = ['cash', 'bank', 'cash+bank'];
       return {
         period,
         totalEtb,
-        count: payments.length,
+        count,
         cashEtb,
         bankEtb,
         tipsEtb,
