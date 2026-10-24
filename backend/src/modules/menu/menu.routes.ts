@@ -21,12 +21,26 @@ const idSchema = z.string().min(1).max(64);
 const idsSchema = z.array(idSchema).min(1).max(200);
 const keySchema = z.string().min(1).max(60);
 
+const categoryNameSchema = z.string().trim().min(1).max(40);
+
+const itemCategorySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  nameAm: z.string().nullable(),
+  kind: categorySchema,
+  sortOrder: z.number().int(),
+  itemCount: z.number().int().describe('Items in it that are not deleted'),
+});
+
 const menuItemSchema = z.object({
   id: z.string(),
   name: z.string(),
   nameAm: z.string().nullable(),
   priceEtb: z.number().int(),
-  category: categorySchema,
+  category: categorySchema.describe('Kind of its category (food, drinks, combos)'),
+  categoryId: z.string(),
+  categoryName: z.string().describe('The category the owner put it in, e.g. "Hot drinks"'),
+  categoryNameAm: z.string().nullable(),
   groupName: z.string().nullable().describe('Section shown to users, e.g. "Meat & Tibs"'),
   active: z.boolean().describe('false = "Finished today": hidden from New order'),
   sortOrder: z.number().int(),
@@ -68,6 +82,9 @@ const errors = {
 };
 const notFound = { 404: errorResponseSchema.describe('NOT_FOUND') };
 const duplicate = { 409: errorResponseSchema.describe('MENU_DUPLICATE') };
+const categoryConflict = {
+  409: errorResponseSchema.describe('CATEGORY_DUPLICATE or CATEGORY_NOT_EMPTY'),
+};
 
 const optionalIdempotencyKey = z.object({
   'idempotency-key': z.string().min(8).max(100).optional().describe('A new UUID per user action'),
@@ -97,6 +114,89 @@ export const menuRoutes: FastifyPluginAsyncZod = async (app) => {
     async (request) => menu.list(request.auth)
   );
 
+  // ─── Categories ────────────────────────────────────────────────────────────
+
+  app.get(
+    '/menu/categories',
+    {
+      schema: {
+        tags: ['menu'],
+        security,
+        description:
+          'The business menu categories ("Hot drinks", "Fast food"…) in the owner’s order. ' +
+          'A new business starts with Food, Drinks and Combos.',
+        response: { 200: z.array(itemCategorySchema), ...errors },
+      },
+    },
+    async (request) => menu.listCategories(request.auth)
+  );
+
+  app.post(
+    '/menu/categories',
+    {
+      preHandler: editors,
+      schema: {
+        tags: ['menu'],
+        security,
+        description:
+          'Add a category at the end. A name already used (ignoring case and spaces) gives ' +
+          'CATEGORY_DUPLICATE.',
+        body: z.object({
+          name: categoryNameSchema,
+          nameAm: categoryNameSchema.optional(),
+          kind: categorySchema.optional().describe('Default food; only starter packs use it'),
+        }),
+        response: { 201: itemCategorySchema, ...errors, ...categoryConflict },
+      },
+    },
+    async (request, reply) =>
+      reply.status(201).send(await menu.addCategory(request.auth, request.body))
+  );
+
+  app.patch(
+    '/menu/categories/:id',
+    {
+      preHandler: editors,
+      schema: {
+        tags: ['menu'],
+        security,
+        description: 'Rename a category (Amharic name: null clears it) or change its position.',
+        params: idParamSchema,
+        body: z
+          .object({
+            name: categoryNameSchema.optional(),
+            nameAm: categoryNameSchema.nullable().optional(),
+            sortOrder: z.number().int().min(0).max(100_000).optional(),
+          })
+          .refine((b) => Object.values(b).some((v) => v !== undefined), {
+            message: 'Nothing to change',
+          }),
+        response: { 200: itemCategorySchema, ...errors, ...notFound, ...categoryConflict },
+      },
+    },
+    async (request) => menu.updateCategory(request.auth, request.params.id, request.body)
+  );
+
+  app.delete(
+    '/menu/categories/:id',
+    {
+      preHandler: editors,
+      schema: {
+        tags: ['menu'],
+        security,
+        description:
+          'Delete an empty category. One with items gives CATEGORY_NOT_EMPTY: move or delete ' +
+          'its items first.',
+        params: idParamSchema,
+        response: { 204: z.null(), ...errors, ...notFound, ...categoryConflict },
+      },
+    },
+    async (request, reply) => {
+      await menu.removeCategory(request.auth, request.params.id);
+      return reply.status(204).send(null);
+    }
+  );
+
   app.post(
     '/menu',
     {
@@ -112,7 +212,8 @@ export const menuRoutes: FastifyPluginAsyncZod = async (app) => {
         body: z.object({
           name: nameSchema,
           nameAm: nameAmSchema.optional(),
-          category: categorySchema,
+          categoryId: idSchema.optional().describe('One of GET /menu/categories'),
+          category: categorySchema.optional().describe('Used only when categoryId is missing'),
           priceEtb: priceSchema,
           groupName: groupNameSchema.optional(),
         }),
@@ -140,6 +241,7 @@ export const menuRoutes: FastifyPluginAsyncZod = async (app) => {
           .object({
             name: nameSchema.optional(),
             nameAm: nameAmSchema.nullable().optional(),
+            categoryId: idSchema.optional(),
             category: categorySchema.optional(),
             priceEtb: priceSchema.optional(),
             active: z.boolean().optional(),

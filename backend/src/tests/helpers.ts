@@ -54,6 +54,7 @@ const USED_TABLES = [
   'Order',
   'Bill',
   'MenuItem',
+  'ItemCategory',
   'RestaurantTable',
   'DeliveryArea',
   'Session',
@@ -138,14 +139,23 @@ export async function createRestaurant(app: TestApp, plan: Plan | null = 'restau
     orderBy: { number: 'asc' },
   });
 
+  const [foodCategory, drinksCategory] = await Promise.all(
+    (['food', 'drinks'] as const).map((kind, sortOrder) =>
+      app.prisma.itemCategory.create({
+        data: { businessId, name: kind === 'food' ? 'Food' : 'Drinks', kind, sortOrder },
+      })
+    )
+  );
+  const food = { category: 'food' as const, categoryId: foodCategory!.id };
+  const drinks = { category: 'drinks' as const, categoryId: drinksCategory!.id };
   const tibs = await app.prisma.menuItem.create({
-    data: { businessId, name: 'Tibs', priceEtb: 450, category: 'food' },
+    data: { businessId, name: 'Tibs', priceEtb: 450, ...food },
   });
   const coffee = await app.prisma.menuItem.create({
-    data: { businessId, name: 'Coffee', priceEtb: 60, category: 'drinks' },
+    data: { businessId, name: 'Coffee', priceEtb: 60, ...drinks },
   });
   const retired = await app.prisma.menuItem.create({
-    data: { businessId, name: 'Old dish', priceEtb: 100, category: 'food', active: false },
+    data: { businessId, name: 'Old dish', priceEtb: 100, ...food, active: false },
   });
   const bole = await app.prisma.deliveryArea.create({
     data: { businessId, name: 'Bole', usualFeeEtb: 80 },

@@ -11,6 +11,8 @@ export type ErrorCode =
   | 'ITEM_UNAVAILABLE'
   | 'BILL_CLOSED'
   | 'MENU_DUPLICATE'
+  | 'CATEGORY_DUPLICATE'
+  | 'CATEGORY_NOT_EMPTY'
   | 'ACCOUNT_DUPLICATE'
   | 'ACCOUNT_LIMIT'
   | 'PAYMENT_NOT_CONFIGURED'
@@ -39,6 +41,10 @@ const statusByCode: Record<ErrorCode, number> = {
   BILL_CLOSED: 409,
   /** The business already has a menu item with this name (ignoring case and spaces). */
   MENU_DUPLICATE: 409,
+  /** The business already has a category (menu or table) with this name (ignoring case and spaces). */
+  CATEGORY_DUPLICATE: 409,
+  /** A category with items (or tables) in it cannot be deleted: move or delete them first. */
+  CATEGORY_NOT_EMPTY: 409,
   /** This bank account is already connected. */
   ACCOUNT_DUPLICATE: 409,
   /** The business already has the most receiving accounts allowed. */

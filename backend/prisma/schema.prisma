@@ -169,6 +169,7 @@ model Business {
   bankAccounts   BankAccount[]
   transactions   Transaction[]
   menuItems      MenuItem[]
+  itemCategories ItemCategory[]
   tables         RestaurantTable[]
   deliveryAreas  DeliveryArea[]
   bills          Bill[]
@@ -336,7 +337,11 @@ model MenuItem {
   business       Business     @relation(fields: [businessId], references: [id], onDelete: Restrict)
   name           String
   priceEtb       Int
+  /// Kind of the item's category (food, drinks, combos): what starter packs and price tools use.
   category       MenuCategory
+  /// The category the owner or manager put it in (e.g. "Hot drinks"). Shown to users.
+  categoryId     String
+  itemCategory   ItemCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   active         Boolean      @default(true)
   sortOrder      Int          @default(0)
   /// Amharic name shown when the app is in Amharic (optional).
@@ -356,6 +361,28 @@ model MenuItem {
 
   @@unique([businessId, idempotencyKey])
   @@index([businessId, active])
+  @@index([categoryId])
+}
+
+/// A menu category made by the owner or manager ("Hot drinks", "Fast food", "Combos"…).
+model ItemCategory {
+  id         String       @id @default(cuid())
+  businessId String
+  business   Business     @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  name       String
+  /// Amharic name shown when the app is in Amharic (optional).
+  nameAm     String?
+  /// Starter packs add their items to the first category of the matching kind.
+  kind       MenuCategory @default(food)
+  sortOrder  Int          @default(0)
+  /// Soft delete (only an empty category can be deleted).
+  deletedAt  DateTime?
+  createdAt  DateTime     @default(now())
+
+  items MenuItem[]
+  // + partial unique (businessId, name ignoring case and spaces) WHERE deletedAt IS NULL   (migration SQL)
+
+  @@index([businessId])
 }
 
 model RestaurantTable {

@@ -15,19 +15,31 @@ export const MAX_PRICE_ETB = 1_000_000;
 /** Most catalog items one import may add. */
 export const MAX_IMPORT_ITEMS = 300;
 
-/** What the API returns for a menu item. */
+/** What the API returns for a menu item (see `shape`). */
 export const menuItemSelect = {
   id: true,
   name: true,
   nameAm: true,
   priceEtb: true,
   category: true,
+  categoryId: true,
+  itemCategory: { select: { name: true, nameAm: true } },
   groupName: true,
   active: true,
   sortOrder: true,
 } as const;
 
+type MenuItemRow = Prisma.MenuItemGetPayload<{ select: typeof menuItemSelect }>;
+
+/** The API shape: the category's names sit next to the item instead of nested. */
+export const shape = ({ itemCategory, ...item }: MenuItemRow) => ({
+  ...item,
+  categoryName: itemCategory.name,
+  categoryNameAm: itemCategory.nameAm,
+});
+
 const menuOrder: Prisma.MenuItemOrderByWithRelationInput[] = [
+  { itemCategory: { sortOrder: 'asc' } },
   { category: 'asc' },
   { groupName: 'asc' },
   { sortOrder: 'asc' },
@@ -51,7 +63,9 @@ export const applyPercent = (priceEtb: number, percent: number) =>
 export interface NewMenuItem {
   name: string;
   nameAm?: string;
-  category: MenuCategory;
+  /** The owner's category. Without it the first category of `category`'s kind is used. */
+  categoryId?: string;
+  category?: MenuCategory;
   priceEtb: number;
   groupName?: string;
 }
@@ -59,6 +73,7 @@ export interface NewMenuItem {
 export interface MenuItemChanges {
   name?: string;
   nameAm?: string | null;
+  categoryId?: string;
   category?: MenuCategory;
   priceEtb?: number;
   active?: boolean;
@@ -77,6 +92,25 @@ export interface ImportInput {
   exclude?: string[];
   activate?: boolean;
 }
+
+export interface NewCategory {
+  name: string;
+  nameAm?: string;
+  kind?: MenuCategory;
+}
+
+export interface CategoryChanges {
+  name?: string;
+  nameAm?: string | null;
+  sortOrder?: number;
+}
+
+/** The three categories every business starts with (and gets back if it deletes them all). */
+const DEFAULT_CATEGORIES: { kind: MenuCategory; name: string; nameAm: string }[] = [
+  { kind: 'food', name: 'Food', nameAm: 'ምግብ' },
+  { kind: 'drinks', name: 'Drinks', nameAm: 'መጠጥ' },
+  { kind: 'combos', name: 'Combos', nameAm: 'ጥምር' },
+];
 
 export interface CatalogFilters {
   pack?: string;
@@ -122,38 +156,118 @@ export function createMenuService(prisma: PrismaClient) {
   /** Next sortOrder at the end of each category. */
   async function sortOrderCounter(tx: Prisma.TransactionClient, businessId: string) {
     const max = await tx.menuItem.groupBy({
-      by: ['category'],
+      by: ['categoryId'],
       where: { businessId },
       _max: { sortOrder: true },
     });
-    const next = new Map(max.map((row) => [row.category, (row._max.sortOrder ?? -1) + 1]));
-    return (category: MenuCategory) => {
-      const value = next.get(category) ?? 0;
-      next.set(category, value + 1);
+    const next = new Map(max.map((row) => [row.categoryId, (row._max.sortOrder ?? -1) + 1]));
+    return (categoryId: string) => {
+      const value = next.get(categoryId) ?? 0;
+      next.set(categoryId, value + 1);
       return value;
     };
   }
+
+  type Db = Prisma.TransactionClient | PrismaClient;
+  const liveCategories = (businessId: string) => ({ businessId, deletedAt: null });
+
+  /** A business with no categories (new, or deleted them all) gets the three starting ones. */
+  async function ensureCategories(db: Db, businessId: string) {
+    if ((await db.itemCategory.count({ where: liveCategories(businessId) })) > 0) return;
+    await db.itemCategory.createMany({
+      data: DEFAULT_CATEGORIES.map((c, index) => ({ businessId, ...c, sortOrder: index })),
+      skipDuplicates: true,
+    });
+  }
+
+  /** The chosen category, or the first one of the given kind (a category must always be found). */
+  async function resolveCategory(
+    db: Db,
+    businessId: string,
+    categoryId: string | undefined,
+    kind: MenuCategory = 'food'
+  ) {
+    await ensureCategories(db, businessId);
+    const select = { id: true, kind: true } as const;
+    if (categoryId) {
+      const chosen = await db.itemCategory.findFirst({
+        where: { id: categoryId, ...liveCategories(businessId) },
+        select,
+      });
+      if (!chosen) throw new AppError('NOT_FOUND');
+      return chosen;
+    }
+    const ofKind = await db.itemCategory.findFirst({
+      where: { ...liveCategories(businessId), kind },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+      select,
+    });
+    if (ofKind) return ofKind;
+    const first = await db.itemCategory.findFirst({
+      where: liveCategories(businessId),
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+      select,
+    });
+    if (!first) throw new AppError('NOT_FOUND');
+    return first;
+  }
+
+  /** Throws CATEGORY_DUPLICATE when another live category has this name. */
+  async function assertCategoryNameFree(
+    db: Db,
+    businessId: string,
+    name: string,
+    exceptId?: string
+  ) {
+    const others = await db.itemCategory.findMany({
+      where: { ...liveCategories(businessId), ...(exceptId && { id: { not: exceptId } }) },
+      select: { name: true },
+    });
+    const wanted = normalizeName(name);
+    if (others.some((c) => normalizeName(c.name) === wanted)) {
+      throw new AppError('CATEGORY_DUPLICATE');
+    }
+  }
+
+  const categorySelect = {
+    id: true,
+    name: true,
+    nameAm: true,
+    kind: true,
+    sortOrder: true,
+    _count: { select: { items: { where: { deletedAt: null } } } },
+  } as const;
+  const categoryView = ({
+    _count,
+    ...category
+  }: Prisma.ItemCategoryGetPayload<{ select: typeof categorySelect }>) => ({
+    ...category,
+    itemCount: _count.items,
+  });
 
   // In add/update (after the idempotency replay check) the only unique index left to violate is
   // MenuItem_name_active_unique: two people saving the same name at the same moment.
   const mapNameViolation = (error: unknown) =>
     isUniqueViolation(error) ? new AppError('MENU_DUPLICATE') : error;
 
-  const findAll = (db: Prisma.TransactionClient | PrismaClient, ids: string[]) =>
-    db.menuItem.findMany({
-      where: { id: { in: ids } },
-      orderBy: menuOrder,
-      select: menuItemSelect,
-    });
+  const findAll = async (db: Prisma.TransactionClient | PrismaClient, ids: string[]) =>
+    (
+      await db.menuItem.findMany({
+        where: { id: { in: ids } },
+        orderBy: menuOrder,
+        select: menuItemSelect,
+      })
+    ).map(shape);
 
   return {
     /** Owner/manager: every non-deleted item. Waiter/chef: only items that are on. */
-    list(auth: AuthContext) {
-      return prisma.menuItem.findMany({
+    async list(auth: AuthContext) {
+      const items = await prisma.menuItem.findMany({
         where: { ...notDeleted(auth.businessId), ...(!canSeeOff(auth) && { active: true }) },
         orderBy: menuOrder,
         select: menuItemSelect,
       });
+      return items.map(shape);
     },
 
     /** Manual add. A repeated Idempotency-Key returns the first item. */
@@ -161,10 +275,12 @@ export function createMenuService(prisma: PrismaClient) {
       const { businessId } = auth;
       const replay = () =>
         idempotencyKey
-          ? prisma.menuItem.findUnique({
-              where: { businessId_idempotencyKey: { businessId, idempotencyKey } },
-              select: menuItemSelect,
-            })
+          ? prisma.menuItem
+              .findUnique({
+                where: { businessId_idempotencyKey: { businessId, idempotencyKey } },
+                select: menuItemSelect,
+              })
+              .then((row) => (row ? shape(row) : null))
           : Promise.resolve(null);
 
       const existing = await replay();
@@ -173,15 +289,21 @@ export function createMenuService(prisma: PrismaClient) {
         return await prisma.$transaction(async (tx) => {
           await assertNameFree(tx, businessId, input.name);
           const nextOrder = await sortOrderCounter(tx, businessId);
-          return tx.menuItem.create({
-            data: {
-              ...input,
-              businessId,
-              idempotencyKey: idempotencyKey ?? null,
-              sortOrder: nextOrder(input.category),
-            },
-            select: menuItemSelect,
-          });
+          const category = await resolveCategory(tx, businessId, input.categoryId, input.category);
+          const { category: _kind, categoryId: _id, ...fields } = input;
+          return shape(
+            await tx.menuItem.create({
+              data: {
+                ...fields,
+                businessId,
+                category: category.kind,
+                categoryId: category.id,
+                idempotencyKey: idempotencyKey ?? null,
+                sortOrder: nextOrder(category.id),
+              },
+              select: menuItemSelect,
+            })
+          );
         });
       } catch (error) {
         // The same add arrived twice at once (the first one may also make the name a "duplicate").
@@ -200,11 +322,18 @@ export function createMenuService(prisma: PrismaClient) {
       if (!item) throw new AppError('NOT_FOUND');
       try {
         if (changes.name !== undefined) await assertNameFree(prisma, businessId, changes.name, id);
-        return await prisma.menuItem.update({
-          where: { id },
-          data: changes,
-          select: menuItemSelect,
-        });
+        const { category, categoryId, ...fields } = changes;
+        const moved =
+          category !== undefined || categoryId !== undefined
+            ? await resolveCategory(prisma, businessId, categoryId, category)
+            : null;
+        return shape(
+          await prisma.menuItem.update({
+            where: { id },
+            data: { ...fields, ...(moved && { category: moved.kind, categoryId: moved.id }) },
+            select: menuItemSelect,
+          })
+        );
       } catch (error) {
         throw mapNameViolation(error);
       }
@@ -308,6 +437,73 @@ export function createMenuService(prisma: PrismaClient) {
       });
     },
 
+    /** Every category of the business, in the order the owner arranged them. */
+    async listCategories(auth: AuthContext) {
+      await ensureCategories(prisma, auth.businessId);
+      const rows = await prisma.itemCategory.findMany({
+        where: liveCategories(auth.businessId),
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        select: categorySelect,
+      });
+      return rows.map(categoryView);
+    },
+
+    async addCategory(auth: AuthContext, input: NewCategory) {
+      const { businessId } = auth;
+      try {
+        return await prisma.$transaction(async (tx) => {
+          await ensureCategories(tx, businessId);
+          await assertCategoryNameFree(tx, businessId, input.name);
+          const last = await tx.itemCategory.aggregate({
+            where: liveCategories(businessId),
+            _max: { sortOrder: true },
+          });
+          return categoryView(
+            await tx.itemCategory.create({
+              data: { ...input, businessId, sortOrder: (last._max.sortOrder ?? -1) + 1 },
+              select: categorySelect,
+            })
+          );
+        });
+      } catch (error) {
+        throw isUniqueViolation(error) ? new AppError('CATEGORY_DUPLICATE') : error;
+      }
+    },
+
+    async updateCategory(auth: AuthContext, id: string, changes: CategoryChanges) {
+      const { businessId } = auth;
+      const found = await prisma.itemCategory.findFirst({
+        where: { id, ...liveCategories(businessId) },
+        select: { id: true },
+      });
+      if (!found) throw new AppError('NOT_FOUND');
+      try {
+        if (changes.name !== undefined) {
+          await assertCategoryNameFree(prisma, businessId, changes.name, id);
+        }
+        return categoryView(
+          await prisma.itemCategory.update({ where: { id }, data: changes, select: categorySelect })
+        );
+      } catch (error) {
+        throw isUniqueViolation(error) ? new AppError('CATEGORY_DUPLICATE') : error;
+      }
+    },
+
+    /** Only an empty category can be deleted: its items must be moved or deleted first. */
+    async removeCategory(auth: AuthContext, id: string) {
+      const { businessId } = auth;
+      await prisma.$transaction(async (tx) => {
+        const found = await tx.itemCategory.findFirst({
+          where: { id, ...liveCategories(businessId) },
+          select: { id: true },
+        });
+        if (!found) throw new AppError('NOT_FOUND');
+        const items = await tx.menuItem.count({ where: { categoryId: id, deletedAt: null } });
+        if (items > 0) throw new AppError('CATEGORY_NOT_EMPTY', { items });
+        await tx.itemCategory.update({ where: { id }, data: { deletedAt: new Date() } });
+      });
+    },
+
     /** Every pack and section with how many of its items this business already has. */
     async packs(auth: AuthContext) {
       const menu = await existingMenu(prisma, auth.businessId);
@@ -399,6 +595,11 @@ export function createMenuService(prisma: PrismaClient) {
             const { businessId } = auth;
             const menu = await existingMenu(tx, businessId);
             const nextOrder = await sortOrderCounter(tx, businessId);
+            // Starter items go to the first category of their kind.
+            const categoryOfKind = new Map<MenuCategory, string>();
+            for (const kind of new Set([...selected.values()].map((entry) => entry.category))) {
+              categoryOfKind.set(kind, (await resolveCategory(tx, businessId, undefined, kind)).id);
+            }
 
             const toCreate: Prisma.MenuItemCreateManyInput[] = [];
             const skipped: { key: string; reason: 'ALREADY_ADDED' }[] = [];
@@ -416,17 +617,24 @@ export function createMenuService(prisma: PrismaClient) {
                 name,
                 nameAm: entry.nameAm,
                 category: entry.category,
+                categoryId: categoryOfKind.get(entry.category)!,
                 groupName: entry.groupName,
                 priceEtb: override?.priceEtb ?? entry.suggestedPriceEtb,
                 catalogKey: entry.key,
                 active,
-                sortOrder: nextOrder(entry.category),
+                sortOrder: nextOrder(categoryOfKind.get(entry.category)!),
               });
             }
 
-            const created = toCreate.length
-              ? await tx.menuItem.createManyAndReturn({ data: toCreate, select: menuItemSelect })
+            const ids = toCreate.length
+              ? (
+                  await tx.menuItem.createManyAndReturn({ data: toCreate, select: { id: true } })
+                ).map((row) => row.id)
               : [];
+            // Back in the order they were added.
+            const created = (await findAll(tx, ids)).sort(
+              (a, b) => ids.indexOf(a.id) - ids.indexOf(b.id)
+            );
             return { created, skipped, totalCreated: created.length };
           },
           { maxWait: 10_000, timeout: 60_000 }
