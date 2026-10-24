@@ -18,6 +18,8 @@ export const sessionUserSchema = z.object({
   businessName: z.string(),
   phone: z.string(),
   role: roleSchema,
+  /** True after the owner or a manager set the PIN: the person must choose their own. */
+  pinIsTemporary: z.boolean(),
   plan: planSchema.nullable(),
   subscription: subscriptionSchema.nullable(),
 });
@@ -54,6 +56,7 @@ export async function loadSessionUser(
     businessName: member.business.name,
     phone: member.user.phone,
     role: member.role,
+    pinIsTemporary: member.user.pinIsTemporary,
     plan: member.business.plan,
     subscription: await currentSubscription(prisma, member.businessId),
   };
