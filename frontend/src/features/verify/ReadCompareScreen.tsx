@@ -89,6 +89,8 @@ export default function ReadCompareScreen() {
     const options: ImagePicker.ImagePickerOptions = {
       mediaTypes: ['images'],
       base64: true,
+      // Receipts are photographed with the back camera.
+      cameraType: ImagePicker.CameraType.back,
       quality: 0.9,
     };
     const picked =

@@ -125,6 +125,8 @@ export default function ReadReceiptScreen() {
     const options: ImagePicker.ImagePickerOptions = {
       mediaTypes: ['images'],
       base64: true,
+      // Receipts are photographed with the back camera.
+      cameraType: ImagePicker.CameraType.back,
       quality: 0.8,
     };
     const picked =
