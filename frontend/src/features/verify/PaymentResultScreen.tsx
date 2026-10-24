@@ -9,11 +9,10 @@ import { formatMoney } from '@/components/ui/MoneyText';
 import { Button } from '@/components/ui/Button';
 import { ResultBadge } from '@/components/ui/ResultBadge';
 import { Text } from '@/components/ui/Text';
-import type { VerificationResult } from '@/lib/mock/verify';
 import { formatDateTime } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
-import { useVerifyFlow } from './verifyFlow';
+import { useVerifyFlow, type VerificationResult } from './verifyFlow';
 
 interface Row {
   label: string;
@@ -39,67 +38,71 @@ export function DetailsCard({ rows }: { rows: Row[] }) {
   );
 }
 
-function useResultContent(result: VerificationResult) {
+function useResultContent({ check, expectedAmountEtb, checkedAt }: VerificationResult) {
   const { t } = useTranslation();
   const etb = (n: number) => formatMoney(n);
-  const reference = { label: t('verify.result.reference'), value: result.reference };
+  const expected = { label: t('verify.result.expected'), value: etb(expectedAmountEtb) };
 
-  if (result.status === 'verified') {
+  if (check.status === 'verified') {
     return {
       title: t('verify.result.verifiedTitle'),
       body: t('verify.result.verifiedBody'),
       note: t('verify.result.receiptSaved'),
       rows: [
-        { label: t('verify.result.amount'), value: etb(result.amount) },
-        { label: t('verify.result.account'), value: result.accountName },
-        reference,
-        { label: t('verify.result.verifiedAt'), value: formatDateTime(result.verifiedAt) },
+        { label: t('verify.result.amount'), value: etb(check.amountEtb) },
+        { label: t('verify.result.account'), value: check.receiverName },
+        { label: t('verify.result.reference'), value: check.reference },
+        { label: t('verify.result.verifiedAt'), value: formatDateTime(checkedAt) },
       ],
     };
   }
 
   const note = t('verify.result.noMoneyTaken');
-  switch (result.reason) {
-    case 'nameMismatch':
-      return {
-        title: t('verify.result.nameMismatchTitle'),
-        body: t('verify.result.nameMismatchBody'),
-        note,
-        rows: [
-          { label: t('verify.result.registeredName'), value: result.registeredName },
-          { label: t('verify.result.payerName'), value: result.payerName },
-          reference,
-        ],
-      };
-    case 'amountMismatch':
-      return {
-        title: t('verify.result.amountMismatchTitle'),
-        body: t('verify.result.amountMismatchBody'),
-        note,
-        rows: [
-          { label: t('verify.result.expected'), value: etb(result.expectedAmount) },
-          { label: t('verify.result.paid'), value: etb(result.paidAmount) },
-          reference,
-        ],
-      };
-    case 'duplicate':
-      return {
-        title: t('verify.result.duplicateTitle'),
-        body: t('verify.result.duplicateBody'),
-        note,
-        rows: [
-          reference,
-          { label: t('verify.result.firstVerified'), value: formatDateTime(result.firstVerifiedAt) },
-        ],
-      };
+  if (check.status === 'unable_to_verify') {
+    return {
+      title: t('verifyBank.check.unable'),
+      body: t(`verifyBank.check.unableReasons.${check.reason}`),
+      note,
+      rows: [expected],
+    };
   }
+
+  const reference = { label: t('verify.result.reference'), value: check.reference };
+  if (check.reasons.includes('DUPLICATE')) {
+    return {
+      title: t('verify.result.duplicateTitle'),
+      body: t('verify.result.duplicateBody'),
+      note,
+      rows: [
+        reference,
+        ...(check.firstCheckedAt
+          ? [
+              {
+                label: t('verify.result.firstVerified'),
+                value: formatDateTime(check.firstCheckedAt),
+              },
+            ]
+          : []),
+      ],
+    };
+  }
+  const [first] = check.reasons;
+  return {
+    title:
+      first === 'AMOUNT_TOO_LOW' || !first
+        ? t('verify.result.amountMismatchTitle')
+        : t(`verifyBank.check.titles.${first}`),
+    body: check.reasons.map((r) => t(`verifyBank.check.reasons.${r}`)).join(' '),
+    note,
+    rows: [expected, { label: t('verify.result.paid'), value: etb(check.amountEtb) }, reference],
+  };
 }
 
 function ResultView({ result }: { result: VerificationResult }) {
   const { t } = useTranslation();
   const router = useRouter();
   const finish = useVerifyFlow((s) => s.finish);
-  const success = result.status === 'verified';
+  const success = result.check.status === 'verified';
   const content = useResultContent(result);
 
   const done = () => {
@@ -109,13 +112,14 @@ function ResultView({ result }: { result: VerificationResult }) {
   };
 
   const shareReceipt = () => {
-    if (result.status !== 'verified') return;
+    const { check } = result;
+    if (check.status !== 'verified') return;
     Share.share({
       message: t('verify.result.shareMessage', {
-        amount: formatMoney(result.amount, false),
-        account: result.accountName,
-        reference: result.reference,
-        date: formatDateTime(result.verifiedAt),
+        amount: formatMoney(check.amountEtb, false),
+        account: check.receiverName,
+        reference: check.reference,
+        date: formatDateTime(result.checkedAt),
       }),
     });
   };
@@ -123,7 +127,12 @@ function ResultView({ result }: { result: VerificationResult }) {
   return (
     <SafeAreaView className={`flex-1 ${success ? 'bg-background' : 'bg-dangerSurface'}`}>
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingTop: 32, paddingBottom: 32 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingHorizontal: 24,
+          paddingTop: 32,
+          paddingBottom: 32,
+        }}
         showsVerticalScrollIndicator={false}
       >
         <View className="items-center" accessibilityLiveRegion="assertive">

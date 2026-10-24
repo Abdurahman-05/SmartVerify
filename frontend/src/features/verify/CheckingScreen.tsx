@@ -11,8 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { SmallSpinner, SpinnerRing } from '@/components/ui/Spinner';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
-import { mockDelay } from '@/lib/mock/mock';
-import { verifyPayment } from '@/lib/mock/verify';
+import { checkReceipt } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
 import { useVerifyFlow } from './verifyFlow';
@@ -59,14 +58,13 @@ export default function CheckingScreen() {
     if (!account || !qrData) return;
     let cancelled = false;
 
-    verifyPayment({ account, amount, qrData })
-      .then(async (result) => {
+    checkReceipt(qrData, amount)
+      .then((check) => {
         if (cancelled) return;
         setStage('compare');
-        await mockDelay(700);
-        if (cancelled) return;
-        setResult(result);
-        queryClient.invalidateQueries();
+        setResult({ check, expectedAmountEtb: amount, checkedAt: new Date().toISOString() });
+        // History and home totals now include this check (saved by the server).
+        void queryClient.invalidateQueries();
         router.replace('/payment-result');
       })
       .catch(() => {

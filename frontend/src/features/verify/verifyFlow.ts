@@ -1,7 +1,14 @@
 import { create } from 'zustand';
 
 import type { BankAccount } from '@/lib/bankAccounts';
-import type { VerificationResult } from '@/lib/mock/verify';
+import type { CbeCheck } from '@/lib/verification';
+
+/** The server's answer for one Verify, with what was asked and when. */
+export interface VerificationResult {
+  check: CbeCheck;
+  expectedAmountEtb: number;
+  checkedAt: string;
+}
 
 interface VerifyFlowState {
   account: BankAccount | null;

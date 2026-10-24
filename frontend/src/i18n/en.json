@@ -929,6 +929,14 @@
       "tag": "Not verified",
       "noBill": "No bill",
       "empty": "No failed checks in this period."
+    },
+    "receipts": {
+      "summary": "Verified receipts · {{count}}",
+      "verified": "Verified ({{count}})",
+      "failed": "Failed ({{count}})",
+      "verifiedTag": "Verified",
+      "empty": "No receipts verified in this period yet.",
+      "kept": "Checks are kept for 4 months, then deleted."
     }
   },
   "verifyBank": {
@@ -1012,7 +1020,8 @@
         "AMOUNT_TOO_LOW": "The amount on the receipt is less than the bill.",
         "NOT_SUCCESS": "The bank says this payment did not go through.",
         "EXPIRED": "This receipt is too old.",
-        "WRONG_RECEIVER_NAME": "The receiver name on the receipt is not your account's name."
+        "WRONG_RECEIVER_NAME": "The receiver name on the receipt is not your account's name.",
+        "DUPLICATE": "This receipt was already used for another payment."
       },
       "unableReasons": {
         "TIMEOUT": "The bank took too long to answer.",
@@ -1024,7 +1033,8 @@
         "WRONG_RECEIVER": "Paid to another account",
         "NOT_SUCCESS": "Payment did not go through",
         "EXPIRED": "Receipt is too old",
-        "WRONG_RECEIVER_NAME": "Paid to a different name"
+        "WRONG_RECEIVER_NAME": "Paid to a different name",
+        "DUPLICATE": "Receipt already used"
       },
       "billOpen": "The bill is still open. Nothing was recorded."
     },

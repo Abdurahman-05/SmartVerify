@@ -3,7 +3,13 @@ import type { Period } from '@/lib/period';
 import { mockDelay } from './mock';
 
 export type CbeMismatch =
-  'WRONG_RECEIVER' | 'WRONG_RECEIVER_NAME' | 'AMOUNT_TOO_LOW' | 'NOT_SUCCESS' | 'EXPIRED';
+  | 'WRONG_RECEIVER'
+  | 'WRONG_RECEIVER_NAME'
+  | 'AMOUNT_TOO_LOW'
+  | 'NOT_SUCCESS'
+  | 'EXPIRED'
+  /** The receipt was already used once. */
+  | 'DUPLICATE';
 export type CbeUnable = 'TIMEOUT' | 'UNREACHABLE' | 'NOT_FOUND' | 'UNPARSEABLE';
 
 /** The server's answer to a CBE receipt check (POST /verify/cbe). */
@@ -17,7 +23,14 @@ export type CbeCheck =
       receiverName: string;
       date: string;
     }
-  | { status: 'not_matching'; reasons: CbeMismatch[]; reference: string; amountEtb: number }
+  | {
+      status: 'not_matching';
+      reasons: CbeMismatch[];
+      reference: string;
+      amountEtb: number;
+      /** DUPLICATE: when it was first verified. */
+      firstCheckedAt?: string;
+    }
   | { status: 'unable_to_verify'; reason: CbeUnable };
 
 /** Offline stand-in: every receipt is paid exactly. */

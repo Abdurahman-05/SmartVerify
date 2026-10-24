@@ -15,6 +15,23 @@ export const verifyCbe = (url: string, expectedAmountEtb: number, billId?: strin
     timeoutMs: 25_000,
   });
 
+/** One receipt that verified (GET /verify/history). */
+export interface VerifiedCheck {
+  id: string;
+  billId: string | null;
+  bankCode: string;
+  reference: string;
+  payerName: string | null;
+  amountEtb: number;
+  expectedAmountEtb: number;
+  checkedBy: string;
+  createdAt: string;
+}
+
+/** GET /verify/history — receipts verified in the period, newest first. */
+export const getVerifiedChecks = (period: Period) =>
+  api<VerifiedCheck[]>('/verify/history', { query: { period } });
+
 /** GET /verify/failed — checks that did not verify in the period, newest first. */
 export const getFailedChecks = (period: Period) =>
   api<FailedCheck[]>('/verify/failed', { query: { period } });

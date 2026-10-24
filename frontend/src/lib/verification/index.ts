@@ -1,10 +1,11 @@
 import * as real from '@/lib/api/verification';
 import * as mock from '@/lib/mock/verification';
 
+import type { CbeCheck } from '@/lib/mock/verification';
 import type { Period } from '@/lib/period';
 
 export type { CbeCheck, CbeMismatch, CbeUnable, FailedCheck } from '@/lib/mock/verification';
-export type { ReadResult } from '@/lib/api/verification';
+export type { ReadResult, VerifiedCheck } from '@/lib/api/verification';
 
 /** EXPO_PUBLIC_USE_MOCK_VERIFICATION=true uses the offline mock; default is the real backend. */
 export const USE_MOCK_VERIFICATION = process.env.EXPO_PUBLIC_USE_MOCK_VERIFICATION === 'true';
@@ -18,6 +19,32 @@ export const readReference = USE_MOCK_VERIFICATION ? mock.readReference : real.r
 export const compareReading = USE_MOCK_VERIFICATION ? mock.compareReading : real.compareReading;
 
 export const failedChecksKey = (period: Period) => ['failed-checks', period] as const;
+
+// The offline mock keeps no history of verified receipts.
+export const getVerifiedChecks: typeof real.getVerifiedChecks = USE_MOCK_VERIFICATION
+  ? async () => []
+  : real.getVerifiedChecks;
+export const verifiedChecksKey = (period: Period) => ['verified-checks', period] as const;
+
+/**
+ * Checks a scanned receipt with the server, the same way for normal Verify and restaurant bills:
+ * a CBE link, a telebirr number, a Dashen reference or a BOA receipt id. Anything else cannot be
+ * checked (never counted as paid). The server saves every result and refuses a reused receipt.
+ */
+export async function checkReceipt(
+  qrData: string,
+  expectedAmountEtb: number,
+  billId?: string
+): Promise<CbeCheck> {
+  const telebirr = telebirrNumberOf(qrData);
+  if (telebirr) return verifyTelebirr(telebirr, expectedAmountEtb, billId);
+  const dashen = dashenReferenceOf(qrData);
+  if (dashen) return verifyDashen(dashen, expectedAmountEtb, billId);
+  const boa = boaReceiptIdOf(qrData);
+  if (boa) return verifyBoa(boa, expectedAmountEtb, billId);
+  if (isCbeReceiptLink(qrData)) return verifyCbe(qrData, expectedAmountEtb, billId);
+  return { status: 'unable_to_verify', reason: 'UNPARSEABLE' };
+}
 
 /** A CBE receipt link from the receipt QR (the server checks it again strictly). */
 export const isCbeReceiptLink = (text: string) =>

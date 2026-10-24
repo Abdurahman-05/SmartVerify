@@ -16,19 +16,7 @@ import { usePaymentBill } from '@/features/bills/usePaymentBill';
 import { newIdempotencyKey } from '@/lib/api/idempotency';
 import type { ExtraChoice } from '@/lib/api/payments';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
-import { checkBankPayment } from '@/lib/mock/verify';
-import {
-  boaReceiptIdOf,
-  dashenReferenceOf,
-  isCbeReceiptLink,
-  telebirrNumberOf,
-  verifyBoa,
-  verifyCbe,
-  verifyDashen,
-  verifyTelebirr,
-  type CbeMismatch,
-  type CbeUnable,
-} from '@/lib/verification';
+import { checkReceipt, type CbeMismatch, type CbeUnable } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
 import { DetailsCard } from './PaymentResultScreen';
@@ -41,29 +29,13 @@ type Failure =
   | { kind: 'mismatch'; reasons: CbeMismatch[]; reference: string; paid: number }
   | { kind: 'unable'; reason: CbeUnable };
 
-/**
- * Bank money actually received, or why it cannot be counted. A CBE receipt link is checked by the
- * server; anything else (typed values, other banks) still uses the FAKE check for now.
- */
+/** Bank money actually received, or why it cannot be counted (checked by the server). */
 async function checkReceived(
   qrData: string,
   amount: number,
-  billId: string,
-  fake: () => Promise<number>
+  billId: string
 ): Promise<number | Failure> {
-  // CBE receipt links and telebirr numbers are checked by the server; a check that does not
-  // verify is saved with the bill, so it shows in history.
-  const telebirr = telebirrNumberOf(qrData);
-  const dashen = dashenReferenceOf(qrData);
-  const boa = boaReceiptIdOf(qrData);
-  if (!telebirr && !dashen && !boa && !isCbeReceiptLink(qrData)) return fake();
-  const result = telebirr
-    ? await verifyTelebirr(telebirr, amount, billId)
-    : dashen
-      ? await verifyDashen(dashen, amount, billId)
-      : boa
-        ? await verifyBoa(boa, amount, billId)
-        : await verifyCbe(qrData, amount, billId);
+  const result = await checkReceipt(qrData, amount, billId);
   if (result.status === 'verified') return result.amountEtb;
   if (result.status === 'not_matching') {
     return {
@@ -94,15 +66,7 @@ export default function RestaurantCheckingScreen() {
   useEffect(() => {
     if (!bill || !account || !qrData) return;
     let cancelled = false;
-    const fake = () =>
-      checkBankPayment({
-        account,
-        expected: amount,
-        qrData,
-        simulate: useRestaurantPay.getState().simulate,
-      }).then(({ received }) => received);
-
-    checkReceived(qrData, amount, bill.id, fake)
+    checkReceived(qrData, amount, bill.id)
       .then(async (received) => {
         if (typeof received !== 'number') {
           if (!cancelled) setFailure(received);
