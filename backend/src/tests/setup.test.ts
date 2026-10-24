@@ -42,7 +42,8 @@ const code = (res: Res) => (res.json() as { error?: { code?: string } }).error?.
 interface Table {
   id: string;
   number: number;
-  area: string;
+  categoryId: string;
+  categoryName: string;
   busy: boolean;
 }
 interface Fees {
@@ -53,13 +54,18 @@ interface Fees {
 describe('tables setup', () => {
   it('adds tables (skips existing, brings back removed) and removes them', async () => {
     const res = await call('POST', '/tables', r.manager.token, {
-      area: 'main',
+      categoryId: r.tableCategory.id,
       numbers: [2, 3, 4, 9],
     });
     expect(res.statusCode).toBe(200);
-    const main = (res.json() as Table[]).filter((t) => t.area === 'main').map((t) => t.number);
+    const main = (res.json() as Table[])
+      .filter((t) => t.categoryName === 'Main Floor')
+      .map((t) => t.number);
     expect(main).toEqual([1, 2, 3, 4, 9]); // 9 was removed before, now back
-    await call('POST', '/tables', r.owner.token, { area: 'upstairs', numbers: [1, 2] });
+    const upstairs = (
+      await call('POST', '/tables/categories', r.owner.token, { name: 'Upstairs' })
+    ).json() as { id: string };
+    await call('POST', '/tables', r.owner.token, { categoryId: upstairs.id, numbers: [1, 2] });
     expect(await app.prisma.restaurantTable.count({ where: { businessId: r.businessId } })).toBe(7);
 
     const t1 = r.tables[0]!;
@@ -87,15 +93,20 @@ describe('tables setup', () => {
 
   it('owner/manager only; bad input rejected; other businesses isolated', async () => {
     expect(
-      code(await call('POST', '/tables', r.waiter.token, { area: 'main', numbers: [5] }))
+      code(
+        await call('POST', '/tables', r.waiter.token, {
+          categoryId: r.tableCategory.id,
+          numbers: [5],
+        })
+      )
     ).toBe('FORBIDDEN');
     expect(code(await call('DELETE', `/tables/${r.tables[0]!.id}`, r.chef.token))).toBe(
       'FORBIDDEN'
     );
     for (const body of [
-      { area: 'roof', numbers: [1] },
-      { area: 'main', numbers: [] },
-      { area: 'main', numbers: [0] },
+      { numbers: [1] },
+      { categoryId: r.tableCategory.id, numbers: [] },
+      { categoryId: r.tableCategory.id, numbers: [0] },
     ]) {
       expect(code(await call('POST', '/tables', r.owner.token, body))).toBe('VALIDATION_ERROR');
     }

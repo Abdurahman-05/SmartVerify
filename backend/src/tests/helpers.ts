@@ -56,6 +56,7 @@ const USED_TABLES = [
   'MenuItem',
   'ItemCategory',
   'RestaurantTable',
+  'TableCategory',
   'DeliveryArea',
   'Session',
   'Subscription',
@@ -130,9 +131,13 @@ export async function createRestaurant(app: TestApp, plan: Plan | null = 'restau
   });
   const chef = await addMember(app, businessId, 'chef', { name: 'Chef Hana' });
 
-  const tableData = [1, 2, 3].map((number) => ({ businessId, number, area: 'main' as const }));
+  const mainFloor = await app.prisma.tableCategory.create({
+    data: { businessId, name: 'Main Floor', nameAm: 'ዋናው ወለል' },
+  });
+  const categoryId = mainFloor.id;
+  const tableData = [1, 2, 3].map((number) => ({ businessId, number, categoryId }));
   await app.prisma.restaurantTable.createMany({
-    data: [...tableData, { businessId, number: 9, area: 'main', active: false }],
+    data: [...tableData, { businessId, number: 9, categoryId, active: false }],
   });
   const tables = await app.prisma.restaurantTable.findMany({
     where: { businessId },
@@ -170,6 +175,7 @@ export async function createRestaurant(app: TestApp, plan: Plan | null = 'restau
     feeWaiter,
     chef,
     tables,
+    tableCategory: mainFloor,
     menu: { tibs, coffee, retired },
     bole,
   };

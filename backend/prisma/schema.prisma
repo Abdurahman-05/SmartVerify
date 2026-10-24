@@ -61,12 +61,6 @@ enum MenuCategory {
   combos
 }
 
-enum TableArea {
-  main
-  upstairs
-  outside
-}
-
 enum BillType {
   dine
   takeaway
@@ -162,23 +156,24 @@ model Business {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  members        BusinessMember[]
-  adminNotes     AdminNote[]
-  paymentReviews PaymentReview[]
-  subscriptions  Subscription[]
-  bankAccounts   BankAccount[]
-  transactions   Transaction[]
-  menuItems      MenuItem[]
-  itemCategories ItemCategory[]
-  tables         RestaurantTable[]
-  deliveryAreas  DeliveryArea[]
-  bills          Bill[]
-  orders         Order[]
-  payments       Payment[]
-  tips           Tip[]
-  kitchenOrders  KitchenOrder[]
-  paymentScans   BillPaymentScan[]
-  receiptChecks  ReceiptCheck[]
+  members         BusinessMember[]
+  adminNotes      AdminNote[]
+  paymentReviews  PaymentReview[]
+  subscriptions   Subscription[]
+  bankAccounts    BankAccount[]
+  transactions    Transaction[]
+  menuItems       MenuItem[]
+  itemCategories  ItemCategory[]
+  tableCategories TableCategory[]
+  tables          RestaurantTable[]
+  deliveryAreas   DeliveryArea[]
+  bills           Bill[]
+  orders          Order[]
+  payments        Payment[]
+  tips            Tip[]
+  kitchenOrders   KitchenOrder[]
+  paymentScans    BillPaymentScan[]
+  receiptChecks   ReceiptCheck[]
 }
 
 /// A person's role inside a business. The owner also has a member row (role = owner).
@@ -385,17 +380,38 @@ model ItemCategory {
   @@index([businessId])
 }
 
-model RestaurantTable {
+/// A group of tables made by the owner or manager ("Main floor", "VIP", "Garden"…).
+model TableCategory {
   id         String    @id @default(cuid())
   businessId String
   business   Business  @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  name       String
+  /// Amharic name shown when the app is in Amharic (optional).
+  nameAm     String?
+  sortOrder  Int       @default(0)
+  /// Soft delete (only a category without tables in use can be deleted).
+  deletedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  tables RestaurantTable[]
+  // + partial unique (businessId, name ignoring case and spaces) WHERE deletedAt IS NULL   (migration SQL)
+
+  @@index([businessId])
+}
+
+model RestaurantTable {
+  id         String        @id @default(cuid())
+  businessId String
+  business   Business      @relation(fields: [businessId], references: [id], onDelete: Restrict)
   number     Int
-  area       TableArea
-  active     Boolean   @default(true)
+  categoryId String
+  category   TableCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  active     Boolean       @default(true)
 
   bills Bill[]
 
-  @@unique([businessId, area, number])
+  @@unique([businessId, categoryId, number])
+  @@index([categoryId])
 }
 
 model DeliveryArea {

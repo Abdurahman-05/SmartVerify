@@ -242,7 +242,9 @@ describe('POST /orders — idempotency and concurrency', () => {
     expect(tables).toContainEqual({
       id: table.id,
       number: 1,
-      area: 'main',
+      categoryId: expect.any(String),
+      categoryName: 'Main Floor',
+      categoryNameAm: 'ዋናው ወለል',
       busy: true,
       openBillId: winner.id,
     });

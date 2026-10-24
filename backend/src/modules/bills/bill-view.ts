@@ -14,7 +14,8 @@ export const billListItemSchema = z.object({
   type: billTypeSchema,
   tableId: z.string().nullable(),
   tableNumber: z.number().int().nullable(),
-  tableArea: z.enum(['main', 'upstairs', 'outside']).nullable(),
+  tableCategory: z.string().nullable().describe('Name of the table’s category, e.g. "VIP"'),
+  tableCategoryAm: z.string().nullable(),
   guests: z.number().int().nullable(),
   customerName: z.string().nullable(),
   deliveryAreaName: z.string().nullable(),
@@ -64,7 +65,7 @@ export type BillDetail = z.infer<typeof billDetailSchema>;
 const memberName = { select: { user: { select: { name: true } } } } as const;
 
 export const billListInclude = {
-  table: { select: { number: true, area: true } },
+  table: { select: { number: true, category: { select: { name: true, nameAm: true } } } },
   deliveryArea: { select: { name: true } },
   waiter: memberName,
   orders: {
@@ -74,7 +75,7 @@ export const billListInclude = {
 } satisfies Prisma.BillInclude;
 
 export const billDetailInclude = {
-  table: { select: { number: true, area: true } },
+  table: { select: { number: true, category: { select: { name: true, nameAm: true } } } },
   deliveryArea: { select: { name: true } },
   waiter: memberName,
   deliveryFeeChangedBy: memberName,
@@ -116,7 +117,8 @@ export function toBillListItem(row: ListRow | DetailRow): BillListItem {
     type: row.type,
     tableId: row.tableId,
     tableNumber: row.table?.number ?? null,
-    tableArea: row.table?.area ?? null,
+    tableCategory: row.table?.category.name ?? null,
+    tableCategoryAm: row.table?.category.nameAm ?? null,
     guests: row.guests,
     customerName: row.customerName,
     deliveryAreaName: row.deliveryArea?.name ?? null,
