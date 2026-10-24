@@ -20,15 +20,17 @@ import { newIdempotencyKey } from '@/lib/api/idempotency';
 import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly } from '@/lib/format';
 import { addMenuItem, getMenuItems, menuAdminKey, updateMenuItem } from '@/lib/menu';
-import type { MenuCategory } from '@/lib/mock/restaurant';
+import { getMenuCategories, itemCategoryKey, menuCategoriesKey } from '@/lib/menuCategories';
+import { colors } from '@/theme/tokens';
+
+import { useLocalName } from './useLocalName';
 
 const MAX_PRICE_DIGITS = 7;
-const categories: MenuCategory[] = ['food', 'drinks', 'combos'];
 
 const schema = z.object({
   name: z.string().trim().min(1, 'menuAdmin.errors.name').max(80, 'menuAdmin.errors.name'),
   price: z.string().refine((v) => Number(v) >= 1, 'menuAdmin.errors.price'),
-  category: z.enum(['food', 'drinks', 'combos']),
+  categoryId: z.string().min(1, 'menuAdmin.errors.category'),
 });
 
 type Values = z.infer<typeof schema>;
@@ -49,32 +51,51 @@ export default function MenuItemFormScreen() {
     enabled: isEdit,
   });
   const existing = items?.find((item) => item.id === id);
+  const localName = useLocalName();
+  const categoriesQuery = useQuery({ queryKey: menuCategoriesKey, queryFn: getMenuCategories });
+  const categories = categoriesQuery.data ?? [];
 
   const {
     control,
     handleSubmit,
     reset,
+    getValues,
+    setValue,
     formState: { errors },
   } = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', price: '', category: 'food' },
+    defaultValues: { name: '', price: '', categoryId: '' },
   });
 
   // Fill the form once the item is known (edit mode).
   useEffect(() => {
     if (existing) {
-      reset({ name: existing.name, price: String(existing.priceEtb), category: existing.category });
+      reset({
+        name: existing.name,
+        price: String(existing.priceEtb),
+        categoryId: itemCategoryKey(existing),
+      });
     }
   }, [existing, reset]);
+
+  // A new item starts in the first category.
+  const firstCategoryId = categories[0]?.id;
+  useEffect(() => {
+    if (!isEdit && firstCategoryId && !getValues('categoryId')) {
+      setValue('categoryId', firstCategoryId);
+    }
+  }, [isEdit, firstCategoryId, getValues, setValue]);
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/menu'));
 
   const mutation = useMutation({
     mutationFn: (values: Values) => {
+      const chosen = categories.find((c) => c.id === values.categoryId);
       const input = {
         name: values.name.trim(),
         priceEtb: Number(values.price),
-        category: values.category,
+        categoryId: values.categoryId,
+        category: chosen?.kind ?? 'food',
       };
       return id ? updateMenuItem(id, input) : addMenuItem(input, idempotencyKey);
     },
@@ -84,8 +105,14 @@ export default function MenuItemFormScreen() {
     },
   });
 
-  if (isEdit && isPending)
-    return <LoadingView screenTitle={t('menuAdmin.editTitle')} onBack={goBack} />;
+  if ((isEdit && isPending) || categoriesQuery.isPending) {
+    return (
+      <LoadingView
+        screenTitle={t(isEdit ? 'menuAdmin.editTitle' : 'menuAdmin.addTitle')}
+        onBack={goBack}
+      />
+    );
+  }
 
   const err = (message?: string) => (message ? t(message) : undefined);
 
@@ -138,20 +165,25 @@ export default function MenuItemFormScreen() {
           </Text>
           <Controller
             control={control}
-            name="category"
+            name="categoryId"
             render={({ field }) => (
               <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
                 {categories.map((c) => (
                   <Pill
-                    key={c}
-                    label={t(`orders.category.${c}`)}
-                    selected={field.value === c}
-                    onPress={() => field.onChange(c)}
+                    key={c.id}
+                    label={localName(c)}
+                    selected={field.value === c.id}
+                    onPress={() => field.onChange(c.id)}
                   />
                 ))}
               </View>
             )}
           />
+          {errors.categoryId?.message ? (
+            <Text className="text-sm" style={{ color: colors.dangerFg }}>
+              {t(errors.categoryId.message)}
+            </Text>
+          ) : null}
         </View>
       </View>
 

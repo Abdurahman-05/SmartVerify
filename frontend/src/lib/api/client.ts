@@ -37,6 +37,8 @@ export type ApiErrorCode =
   | 'RATE_LIMITED'
   | 'CONFLICT'
   | 'MENU_DUPLICATE'
+  | 'CATEGORY_DUPLICATE'
+  | 'CATEGORY_NOT_EMPTY'
   | 'TABLE_BUSY'
   | 'ITEM_UNAVAILABLE'
   | 'BILL_CLOSED'

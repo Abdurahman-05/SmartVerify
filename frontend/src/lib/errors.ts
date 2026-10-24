@@ -10,6 +10,8 @@ const keyByCode: Partial<Record<ApiErrorCode, string>> = {
   SUBSCRIPTION_REQUIRED: 'errors.subscriptionRequired',
   PAYMENT_NOT_CONFIGURED: 'errors.paymentNotConfigured',
   MENU_DUPLICATE: 'menuAdmin.errors.duplicate',
+  CATEGORY_DUPLICATE: 'categories.errors.duplicate',
+  CATEGORY_NOT_EMPTY: 'categories.errors.notEmpty',
   TABLE_BUSY: 'orders.errors.tableBusy',
   ITEM_UNAVAILABLE: 'orders.errors.itemUnavailable',
   NETWORK_ERROR: 'errors.noConnection',

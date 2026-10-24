@@ -12,7 +12,6 @@ import { LoadingView } from '@/components/ui/LoadingView';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { Switch } from '@/components/ui/Switch';
 import { Text } from '@/components/ui/Text';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import {
@@ -87,7 +86,6 @@ export default function StarterPackScreen() {
   const localName = useLocalName();
   const { key = '' } = useLocalSearchParams<{ key: string }>();
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [addOff, setAddOff] = useState(false);
   const [result, setResult] = useState<CatalogImportResult | null>(null);
 
   const packs = useQuery({ queryKey: catalogPacksKey, queryFn: getCatalogPacks });
@@ -97,7 +95,7 @@ export default function StarterPackScreen() {
   });
 
   const mutation = useMutation({
-    mutationFn: (input: CatalogImportInput) => importCatalog({ ...input, activate: !addOff }),
+    mutationFn: (input: CatalogImportInput) => importCatalog(input),
     onSuccess: (res) => {
       setResult(res);
       setSelected(new Set());
@@ -176,22 +174,6 @@ export default function StarterPackScreen() {
             <Text tone="muted" className="flex-1 text-sm leading-5">
               {t('menuAdmin.starter.priceNote')}
             </Text>
-          </View>
-
-          <View className="flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface px-4 py-3">
-            <View className="flex-1">
-              <Text font="bold" className="text-base">
-                {t('menuAdmin.starter.addOff')}
-              </Text>
-              <Text tone="muted" className="text-sm">
-                {t('menuAdmin.starter.addOffHint')}
-              </Text>
-            </View>
-            <Switch
-              value={addOff}
-              onValueChange={setAddOff}
-              accessibilityLabel={t('menuAdmin.starter.addOff')}
-            />
           </View>
 
           {notAdded.length ? (

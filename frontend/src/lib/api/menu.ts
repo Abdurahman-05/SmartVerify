@@ -1,4 +1,8 @@
-import type { MenuAdminItem, MenuItemChanges, MenuItemInput } from '@/lib/mock/menu';
+import type {
+  MenuAdminItem as BaseItem,
+  MenuItemChanges as BaseChanges,
+  MenuItemInput as BaseInput,
+} from '@/lib/mock/menu';
 import type {
   CatalogImportInput,
   CatalogImportResult,
@@ -8,6 +12,15 @@ import type {
 
 import { api } from './client';
 import { newIdempotencyKey } from './idempotency';
+
+/** A menu item with the owner's category (the offline mock only knows its kind). */
+export type MenuAdminItem = BaseItem & {
+  categoryId?: string;
+  categoryName?: string;
+  categoryNameAm?: string | null;
+};
+export type MenuItemInput = BaseInput & { categoryId?: string };
+export type MenuItemChanges = BaseChanges & { categoryId?: string };
 
 /** GET /menu?all=true — every item of the business, including ones turned off. */
 export const getMenuItems = () => api<MenuAdminItem[]>('/menu', { query: { all: 'true' } });

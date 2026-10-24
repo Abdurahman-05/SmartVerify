@@ -6,7 +6,6 @@ export type { Fees, SendOrderInput } from '@/lib/api/restaurant';
 export type {
   DeliveryArea,
   MenuCategory,
-  MenuItem,
   Order,
   OrderLine,
   OrderNote,
@@ -16,10 +15,13 @@ export type {
   TableArea,
 } from '@/lib/mock/restaurant';
 
+/** A menu item on New order. `categoryId` is the owner's category (the offline mock has none). */
+export type MenuItem = mock.MenuItem & { categoryId?: string };
+
 /** EXPO_PUBLIC_USE_MOCK_RESTAURANT=true uses the offline mock (src/lib/mock/restaurant.ts); default is the real backend. */
 export const USE_MOCK_RESTAURANT = process.env.EXPO_PUBLIC_USE_MOCK_RESTAURANT === 'true';
 
-export const getMenu = USE_MOCK_RESTAURANT ? mock.getMenu : real.getMenu;
+export const getMenu: () => Promise<MenuItem[]> = USE_MOCK_RESTAURANT ? mock.getMenu : real.getMenu;
 export const getTables = USE_MOCK_RESTAURANT ? mock.getTables : real.getTables;
 export const getOrder = USE_MOCK_RESTAURANT ? mock.getOrder : real.getOrder;
 

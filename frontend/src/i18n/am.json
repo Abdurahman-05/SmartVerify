@@ -696,12 +696,8 @@
   },
   "menuAdmin": {
     "title": "ምናሌ",
-    "subtitle": "ያለቀውን ያጥፉ",
+    "subtitle": "ንጥሎችዎና ዋጋዎቻቸው",
     "add": "ጨምር",
-    "finished": "ዛሬ አልቋል",
-    "on": "በርቷል",
-    "off": "ጠፍቷል",
-    "available": "ይገኛል፦ {{name}}",
     "editItem": "{{name}} አስተካክል",
     "empty": "ገና ምንም የለም። የመጀመሪያውን ለመፍጠር ጨምርን ይጫኑ።",
     "addTitle": "ንጥል ጨምር",
@@ -712,12 +708,12 @@
     "price": "ዋጋ (ብር)",
     "category": "ምድብ",
     "saveFailedTitle": "ማስቀመጥ አልተቻለም",
-    "toggleFailedTitle": "ንጥሉን መቀየር አልተቻለም",
     "loadFailed": "ምናሌውን መጫን አልተቻለም።",
     "errors": {
       "name": "የንጥሉን ስም ያስገቡ።",
       "price": "ቢያንስ 1 ብር ዋጋ ያስገቡ።",
-      "duplicate": "ይህ ስም አስቀድሞ በምናሌዎ ላይ አለ።"
+      "duplicate": "ይህ ስም አስቀድሞ በምናሌዎ ላይ አለ።",
+      "category": "ምድብ ይምረጡ።"
     },
     "starter": {
       "open": "ከዝግጁ ምናሌዎች ጨምር",
@@ -730,8 +726,6 @@
       "addSelected": "የተመረጡትን ጨምር ({{count}})",
       "sectionDone": "ሁሉም ተጨምረዋል",
       "alreadyAdded": "ተጨምሯል",
-      "addOff": "ጠፍቶ ጨምር",
-      "addOffHint": "መጀመሪያ ዋጋዎን ያስተካክሉ፣ ከዚያ በምናሌ ውስጥ ያብሩ",
       "resultAdded": "{{count}} ንጥሎች ወደ ምናሌዎ ተጨምረዋል",
       "resultSkipped": "{{count}} አስቀድመው በምናሌዎ ላይ ነበሩ",
       "importFailedTitle": "ንጥሎቹን መጨመር አልተቻለም",
@@ -742,12 +736,8 @@
     "removeTitle": "{{name}} ከምናሌው ይወገድ?",
     "removeBody": "አስተናጋጆች ከእንግዲህ ሊያዙት አይችሉም። ያለፉ ሂሳቦች ይጠብቁታል።",
     "removeAction": "አስወግድ",
-    "allOn": "ሁሉንም አብራ",
-    "allOff": "ሁሉንም አጥፋ",
-    "allOffTitle": "{{count}} ንጥሎች ይጥፉ?",
-    "allOffBody": "እንደገና እስኪያበሯቸው ድረስ አስተናጋጆች አያዩአቸውም።",
     "removeFailedTitle": "ንጥሉን ማስወገድ አልተቻለም",
-    "bulkFailedTitle": "ንጥሎቹን መቀየር አልተቻለም"
+    "editButton": "አስተካክል"
   },
   "setup": {
     "tables": {
@@ -1095,6 +1085,36 @@
       "saved": "ተቀምጧል",
       "invalidLocation": "ከዚያ ቦታ ማንበብ አልቻልንም። የGoogle Maps ሊንክ ወይም ሁለት ቁጥሮች ይለጥፉ።",
       "entry": "የንግድ መረጃ"
+    }
+  },
+  "categories": {
+    "title": "ምድቦች",
+    "subtitle": "ምናሌዎን እንደፈለጉ ይመድቡ",
+    "add": "ጨምር",
+    "addTitle": "ምድብ ጨምር",
+    "editTitle": "ምድብ አስተካክል",
+    "formSubtitle": "የቡድኑ ስም",
+    "name": "የምድብ ስም",
+    "namePlaceholder": "ለምሳሌ ትኩስ መጠጦች",
+    "nameAm": "የአማርኛ ስም (አማራጭ)",
+    "nameAmPlaceholder": "ለምሳሌ ትኩስ መጠጦች",
+    "empty": "ገና ምንም ምድብ የለም። የመጀመሪያውን ለመፍጠር ጨምርን ይጫኑ።",
+    "itemCount_one": "{{count}} ንጥል",
+    "itemCount_other": "{{count}} ንጥሎች",
+    "edit": "{{name}} አስተካክል",
+    "remove": "{{name}} አጥፋ",
+    "removeTitle": "{{name}} ይጥፋ?",
+    "removeBody": "ይህ ምድብ ባዶ ነው፣ ስለዚህ ሌላ ምንም አይወገድም።",
+    "removeAction": "አጥፋ",
+    "saveFailedTitle": "ማስቀመጥ አልተቻለም",
+    "removeFailedTitle": "ማጥፋት አልተቻለም",
+    "loadFailed": "ምድቦችን መጫን አልተቻለም።",
+    "manage": "ምድቦችን ያስተዳድሩ",
+    "manageHint": "ትኩስ መጠጥ፣ ፈጣን ምግብ፣ ጥምር… የራስዎን ይፍጠሩ",
+    "errors": {
+      "name": "የምድቡን ስም ያስገቡ።",
+      "duplicate": "በዚህ ስም ምድብ አስቀድሞ አለዎት።",
+      "notEmpty": "ምድቡ ባዶ አይደለም። መጀመሪያ ውስጡ ያለውን ያንቀሳቅሱ ወይም ያጥፉ።"
     }
   }
 }

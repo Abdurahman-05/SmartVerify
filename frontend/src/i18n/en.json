@@ -696,12 +696,8 @@
   },
   "menuAdmin": {
     "title": "Menu",
-    "subtitle": "Turn off what is finished",
+    "subtitle": "Your items and prices",
     "add": "Add",
-    "finished": "Finished today",
-    "on": "On",
-    "off": "Off",
-    "available": "Available: {{name}}",
     "editItem": "Edit {{name}}",
     "empty": "No items yet. Tap Add to create the first one.",
     "addTitle": "Add item",
@@ -712,12 +708,12 @@
     "price": "Price (ETB)",
     "category": "Category",
     "saveFailedTitle": "Couldn't save",
-    "toggleFailedTitle": "Couldn't change the item",
     "loadFailed": "Couldn't load the menu.",
     "errors": {
       "name": "Enter the item name.",
       "price": "Enter a price of at least 1 ETB.",
-      "duplicate": "This name is already on your menu."
+      "duplicate": "This name is already on your menu.",
+      "category": "Choose a category."
     },
     "starter": {
       "open": "Add from starter menus",
@@ -730,8 +726,6 @@
       "addSelected": "Add selected ({{count}})",
       "sectionDone": "All added",
       "alreadyAdded": "Added",
-      "addOff": "Add turned off",
-      "addOffHint": "Set your prices first, then turn them on in Menu",
       "resultAdded": "{{count}} items added to your menu",
       "resultSkipped": "{{count}} were already on your menu",
       "importFailedTitle": "Couldn't add the items",
@@ -742,12 +736,8 @@
     "removeTitle": "Remove {{name}} from the menu?",
     "removeBody": "Waiters can no longer order it. Past bills keep it.",
     "removeAction": "Remove",
-    "allOn": "Turn all on",
-    "allOff": "Turn all off",
-    "allOffTitle": "Turn off {{count}} items?",
-    "allOffBody": "Waiters won't see them until you turn them on again.",
     "removeFailedTitle": "Couldn't remove the item",
-    "bulkFailedTitle": "Couldn't change the items"
+    "editButton": "Edit"
   },
   "setup": {
     "tables": {
@@ -1095,6 +1085,36 @@
       "saved": "Saved",
       "invalidLocation": "We could not read a location from that. Paste a Google Maps link or two numbers.",
       "entry": "Business information"
+    }
+  },
+  "categories": {
+    "title": "Categories",
+    "subtitle": "Group your menu your way",
+    "add": "Add",
+    "addTitle": "Add category",
+    "editTitle": "Edit category",
+    "formSubtitle": "Name of the group",
+    "name": "Category name",
+    "namePlaceholder": "e.g. Hot drinks",
+    "nameAm": "Amharic name (optional)",
+    "nameAmPlaceholder": "e.g. ትኩስ መጠጦች",
+    "empty": "No categories yet. Tap Add to create the first one.",
+    "itemCount_one": "{{count}} item",
+    "itemCount_other": "{{count}} items",
+    "edit": "Edit {{name}}",
+    "remove": "Delete {{name}}",
+    "removeTitle": "Delete {{name}}?",
+    "removeBody": "This category is empty, so nothing else is removed.",
+    "removeAction": "Delete",
+    "saveFailedTitle": "Couldn't save",
+    "removeFailedTitle": "Couldn't delete",
+    "loadFailed": "Couldn't load the categories.",
+    "manage": "Manage categories",
+    "manageHint": "Hot drinks, fast food, combos… make your own",
+    "errors": {
+      "name": "Enter the category name.",
+      "duplicate": "You already have a category with this name.",
+      "notEmpty": "This category is not empty. Move or delete what is inside first."
     }
   }
 }

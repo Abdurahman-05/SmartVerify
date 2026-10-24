@@ -40,13 +40,13 @@ import {
   getTables,
   sendOrder,
   tablesKey,
-  type MenuCategory,
   type OrderLine,
   type OrderNote,
   type OrderType,
   type SendOrderInput,
   type Table,
 } from '@/lib/restaurant';
+import { getMenuCategories, itemCategoryKey, menuCategoriesKey } from '@/lib/menuCategories';
 import { useBrandColors } from '@/store/theme';
 import { digitsOnly } from '@/lib/format';
 import { useSession } from '@/store/session';
@@ -64,7 +64,6 @@ const orderTypes: { type: OrderType; icon: LucideIcon }[] = [
   { type: 'takeaway', icon: ShoppingBag },
   { type: 'delivery', icon: Bike },
 ];
-const categories: ('all' | MenuCategory)[] = ['all', 'food', 'drinks', 'combos'];
 const kitchenNotes: OrderNote[] = ['noOnion', 'lessSpicy', 'rush', 'takeaway'];
 
 type Sheet = 'table' | 'confirm' | 'area' | null;
@@ -105,7 +104,7 @@ function TypeButton({
 
 export default function NewOrderScreen() {
   const brand = useBrandColors();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const waiterName = useSession((s) => s.user?.displayName ?? '');
@@ -115,7 +114,8 @@ export default function NewOrderScreen() {
   const [table, setTable] = useState<Table | null>(null);
   const [cart, setCart] = useState<Record<string, number>>({});
   const [notes, setNotes] = useState<OrderNote[]>([]);
-  const [category, setCategory] = useState<'all' | MenuCategory>('all');
+  // 'all', or a category id.
+  const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
   const [sheet, setSheet] = useState<Sheet>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -131,6 +131,8 @@ export default function NewOrderScreen() {
   const [orderKey] = useState(newIdempotencyKey);
 
   const menuQuery = useQuery({ queryKey: ['menu'], queryFn: getMenu });
+  // The category chips are a convenience: the order can still be taken while they load.
+  const categoriesQuery = useQuery({ queryKey: menuCategoriesKey, queryFn: getMenuCategories });
   const tablesQuery = useQuery({ queryKey: tablesKey, queryFn: getTables });
   const feesQuery = useQuery({ queryKey: feesKey, queryFn: getFees });
 
@@ -184,10 +186,14 @@ export default function NewOrderScreen() {
   const total = lines.reduce((sum, l) => sum + l.priceEtb * l.quantity, 0);
   // Each item keeps its number in the full menu; search matches the name or the number.
   const numbered = menu.map((item, i) => ({ item, number: i + 1 }));
+  // Only categories that have something to order, in the owner's order.
+  const usedKeys = new Set(menu.map(itemCategoryKey));
+  const categoryChips = (categoriesQuery.data ?? []).filter((c) => usedKeys.has(c.id));
+  const chosenCategory = categoryChips.some((c) => c.id === category) ? category : 'all';
   const query = search.trim().toLowerCase();
   const shownMenu = numbered.filter(
     ({ item, number }) =>
-      (category === 'all' || item.category === category) &&
+      (chosenCategory === 'all' || itemCategoryKey(item) === chosenCategory) &&
       (!query || item.name.toLowerCase().includes(query) || String(number) === query)
   );
   const err = (key: string) => (errors[key] ? t(errors[key]) : undefined);
@@ -433,12 +439,17 @@ export default function NewOrderScreen() {
             }}
             accessibilityRole="radiogroup"
           >
-            {categories.map((c) => (
+            <Pill
+              label={t('orders.category.all')}
+              selected={chosenCategory === 'all'}
+              onPress={() => setCategory('all')}
+            />
+            {categoryChips.map((c) => (
               <Pill
-                key={c}
-                label={t(`orders.category.${c}`)}
-                selected={category === c}
-                onPress={() => setCategory(c)}
+                key={c.id}
+                label={i18n.language === 'am' && c.nameAm ? c.nameAm : c.name}
+                selected={chosenCategory === c.id}
+                onPress={() => setCategory(c.id)}
               />
             ))}
           </ScrollView>
