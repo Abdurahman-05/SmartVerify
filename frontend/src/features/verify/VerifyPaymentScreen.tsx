@@ -37,9 +37,9 @@ export default function VerifyPaymentScreen() {
   const startScan = () => {
     if (!account) return;
     setAccount(account);
-    // Same bank steps as a restaurant bill: which bank paid, then its receipt QR or a photo.
-    useReceiptFlow.getState().setMode('normal');
-    router.push('/verify-bank');
+    // No bank to choose: the receipt QR or picture tells which bank paid.
+    useReceiptFlow.getState().startAuto();
+    router.push('/verify-bank/auto');
   };
 
   return (

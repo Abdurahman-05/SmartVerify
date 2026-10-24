@@ -40,15 +40,21 @@ export const getFailedChecks = (period: Period) =>
  * POST /verify/read-reference — the Transaction ID and text of a receipt picture (base64), read
  * by Gemini on the server (OCR when Gemini is unavailable).
  */
-export const readReference = (imageBase64: string, bank: 'CBE' | 'TEL' | 'DAS' | 'BOA' = 'CBE') =>
-  api<{ reference: string | null; text: string; source: 'gemini' | 'ocr' }>(
-    '/verify/read-reference',
-    {
-      method: 'POST',
-      body: { image: imageBase64, bank },
-      timeoutMs: 45_000,
-    }
-  );
+export const readReference = (
+  imageBase64: string,
+  bank: 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'AUTO' = 'CBE'
+) =>
+  api<{
+    /** The bank asked for, or (AUTO) the one the picture is from; null: none we check. */
+    bank: 'CBE' | 'TEL' | 'DAS' | 'BOA' | null;
+    reference: string | null;
+    text: string;
+    source: 'gemini' | 'ocr';
+  }>('/verify/read-reference', {
+    method: 'POST',
+    body: { image: imageBase64, bank },
+    timeoutMs: 45_000,
+  });
 
 /** One reader's result on the dev compare page. */
 export interface ReadResult {

@@ -1043,6 +1043,16 @@
       "body": "The customer sent {{received}} for a {{bill}} bill. Ask the customer: keep the extra as {{name}}'s tip, or give it back in cash?",
       "keepTip": "Keep as tip",
       "giveBack": "Give back in cash"
+    },
+    "auto": {
+      "subtitle": "Scan the receipt QR or use a photo",
+      "title": "Show the customer's receipt",
+      "hint": "Any of these banks: the app finds the bank from the receipt and checks it with that bank.",
+      "banks": "CBE, telebirr, Dashen Bank, Bank of Abyssinia",
+      "anyBank": "Any bank receipt QR",
+      "findingBank": "Finding the bank and the receipt number",
+      "unknownTitle": "Bank not recognised",
+      "unknownBody": "This picture is not a CBE, telebirr, Dashen or BOA receipt, or it is not clear. Scan the receipt QR, or take a clearer photo."
     }
   },
   "devCompare": {
