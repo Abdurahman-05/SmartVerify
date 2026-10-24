@@ -17,6 +17,7 @@ import { colors } from '@/theme/tokens';
 
 import { billLabel } from './billLabel';
 import { useRestaurantPay, type PaymentOutcome } from './restaurantFlow';
+import { useReceiptFlow } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
 
 function Hero({ short, children }: { short: boolean; children: ReactNode }) {
@@ -131,7 +132,8 @@ function ResultView({ outcome, bill }: { outcome: PaymentOutcome; bill: Bill }) 
 
   const scanAgain = () => {
     useVerifyFlow.getState().setAmount(outcome.remaining);
-    router.replace({ pathname: '/scan', params: { mode: 'restaurant' } });
+    useReceiptFlow.getState().setMode('restaurant');
+    router.replace('/verify-bank');
   };
 
   const changeCash = () =>

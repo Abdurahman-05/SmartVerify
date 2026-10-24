@@ -12,6 +12,7 @@ import { Text } from '@/components/ui/Text';
 import { formatDateTime } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
+import { useReceiptFlow } from './receiptFlow';
 import { useVerifyFlow, type VerificationResult } from './verifyFlow';
 
 interface Row {
@@ -170,7 +171,11 @@ function ResultView({ result }: { result: VerificationResult }) {
               <Button
                 label={t('verify.result.tryAgain')}
                 variant="danger"
-                onPress={() => router.replace('/scan')}
+                onPress={() => {
+                  // Again from the bank choice, like the first time.
+                  useReceiptFlow.getState().setMode('normal');
+                  router.replace('/verify-bank');
+                }}
               />
               <Button
                 label={t('verify.result.contactSupport')}
