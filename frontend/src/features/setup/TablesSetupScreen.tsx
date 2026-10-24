@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Plus, RefreshCw } from 'lucide-react-native';
+import { ChevronRight, Layers, Plus, RefreshCw } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Keyboard, Pressable, ScrollView, View } from 'react-native';
@@ -16,33 +16,42 @@ import { Field } from '@/features/orders/Field';
 import { Pill } from '@/features/orders/Pill';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { digitsOnly } from '@/lib/format';
-import { tablesKey, type Table, type TableArea } from '@/lib/restaurant';
+import { tablesKey, type Table } from '@/lib/restaurant';
 import { addTables, getSetupTables, removeTable } from '@/lib/setup';
+import { getTableCategories, tableCategoriesKey, tableCategoryKey } from '@/lib/tableCategories';
+import { useLocalName } from '@/features/menu/useLocalName';
 import { colors } from '@/theme/tokens';
 
-const areas: TableArea[] = ['main', 'upstairs', 'outside'];
 const setupTablesKey = ['setup', 'tables'] as const;
 const MAX_AT_ONCE = 100;
 
-/** Owner/manager: add tables per area and remove the ones not used any more. */
+/** Owner/manager: add tables per category and remove the ones not used any more. */
 export default function TablesSetupScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [area, setArea] = useState<TableArea>('main');
+  const localName = useLocalName();
+  // A category id; empty = the first one.
+  const [picked, setPicked] = useState('');
   const [range, setRange] = useState({ from: '', to: '' });
   const [rangeError, setRangeError] = useState(false);
 
   const query = useQuery({ queryKey: setupTablesKey, queryFn: getSetupTables });
+  const categoriesQuery = useQuery({ queryKey: tableCategoriesKey, queryFn: getTableCategories });
   const { refetch } = query;
+  const { refetch: refetchCategories } = categoriesQuery;
   useFocusEffect(
     useCallback(() => {
       void refetch();
-    }, [refetch])
+      void refetchCategories();
+    }, [refetch, refetchCategories])
   );
+  const categories = categoriesQuery.data ?? [];
+  const area = categories.some((c) => c.id === picked) ? picked : (categories[0]?.id ?? '');
 
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: setupTablesKey });
+    // Also reloads the categories' table counts (their key starts with `tables`).
     void queryClient.invalidateQueries({ queryKey: tablesKey });
   };
   const add = useMutation({
@@ -56,13 +65,14 @@ export default function TablesSetupScreen() {
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/profile'));
 
-  if (query.isPending) return <LoadingView screenTitle={t('setup.tables.title')} onBack={goBack} />;
+  if (query.isPending || categoriesQuery.isPending)
+    return <LoadingView screenTitle={t('setup.tables.title')} onBack={goBack} />;
   if (query.isError && !query.data && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void refetch()} />;
   }
 
   const tables = query.data ?? [];
-  const shown = tables.filter((tb) => tb.area === area);
+  const shown = tables.filter((tb) => tableCategoryKey(tb) === area);
   const nextNumber = shown.reduce((max, tb) => Math.max(max, tb.number), 0) + 1;
 
   const onAdd = () => {
@@ -71,7 +81,7 @@ export default function TablesSetupScreen() {
     const to = Number(range.to || range.from || nextNumber);
     const valid = from >= 1 && to >= from && to <= 999 && to - from < MAX_AT_ONCE;
     setRangeError(!valid);
-    if (valid) add.mutate(Array.from({ length: to - from + 1 }, (_, i) => from + i));
+    if (valid && area) add.mutate(Array.from({ length: to - from + 1 }, (_, i) => from + i));
   };
 
   const confirmRemove = (table: Table) =>
@@ -113,15 +123,34 @@ export default function TablesSetupScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 14 }}
         >
           <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
-            {areas.map((a) => (
+            {categories.map((c) => (
               <Pill
-                key={a}
-                label={t(`orders.area.${a}`)}
-                selected={area === a}
-                onPress={() => setArea(a)}
+                key={c.id}
+                label={localName(c)}
+                selected={area === c.id}
+                onPress={() => setPicked(c.id)}
               />
             ))}
           </View>
+
+          <Pressable
+            onPress={() => router.push('/setup/table-categories')}
+            accessibilityRole="button"
+            className="flex-row items-center gap-3 rounded-[18px] border-2 border-primary bg-primarySoft px-3 py-2.5 active:opacity-80"
+          >
+            <View className="h-11 w-11 items-center justify-center rounded-[12px] bg-primary">
+              <Layers size={22} color={colors.surface} strokeWidth={2.2} />
+            </View>
+            <View className="min-w-0 flex-1">
+              <Text font="bold" className="text-base">
+                {t('categories.manageTables')}
+              </Text>
+              <Text tone="muted" className="text-sm">
+                {t('categories.manageTablesHint')}
+              </Text>
+            </View>
+            <ChevronRight size={22} color={colors.muted} strokeWidth={2.2} />
+          </Pressable>
 
           {shown.length ? (
             <View className="gap-2">

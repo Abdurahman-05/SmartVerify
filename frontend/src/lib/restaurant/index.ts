@@ -2,7 +2,7 @@ import * as real from '@/lib/api/restaurant';
 import { PACKING_FEE_ETB } from '@/lib/mock/fees';
 import * as mock from '@/lib/mock/restaurant';
 
-export type { Fees, SendOrderInput } from '@/lib/api/restaurant';
+export type { Fees, SendOrderInput, Table } from '@/lib/api/restaurant';
 export type {
   DeliveryArea,
   MenuCategory,
@@ -11,7 +11,6 @@ export type {
   OrderNote,
   OrderTarget,
   OrderType,
-  Table,
   TableArea,
 } from '@/lib/mock/restaurant';
 
@@ -22,7 +21,9 @@ export type MenuItem = mock.MenuItem & { categoryId?: string };
 export const USE_MOCK_RESTAURANT = process.env.EXPO_PUBLIC_USE_MOCK_RESTAURANT === 'true';
 
 export const getMenu: () => Promise<MenuItem[]> = USE_MOCK_RESTAURANT ? mock.getMenu : real.getMenu;
-export const getTables = USE_MOCK_RESTAURANT ? mock.getTables : real.getTables;
+export const getTables: () => Promise<real.Table[]> = USE_MOCK_RESTAURANT
+  ? mock.getTables
+  : real.getTables;
 export const getOrder = USE_MOCK_RESTAURANT ? mock.getOrder : real.getOrder;
 
 export const sendOrder = (input: real.SendOrderInput, idempotencyKey?: string) =>

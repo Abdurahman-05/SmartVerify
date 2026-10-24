@@ -1,5 +1,4 @@
 import type { Bill, BillType } from '@/features/bills/types';
-import type { TableArea } from '@/lib/mock/restaurant';
 
 import { api, ApiError } from './client';
 
@@ -8,7 +7,8 @@ interface ServerBillListItem {
   id: string;
   type: BillType;
   tableNumber: number | null;
-  tableArea: TableArea | null;
+  tableCategory: string | null;
+  tableCategoryAm: string | null;
   guests: number | null;
   customerName: string | null;
   deliveryAreaName: string | null;
@@ -38,7 +38,8 @@ const base = (
   orderNo: b.orderNo,
   type: b.type,
   tableNo: b.tableNumber ?? undefined,
-  tableArea: b.tableArea ?? undefined,
+  tableArea: b.tableCategory ?? undefined,
+  tableAreaAm: b.tableCategoryAm ?? undefined,
   guests: b.guests ?? undefined,
   customerName: b.customerName ?? undefined,
   area: b.deliveryAreaName ?? undefined,

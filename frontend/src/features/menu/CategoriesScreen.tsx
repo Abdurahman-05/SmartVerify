@@ -13,22 +13,19 @@ import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
-import {
-  getMenuCategories,
-  menuCategoriesKey,
-  removeMenuCategory,
-  type MenuCategoryEntry,
-} from '@/lib/menuCategories';
 import { colors } from '@/theme/tokens';
 
+import { categoryKinds, type CategoryKind, type CategoryRowData } from './categoryKinds';
 import { useLocalName } from './useLocalName';
 
 function CategoryRow({
   category,
+  countKey,
   onEdit,
   onRemove,
 }: {
-  category: MenuCategoryEntry;
+  category: CategoryRowData;
+  countKey: string;
   onEdit: () => void;
   onRemove: () => void;
 }) {
@@ -42,7 +39,7 @@ function CategoryRow({
           {localName(category)}
         </Text>
         <Text tone="muted" className="text-sm">
-          {t('categories.itemCount', { count: category.itemCount })}
+          {t(countKey, { count: category.count })}
         </Text>
       </View>
       <Pressable
@@ -65,14 +62,15 @@ function CategoryRow({
   );
 }
 
-/** Owner and manager: the menu categories (hot drinks, fast food…), with edit and delete. */
-export default function CategoriesScreen() {
+/** Owner and manager: menu categories (hot drinks, fast food…) or table categories (VIP, garden…). */
+export default function CategoriesScreen({ kind = 'menu' }: { kind?: CategoryKind }) {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
   const localName = useLocalName();
+  const config = categoryKinds[kind];
 
-  const query = useQuery({ queryKey: menuCategoriesKey, queryFn: getMenuCategories });
+  const query = useQuery({ queryKey: config.queryKey, queryFn: config.list });
   const { refetch } = query;
   useFocusEffect(
     useCallback(() => {
@@ -81,20 +79,20 @@ export default function CategoriesScreen() {
   );
 
   const remove = useMutation({
-    mutationFn: removeMenuCategory,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['menu'] }),
+    mutationFn: config.remove,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: config.refreshKey }),
   });
 
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/menu'));
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace(config.backRoute));
 
   if (query.isPending) return <LoadingView screenTitle={t('categories.title')} onBack={goBack} />;
   if (query.isError && !query.data && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void refetch()} />;
   }
 
-  const confirmRemove = (category: MenuCategoryEntry) => {
-    // A category with items must be emptied first: say so now, before asking.
-    if (category.itemCount > 0) {
+  const confirmRemove = (category: CategoryRowData) => {
+    // A category with something in it must be emptied first: say so now, before asking.
+    if (category.count > 0) {
       Alert.alert(t('categories.removeFailedTitle'), t('categories.errors.notEmpty'));
       return;
     }
@@ -116,11 +114,11 @@ export default function CategoriesScreen() {
     <SafeAreaView className="flex-1 bg-background">
       <ScreenHeader
         title={t('categories.title')}
-        subtitle={t('categories.subtitle')}
+        subtitle={t(kind === 'menu' ? 'categories.subtitle' : 'categories.tableSubtitle')}
         onBack={goBack}
         right={
           <Pressable
-            onPress={() => router.push('/menu/category')}
+            onPress={() => router.push(config.formPath)}
             accessibilityRole="button"
             accessibilityLabel={t('categories.addTitle')}
             className="h-11 flex-row items-center gap-1 rounded-[22px] bg-primary pl-3 pr-4 active:opacity-80"
@@ -150,7 +148,8 @@ export default function CategoriesScreen() {
           renderItem={({ item }) => (
             <CategoryRow
               category={item}
-              onEdit={() => router.push({ pathname: '/menu/category', params: { id: item.id } })}
+              countKey={config.countKey}
+              onEdit={() => router.push({ pathname: config.formPath, params: { id: item.id } })}
               onRemove={() => confirmRemove(item)}
             />
           )}

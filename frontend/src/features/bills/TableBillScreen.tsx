@@ -17,16 +17,18 @@ import { billKey, getBill } from '@/lib/bills';
 import { isNetworkError } from '@/lib/errors';
 
 import { BillPill } from './BillPill';
+import { areaLabel } from '@/lib/areaLabel';
+
 import type { Bill } from './types';
 
 function useHeading(bill: Bill) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   switch (bill.type) {
     case 'dine':
       return {
         title: t('bills.titleTable', { number: bill.tableNo }),
         heroLabel: [
-          bill.tableArea ? t(`orders.area.${bill.tableArea}`) : null,
+          bill.tableArea ? areaLabel(t, i18n.language, bill.tableArea, bill.tableAreaAm) : null,
           bill.guests ? t('bills.guests', { count: bill.guests }) : null,
         ]
           .filter(Boolean)

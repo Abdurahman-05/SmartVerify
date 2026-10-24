@@ -5,12 +5,14 @@ import type {
   Order,
   OrderNote,
   OrderTarget,
-  Table,
-  TableArea,
+  Table as BaseTable,
 } from '@/lib/mock/restaurant';
 
 import { api, ApiError } from './client';
 import { newIdempotencyKey } from './idempotency';
+
+/** A table. `area` is its category's name; the offline mock only has fixed areas and no ids. */
+export type Table = BaseTable & { categoryId?: string; categoryNameAm?: string | null };
 
 /** The delivery target as New order sends it to the server (the server needs the area id). */
 export type SendOrderInput = Omit<NewOrderInput, 'target'> & {
@@ -28,7 +30,7 @@ interface BillDetail {
   type: 'dine' | 'takeaway' | 'delivery';
   tableId: string | null;
   tableNumber: number | null;
-  tableArea: TableArea | null;
+  tableCategory: string | null;
   customerName: string | null;
   customerPhone: string | null;
   deliveryAreaName: string | null;
@@ -59,10 +61,30 @@ export async function getMenu(): Promise<MenuItem[]> {
   return items.filter((item) => item.active);
 }
 
+/** A table as the server sends it (GET and POST /tables). */
+export interface ServerTable {
+  id: string;
+  number: number;
+  categoryId: string;
+  categoryName: string;
+  categoryNameAm: string | null;
+  busy: boolean;
+}
+
+/** The app's table: `area` is the category's name. */
+export const toTables = (tables: ServerTable[]): Table[] =>
+  tables.map(({ id, number, categoryId, categoryName, categoryNameAm, busy }) => ({
+    id,
+    number,
+    area: categoryName,
+    categoryId,
+    categoryNameAm,
+    busy,
+  }));
+
 /** GET /tables — tables in use; busy = has an open dine-in bill. */
 export async function getTables(): Promise<Table[]> {
-  const tables = await api<(Table & { openBillId: string | null })[]>('/tables');
-  return tables.map(({ id, number, area, busy }) => ({ id, number, area, busy }));
+  return toTables(await api<ServerTable[]>('/tables'));
 }
 
 /** GET /fees — packing fee and delivery areas with their usual fee. */
@@ -77,7 +99,7 @@ function toOrder(bill: BillDetail): Order {
           type: 'dineIn',
           tableId: bill.tableId ?? '',
           tableNumber: bill.tableNumber ?? 0,
-          area: bill.tableArea ?? 'main',
+          area: bill.tableCategory ?? '',
         }
       : bill.type === 'takeaway'
         ? {

@@ -14,7 +14,8 @@ export interface MenuItem {
   category: MenuCategory;
 }
 
-export type TableArea = 'main' | 'upstairs' | 'outside';
+/** A table category's name (the offline mock still uses the keys 'main', 'upstairs', 'outside'). */
+export type TableArea = string;
 
 export interface Table {
   id: string;

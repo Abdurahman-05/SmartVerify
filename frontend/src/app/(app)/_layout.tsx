@@ -39,6 +39,10 @@ export default function AppLayout() {
       <Stack.Screen name="menu/packs/[key]" />
       <Stack.Screen name="setup/tables" />
       <Stack.Screen name="setup/fees" />
+      <Stack.Screen name="setup/table-categories" />
+      <Stack.Screen name="setup/table-category" />
+      <Stack.Screen name="menu/categories" />
+      <Stack.Screen name="menu/category" />
       <Stack.Screen name="kitchen/[id]" />
       <Stack.Screen name="admin" />
       <Stack.Screen name="tips-admin" />

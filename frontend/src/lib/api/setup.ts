@@ -1,16 +1,13 @@
-import type { Table, TableArea } from '@/lib/mock/restaurant';
 import type { FeesInput } from '@/lib/mock/setup';
 
 import { api } from './client';
-import type { Fees } from './restaurant';
+import { toTables, type Fees, type ServerTable, type Table } from './restaurant';
 
-/** POST /tables — adds table numbers to an area (existing ones are skipped). Returns all tables. */
-export async function addTables(area: TableArea, numbers: number[]): Promise<Table[]> {
-  const tables = await api<(Table & { openBillId: string | null })[]>('/tables', {
-    method: 'POST',
-    body: { area, numbers },
-  });
-  return tables.map(({ id, number, area: a, busy }) => ({ id, number, area: a, busy }));
+/** POST /tables — adds table numbers to a category (existing ones are skipped). Returns all tables. */
+export async function addTables(categoryId: string, numbers: number[]): Promise<Table[]> {
+  return toTables(
+    await api<ServerTable[]>('/tables', { method: 'POST', body: { categoryId, numbers } })
+  );
 }
 
 /** DELETE /tables/:id — removes a table from use (TABLE_BUSY while it has an open bill). */

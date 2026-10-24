@@ -5,11 +5,11 @@ import { Pressable, View } from 'react-native';
 import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
-import type { Table, TableArea } from '@/lib/restaurant';
+import { areaLabel } from '@/lib/areaLabel';
+import type { Table } from '@/lib/restaurant';
+import { tableCategoryKey } from '@/lib/tableCategories';
 
 import { Pill } from './Pill';
-
-const areas: TableArea[] = ['main', 'upstairs', 'outside'];
 
 interface TableSheetProps {
   visible: boolean;
@@ -20,10 +20,20 @@ interface TableSheetProps {
 }
 
 export function TableSheet({ visible, tables, currentId, onSelect, onClose }: TableSheetProps) {
-  const { t } = useTranslation();
-  const currentArea = tables.find((tb) => tb.id === currentId)?.area ?? 'main';
-  const [area, setArea] = useState<TableArea>(currentArea);
-  const shown = tables.filter((tb) => tb.area === area);
+  const { t, i18n } = useTranslation();
+  // One tab per category that has tables (the server sends them in the owner's order).
+  const groups = tables.filter(
+    (tb, index) =>
+      tables.findIndex((other) => tableCategoryKey(other) === tableCategoryKey(tb)) === index
+  );
+  const current = tables.find((tb) => tb.id === currentId);
+  const [picked, setPicked] = useState(current ? tableCategoryKey(current) : null);
+  const area = groups.some((g) => tableCategoryKey(g) === picked)
+    ? picked
+    : groups[0]
+      ? tableCategoryKey(groups[0])
+      : null;
+  const shown = tables.filter((tb) => tableCategoryKey(tb) === area);
 
   return (
     <BottomSheet visible={visible} onClose={onClose}>
@@ -31,13 +41,13 @@ export function TableSheet({ visible, tables, currentId, onSelect, onClose }: Ta
         {t('orders.chooseTable')}
       </Text>
       <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
-        {areas.map((a) => (
+        {groups.map((g) => (
           <Pill
-            key={a}
-            label={t(`orders.area.${a}`)}
-            selected={area === a}
+            key={tableCategoryKey(g)}
+            label={areaLabel(t, i18n.language, g.area, g.categoryNameAm)}
+            selected={area === tableCategoryKey(g)}
             dark
-            onPress={() => setArea(a)}
+            onPress={() => setPicked(tableCategoryKey(g))}
           />
         ))}
       </View>

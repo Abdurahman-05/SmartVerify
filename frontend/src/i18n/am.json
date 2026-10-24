@@ -1133,6 +1133,13 @@
       "name": "የምድቡን ስም ያስገቡ።",
       "duplicate": "በዚህ ስም ምድብ አስቀድሞ አለዎት።",
       "notEmpty": "ምድቡ ባዶ አይደለም። መጀመሪያ ውስጡ ያለውን ያንቀሳቅሱ ወይም ያጥፉ።"
-    }
+    },
+    "tableSubtitle": "ጠረጴዛዎችዎን እንደፈለጉ ይመድቡ",
+    "tableNamePlaceholder": "ለምሳሌ VIP",
+    "tableNameAmPlaceholder": "ለምሳሌ ልዩ",
+    "tableCount_one": "{{count}} ጠረጴዛ",
+    "tableCount_other": "{{count}} ጠረጴዛዎች",
+    "manageTables": "የጠረጴዛ ምድቦችን ያስተዳድሩ",
+    "manageTablesHint": "ዋናው ወለል፣ VIP፣ የአትክልት ስፍራ… የራስዎን ይፍጠሩ"
   }
 }

@@ -9,14 +9,22 @@ import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { ResultBadge } from '@/components/ui/ResultBadge';
 import { Text } from '@/components/ui/Text';
-import { getOrder, type Order } from '@/lib/restaurant';
+import { areaLabel } from '@/lib/areaLabel';
+import { getOrder, getTables, tablesKey, type Order } from '@/lib/restaurant';
 
 function useTargetLabel(order: Order) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { target } = order;
+  // The Amharic name of the table's category comes from the loaded tables, when they are there.
+  const { data: tables } = useQuery({ queryKey: tablesKey, queryFn: getTables });
   switch (target.type) {
     case 'dineIn':
-      return `${t('orders.table', { number: target.tableNumber })} · ${t(`orders.area.${target.area}`)}`;
+      return `${t('orders.table', { number: target.tableNumber })} · ${areaLabel(
+        t,
+        i18n.language,
+        target.area,
+        tables?.find((table) => table.id === target.tableId)?.categoryNameAm
+      )}`;
     case 'takeaway':
       return t('orders.sentTakeaway', { name: target.customerName });
     case 'delivery':

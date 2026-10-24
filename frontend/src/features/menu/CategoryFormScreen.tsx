@@ -15,12 +15,8 @@ import { Input } from '@/components/ui/Input';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { errorMessageKey } from '@/lib/errors';
-import {
-  addMenuCategory,
-  getMenuCategories,
-  menuCategoriesKey,
-  updateMenuCategory,
-} from '@/lib/menuCategories';
+
+import { categoryKinds, type CategoryKind } from './categoryKinds';
 
 const schema = z.object({
   name: z.string().trim().min(1, 'categories.errors.name').max(40, 'categories.errors.name'),
@@ -29,17 +25,18 @@ const schema = z.object({
 
 type Values = z.infer<typeof schema>;
 
-/** Add a menu category, or rename one when opened with `?id=`. */
-export default function CategoryFormScreen() {
+/** Add a category, or rename one when opened with `?id=`. Works for menu and table categories. */
+export default function CategoryFormScreen({ kind = 'menu' }: { kind?: CategoryKind }) {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const config = categoryKinds[kind];
   const { id } = useLocalSearchParams<{ id?: string }>();
   const isEdit = Boolean(id);
 
   const { data: categories, isPending } = useQuery({
-    queryKey: menuCategoriesKey,
-    queryFn: getMenuCategories,
+    queryKey: config.queryKey,
+    queryFn: config.list,
     enabled: isEdit,
   });
   const existing = categories?.find((category) => category.id === id);
@@ -59,18 +56,18 @@ export default function CategoryFormScreen() {
     if (existing) reset({ name: existing.name, nameAm: existing.nameAm ?? '' });
   }, [existing, reset]);
 
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/menu/categories'));
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace(config.listRoute));
 
   const mutation = useMutation({
     mutationFn: (values: Values) => {
       const name = values.name.trim();
       const nameAm = values.nameAm.trim();
       return id
-        ? updateMenuCategory(id, { name, nameAm: nameAm || null })
-        : addMenuCategory({ name, ...(nameAm && { nameAm }) });
+        ? config.update(id, { name, nameAm: nameAm || null })
+        : config.add({ name, ...(nameAm && { nameAm }) });
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['menu'] });
+      void queryClient.invalidateQueries({ queryKey: config.refreshKey });
       goBack();
     },
   });
@@ -94,7 +91,9 @@ export default function CategoryFormScreen() {
           render={({ field }) => (
             <Input
               label={t('categories.name')}
-              placeholder={t('categories.namePlaceholder')}
+              placeholder={t(
+                kind === 'menu' ? 'categories.namePlaceholder' : 'categories.tableNamePlaceholder'
+              )}
               value={field.value}
               onChangeText={field.onChange}
               onBlur={field.onBlur}
@@ -110,7 +109,11 @@ export default function CategoryFormScreen() {
           render={({ field }) => (
             <Input
               label={t('categories.nameAm')}
-              placeholder={t('categories.nameAmPlaceholder')}
+              placeholder={t(
+                kind === 'menu'
+                  ? 'categories.nameAmPlaceholder'
+                  : 'categories.tableNameAmPlaceholder'
+              )}
               value={field.value}
               onChangeText={field.onChange}
               onBlur={field.onBlur}

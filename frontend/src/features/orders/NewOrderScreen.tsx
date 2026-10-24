@@ -46,6 +46,7 @@ import {
   type SendOrderInput,
   type Table,
 } from '@/lib/restaurant';
+import { areaLabel } from '@/lib/areaLabel';
 import { getMenuCategories, itemCategoryKey, menuCategoriesKey } from '@/lib/menuCategories';
 import { useBrandColors } from '@/store/theme';
 import { digitsOnly } from '@/lib/format';
@@ -284,7 +285,9 @@ export default function NewOrderScreen() {
               <View className="flex-1">
                 <Text font="semibold" tone="inverse" className="text-sm opacity-90">
                   {table
-                    ? t('orders.orderingFor', { area: t(`orders.area.${table.area}`) })
+                    ? t('orders.orderingFor', {
+                        area: areaLabel(t, i18n.language, table.area, table.categoryNameAm),
+                      })
                     : t('orders.noTable')}
                 </Text>
                 <Text

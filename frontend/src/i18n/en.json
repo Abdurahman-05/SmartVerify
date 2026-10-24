@@ -1133,6 +1133,13 @@
       "name": "Enter the category name.",
       "duplicate": "You already have a category with this name.",
       "notEmpty": "This category is not empty. Move or delete what is inside first."
-    }
+    },
+    "tableSubtitle": "Group your tables your way",
+    "tableNamePlaceholder": "e.g. VIP",
+    "tableNameAmPlaceholder": "e.g. ልዩ",
+    "tableCount_one": "{{count}} table",
+    "tableCount_other": "{{count}} tables",
+    "manageTables": "Manage table categories",
+    "manageTablesHint": "Main floor, VIP, garden… make your own"
   }
 }

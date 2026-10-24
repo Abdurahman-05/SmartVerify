@@ -8,6 +8,8 @@ export interface Bill {
   type: BillType;
   tableNo?: number;
   tableArea?: TableArea;
+  /** Amharic name of the table's category (the server sends it when there is one). */
+  tableAreaAm?: string;
   guests?: number;
   customerName?: string;
   phone?: string;
