@@ -1,9 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import {
   ChefHat,
   Info,
   Save,
+  Shuffle,
   UserCog,
   UtensilsCrossed,
   type LucideIcon,
@@ -14,18 +16,19 @@ import { Pressable, View } from 'react-native';
 import { z } from 'zod';
 
 import { Button } from '@/components/ui/Button';
+import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { Input } from '@/components/ui/Input';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Switch } from '@/components/ui/Switch';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
+import { ApiError } from '@/lib/api/client';
+import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
+import { addStaff, randomPin, staffKey, type StaffRole } from '@/lib/staff';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
-
-import { useStaff } from './store';
-import type { Staff, StaffRole } from './types';
 
 const STAFF_PIN_DIGITS = 4;
 
@@ -45,21 +48,6 @@ const roleOptions: { role: StaffRole; icon: LucideIcon }[] = [
   { role: 'chef', icon: ChefHat },
   { role: 'manager', icon: UserCog },
 ];
-
-function buildStaff(values: Values): Staff {
-  const isWaiter = values.role === 'waiter';
-  const isManager = values.role === 'manager';
-  return {
-    id: `staff-${Date.now()}`,
-    name: values.name.trim(),
-    phone: values.phone,
-    pin: values.pin,
-    role: values.role,
-    canChangeDeliveryFee: isManager || (isWaiter && values.canChangeDeliveryFee),
-    canSeeReports: isManager || (isWaiter && values.canSeeReports),
-    active: true,
-  };
-}
 
 function PermissionRow({
   label,
@@ -88,13 +76,14 @@ export default function AddStaffScreen() {
   const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const isOwner = useSession((s) => s.user?.role === 'owner');
-  const addStaff = useStaff((s) => s.addStaff);
 
   const {
     control,
     handleSubmit,
     setError,
+    setValue,
     formState: { errors },
   } = useForm<Values>({
     resolver: zodResolver(schema),
@@ -112,15 +101,38 @@ export default function AddStaffScreen() {
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/staff'));
   const err = (message?: string) => (message ? t(message) : undefined);
 
+  const mutation = useMutation({
+    mutationFn: (values: Values) => {
+      const isWaiter = values.role === 'waiter';
+      return addStaff({
+        name: values.name.trim(),
+        phone: values.phone,
+        pin: values.pin,
+        role: values.role,
+        // Only waiters use these two; managers can do both anyway.
+        canChangeDeliveryFee: isWaiter && values.canChangeDeliveryFee,
+        canSeeReports: isWaiter && values.canSeeReports,
+      });
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: staffKey });
+      goBack();
+    },
+    onError: (error) => {
+      // A taken phone number is shown under the phone field, not as a popup.
+      const phoneTaken =
+        (error instanceof ApiError && error.code === 'PHONE_TAKEN') ||
+        (error instanceof Error && error.message === 'PHONE_TAKEN');
+      if (phoneTaken) {
+        setError('phone', { message: 'staff.errors.phoneTaken' });
+        mutation.reset();
+      }
+    },
+  });
+
   const save = handleSubmit((values) => {
-    const { owner, staff } = useStaff.getState();
-    if (owner.phone === values.phone || staff.some((m) => m.phone === values.phone)) {
-      setError('phone', { message: 'staff.errors.phoneTaken' });
-      return;
-    }
     if (values.role === 'manager' && !isOwner) return;
-    addStaff(buildStaff(values));
-    goBack();
+    mutation.mutate(values);
   });
 
   return (
@@ -228,6 +240,13 @@ export default function AddStaffScreen() {
               {t('staff.pinNote')}
             </Text>
           </View>
+          <Button
+            label={t('staff.generatePin')}
+            icon={Shuffle}
+            variant="outline"
+            size="md"
+            onPress={() => setValue('pin', randomPin(), { shouldValidate: true })}
+          />
         </View>
       </View>
 
@@ -264,8 +283,21 @@ export default function AddStaffScreen() {
 
       <View className="min-h-6 flex-1" />
 
+      <ErrorDialog
+        visible={mutation.isError}
+        title={t('staff.saveFailedTitle')}
+        message={t(errorMessageKey(mutation.error))}
+        actionLabel={t('errors.retry')}
+        onClose={mutation.reset}
+      />
+
       <View className="gap-2.5 px-4 pb-6 pt-3">
-        <Button label={t('staff.save')} icon={Save} onPress={save} />
+        <Button
+          label={t('staff.save')}
+          icon={Save}
+          disabled={mutation.isPending}
+          onPress={() => void save()}
+        />
         <Button label={t('staff.cancel')} variant="outline" size="md" onPress={goBack} />
       </View>
     </FormScreen>

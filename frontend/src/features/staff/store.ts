@@ -21,7 +21,9 @@ const seedOwner: OwnerAccount = {
   },
 };
 
-const staffMember = (s: Omit<Staff, 'canChangeDeliveryFee' | 'canSeeReports' | 'active'> & Partial<Staff>): Staff => ({
+const staffMember = (
+  s: Omit<Staff, 'canChangeDeliveryFee' | 'canSeeReports' | 'active'> & Partial<Staff>
+): Staff => ({
   canChangeDeliveryFee: false,
   canSeeReports: false,
   active: true,
@@ -29,8 +31,20 @@ const staffMember = (s: Omit<Staff, 'canChangeDeliveryFee' | 'canSeeReports' | '
 });
 
 const seedStaff: Staff[] = [
-  staffMember({ id: 'waiter-dawit', name: 'Dawit G.', phone: '911111111', pin: '1111', role: 'waiter' }),
-  staffMember({ id: 'waiter-selam', name: 'Selam T.', phone: '922222222', pin: '2222', role: 'waiter' }),
+  staffMember({
+    id: 'waiter-dawit',
+    name: 'Dawit G.',
+    phone: '911111111',
+    pin: '1111',
+    role: 'waiter',
+  }),
+  staffMember({
+    id: 'waiter-selam',
+    name: 'Selam T.',
+    phone: '922222222',
+    pin: '2222',
+    role: 'waiter',
+  }),
   staffMember({ id: 'chef-hana', name: 'Hana M.', phone: '933333333', pin: '3333', role: 'chef' }),
   staffMember({
     id: 'manager-yonas',
@@ -58,7 +72,9 @@ export const useStaff = create<StaffState>((set) => ({
   staff: seedStaff,
   setOwner: (owner) => set({ owner }),
   setOwnerPlan: (plan, subscription) =>
-    set((s) => ({ owner: { ...s.owner, plan, subscription: subscription ?? s.owner.subscription } })),
+    set((s) => ({
+      owner: { ...s.owner, plan, subscription: subscription ?? s.owner.subscription },
+    })),
   addStaff: (member) => set((s) => ({ staff: [...s.staff, member] })),
   setActive: (id, active) =>
     set((s) => ({ staff: s.staff.map((m) => (m.id === id ? { ...m, active } : m)) })),

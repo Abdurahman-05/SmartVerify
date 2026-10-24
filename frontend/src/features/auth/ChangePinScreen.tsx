@@ -15,7 +15,7 @@ import { ApiError } from '@/lib/api/client';
 import { changePin } from '@/lib/auth';
 import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly } from '@/lib/format';
-import { useSession } from '@/store/session';
+import { homeRouteFor, useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
 import { PinVisibilityButton } from './PinVisibilityButton';
@@ -27,7 +27,11 @@ type Field = 'current' | 'next' | 'again';
 export default function ChangePinScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const role = useSession((s) => s.user?.role);
+  const user = useSession((s) => s.user);
+  const pinChanged = useSession((s) => s.pinChanged);
+  const role = user?.role;
+  // Signed in with a PIN the owner or manager set: choosing a new one is required, not optional.
+  const forced = Boolean(user?.pinIsTemporary);
   const length = role === 'owner' ? PIN_LENGTH : STAFF_PIN_LENGTH;
   const [values, setValues] = useState<Record<Field, string>>({ current: '', next: '', again: '' });
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
@@ -37,8 +41,13 @@ export default function ChangePinScreen() {
   const mutation = useMutation({
     mutationFn: () => changePin(values.current, values.next),
     onSuccess: () => {
-      setSaved(true);
       setValues({ current: '', next: '', again: '' });
+      if (forced && user) {
+        pinChanged();
+        router.replace(homeRouteFor({ ...user, pinIsTemporary: false }));
+        return;
+      }
+      setSaved(true);
     },
     onError: (error) => {
       // A wrong current PIN is shown under that field, not as a popup.
@@ -85,11 +94,18 @@ export default function ChangePinScreen() {
     <FormScreen>
       <ScreenHeader
         title={t('pin.changeTitle')}
-        subtitle={t('pin.changeSubtitle')}
-        onBack={goBack}
+        subtitle={t(forced ? 'pin.forcedSubtitle' : 'pin.changeSubtitle')}
+        onBack={forced ? undefined : goBack}
       />
 
       <View className="gap-3.5 px-4 pt-2">
+        {forced ? (
+          <View className="rounded-[16px] bg-warnBg p-3">
+            <Text font="semibold" className="text-base">
+              {t('pin.forcedNote')}
+            </Text>
+          </View>
+        ) : null}
         {saved ? (
           <View
             className="flex-row items-start gap-2 rounded-[16px] bg-successBg p-3"
@@ -115,7 +131,9 @@ export default function ChangePinScreen() {
           disabled={mutation.isPending}
           onPress={save}
         />
-        <Button label={t('common.cancel')} variant="outline" size="md" onPress={goBack} />
+        {forced ? null : (
+          <Button label={t('common.cancel')} variant="outline" size="md" onPress={goBack} />
+        )}
       </View>
 
       <ErrorDialog

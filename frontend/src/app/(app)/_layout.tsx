@@ -32,6 +32,7 @@ export default function AppLayout() {
       <Stack.Screen name="help" />
       <Stack.Screen name="staff/index" />
       <Stack.Screen name="staff/add" />
+      <Stack.Screen name="staff/[id]" />
       <Stack.Screen name="menu/index" />
       <Stack.Screen name="menu/edit" />
       <Stack.Screen name="menu/packs/index" />

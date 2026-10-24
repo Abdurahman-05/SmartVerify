@@ -1,77 +1,98 @@
-import { useRouter } from 'expo-router';
-import { Check, Plus } from 'lucide-react-native';
+import { useQuery } from '@tanstack/react-query';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { Check, ChevronRight, Plus, RefreshCw } from 'lucide-react-native';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, FlatList, Pressable, View } from 'react-native';
+import { FlatList, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Button } from '@/components/ui/Button';
+import { LoadingView } from '@/components/ui/LoadingView';
+import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { useSession } from '@/store/session';
+import { errorMessageKey, isNetworkError } from '@/lib/errors';
+import { formatPhone } from '@/lib/format';
+import { getStaff, staffKey, type StaffMember } from '@/lib/staff';
 import { colors } from '@/theme/tokens';
 
-import { useStaff } from './store';
-import type { Staff } from './types';
-
-function RolePill({ role }: { role: Staff['role'] }) {
+export function RolePill({ role }: { role: StaffMember['role'] }) {
   const { t } = useTranslation();
   const isManager = role === 'manager';
   return (
-    <View className={`rounded-[14px] py-[3px] pl-2 pr-2.5 ${isManager ? 'bg-text' : 'bg-successBg'}`}>
-      <Text font="bold" className="text-sm" style={{ color: isManager ? colors.surface : colors.successFg }}>
+    <View
+      className={`rounded-[14px] py-[3px] pl-2 pr-2.5 ${isManager ? 'bg-text' : 'bg-successBg'}`}
+    >
+      <Text
+        font="bold"
+        className="text-sm"
+        style={{ color: isManager ? colors.surface : colors.successFg }}
+      >
         {t(`roles.${role}`)}
       </Text>
     </View>
   );
 }
 
-function ActivePill({ active }: { active: boolean }) {
+export function ActivePill({ active }: { active: boolean }) {
   const { t } = useTranslation();
   return (
     <View
       className={`flex-row items-center gap-1 rounded-[14px] py-[3px] pl-2 pr-2.5 ${active ? 'bg-successBg' : 'bg-neutralBg'}`}
     >
       {active ? <Check size={14} color={colors.successFg} strokeWidth={2.6} /> : null}
-      <Text font="bold" className="text-sm" style={{ color: active ? colors.successFg : colors.muted }}>
-        {active ? t('staff.active') : t('staff.off')}
+      <Text
+        font="bold"
+        className="text-sm"
+        style={{ color: active ? colors.successFg : colors.muted }}
+      >
+        {active ? t('staff.active') : t('staff.inactive')}
       </Text>
     </View>
   );
 }
 
+function PinPill() {
+  const { t } = useTranslation();
+  return (
+    <View className="rounded-[14px] bg-warnBg py-[3px] pl-2 pr-2.5">
+      <Text font="bold" className="text-sm" style={{ color: colors.warnFg }}>
+        {t('staff.tempPin')}
+      </Text>
+    </View>
+  );
+}
+
+/** Owner and manager: the team. Tap a person to edit, reset a forgotten PIN, or turn them on/off. */
 export default function StaffScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const user = useSession((s) => s.user);
-  const staff = useStaff((s) => s.staff);
-  const setActive = useStaff((s) => s.setActive);
 
+  const query = useQuery({ queryKey: staffKey, queryFn: getStaff });
+  const { refetch } = query;
+  // Lists refetch when the screen comes back into view (e.g. after adding or editing someone).
+  useFocusEffect(
+    useCallback(() => {
+      void refetch();
+    }, [refetch])
+  );
+
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/profile'));
+
+  if (query.isPending) return <LoadingView screenTitle={t('staff.title')} onBack={goBack} />;
+  if (query.isError && !query.data && isNetworkError(query.error)) {
+    return <NoConnection onRetry={() => void refetch()} />;
+  }
+
+  const staff = query.data ?? [];
   const activeCount = staff.filter((m) => m.active).length;
-  const isOwner = user?.role === 'owner';
-
-  const canToggle = (member: Staff) => member.id !== user?.userId && (isOwner || member.role !== 'manager');
-
-  const confirmToggle = (member: Staff) => {
-    const turningOff = member.active;
-    Alert.alert(
-      t(turningOff ? 'staff.setOffTitle' : 'staff.setActiveTitle', { name: member.name }),
-      t(turningOff ? 'staff.setOffBody' : 'staff.setActiveBody'),
-      [
-        { text: t('staff.cancel'), style: 'cancel' },
-        {
-          text: t(turningOff ? 'staff.confirmOff' : 'staff.confirmActive'),
-          style: turningOff ? 'destructive' : 'default',
-          onPress: () => setActive(member.id, !turningOff),
-        },
-      ]
-    );
-  };
 
   return (
     <SafeAreaView className="flex-1 bg-background">
       <ScreenHeader
         title={t('staff.title')}
         subtitle={t('staff.people', { count: staff.length, active: activeCount })}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/profile'))}
+        onBack={goBack}
         right={
           <Pressable
             onPress={() => router.push('/staff/add')}
@@ -87,48 +108,68 @@ export default function StaffScreen() {
         }
       />
 
-      <FlatList
-        data={staff}
-        keyExtractor={(m) => m.id}
-        contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingTop: 6, paddingBottom: 16 }}
-        renderItem={({ item }) => {
-          const enabled = canToggle(item);
-          return (
+      {query.isError ? (
+        <View className="flex-1 items-center justify-center gap-4 px-6">
+          <Text font="semibold" className="text-center text-lg">
+            {t('staff.loadFailed')} {t(errorMessageKey(query.error))}
+          </Text>
+          <View className="w-full">
+            <Button label={t('errors.retry')} icon={RefreshCw} onPress={() => void refetch()} />
+          </View>
+        </View>
+      ) : (
+        <FlatList
+          data={staff}
+          keyExtractor={(m) => m.id}
+          contentContainerStyle={{
+            gap: 8,
+            paddingHorizontal: 16,
+            paddingTop: 6,
+            paddingBottom: 16,
+          }}
+          renderItem={({ item }) => (
             <Pressable
-              onPress={() => confirmToggle(item)}
-              disabled={!enabled}
+              onPress={() => router.push({ pathname: '/staff/[id]', params: { id: item.id } })}
               accessibilityRole="button"
-              accessibilityState={{ disabled: !enabled }}
               accessibilityLabel={t('staff.rowLabel', {
                 name: item.name,
                 role: t(`roles.${item.role}`),
-                state: item.active ? t('staff.active') : t('staff.off'),
+                state: item.active ? t('staff.active') : t('staff.inactive'),
               })}
-              className="flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface px-3 py-2.5 active:bg-background"
+              className={`flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface px-3 py-2.5 active:bg-background ${
+                item.active ? '' : 'opacity-80'
+              }`}
             >
-              <View className="h-12 w-12 items-center justify-center rounded-full bg-primary">
+              <View
+                className={`h-12 w-12 items-center justify-center rounded-full ${item.active ? 'bg-primary' : 'bg-borderStrong'}`}
+              >
                 <Text font="bold" tone="inverse" className="text-xl">
                   {item.name.charAt(0).toUpperCase()}
                 </Text>
               </View>
-              <View className="flex-1">
-                <Text font="bold" className="text-[17px]">
+              <View className="min-w-0 flex-1">
+                <Text font="bold" className="text-[17px]" numberOfLines={1}>
                   {item.name}
+                </Text>
+                <Text tone="muted" className="text-sm">
+                  +251 {formatPhone(item.phone)}
                 </Text>
                 <View className="mt-1 flex-row flex-wrap gap-1.5">
                   <RolePill role={item.role} />
                   <ActivePill active={item.active} />
+                  {item.pinIsTemporary ? <PinPill /> : null}
                 </View>
               </View>
+              <ChevronRight size={22} color={colors.muted} strokeWidth={2.2} />
             </Pressable>
-          );
-        }}
-        ListEmptyComponent={
-          <Text tone="muted" className="pt-8 text-center text-lg">
-            {t('staff.empty')}
-          </Text>
-        }
-      />
+          )}
+          ListEmptyComponent={
+            <Text tone="muted" className="pt-8 text-center text-lg">
+              {t('staff.empty')}
+            </Text>
+          }
+        />
+      )}
     </SafeAreaView>
   );
 }
