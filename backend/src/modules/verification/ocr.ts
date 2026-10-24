@@ -100,6 +100,19 @@ export function findBoaReference(text: string): string | null {
 
 export type PictureBank = 'CBE' | 'TEL' | 'DAS' | 'BOA';
 
+/** Words that only one bank's receipts carry, strongest first. */
+const BANK_WORDS: [PictureBank, RegExp][] = [
+  ['TEL', /transactioninfo\.ethiotelecom|telebirr|ethio\s*telecom|ቴሌብር/i],
+  ['DAS', /dashen|superapp|receipts\.dashenbanksc|ዳሽን/i],
+  ['BOA', /abyssinia|bankofabyssinia|\bBoA\b|አቢሲኒያ/i],
+  ['CBE', /commercial\s*bank\s*of\s*ethiopia|cbe\.com\.et|\bCBE\b|ኢትዮጵያ\s*ንግድ\s*ባንክ/i],
+];
+
+/** Which bank a receipt's text comes from, or null when it does not say. */
+export function detectBank(text: string): PictureBank | null {
+  return BANK_WORDS.find(([, words]) => words.test(text))?.[0] ?? null;
+}
+
 /** The reference to look for in a picture of this bank's receipt. */
 export const findReference = (bank: PictureBank, text: string) =>
   bank === 'TEL'

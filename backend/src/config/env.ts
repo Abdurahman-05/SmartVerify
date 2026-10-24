@@ -76,6 +76,10 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
 }
 
 /** The Gemini key for this bank's pictures: its own key if set, else the shared GEMINI_API_KEY. */
-export function geminiKeyFor(env: Env, bank: 'CBE' | 'TEL' | 'DAS' | 'BOA'): string | undefined {
-  return env[`GEMINI_API_KEY_${bank}`] ?? env.GEMINI_API_KEY;
+export function geminiKeyFor(
+  env: Env,
+  bank: 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'AUTO'
+): string | undefined {
+  // AUTO (bank not known yet) uses the main key.
+  return (bank === 'AUTO' ? undefined : env[`GEMINI_API_KEY_${bank}`]) ?? env.GEMINI_API_KEY;
 }

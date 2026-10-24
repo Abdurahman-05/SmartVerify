@@ -70,10 +70,16 @@ describe('POST /verify/read-reference', () => {
     ocrMock.mockResolvedValueOnce(USSD_TEXT);
     const found = await read(PNG.toString('base64'));
     expect(found.statusCode).toBe(200);
-    expect(found.json()).toEqual({ reference: 'FT26286JZH4B', text: USSD_TEXT, source: 'ocr' });
+    expect(found.json()).toEqual({
+      bank: 'CBE',
+      reference: 'FT26286JZH4B',
+      text: USSD_TEXT,
+      source: 'ocr',
+    });
 
     ocrMock.mockResolvedValueOnce('A photo of a cat');
     expect((await read(PNG.toString('base64'))).json()).toEqual({
+      bank: 'CBE',
       reference: null,
       text: 'A photo of a cat',
       source: 'ocr',
@@ -117,12 +123,14 @@ describe('POST /verify/read-reference with Gemini', () => {
     geminiMock.mockReset();
     ocrMock.mockReset();
     geminiMock.mockResolvedValueOnce({
+      bank: 'CBE',
       reference: 'FT26279V27Y0',
       amount: 2300,
       date: '05/10/2026',
       text: 'Completed ETB2300.00 transfer',
     });
     expect((await readGem()).json()).toEqual({
+      bank: 'CBE',
       reference: 'FT26279V27Y0',
       text: 'Completed ETB2300.00 transfer',
       source: 'gemini',
@@ -141,5 +149,27 @@ describe('POST /verify/read-reference with Gemini', () => {
     ocrMock.mockResolvedValueOnce(USSD_TEXT);
     expect((await readGem()).json()).toMatchObject({ source: 'ocr' });
     expect(geminiMock).toHaveBeenCalledTimes(4);
+  });
+
+  const readAuto = (image: string) =>
+    gemApp.inject({
+      method: 'POST',
+      url: '/api/v1/verify/read-reference',
+      headers: headers(owner),
+      payload: { image, bank: 'AUTO' },
+    });
+
+  it('finds the bank from the words on the receipt, then its reference', async () => {
+    geminiMock.mockReset();
+    geminiMock.mockRejectedValue(new GeminiError('unreachable'));
+    for (const [text, bank, reference] of [
+      ['Commercial Bank of Ethiopia ... Transaction ID: FT26286JZH4B', 'CBE', 'FT26286JZH4B'],
+      ['telebirr ... Your transaction number is DJD2QW8XTE.', 'TEL', 'DJD2QW8XTE'],
+      ['A photo of a cat', null, null],
+    ] as const) {
+      ocrMock.mockResolvedValueOnce(text);
+      expect((await readAuto(PNG.toString('base64'))).json()).toMatchObject({ bank, reference });
+    }
+    geminiMock.mockReset();
   });
 });

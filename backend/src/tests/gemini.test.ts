@@ -28,6 +28,7 @@ describe('readWithGemini', () => {
     );
     vi.stubGlobal('fetch', fetchMock);
     await expect(readWithGemini(PNG, 'image/png', config)).resolves.toEqual({
+      bank: 'CBE',
       reference: 'FT26279V27Y0',
       amount: 2300,
       date: '05/10/2026',

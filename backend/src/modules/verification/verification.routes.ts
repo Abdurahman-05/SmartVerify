@@ -17,7 +17,14 @@ import { GeminiError, readWithGemini } from './gemini.js';
 import { listVerified, recordCheck } from './record-check.js';
 import { geminiKeyFor } from '../../config/env.js';
 import { readWithUnlimitedOcr, UnlimitedOcrError } from './unlimited-ocr.js';
-import { closeOcr, findReference, imageType, readImageText, type PictureBank } from './ocr.js';
+import {
+  closeOcr,
+  detectBank,
+  findReference,
+  imageType,
+  readImageText,
+  type PictureBank,
+} from './ocr.js';
 import {
   listFailedChecks,
   BOA_RECEIPT_ID,
@@ -47,16 +54,21 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
   async function readPicture(
     image: Buffer,
     type: string,
-    bank: PictureBank,
+    asked: PictureBank | 'AUTO',
     log: { warn: (obj: object, msg: string) => void }
-  ): Promise<{ reference: string | null; text: string; source: 'gemini' | 'ocr' }> {
+  ): Promise<{
+    bank: PictureBank | null;
+    reference: string | null;
+    text: string;
+    source: 'gemini' | 'ocr';
+  }> {
     const { GEMINI_MODEL: model } = app.env;
-    const apiKey = geminiKeyFor(app.env, bank);
+    const apiKey = geminiKeyFor(app.env, asked);
     for (let attempt = 1; apiKey && attempt <= 2; attempt++) {
       try {
         void countToday(app.prisma, 'gemini_calls');
-        const read = await readWithGemini(image, type, { apiKey, model }, bank);
-        return { reference: read.reference, text: read.text, source: 'gemini' };
+        const read = await readWithGemini(image, type, { apiKey, model }, asked);
+        return { bank: read.bank, reference: read.reference, text: read.text, source: 'gemini' };
       } catch (error) {
         const reason = error instanceof GeminiError ? error.message : 'failed';
         log.warn({ gemini: reason, attempt }, `Gemini could not read the picture (${reason})`);
@@ -73,7 +85,8 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
     }
     void countToday(app.prisma, 'ocr_fallback');
     const text = await readImageText(image);
-    return { reference: findReference(bank, text), text, source: 'ocr' };
+    const bank = asked === 'AUTO' ? detectBank(text) : asked;
+    return { bank, reference: bank ? findReference(bank, text) : null, text, source: 'ocr' };
   }
 
   app.post(
@@ -322,14 +335,19 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         body: z.object({
           image: z.string().min(16).max(9_000_000).describe('PNG / JPEG / WebP, base64'),
           bank: z
-            .enum(['CBE', 'TEL', 'DAS', 'BOA'])
+            .enum(['CBE', 'TEL', 'DAS', 'BOA', 'AUTO'])
             .default('CBE')
             .describe(
-              'Whose receipt: CBE (FT reference), TEL (telebirr number), DAS (Dashen FT Ref)'
+              'Whose receipt: CBE (FT reference), TEL (telebirr number), DAS (Dashen FT Ref), ' +
+                'BOA, or AUTO: find out which bank from the picture'
             ),
         }),
         response: {
           200: z.object({
+            bank: z
+              .enum(['CBE', 'TEL', 'DAS', 'BOA'])
+              .nullable()
+              .describe('The bank asked for, or (AUTO) the one found; null: none of these'),
             reference: z.string().nullable(),
             text: z.string().describe('All text read from the picture'),
             source: z.enum(['gemini', 'ocr']).describe('Which reader answered'),
@@ -347,7 +365,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
       if (image.length > MAX_IMAGE_BYTES || !type) {
         throw new AppError('VALIDATION_ERROR', { reason: 'image' });
       }
-      const { reference, text, source } = await readPicture(
+      const { bank, reference, text, source } = await readPicture(
         image,
         type,
         request.body.bank,
@@ -359,7 +377,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
           ? `Receipt picture (${source}): found ${reference}`
           : `Receipt picture (${source}): no Transaction ID found`
       );
-      return { reference, text, source };
+      return { bank, reference, text, source };
     }
   );
 
