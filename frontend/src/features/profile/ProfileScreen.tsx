@@ -25,6 +25,8 @@ import { Text } from '@/components/ui/Text';
 import { Pill } from '@/features/orders/Pill';
 import { signOut as signOutRequest } from '@/lib/auth';
 import { formatPhone } from '@/lib/format';
+import { queryClient } from '@/lib/queryClient';
+import { explorePlan } from '@/lib/subscription';
 import { useSession, type Plan, type Role, type SessionUser } from '@/store/session';
 
 import { ThemeSwatches } from './ThemeSwatches';
@@ -82,6 +84,20 @@ export default function ProfileScreen() {
   const { signOut, setRole, setPlan } = useSession();
 
   if (!user) return null;
+
+  // Dev only. The server decides the plan, so an owner's change is saved there first (like Choose
+  // Plan); otherwise the app would show Restaurant Plus while the server still refuses it.
+  const changePlan = async (plan: Plan) => {
+    if (user.role === 'owner') {
+      try {
+        await explorePlan(plan);
+      } catch {
+        return;
+      }
+    }
+    setPlan(plan);
+    void queryClient.invalidateQueries();
+  };
 
   const isStaff = user.role === 'waiter' || user.role === 'chef';
   const isChef = user.role === 'chef';
@@ -204,7 +220,7 @@ export default function ProfileScreen() {
                   key={plan}
                   label={t(`plans.${plan}`)}
                   selected={user.plan === plan}
-                  onPress={() => setPlan(plan)}
+                  onPress={() => void changePlan(plan)}
                 />
               ))}
             </View>
