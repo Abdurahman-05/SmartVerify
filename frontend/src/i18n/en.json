@@ -936,7 +936,8 @@
       "failed": "Failed ({{count}})",
       "verifiedTag": "Verified",
       "empty": "No receipts verified in this period yet.",
-      "kept": "Checks are kept for 4 months, then deleted."
+      "kept": "Checks are kept for 4 months, then deleted.",
+      "all": "All ({{count}})"
     }
   },
   "verifyBank": {

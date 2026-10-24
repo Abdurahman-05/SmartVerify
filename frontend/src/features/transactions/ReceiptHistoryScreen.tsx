@@ -20,6 +20,7 @@ import {
   getFailedChecks,
   getVerifiedChecks,
   verifiedChecksKey,
+  type FailedCheck,
   type VerifiedCheck,
 } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
@@ -66,7 +67,7 @@ export default function ReceiptHistoryScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [period, setPeriod] = useState<Period>('today');
-  const [showFailed, setShowFailed] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'verified' | 'failed'>('all');
 
   const verified = useQuery({
     queryKey: verifiedChecksKey(period),
@@ -94,7 +95,24 @@ export default function ReceiptHistoryScreen() {
   const failedList = failed.data ?? [];
   const total = verifiedList.reduce((sum, c) => sum + c.amountEtb, 0);
   const showDate = period !== 'today';
-  const loadError = showFailed ? failed : verified;
+  const loadError =
+    filter === 'failed'
+      ? failed
+      : filter === 'verified'
+        ? verified
+        : verified.error
+          ? verified
+          : failed;
+  // "All": both kinds in one list, newest first.
+  type Entry = { kind: 'verified'; check: VerifiedCheck } | { kind: 'failed'; check: FailedCheck };
+  const entries: Entry[] = [
+    ...(filter === 'failed'
+      ? []
+      : verifiedList.map((check) => ({ kind: 'verified' as const, check }))),
+    ...(filter === 'verified'
+      ? []
+      : failedList.map((check) => ({ kind: 'failed' as const, check }))),
+  ].sort((a, b) => b.check.createdAt.localeCompare(a.check.createdAt));
 
   const header = (
     <View className="gap-3 pb-3">
@@ -121,14 +139,19 @@ export default function ReceiptHistoryScreen() {
       </View>
       <View className="flex-row gap-2 px-4" accessibilityRole="radiogroup">
         <Pill
+          label={t('history.receipts.all', { count: verifiedList.length + failedList.length })}
+          selected={filter === 'all'}
+          onPress={() => setFilter('all')}
+        />
+        <Pill
           label={t('history.receipts.verified', { count: verifiedList.length })}
-          selected={!showFailed}
-          onPress={() => setShowFailed(false)}
+          selected={filter === 'verified'}
+          onPress={() => setFilter('verified')}
         />
         <Pill
           label={t('history.receipts.failed', { count: failedList.length })}
-          selected={showFailed}
-          onPress={() => setShowFailed(true)}
+          selected={filter === 'failed'}
+          onPress={() => setFilter('failed')}
         />
       </View>
       <Text tone="muted" className="px-4 text-sm">
@@ -141,42 +164,30 @@ export default function ReceiptHistoryScreen() {
     <Text tone="muted" className="px-6 pt-10 text-center text-lg">
       {loadError.isError
         ? `${t('history.loadFailed')} ${t(errorMessageKey(loadError.error))}`
-        : t(showFailed ? 'history.failed.empty' : 'history.receipts.empty')}
+        : t(filter === 'failed' ? 'history.failed.empty' : 'history.receipts.empty')}
     </Text>
   );
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-background">
       <ScreenHeader title={t('transactions.title')} onBack={() => router.navigate('/home')} />
-      {showFailed ? (
-        <FlatList
-          data={failedList}
-          keyExtractor={(c) => c.id}
-          ListHeaderComponent={header}
-          contentContainerStyle={{ paddingBottom: 16 }}
-          ItemSeparatorComponent={() => <View className="h-2" />}
-          renderItem={({ item }) => (
-            <View className="px-4">
-              <FailedCheckRow check={item} showDate={showDate} />
-            </View>
-          )}
-          ListEmptyComponent={empty}
-        />
-      ) : (
-        <FlatList
-          data={verifiedList}
-          keyExtractor={(c) => c.id}
-          ListHeaderComponent={header}
-          contentContainerStyle={{ paddingBottom: 16 }}
-          ItemSeparatorComponent={() => <View className="h-2" />}
-          renderItem={({ item }) => (
-            <View className="px-4">
-              <VerifiedRow check={item} showDate={showDate} />
-            </View>
-          )}
-          ListEmptyComponent={empty}
-        />
-      )}
+      <FlatList
+        data={entries}
+        keyExtractor={(entry) => `${entry.kind}-${entry.check.id}`}
+        ListHeaderComponent={header}
+        contentContainerStyle={{ paddingBottom: 16 }}
+        ItemSeparatorComponent={() => <View className="h-2" />}
+        renderItem={({ item }) => (
+          <View className="px-4">
+            {item.kind === 'verified' ? (
+              <VerifiedRow check={item.check} showDate={showDate} />
+            ) : (
+              <FailedCheckRow check={item.check} showDate={showDate} />
+            )}
+          </View>
+        )}
+        ListEmptyComponent={empty}
+      />
     </SafeAreaView>
   );
 }
