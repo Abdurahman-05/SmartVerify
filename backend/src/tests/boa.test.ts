@@ -83,7 +83,13 @@ beforeEach(() => {
   fetchMock.mockReset();
 });
 
-const verify = (body: Record<string, unknown>, token = r.waiter.token) =>
+// These tests are about reading receipts: each check starts as the first use of the receipt
+// (the DUPLICATE rule has its own tests in receipt-history.test.ts).
+const verify = async (body: Record<string, unknown>, token = r.waiter.token) => {
+  await app.prisma.transaction.deleteMany();
+  return verifyOnce(body, token);
+};
+const verifyOnce = (body: Record<string, unknown>, token = r.waiter.token) =>
   app.inject({ method: 'POST', url: '/api/v1/verify/boa', headers: headers(token), payload: body });
 
 describe('POST /verify/boa', () => {

@@ -47,6 +47,7 @@ const USED_TABLES = [
   'AdminUser',
   'ReceiptCheck',
   'Tip',
+  'Transaction',
   'Payment',
   'BillPaymentScan',
   'KitchenOrder',

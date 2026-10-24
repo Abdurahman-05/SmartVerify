@@ -32,9 +32,19 @@ export const notMatchingSchema = z.object({
   status: z.literal('not_matching'),
   reference: z.string(),
   amountEtb: z.number().int().describe('Amount on the receipt'),
-  reasons: z.array(
-    z.enum(['WRONG_RECEIVER', 'WRONG_RECEIVER_NAME', 'AMOUNT_TOO_LOW', 'NOT_SUCCESS', 'EXPIRED'])
-  ),
+  reasons: z
+    .array(
+      z.enum([
+        'WRONG_RECEIVER',
+        'WRONG_RECEIVER_NAME',
+        'AMOUNT_TOO_LOW',
+        'NOT_SUCCESS',
+        'EXPIRED',
+        'DUPLICATE',
+      ])
+    )
+    .describe('DUPLICATE: this receipt was already used once'),
+  firstCheckedAt: z.string().optional().describe('DUPLICATE: when it was first verified'),
 });
 
 export const unableSchema = z.object({
@@ -54,6 +64,7 @@ const reasonSchema = z.enum([
   'AMOUNT_TOO_LOW',
   'NOT_SUCCESS',
   'EXPIRED',
+  'DUPLICATE',
   'TIMEOUT',
   'UNREACHABLE',
   'NOT_FOUND',
@@ -75,3 +86,15 @@ export const failedCheckSchema = z.object({
 });
 
 export type FailedCheck = z.infer<typeof failedCheckSchema>;
+
+export const verifiedCheckSchema = z.object({
+  id: z.string(),
+  billId: z.string().nullable(),
+  bankCode: z.string(),
+  reference: z.string(),
+  payerName: z.string().nullable(),
+  amountEtb: z.number().int().describe('Amount on the receipt'),
+  expectedAmountEtb: z.number().int(),
+  checkedBy: z.string(),
+  createdAt: z.string(),
+});

@@ -289,8 +289,9 @@ model Transaction {
   id             String             @id @default(cuid())
   businessId     String
   business       Business           @relation(fields: [businessId], references: [id], onDelete: Restrict)
-  bankAccountId  String
-  bankAccount    BankAccount        @relation(fields: [bankAccountId], references: [id], onDelete: Restrict)
+  /// Not known for receipts checked by link or number (the bank's receipt names the receiver).
+  bankAccountId  String?
+  bankAccount    BankAccount?       @relation(fields: [bankAccountId], references: [id], onDelete: Restrict)
   /// Copied from the account so duplicate checks work per bank.
   bankCode       String
   /// Who scanned it.

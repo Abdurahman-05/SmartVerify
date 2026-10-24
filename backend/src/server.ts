@@ -1,5 +1,6 @@
 import { buildApp } from './app.js';
 import { loadEnv } from './config/env.js';
+import { deleteOldChecks } from './modules/verification/record-check.js';
 
 const env = loadEnv();
 const app = await buildApp({ env });
@@ -15,6 +16,17 @@ process.on('SIGTERM', () => void shutdown('SIGTERM'));
 try {
   await app.listen({ host: env.HOST, port: env.PORT });
   app.log.info(`API docs: http://localhost:${env.PORT}/docs`);
+
+  // Every day: verified and failed checks older than 4 months are deleted.
+  const cleanUp = async () => {
+    try {
+      app.log.info(await deleteOldChecks(app.prisma), 'deleted old checks');
+    } catch (error) {
+      app.log.error(error, 'could not delete old checks');
+    }
+  };
+  void cleanUp();
+  setInterval(() => void cleanUp(), 24 * 3_600_000).unref();
 } catch (error) {
   app.log.error(error);
   process.exit(1);

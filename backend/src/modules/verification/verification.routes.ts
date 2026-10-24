@@ -9,16 +9,17 @@ import {
   failedCheckSchema,
   verifyCbeBodySchema,
   verifyResponseSchema,
+  verifiedCheckSchema,
 } from './verification.schemas.js';
 import { countToday, recordIssue } from '../../services/issues.js';
 
 import { GeminiError, readWithGemini } from './gemini.js';
+import { listVerified, recordCheck } from './record-check.js';
 import { geminiKeyFor } from '../../config/env.js';
 import { readWithUnlimitedOcr, UnlimitedOcrError } from './unlimited-ocr.js';
 import { closeOcr, findReference, imageType, readImageText, type PictureBank } from './ocr.js';
 import {
   listFailedChecks,
-  saveFailedCheck,
   BOA_RECEIPT_ID,
   DASHEN_REFERENCE,
   TELEBIRR_NUMBER,
@@ -98,7 +99,8 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
           'accounts. Both: amount ≥ expected, status success, not older than ' +
           'CBE_RECEIPT_MAX_AGE_HOURS. Answers verified / not_matching / ' +
           'unable_to_verify (all 200). A check that does not verify is saved (with billId, if ' +
-          'given) and listed by GET /verify/failed. Duplicates are not checked yet.',
+          'given) and listed by GET /verify/failed. A verified receipt is saved (GET /verify/history); ' +
+          'using the same receipt again answers not_matching with DUPLICATE.',
         body: verifyCbeBodySchema,
         response: {
           200: verifyResponseSchema,
@@ -129,17 +131,14 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         expectedAmountEtb,
         request.log
       );
-      if (result.status !== 'verified') {
-        await saveFailedCheck(app.prisma, {
-          businessId,
-          checkedById: memberId,
-          billId,
-          bankCode: 'CBE',
-          expectedAmountEtb,
-          result,
-        });
-      }
-      return result;
+      return recordCheck(app.prisma, {
+        businessId,
+        memberId,
+        billId,
+        bankCode: 'CBE',
+        expectedAmountEtb,
+        result,
+      });
     }
   );
 
@@ -204,17 +203,14 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
           expectedAmountEtb,
           request.log
         );
-        if (result.status !== 'verified') {
-          await saveFailedCheck(app.prisma, {
-            businessId,
-            checkedById: memberId,
-            billId,
-            bankCode: config.bankCode,
-            expectedAmountEtb,
-            result,
-          });
-        }
-        return result;
+        return recordCheck(app.prisma, {
+          businessId,
+          memberId,
+          billId,
+          bankCode: config.bankCode,
+          expectedAmountEtb,
+          result,
+        });
       }
     );
 
@@ -280,6 +276,27 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => listFailedChecks(app.prisma, request.auth, periodStart(request.query.period))
+  );
+
+  app.get(
+    '/verify/history',
+    {
+      preHandler: requireRoles('owner', 'manager', 'waiter'),
+      schema: {
+        tags: ['verification'],
+        security: [{ bearerAuth: [] }],
+        description:
+          'Receipts verified in the period, newest first, at most 500. Waiters only get their ' +
+          'own. Checks older than 4 months are deleted.',
+        querystring: z.object({ period: periodSchema }),
+        response: {
+          200: z.array(verifiedCheckSchema),
+          401: errorResponseSchema.describe('UNAUTHORIZED'),
+          403: errorResponseSchema.describe('FORBIDDEN'),
+        },
+      },
+    },
+    async (request) => listVerified(app.prisma, request.auth, periodStart(request.query.period))
   );
 
   app.post(
