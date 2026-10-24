@@ -12,7 +12,7 @@ import { BottomSheet } from '@/components/ui/BottomSheet';
 import { Button } from '@/components/ui/Button';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { Text } from '@/components/ui/Text';
-import { detectReceiptQr, receiptLinkFromQr } from '@/lib/verification';
+import { receiptLinkFromQr } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
 import { findPayerBank } from './payerBanks';
@@ -37,15 +37,13 @@ export default function ScanReceiptQrScreen() {
   const [locked, setLocked] = useState(false);
   useFocusEffect(useCallback(() => setLocked(false), []));
 
-  // No bank yet (normal Verify): the QR itself says which bank it is.
-  const auto = !bank && useReceiptFlow.getState().mode === 'normal';
-  if ((!bank && !auto) || amount <= 0) return <Redirect href="/verify-bank" />;
+  if (!bank || amount <= 0) return <Redirect href="/verify-bank" />;
 
   const goBack = () =>
     router.canGoBack() ? router.back() : router.replace('/verify-bank/receipt');
   const readReceipt = () => {
     setNotFound(false);
-    router.replace(bank ? '/verify-bank/read' : '/verify-bank/auto');
+    router.replace('/verify-bank/read');
   };
   const scanAgain = () => {
     setNotFound(false);
@@ -67,17 +65,6 @@ export default function ScanReceiptQrScreen() {
   const handleScanned = ({ data }: BarcodeScanningResult) => {
     if (locked) return;
     setLocked(true);
-    if (!bank) {
-      const found = detectReceiptQr(data);
-      if (!found) {
-        setNotFound(true);
-        return;
-      }
-      useReceiptFlow.getState().setBank(found.bankCode);
-      setQrData(found.link);
-      router.replace(checkingRoute('normal'));
-      return;
-    }
     // CBE, telebirr and Dashen: the QR gives the receipt link (decoded here, no OCR).
     if (!['CBE', 'TEL', 'DAS'].includes(bank.code)) {
       router.push({ pathname: '/verify/qr-result', params: { text: data } });
@@ -121,18 +108,12 @@ export default function ScanReceiptQrScreen() {
           className="mx-4 mt-2 flex-row items-center justify-between rounded-2xl bg-white/15 px-3 py-2"
           accessible
         >
-          {bank ? (
-            <View className="flex-row items-center gap-2.5">
-              <BankBadge code={bank.code} size={40} />
-              <Text font="bold" tone="inverse" className="text-[17px]">
-                {bank.shortName}
-              </Text>
-            </View>
-          ) : (
-            <Text font="bold" tone="inverse" className="flex-1 text-[17px]">
-              {t('verifyBank.auto.anyBank')}
+          <View className="flex-row items-center gap-2.5">
+            <BankBadge code={bank.code} size={40} />
+            <Text font="bold" tone="inverse" className="text-[17px]">
+              {bank.shortName}
             </Text>
-          )}
+          </View>
           <MoneyText value={amount} tone="inverse" className="text-xl" />
         </View>
 

@@ -15,13 +15,7 @@ export const verifyTelebirr = USE_MOCK_VERIFICATION ? mock.verifyTelebirr : real
 export const verifyDashen = USE_MOCK_VERIFICATION ? mock.verifyDashen : real.verifyDashen;
 export const verifyBoa = USE_MOCK_VERIFICATION ? mock.verifyBoa : real.verifyBoa;
 export const getFailedChecks = USE_MOCK_VERIFICATION ? mock.getFailedChecks : real.getFailedChecks;
-// The offline mock only knows CBE pictures.
-export const readReference: typeof real.readReference = USE_MOCK_VERIFICATION
-  ? async (image, bank = 'CBE') => ({
-      ...(await mock.readReference(image, bank === 'AUTO' ? 'CBE' : bank)),
-      bank: bank === 'AUTO' ? 'CBE' : bank,
-    })
-  : real.readReference;
+export const readReference = USE_MOCK_VERIFICATION ? mock.readReference : real.readReference;
 export const compareReading = USE_MOCK_VERIFICATION ? mock.compareReading : real.compareReading;
 
 export const failedChecksKey = (period: Period) => ['failed-checks', period] as const;
@@ -145,20 +139,6 @@ export function telebirrNumberFromQr(text: string): string | null {
  * The receipt link to check for a scanned receipt QR of this bank (CBE, telebirr, Dashen), or
  * null when the QR is not one of its receipts. No OCR needed.
  */
-/**
- * Which bank a scanned receipt QR is from, and the receipt link to check: tries CBE, telebirr,
- * Dashen and BOA in turn. null when it is none of their receipts.
- */
-export function detectReceiptQr(
-  data: string
-): { bankCode: 'CBE' | 'TEL' | 'DAS' | 'BOA'; link: string } | null {
-  for (const bankCode of ['CBE', 'TEL', 'DAS'] as const) {
-    const link = receiptLinkFromQr(bankCode, data);
-    if (link) return { bankCode, link };
-  }
-  return boaReceiptIdOf(data) ? { bankCode: 'BOA', link: data.trim() } : null;
-}
-
 export function receiptLinkFromQr(bankCode: string, data: string): string | null {
   if (bankCode === 'CBE') return isCbeReceiptLink(data) ? data.trim() : null;
   if (bankCode === 'TEL') {
