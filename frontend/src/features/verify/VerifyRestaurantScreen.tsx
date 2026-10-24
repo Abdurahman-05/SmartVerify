@@ -29,6 +29,7 @@ import { colors } from '@/theme/tokens';
 
 import { billLabel } from './billLabel';
 import { cashFor, settlePayment, useRestaurantPay, type RestaurantMethod } from './restaurantFlow';
+import { useReceiptFlow } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
 
 const methods: { value: RestaurantMethod; icon: LucideIcon }[] = [
@@ -120,6 +121,7 @@ export default function VerifyRestaurantScreen() {
       return;
     }
     setAmount(toScan);
+    useReceiptFlow.getState().setMode('restaurant');
     router.push('/verify-bank');
   };
 

@@ -16,7 +16,7 @@ import { receiptLinkFromQr } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
 import { findPayerBank } from './payerBanks';
-import { useReceiptFlow } from './receiptFlow';
+import { checkingRoute, useReceiptFlow } from './receiptFlow';
 import { PermissionView, ScanFrame } from './ScanScreen';
 import { useVerifyFlow } from './verifyFlow';
 
@@ -76,7 +76,7 @@ export default function ScanReceiptQrScreen() {
       return;
     }
     setQrData(link);
-    router.replace('/verify-restaurant/checking');
+    router.replace(checkingRoute(useReceiptFlow.getState().mode));
   };
 
   return (

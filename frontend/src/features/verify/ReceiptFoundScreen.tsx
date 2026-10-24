@@ -18,7 +18,7 @@ import {
 import { colors } from '@/theme/tokens';
 
 import { findPayerBank, type ReceiptField } from './payerBanks';
-import { useReceiptFlow, type ReceiptValues } from './receiptFlow';
+import { checkingRoute, useReceiptFlow, type ReceiptValues } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
 
 function FoundValue({ field, value }: { field: ReceiptField; value: string }) {
@@ -122,7 +122,7 @@ export default function ReceiptFoundScreen() {
               ? boaReceiptLink(values['reference'] ?? '', values['senderLast5'] ?? '')
               : JSON.stringify({ bank: bank.code, ...values })
     );
-    router.replace('/verify-restaurant/checking');
+    router.replace(checkingRoute(useReceiptFlow.getState().mode));
   };
 
   return (

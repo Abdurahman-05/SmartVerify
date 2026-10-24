@@ -18,7 +18,7 @@ import { errorMessageKey } from '@/lib/errors';
 import { colors } from '@/theme/tokens';
 
 import { payerBanks, type PayerBank } from './payerBanks';
-import { useReceiptFlow } from './receiptFlow';
+import { startRoute, useReceiptFlow } from './receiptFlow';
 import { settlePayment, useRestaurantPay } from './restaurantFlow';
 import { useVerifyFlow } from './verifyFlow';
 import { VerifySteps } from './VerifySteps';
@@ -80,16 +80,17 @@ export default function PickBankScreen() {
   const router = useRouter();
   const amount = useVerifyFlow((s) => s.amount);
   const setBank = useReceiptFlow((s) => s.setBank);
+  const mode = useReceiptFlow((s) => s.mode);
   const billId = useRestaurantPay((s) => s.billId);
   const { bill } = usePaymentBill(billId);
   const [notSupported, setNotSupported] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveKey] = useState(newIdempotencyKey);
 
-  if (amount <= 0) return <Redirect href="/bills" />;
+  if (amount <= 0) return <Redirect href={startRoute(mode)} />;
   if (saving) return <LoadingView title={t('verifyBank.saving')} />;
 
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/bills'));
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace(startRoute(mode)));
   const pick = (bank: PayerBank) => {
     setBank(bank.code);
     router.push('/verify-bank/receipt');
@@ -179,14 +180,16 @@ export default function PickBankScreen() {
           </View>
         </View>
         <Button label={t('verifyBank.chooseAnother')} onPress={() => setNotSupported(false)} />
-        <Button
-          label={t('verifyBank.saveNotChecked')}
-          icon={Save}
-          variant="outline"
-          size="md"
-          disabled={!bill}
-          onPress={saveNotChecked}
-        />
+        {mode === 'restaurant' ? (
+          <Button
+            label={t('verifyBank.saveNotChecked')}
+            icon={Save}
+            variant="outline"
+            size="md"
+            disabled={!bill}
+            onPress={saveNotChecked}
+          />
+        ) : null}
       </BottomSheet>
     </SafeAreaView>
   );

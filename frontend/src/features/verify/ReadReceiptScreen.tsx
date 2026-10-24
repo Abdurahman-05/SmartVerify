@@ -18,7 +18,7 @@ import { readReceipt } from '@/lib/mock/receipt';
 import { readReference, receiptLinkFromQr } from '@/lib/verification';
 
 import { findPayerBank, onReceipt, type PayerBank } from './payerBanks';
-import { useReceiptFlow } from './receiptFlow';
+import { checkingRoute, useReceiptFlow } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
 
 const CORNER = 34;
@@ -143,7 +143,7 @@ export default function ReadReceiptScreen() {
         .find((l): l is string => l !== null);
       if (link) {
         setQrData(link);
-        router.replace('/verify-restaurant/checking');
+        router.replace(checkingRoute(useReceiptFlow.getState().mode));
         return;
       }
       // The server reads the picture (Gemini) and filters the bank's number: CBE FT reference or

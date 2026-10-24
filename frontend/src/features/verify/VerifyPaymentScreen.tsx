@@ -16,6 +16,7 @@ import { parseAmountInput } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
 import { AccountPicker } from './AccountPicker';
+import { useReceiptFlow } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
 
 export default function VerifyPaymentScreen() {
@@ -36,7 +37,9 @@ export default function VerifyPaymentScreen() {
   const startScan = () => {
     if (!account) return;
     setAccount(account);
-    router.push('/scan');
+    // Same bank steps as a restaurant bill: which bank paid, then its receipt QR or a photo.
+    useReceiptFlow.getState().setMode('normal');
+    router.push('/verify-bank');
   };
 
   return (
