@@ -17,7 +17,8 @@ export function BankBadge({ code, size = 48 }: { code: string; size?: 40 | 44 | 
   const logo = LOGOS[code];
   return (
     <View
-      className="items-center justify-center overflow-hidden rounded-[14px] bg-primaryTile"
+      // White behind logos so ones that do not fill the square (M-PESA, eBirr) match the others.
+      className={`items-center justify-center overflow-hidden rounded-[14px] ${logo ? 'bg-white' : 'bg-primaryTile'}`}
       style={{ width: size, height: size }}
     >
       {logo ? (
