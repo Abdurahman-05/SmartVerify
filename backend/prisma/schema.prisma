@@ -153,10 +153,15 @@ model Business {
   /// Admin: never restricted for late payment (partner, special case).
   exemptFromRules Boolean   @default(false)
   exemptReason    String?
+  /// Owner-controlled extras (Restaurant Plus). Off only hides them: data is never deleted.
+  featureBuyList  Boolean   @default(false)
+  featureMoneyOut Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
   members         BusinessMember[]
+  buyItems        BuyItem[]
+  spendings       Spending[]
   adminNotes      AdminNote[]
   paymentReviews  PaymentReview[]
   subscriptions   Subscription[]
@@ -203,6 +208,9 @@ model BusinessMember {
   tips               Tip[]
   paymentScans       BillPaymentScan[]
   receiptChecks      ReceiptCheck[]
+  buyItemsCreated    BuyItem[]         @relation("BuyItemCreatedBy")
+  buyItemsBought     BuyItem[]         @relation("BuyItemBoughtBy")
+  spendings          Spending[]
 
   @@index([businessId])
 }
@@ -818,4 +826,71 @@ model Announcement {
   createdAt   DateTime  @default(now())
 
   @@index([showFrom, hideOn])
+}
+
+// ─── Owner extras: kitchen buy list and money out ──────────────────────────
+
+enum BuyWhen {
+  TODAY
+  WEEK
+}
+
+enum BuyStatus {
+  OPEN
+  BOUGHT
+}
+
+enum PaidFrom {
+  CASH
+  BANK
+}
+
+enum SpendingCategory {
+  FOOD
+  TRANSPORT
+  BILLS
+  OTHER
+}
+
+/// Something the kitchen has run out of. The manager buys it and marks it bought.
+model BuyItem {
+  id          String          @id @default(cuid())
+  businessId  String
+  business    Business        @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  name        String
+  /// Free text, e.g. "3 boxes".
+  qty         String?
+  when        BuyWhen
+  status      BuyStatus       @default(OPEN)
+  createdById String
+  createdBy   BusinessMember  @relation("BuyItemCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  boughtById  String?
+  boughtBy    BusinessMember? @relation("BuyItemBoughtBy", fields: [boughtById], references: [id], onDelete: Restrict)
+  price       Int?
+  paidFrom    PaidFrom?
+  createdAt   DateTime        @default(now())
+  boughtAt    DateTime?
+
+  spending Spending?
+
+  @@index([businessId, status, createdAt])
+}
+
+/// Money the business paid out (not a sale).
+model Spending {
+  id          String           @id @default(cuid())
+  businessId  String
+  business    Business         @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  title       String
+  amount      Int
+  category    SpendingCategory
+  paidFrom    PaidFrom
+  /// Set when it came from marking a buy-list item as bought.
+  buyItemId   String?          @unique
+  buyItem     BuyItem?         @relation(fields: [buyItemId], references: [id], onDelete: Restrict)
+  createdById String
+  createdBy   BusinessMember   @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt   DateTime         @default(now())
+
+  @@index([businessId, createdAt])
 }

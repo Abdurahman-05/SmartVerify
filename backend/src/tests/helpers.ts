@@ -46,6 +46,8 @@ const USED_TABLES = [
   'AdminSession',
   'AdminUser',
   'ReceiptCheck',
+  'Spending',
+  'BuyItem',
   'Tip',
   'Transaction',
   'Payment',

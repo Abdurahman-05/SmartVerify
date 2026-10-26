@@ -21,6 +21,7 @@ import { kitchenRoutes } from './modules/kitchen/kitchen.routes.js';
 import { overviewRoutes } from './modules/overview/overview.routes.js';
 import { paymentRoutes } from './modules/payments/payment.routes.js';
 import { tipRoutes } from './modules/tips/tip.routes.js';
+import { extrasRoutes } from './modules/extras/extras.routes.js';
 import { menuRoutes } from './modules/menu/menu.routes.js';
 import { staffRoutes } from './modules/staff/staff.routes.js';
 import { orderRoutes } from './modules/orders/order.routes.js';
@@ -151,6 +152,7 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
         await secured.register(tableRoutes);
         await secured.register(menuRoutes);
         await secured.register(staffRoutes);
+        await secured.register(extrasRoutes);
         await secured.register(feeRoutes);
         await secured.register(kitchenRoutes);
         await secured.register(paymentRoutes);
