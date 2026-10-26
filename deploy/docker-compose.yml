@@ -1,5 +1,5 @@
-# Production on one server: PostgreSQL, the API, and nginx (admin website + /api).
-# Secrets are in /opt/smartverify/.env on the server (never in git). See deploy/README.md.
+# Production on one server: PostgreSQL, the API, and Caddy (HTTPS, admin website + /api).
+# Secrets come from AWS Parameter Store through update.sh (never in git). See deploy/README.md.
 name: smartverify
 
 services:
@@ -28,19 +28,25 @@ services:
       HOST: 0.0.0.0
       PORT: '3000'
       DATABASE_URL: postgresql://smartverify:${DB_PASSWORD}@db:5432/smartverify
-      # CloudFront + nginx add X-Forwarded-For.
-      TRUST_PROXY_HOPS: '2'
+      # Caddy adds X-Forwarded-For.
+      TRUST_PROXY_HOPS: '1'
     depends_on:
       db:
         condition: service_healthy
 
   web:
-    image: nginx:1.27-alpine
+    image: caddy:2.8-alpine
     restart: unless-stopped
     ports:
       - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?SITE_ADDRESS is not set}
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - /opt/smartverify/admin:/srv/admin:ro
+      # Certificates live on the data disk, so they survive a rebuild (Let's Encrypt limits).
+      - /data/caddy:/data
     depends_on:
       - api

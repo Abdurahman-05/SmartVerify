@@ -1,0 +1,33 @@
+# One address for everything, with automatic HTTPS (Let's Encrypt, renewed by Caddy):
+#   /api/…, /docs → the API      everything else → the admin website (static files)
+{$SITE_ADDRESS} {
+	encode gzip
+
+	# Receipt pictures (base64) are up to ~8 MB.
+	request_body {
+		max_size 10MB
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	handle /api/* {
+		reverse_proxy api:3000
+	}
+
+	handle /docs* {
+		reverse_proxy api:3000
+	}
+
+	handle {
+		header X-Frame-Options DENY
+		root * /srv/admin
+		# Static export: /sign-in → sign-in.html
+		try_files {path} {path}.html {path}/index.html /index.html
+		file_server
+	}
+}

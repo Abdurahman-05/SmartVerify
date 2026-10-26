@@ -28,7 +28,7 @@ if ! mountpoint -q /data; then
   grep -q "$UUID" /etc/fstab || echo "UUID=$UUID /data xfs defaults,nofail 0 2" >> /etc/fstab
   mount /data
 fi
-mkdir -p /data/postgres /opt/smartverify/admin
+mkdir -p /data/postgres /data/caddy /opt/smartverify/admin
 
 # Daily backup at 02:00 Addis Ababa time (23:00 UTC).
 cat > /etc/systemd/system/smartverify-backup.service <<'UNIT'
