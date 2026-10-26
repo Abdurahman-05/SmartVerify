@@ -26,6 +26,9 @@
 	handle {
 		header X-Frame-Options DENY
 		root * /srv/admin
+		# One customer's page: /customers/<id> → the exported customers/[id].html
+		@customer path_regexp ^/customers/[^/]+$
+		rewrite @customer "/customers/[id].html"
 		# Static export: /sign-in → sign-in.html
 		try_files {path} {path}.html {path}/index.html /index.html
 		file_server
