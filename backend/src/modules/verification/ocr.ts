@@ -102,7 +102,8 @@ export type PictureBank = 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'MPE' | 'EBR';
 
 /** Words that only one bank's receipts carry, strongest first. */
 const BANK_WORDS: [PictureBank, RegExp][] = [
-  ['EBR', /e-?birr|receipt\.ebirr/i],
+  // Word start: "telebirr" contains "ebirr" but is not eBirr.
+  ['EBR', /\be-?birr|receipt\.ebirr/i],
   ['MPE', /m-?pesa|safaricom|ኤም-?ፔሳ/i],
   ['TEL', /transactioninfo\.ethiotelecom|telebirr|ethio\s*telecom|ቴሌብር/i],
   ['DAS', /dashen|superapp|receipts\.dashenbanksc|ዳሽን/i],
