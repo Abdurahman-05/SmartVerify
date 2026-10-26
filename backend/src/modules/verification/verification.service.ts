@@ -9,6 +9,7 @@ import { AppError } from '../../shared/errors/app-error.js';
 import { cbeParser } from './banks/cbe.js';
 import { BOA_NOT_FOUND, boaParser } from './banks/boa.js';
 import { dashenParser } from './banks/dashen.js';
+import { EBIRR_NOT_FOUND, ebirrParser } from './banks/ebirr.js';
 import { MPESA_NOT_FOUND, mpesaParser } from './banks/mpesa.js';
 import { TELEBIRR_NOT_FOUND, telebirrParser } from './banks/telebirr.js';
 import type { ReceiptParser } from './banks/types.js';
@@ -260,6 +261,40 @@ export async function verifyMpesa(
     now,
     toText: mpesaText,
     isNotFound: (text) => text === MPESA_NOT_FOUND,
+    receiver,
+  });
+}
+
+/** eBirr receipt link path: <institution>/<token> from receipt.ebirr.com (the token is case-sensitive). */
+export const EBIRR_REFERENCE = /^[a-z0-9]{2,30}\/[A-Za-z0-9_-]{16,64}$/;
+
+/** Fetches an eBirr receipt page (HTML) by its link path and checks it like the other banks. */
+export async function verifyEbirr(
+  prisma: PrismaClient,
+  env: Env,
+  businessId: string,
+  reference: string,
+  expectedAmountEtb: number,
+  log?: Pick<FastifyBaseLogger, 'info'>,
+  now = new Date(),
+  /** Check against these accounts instead of the business's (subscription payments). */
+  receiver?: { accounts: OwnAccount[]; name: string; maxAgeHours?: number }
+): Promise<VerifyResponse> {
+  if (!EBIRR_REFERENCE.test(reference)) throw new AppError('INVALID_URL');
+  return checkReceipt({
+    prisma,
+    env,
+    businessId,
+    source: { url: new URL(`https://receipt.ebirr.com/${reference}`) },
+    tlsStrict: true,
+    parser: ebirrParser,
+    bank: 'eBirr',
+    expectedAmountEtb,
+    log,
+    now,
+    html: true,
+    // An unknown token gets a short "Not Found Page" (HTTP 200).
+    isNotFound: (text) => EBIRR_NOT_FOUND.test(text) && text.length < 3000,
     receiver,
   });
 }

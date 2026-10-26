@@ -29,11 +29,13 @@ import {
   listFailedChecks,
   BOA_RECEIPT_ID,
   DASHEN_REFERENCE,
+  EBIRR_REFERENCE,
   MPESA_NUMBER,
   TELEBIRR_NUMBER,
   verifyBoa,
   verifyCbe,
   verifyDashen,
+  verifyEbirr,
   verifyMpesa,
   verifyTelebirr,
 } from './verification.service.js';
@@ -163,6 +165,8 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
     bankCode: string;
     field: 'transactionNumber' | 'reference';
     format: RegExp;
+    /** Keep the letters as typed (eBirr's token), instead of upper-casing. */
+    caseSensitive?: boolean;
     description: string;
     verify: typeof verifyTelebirr;
   }) =>
@@ -182,7 +186,10 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
           security: [{ bearerAuth: [] }],
           description: config.description,
           body: z.object({
-            [config.field]: z.string().trim().toUpperCase().regex(config.format),
+            // eBirr tokens are case-sensitive; every other reference is upper case.
+            [config.field]: config.caseSensitive
+              ? z.string().trim().regex(config.format)
+              : z.string().trim().toUpperCase().regex(config.format),
             expectedAmountEtb: z.number().int().positive().max(100_000_000),
             billId: z.string().min(1).max(64).optional(),
           }),
@@ -242,6 +249,22 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
       'holder. Telebirr to a bank: the bank account number is one of its bank accounts and ' +
       'the name matches. Both: settled amount ≥ expected, status Completed, not too old. ' +
       'Unknown numbers give unable_to_verify NOT_FOUND. Failed checks are saved like CBE.',
+  });
+
+  referenceCheck({
+    path: '/verify/ebirr',
+    bankCode: 'EBR',
+    field: 'reference',
+    format: EBIRR_REFERENCE,
+    caseSensitive: true,
+    verify: verifyEbirr,
+    description:
+      'Reads the eBirr receipt page (receipt.ebirr.com/<institution>/<token>, from the SMS link) ' +
+      'and checks it: sent to a bank account, the account (printed with its middle hidden, ' +
+      "231XXXX31) fits one of the business's accounts (no holder name is printed, so only the " +
+      'account is checked); sent to a wallet, the phone and name fit one of its eBirr accounts. ' +
+      'Amount ≥ expected, status Completed, not too old. An unknown token gives NOT_FOUND. ' +
+      'No QR code: the link comes from a photo or is typed.',
   });
 
   referenceCheck({
@@ -352,7 +375,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         body: z.object({
           image: z.string().min(16).max(9_000_000).describe('PNG / JPEG / WebP, base64'),
           bank: z
-            .enum(['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'AUTO'])
+            .enum(['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR', 'AUTO'])
             .default('CBE')
             .describe(
               'Whose receipt: CBE (FT reference), TEL (telebirr number), DAS (Dashen FT Ref), ' +
@@ -362,7 +385,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         response: {
           200: z.object({
             bank: z
-              .enum(['CBE', 'TEL', 'DAS', 'BOA', 'MPE'])
+              .enum(['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR'])
               .nullable()
               .describe('The bank asked for, or (AUTO) the one found; null: none of these'),
             reference: z.string().nullable(),
@@ -445,7 +468,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
             'stored or logged.',
           body: z.object({
             image: z.string().min(16).max(9_000_000),
-            bank: z.enum(['CBE', 'TEL', 'DAS', 'BOA', 'MPE']).default('CBE'),
+            bank: z.enum(['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR']).default('CBE'),
           }),
           response: {
             200: z.object({

@@ -105,6 +105,25 @@ function receiverCheck(receipt: ParsedReceipt, input: CompareInput) {
     const name = matches.some((a) => sameName(receipt.receiverName, nameOf(a)));
     return { account, name: !account || name, shown: printed.slice(-4) };
   }
+  if (receipt.transfer === 'ebirr_bank') {
+    // 231****31 (first 3 and last 2 digits): the receipt has no holder name, so the account is
+    // all there is to check; the printed length must also match.
+    const printed = receipt.destinationAccount;
+    const account = input.accounts.some(
+      (a) =>
+        a.bankCode !== 'TEL' && a.bankCode !== 'EBR' && sameMaskedAccount(printed, a.accountNumber)
+    );
+    return { account, name: true, shown: printed.slice(-2) };
+  }
+  if (receipt.transfer === 'ebirr_wallet') {
+    const printed = receipt.receiverAccount.replace(/\D/g, '');
+    const matches = input.accounts.filter(
+      (a) => a.bankCode === 'EBR' && samePhone(printed, a.accountNumber)
+    );
+    const account = matches.length > 0;
+    const name = matches.some((a) => sameName(receipt.receiverName, nameOf(a)));
+    return { account, name: !account || name, shown: printed.slice(-4) };
+  }
   if (receipt.transfer === 'wallet_to_bank') {
     const dest = receipt.destinationAccount;
     const matches = input.accounts.filter((a) => a.bankCode !== 'TEL' && a.accountNumber === dest);
@@ -171,40 +190,54 @@ export function explainComparison(receipt: ParsedReceipt, input: CompareInput) {
   const otherBank = receipt.transfer === 'other_bank';
   const wallet = receipt.transfer === 'wallet';
   const walletToBank = receipt.transfer === 'wallet_to_bank';
+  const ebirrBank = receipt.transfer === 'ebirr_bank';
+  const ebirrWallet = receipt.transfer === 'ebirr_wallet';
   const masked = receipt.transfer === 'masked_account';
   const ours = (filter: (a: OwnAccount) => boolean) => {
     const list = input.accounts.filter(filter).map((a) => `...${a.last4}`);
     return list.length ? list.join(', ') : 'none saved';
   };
   const nameLine = `receiver name matches the saved holder name ${receiver.account ? mark(receiver.name) : '(skipped)'}`;
-  const receiverLines = masked
+  const receiverLines = ebirrBank
     ? [
-        `${receipt.destinationBank ?? 'bank'}: receiver account ...${receiver.shown} in our ` +
-          `accounts [${ours((a) => a.bankCode !== 'TEL')}] ${mark(receiver.account)}`,
-        nameLine,
+        `eBirr -> bank: account ...${receiver.shown} (printed with its middle hidden) in our ` +
+          `bank accounts [${ours((a) => a.bankCode !== 'TEL' && a.bankCode !== 'EBR')}] ${mark(receiver.account)}`,
+        'no holder name on this receipt (name check skipped)',
       ]
-    : wallet
+    : ebirrWallet
       ? [
-          `Telebirr -> Telebirr: receiver phone ...${receiver.shown} in our Telebirr numbers ` +
-            `[${ours((a) => a.bankCode === 'TEL')}] ${mark(receiver.account)}`,
+          `eBirr -> wallet: receiver phone ...${receiver.shown} in our eBirr numbers ` +
+            `[${ours((a) => a.bankCode === 'EBR')}] ${mark(receiver.account)}`,
           nameLine,
         ]
-      : walletToBank
+      : masked
         ? [
-            `Wallet -> bank: bank account ...${receiver.shown} in our bank accounts ` +
-              `[${ours((a) => a.bankCode !== 'TEL')}] ${mark(receiver.account)}`,
+            `${receipt.destinationBank ?? 'bank'}: receiver account ...${receiver.shown} in our ` +
+              `accounts [${ours((a) => a.bankCode !== 'TEL')}] ${mark(receiver.account)}`,
             nameLine,
           ]
-        : otherBank
+        : wallet
           ? [
-              `CBE -> other bank: destination account in reason ...${receiver.shown || '(none)'} ` +
-                `in our other-bank accounts [${ours((a) => a.bankCode !== 'CBE')}] ${mark(receiver.account)}`,
-            ]
-          : [
-              `CBE -> CBE: receiver account ...${receiver.shown} in our CBE accounts ` +
-                `[${ours((a) => a.bankCode === 'CBE')}] ${mark(receiver.account)}`,
+              `Telebirr -> Telebirr: receiver phone ...${receiver.shown} in our Telebirr numbers ` +
+                `[${ours((a) => a.bankCode === 'TEL')}] ${mark(receiver.account)}`,
               nameLine,
-            ];
+            ]
+          : walletToBank
+            ? [
+                `Wallet -> bank: bank account ...${receiver.shown} in our bank accounts ` +
+                  `[${ours((a) => a.bankCode !== 'TEL')}] ${mark(receiver.account)}`,
+                nameLine,
+              ]
+            : otherBank
+              ? [
+                  `CBE -> other bank: destination account in reason ...${receiver.shown || '(none)'} ` +
+                    `in our other-bank accounts [${ours((a) => a.bankCode !== 'CBE')}] ${mark(receiver.account)}`,
+                ]
+              : [
+                  `CBE -> CBE: receiver account ...${receiver.shown} in our CBE accounts ` +
+                    `[${ours((a) => a.bankCode === 'CBE')}] ${mark(receiver.account)}`,
+                  nameLine,
+                ];
   return {
     checks,
     fields: {

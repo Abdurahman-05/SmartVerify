@@ -16,8 +16,17 @@ export interface ParsedReceipt {
    * bank: the receiver is CBE's inter-bank account, the real destination is in the reason.
    * wallet = Telebirr to Telebirr (receiver name + phone masked to first and last 4 digits).
    * wallet_to_bank = Telebirr to a bank account (full account number + holder name).
+   * ebirr_bank = eBirr to a bank account (account printed 231****31, no holder name).
+   * ebirr_wallet = eBirr to a wallet (name and full phone from the payment reason).
    */
-  transfer: 'cbe' | 'other_bank' | 'wallet' | 'wallet_to_bank' | 'masked_account';
+  transfer:
+    | 'cbe'
+    | 'other_bank'
+    | 'wallet'
+    | 'wallet_to_bank'
+    | 'masked_account'
+    | 'ebirr_bank'
+    | 'ebirr_wallet';
   /** "Reason / Type of service": the sender's note (CBE to CBE) or the destination account. */
   reason: string;
   /** Destination account at another bank / from a wallet ('' when the receiver is used). */

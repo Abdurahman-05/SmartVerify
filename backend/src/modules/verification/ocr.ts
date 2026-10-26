@@ -98,10 +98,11 @@ export function findBoaReference(text: string): string | null {
   return fromLink?.[1] ?? findCbeReference(text);
 }
 
-export type PictureBank = 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'MPE';
+export type PictureBank = 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'MPE' | 'EBR';
 
 /** Words that only one bank's receipts carry, strongest first. */
 const BANK_WORDS: [PictureBank, RegExp][] = [
+  ['EBR', /e-?birr|receipt\.ebirr/i],
   ['MPE', /m-?pesa|safaricom|ኤም-?ፔሳ/i],
   ['TEL', /transactioninfo\.ethiotelecom|telebirr|ethio\s*telecom|ቴሌብር/i],
   ['DAS', /dashen|superapp|receipts\.dashenbanksc|ዳሽን/i],
@@ -126,14 +127,28 @@ export function findMpesaNumber(text: string): string | null {
   return m?.[1] && /\d/.test(m[1]) && /[A-Z]/.test(m[1]) ? m[1] : null;
 }
 
+/**
+ * The eBirr receipt link path in text: "receipt.ebirr.com/kaafimf/7Ca4gq…" (the SMS wraps the
+ * link over lines, so spaces around the slashes are allowed). The token is case-sensitive.
+ */
+export function findEbirrReference(text: string): string | null {
+  const m =
+    /receipt\.ebirr\.com\s*\/\s*([a-z0-9]{2,30})\s*\/\s*([A-Za-z0-9_-]{16,64})(?![A-Za-z0-9_-])/i.exec(
+      text
+    );
+  return m?.[1] && m[2] ? `${m[1].toLowerCase()}/${m[2]}` : null;
+}
+
 /** The reference to look for in a picture of this bank's receipt. */
 export const findReference = (bank: PictureBank, text: string) =>
-  bank === 'MPE'
-    ? findMpesaNumber(text)
-    : bank === 'TEL'
-      ? findTelebirrNumber(text)
-      : bank === 'DAS'
-        ? findDashenReference(text)
-        : bank === 'BOA'
-          ? findBoaReference(text)
-          : findCbeReference(text);
+  bank === 'EBR'
+    ? findEbirrReference(text)
+    : bank === 'MPE'
+      ? findMpesaNumber(text)
+      : bank === 'TEL'
+        ? findTelebirrNumber(text)
+        : bank === 'DAS'
+          ? findDashenReference(text)
+          : bank === 'BOA'
+            ? findBoaReference(text)
+            : findCbeReference(text);

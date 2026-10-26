@@ -23,6 +23,11 @@ const WHAT: Record<PictureBank, string> = {
     'from telebirr (Ethio telecom), an app screen or an SMS. transactionId: the telebirr ' +
     'transaction number exactly as printed: 10 letters or digits, e.g. DJD2QW8XTE (also at ' +
     'the end of a transactioninfo.ethiotelecom.et/receipt/ link)',
+  EBR:
+    'from eBirr, an SMS or an app screen. transactionId: the receipt link path exactly as ' +
+    'printed after "receipt.ebirr.com/": "<institution>/<token>", e.g. ' +
+    'kaafimf/7Ca4gqKiADLtuj5VPOWuaQ. Letters are case-sensitive; join the link if it is ' +
+    'wrapped over lines, without spaces',
   MPE:
     'from M-PESA (Safaricom), an app screen or an SMS. transactionId: the M-PESA transaction ' +
     'number exactly as printed ("Transaction ID" in the app, "Transaction number" in the SMS): ' +
@@ -44,7 +49,7 @@ const promptFor = (bank: PictureBank | 'AUTO') =>
   (bank === 'AUTO'
     ? 'from one of these: ' +
       (Object.keys(WHAT) as PictureBank[]).map((b) => `${b} = a receipt ${WHAT[b]}`).join('; ') +
-      '. bank: which one it is (CBE, TEL, DAS, BOA or MPE), or null if none. transactionId: as ' +
+      '. bank: which one it is (CBE, TEL, DAS, BOA, MPE or EBR), or null if none. transactionId: as ' +
       'described for that bank, or null.'
     : `${WHAT[bank]}, or null.`) +
   ' Read it and return JSON only. amount: the transferred amount as ' +
@@ -67,6 +72,9 @@ export class GeminiError extends Error {}
 /** Gemini's own transactionId, kept only if it has the bank's exact format. */
 function bankReference(bank: PictureBank, id: string): string | null {
   const value = id.trim().toUpperCase();
+  if (bank === 'EBR') {
+    return /^[a-z0-9]{2,30}\/[A-Za-z0-9_-]{16,64}$/.test(id.trim()) ? id.trim() : null;
+  }
   if (bank === 'TEL' || bank === 'MPE')
     return /^[A-Z0-9]{10}$/.test(value) && /\d/.test(value) ? value : null;
   if (bank === 'BOA') return /^FT[A-Z0-9]{10}(\d{5})?$/.test(value) ? value : null;
@@ -141,7 +149,12 @@ export async function readWithGemini(
   const bank: PictureBank | null =
     asked !== 'AUTO'
       ? asked
-      : said === 'CBE' || said === 'TEL' || said === 'DAS' || said === 'BOA' || said === 'MPE'
+      : said === 'CBE' ||
+          said === 'TEL' ||
+          said === 'DAS' ||
+          said === 'BOA' ||
+          said === 'MPE' ||
+          said === 'EBR'
         ? said
         : detectBank(parsed.fullText);
   return {
