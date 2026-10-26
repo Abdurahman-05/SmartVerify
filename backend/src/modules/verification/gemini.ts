@@ -23,6 +23,11 @@ const WHAT: Record<PictureBank, string> = {
     'from telebirr (Ethio telecom), an app screen or an SMS. transactionId: the telebirr ' +
     'transaction number exactly as printed: 10 letters or digits, e.g. DJD2QW8XTE (also at ' +
     'the end of a transactioninfo.ethiotelecom.et/receipt/ link)',
+  MPE:
+    'from M-PESA (Safaricom), an app screen or an SMS. transactionId: the M-PESA transaction ' +
+    'number exactly as printed ("Transaction ID" in the app, "Transaction number" in the SMS): ' +
+    '10 letters or digits, e.g. UJK0TV2TAO (also at the end of a ' +
+    'm-pesabusiness.safaricom.et/receipt/ link)',
   BOA:
     'from Bank of Abyssinia (BOA), an app screen or an SMS. transactionId: if a ' +
     'cs.bankofabyssinia.com/slip/?trx= link is shown, the full trx value (e.g. ' +
@@ -39,7 +44,7 @@ const promptFor = (bank: PictureBank | 'AUTO') =>
   (bank === 'AUTO'
     ? 'from one of these: ' +
       (Object.keys(WHAT) as PictureBank[]).map((b) => `${b} = a receipt ${WHAT[b]}`).join('; ') +
-      '. bank: which one it is (CBE, TEL, DAS or BOA), or null if none. transactionId: as ' +
+      '. bank: which one it is (CBE, TEL, DAS, BOA or MPE), or null if none. transactionId: as ' +
       'described for that bank, or null.'
     : `${WHAT[bank]}, or null.`) +
   ' Read it and return JSON only. amount: the transferred amount as ' +
@@ -62,7 +67,8 @@ export class GeminiError extends Error {}
 /** Gemini's own transactionId, kept only if it has the bank's exact format. */
 function bankReference(bank: PictureBank, id: string): string | null {
   const value = id.trim().toUpperCase();
-  if (bank === 'TEL') return /^[A-Z0-9]{10}$/.test(value) && /\d/.test(value) ? value : null;
+  if (bank === 'TEL' || bank === 'MPE')
+    return /^[A-Z0-9]{10}$/.test(value) && /\d/.test(value) ? value : null;
   if (bank === 'BOA') return /^FT[A-Z0-9]{10}(\d{5})?$/.test(value) ? value : null;
   if (bank === 'DAS') {
     return /^[A-Z0-9]{10,24}$/.test(value) && /\d/.test(value) && /[A-Z]/.test(value)
@@ -135,7 +141,7 @@ export async function readWithGemini(
   const bank: PictureBank | null =
     asked !== 'AUTO'
       ? asked
-      : said === 'CBE' || said === 'TEL' || said === 'DAS' || said === 'BOA'
+      : said === 'CBE' || said === 'TEL' || said === 'DAS' || said === 'BOA' || said === 'MPE'
         ? said
         : detectBank(parsed.fullText);
   return {

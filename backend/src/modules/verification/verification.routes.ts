@@ -29,10 +29,12 @@ import {
   listFailedChecks,
   BOA_RECEIPT_ID,
   DASHEN_REFERENCE,
+  MPESA_NUMBER,
   TELEBIRR_NUMBER,
   verifyBoa,
   verifyCbe,
   verifyDashen,
+  verifyMpesa,
   verifyTelebirr,
 } from './verification.service.js';
 
@@ -243,6 +245,21 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
   });
 
   referenceCheck({
+    path: '/verify/mpesa',
+    bankCode: 'MPE',
+    field: 'transactionNumber',
+    format: MPESA_NUMBER,
+    verify: verifyMpesa,
+    description:
+      'Reads the M-PESA receipt (m-pesabusiness.safaricom.et, its PDF) by transaction number ' +
+      '(the "Transaction ID" in the app or the "Transaction number" in the SMS) and checks it: ' +
+      "sent to a bank, the bank account number is one of the business's accounts and the " +
+      'holder name matches; settled amount ≥ expected; not too old. A receipt only exists for ' +
+      'completed transactions; an unknown number gives NOT_FOUND. M-PESA to M-PESA and merchant ' +
+      'receipts are not read yet (UNPARSEABLE). No QR code: number from a photo or typed.',
+  });
+
+  referenceCheck({
     path: '/verify/dashen',
     bankCode: 'DAS',
     field: 'reference',
@@ -335,7 +352,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         body: z.object({
           image: z.string().min(16).max(9_000_000).describe('PNG / JPEG / WebP, base64'),
           bank: z
-            .enum(['CBE', 'TEL', 'DAS', 'BOA', 'AUTO'])
+            .enum(['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'AUTO'])
             .default('CBE')
             .describe(
               'Whose receipt: CBE (FT reference), TEL (telebirr number), DAS (Dashen FT Ref), ' +
@@ -345,7 +362,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         response: {
           200: z.object({
             bank: z
-              .enum(['CBE', 'TEL', 'DAS', 'BOA'])
+              .enum(['CBE', 'TEL', 'DAS', 'BOA', 'MPE'])
               .nullable()
               .describe('The bank asked for, or (AUTO) the one found; null: none of these'),
             reference: z.string().nullable(),
@@ -428,7 +445,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
             'stored or logged.',
           body: z.object({
             image: z.string().min(16).max(9_000_000),
-            bank: z.enum(['CBE', 'TEL', 'DAS', 'BOA']).default('CBE'),
+            bank: z.enum(['CBE', 'TEL', 'DAS', 'BOA', 'MPE']).default('CBE'),
           }),
           response: {
             200: z.object({

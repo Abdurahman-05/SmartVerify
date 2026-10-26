@@ -9,10 +9,11 @@ import { AppError } from '../../shared/errors/app-error.js';
 import { cbeParser } from './banks/cbe.js';
 import { BOA_NOT_FOUND, boaParser } from './banks/boa.js';
 import { dashenParser } from './banks/dashen.js';
+import { MPESA_NOT_FOUND, mpesaParser } from './banks/mpesa.js';
 import { TELEBIRR_NOT_FOUND, telebirrParser } from './banks/telebirr.js';
 import type { ReceiptParser } from './banks/types.js';
 import { compareReceipt, explainComparison, type OwnAccount } from './compare.js';
-import { fetchReceipt, ReceiptFetchError } from './fetch-receipt.js';
+import { fetchReceipt, ReceiptFetchError, type FetchedReceipt } from './fetch-receipt.js';
 import type { FailedCheck, VerifyResponse } from './verification.schemas.js';
 
 /** Receipt PDF/HTML link: https://apps.cbe.com.et[:100]/?id=FT… */
@@ -210,6 +211,59 @@ export async function verifyDashen(
   });
 }
 
+/** M-PESA transaction number (10 letters/digits, e.g. UJK0TV2TAO), as in its SMS and app. */
+export const MPESA_NUMBER = /^[A-Z0-9]{10}$/;
+
+/** M-PESA answers with JSON whose base64Data is the receipt PDF; a code other than 0 = no receipt. */
+async function mpesaText(fetched: FetchedReceipt): Promise<string | null> {
+  try {
+    const body = JSON.parse(fetched.body.toString('utf8')) as {
+      responseCode?: string;
+      base64Data?: string;
+    };
+    if (String(body.responseCode) !== '0') return MPESA_NOT_FOUND;
+    if (!body.base64Data) return null;
+    return await pdfText(Buffer.from(body.base64Data, 'base64'));
+  } catch {
+    return null;
+  }
+}
+
+/** Fetches an M-PESA receipt by transaction number and checks it like the other banks. */
+export async function verifyMpesa(
+  prisma: PrismaClient,
+  env: Env,
+  businessId: string,
+  transactionNumber: string,
+  expectedAmountEtb: number,
+  log?: Pick<FastifyBaseLogger, 'info'>,
+  now = new Date(),
+  /** Check against these accounts instead of the business's (subscription payments). */
+  receiver?: { accounts: OwnAccount[]; name: string; maxAgeHours?: number }
+): Promise<VerifyResponse> {
+  if (!MPESA_NUMBER.test(transactionNumber)) throw new AppError('INVALID_URL');
+  return checkReceipt({
+    prisma,
+    env,
+    businessId,
+    source: {
+      url: new URL(
+        `https://m-pesabusiness.safaricom.et/api/receipt/getReceipt?trxNo=${transactionNumber}`
+      ),
+      headers: { accept: 'application/json', 'user-agent': 'SmartVerify/1.0' },
+    },
+    tlsStrict: true,
+    parser: mpesaParser,
+    bank: 'M-PESA',
+    expectedAmountEtb,
+    log,
+    now,
+    toText: mpesaText,
+    isNotFound: (text) => text === MPESA_NOT_FOUND,
+    receiver,
+  });
+}
+
 /** BOA receipt id: FT reference + the sender account's last 5 digits (FT26238SRG1T10431). */
 export const BOA_RECEIPT_ID = /^FT[A-Z0-9]{10}\d{5}$/;
 
@@ -258,6 +312,8 @@ async function checkReceipt(input: {
   isNotFound?: (text: string) => boolean;
   /** The parser reads the HTML page itself (its table rows), not plain text. */
   html?: boolean;
+  /** Turns the fetched answer into the receipt text (M-PESA: JSON holding a PDF). */
+  toText?: (fetched: FetchedReceipt) => Promise<string | null>;
   /** Check against these accounts instead of the business's (e.g. Smart Verify's own). */
   receiver?: { accounts: OwnAccount[]; name: string; maxAgeHours?: number };
 }): Promise<VerifyResponse> {
@@ -283,8 +339,9 @@ async function checkReceipt(input: {
     return { status: 'unable_to_verify', reason };
   }
 
-  const text =
-    input.html && fetched.contentType.startsWith('text/html')
+  const text = input.toText
+    ? await input.toText(fetched)
+    : input.html && fetched.contentType.startsWith('text/html')
       ? fetched.body.toString('utf8')
       : await receiptText(fetched.contentType, fetched.body);
   if (text && input.isNotFound?.(text)) {

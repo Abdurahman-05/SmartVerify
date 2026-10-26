@@ -1,0 +1,48 @@
+SCAN TO VERIFY
+TIN NO :
+VAT REG NO :
+Address :
+Tel :
+TRANSACTION INFORMATION
+/ SENDER NAME Kebede Alemu Tadesse
+0000000000
+00000000000
+Addis Ababa, Kirkos Woreda 1
++251 756 765434
+Safaricom M-PESA Mobile Financial Services
+የላኪ ስም
+/ PAYMENT METHOD M-PESA Main Account
+/ TRANSACTION TYPE
+/ PAYMENT CHANNEL
+Send To Bank
+APP
+/ PAYMENT REASON Lunch
+የመክፈያ ዘዴ
+የግብይት አይነት
+የክፍያ መንገድ
+የክፍያ ምክንያት
+TRANSACTION DETAIL
+/ RECEIPT NO / PAYMENT DATE / SETTLED AMOUNT
+SABCDEFGHIJK {{DATE}} 250.00
+0.50 Birr
+0.00 Birr
+/ SERVICE FEE
+/ + 15% VAT
+/ TOTAL AMOUNT IN WORDS Two Hundred Fifty Birr and Fifty Cents Only
+/ TOTAL 250.50
+/ TRANSACTION ID KLM3NP4QRS
+/ BANK TRANSACTION ID - - -
+የግብይት ቁጥር
+ደረሰኝ ቁጥር የክፍያ ቀን የገንዘብ መጠን
+የአገልግሎት ክፍያ
+ተጨማሪ እሴት ታክስ
+ጠቅላላ
+ጠቅላላ መጠን በፊደል
+የባንክ ግብይት ቁጥር
+/ BANK ACCOUNT NUMBER 1000123455678 - ABEBE COFFEE BEKELE	የባንክ አካውንት ቁጥር
+/ SENDER PHONE NUMBER 251911000111
+/ SENDER TIN NO - - -
+/ RECEIVER BANK NAME Commercial Bank Of Ethiopia	የተቀባዩ ባንክ ስም
+የላኪ ቲን ቁጥር
+የላኪ ስልክ ቁጥር
+/ THANK YOU FOR USING M-PESA	ን ስለተጠቀሙ እናመሰግናለን	M-PESA

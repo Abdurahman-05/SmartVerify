@@ -191,7 +191,7 @@ export function explainComparison(receipt: ParsedReceipt, input: CompareInput) {
         ]
       : walletToBank
         ? [
-            `Telebirr -> bank: bank account ...${receiver.shown} in our bank accounts ` +
+            `Wallet -> bank: bank account ...${receiver.shown} in our bank accounts ` +
               `[${ours((a) => a.bankCode !== 'TEL')}] ${mark(receiver.account)}`,
             nameLine,
           ]

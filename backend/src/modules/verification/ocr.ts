@@ -98,10 +98,11 @@ export function findBoaReference(text: string): string | null {
   return fromLink?.[1] ?? findCbeReference(text);
 }
 
-export type PictureBank = 'CBE' | 'TEL' | 'DAS' | 'BOA';
+export type PictureBank = 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'MPE';
 
 /** Words that only one bank's receipts carry, strongest first. */
 const BANK_WORDS: [PictureBank, RegExp][] = [
+  ['MPE', /m-?pesa|safaricom|ኤም-?ፔሳ/i],
   ['TEL', /transactioninfo\.ethiotelecom|telebirr|ethio\s*telecom|ቴሌብር/i],
   ['DAS', /dashen|superapp|receipts\.dashenbanksc|ዳሽን/i],
   ['BOA', /abyssinia|bankofabyssinia|\bBoA\b|አቢሲኒያ/i],
@@ -113,12 +114,26 @@ export function detectBank(text: string): PictureBank | null {
   return BANK_WORDS.find(([, words]) => words.test(text))?.[0] ?? null;
 }
 
+/**
+ * The M-PESA transaction number: in the SMS ("Transaction number UJK0TV2TAO", or the receipt
+ * link ending /receipt/UJK0TV2TAO) or in the app ("TRANSACTION ID UJK0TV2TAO"). Not guessed.
+ */
+export function findMpesaNumber(text: string): string | null {
+  const upper = text.toUpperCase();
+  const m =
+    /RECEIPT\s*\/\s*([A-Z0-9]{10})\b/.exec(upper) ??
+    /(?<!BANK\s)TRANSACTION\s+(?:NUMBER|NO\.?|ID)\s*(?:IS|:)?\s*([A-Z0-9]{10})\b/.exec(upper);
+  return m?.[1] && /\d/.test(m[1]) && /[A-Z]/.test(m[1]) ? m[1] : null;
+}
+
 /** The reference to look for in a picture of this bank's receipt. */
 export const findReference = (bank: PictureBank, text: string) =>
-  bank === 'TEL'
-    ? findTelebirrNumber(text)
-    : bank === 'DAS'
-      ? findDashenReference(text)
-      : bank === 'BOA'
-        ? findBoaReference(text)
-        : findCbeReference(text);
+  bank === 'MPE'
+    ? findMpesaNumber(text)
+    : bank === 'TEL'
+      ? findTelebirrNumber(text)
+      : bank === 'DAS'
+        ? findDashenReference(text)
+        : bank === 'BOA'
+          ? findBoaReference(text)
+          : findCbeReference(text);
