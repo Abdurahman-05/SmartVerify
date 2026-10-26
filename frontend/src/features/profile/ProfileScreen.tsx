@@ -8,6 +8,7 @@ import {
   LifeBuoy,
   LogOut,
   ScanText,
+  SlidersHorizontal,
   Star,
   Store,
   Users,
@@ -171,6 +172,13 @@ export default function ProfileScreen() {
               icon={Bike}
               label={t('profile.fees')}
               onPress={() => router.push('/setup/fees')}
+            />
+          ) : null}
+          {user.role === 'owner' && user.plan === 'restaurant' ? (
+            <ListRow
+              icon={SlidersHorizontal}
+              label={t('extras.title')}
+              onPress={() => router.push('/extra-features')}
             />
           ) : null}
           <ListRow

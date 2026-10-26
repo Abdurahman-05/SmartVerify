@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Check, ChefHat } from 'lucide-react-native';
+import { Check, ChefHat, NotebookPen } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, View } from 'react-native';
@@ -12,6 +12,7 @@ import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
+import { useFeatures } from '@/store/features';
 import { useSession } from '@/store/session';
 
 import { minutesSince, NoteChips, TypeTile, useNow, useOrderSubtitle, WaitTag } from './parts';
@@ -138,6 +139,7 @@ export default function KitchenScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const chefName = useSession((s) => s.user?.displayName ?? '');
+  const buyList = useFeatures((s) => s.featureBuyList);
   const query = useKitchenOrders();
   const { start, ready, failed } = useKitchenActions();
   const [tab, setTab] = useState<KitchenStatus>('new');
@@ -172,6 +174,18 @@ export default function KitchenScreen() {
           </Pressable>
         }
       />
+
+      {buyList ? (
+        <View className="px-4 pb-2.5">
+          <Button
+            label={t('extras.finished.open')}
+            icon={NotebookPen}
+            variant="outline"
+            size="md"
+            onPress={() => router.push('/finished')}
+          />
+        </View>
+      ) : null}
 
       <View className="flex-row gap-2 px-4 pb-3 pt-1" accessibilityRole="tablist">
         {tabs.map((status) => (

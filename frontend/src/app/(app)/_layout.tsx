@@ -1,8 +1,17 @@
 import { Stack } from 'expo-router';
+import { useEffect } from 'react';
 
+import { useFeatures } from '@/store/features';
+import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
 export default function AppLayout() {
+  // Which owner extras are on: asked after sign-in and whenever the app opens signed in.
+  const userId = useSession((s) => s.user?.userId);
+  useEffect(() => {
+    if (userId) void useFeatures.getState().load();
+  }, [userId]);
+
   return (
     <Stack
       screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
@@ -47,6 +56,8 @@ export default function AppLayout() {
       <Stack.Screen name="admin" />
       <Stack.Screen name="tips-admin" />
       <Stack.Screen name="change-pin" />
+      <Stack.Screen name="extra-features" />
+      <Stack.Screen name="finished" />
       <Stack.Screen name="verify/qr-result" />
     </Stack>
   );

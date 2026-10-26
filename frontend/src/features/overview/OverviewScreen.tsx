@@ -7,6 +7,7 @@ import {
   CircleCheck,
   HandCoins,
   Landmark,
+  Wallet,
   RefreshCw,
   UtensilsCrossed,
   type LucideIcon,
@@ -24,8 +25,10 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { Pill } from '@/features/orders/Pill';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
+import { getSpendings, spendingsKey } from '@/lib/extras';
 import { getOverview, overviewKey } from '@/lib/overview';
 import { periods, type Period } from '@/lib/period';
+import { useFeatures } from '@/store/features';
 import { useSession } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
@@ -100,6 +103,10 @@ export default function OverviewScreen() {
 
   const query = useQuery({ queryKey: overviewKey(period), queryFn: () => getOverview(period) });
   const { refetch } = query;
+  // Owner, Money out on: what was spent today. Nothing is shown (or asked) while it is off.
+  const moneyOut = useFeatures((s) => s.featureMoneyOut);
+  const showSpent = user?.role === 'owner' && moneyOut;
+  const spent = useQuery({ queryKey: spendingsKey, queryFn: getSpendings, enabled: showSpent });
   useFocusEffect(
     useCallback(() => {
       void refetch();
@@ -162,6 +169,13 @@ export default function OverviewScreen() {
           <Text tone="muted" className="text-sm">
             {t('overview.tipsNote')}
           </Text>
+          {showSpent && spent.data ? (
+            <SplitBox
+              icon={Wallet}
+              label={t('extras.money.spentToday')}
+              value={spent.data.totals.today}
+            />
+          ) : null}
 
           <Text font="heading" className="pt-2 text-lg" accessibilityRole="header">
             {t('overview.attention')}

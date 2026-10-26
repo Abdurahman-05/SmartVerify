@@ -1,6 +1,6 @@
 {
   "brand": {
-    "name": "Smart Verify",
+    "name": "ገብቷል",
     "tagline": "Every payment. Verified.",
     "secure": "SECURE PAYMENT VERIFICATION"
   },
@@ -112,7 +112,7 @@
       "waitingFor": "Waiting for",
       "close": "Close",
       "permissionTitle": "Camera needed",
-      "permissionBody": "Smart Verify needs the camera to scan the customer's payment QR code.",
+      "permissionBody": "ገብቷል needs the camera to scan the customer's payment QR code.",
       "allow": "Allow camera",
       "openSettings": "Open settings"
     },
@@ -702,7 +702,7 @@
   "errors": {
     "noConnection": "No connection. Check your internet and try again.",
     "noConnectionTitle": "No connection",
-    "noConnectionBody": "We couldn't reach Smart Verify. Check your internet connection and try again.",
+    "noConnectionBody": "We couldn't reach ገብቷል. Check your internet connection and try again.",
     "retry": "Retry",
     "validation": "Please check the details and try again.",
     "rateLimited": "Too many tries. Please wait a few minutes and try again.",
@@ -854,7 +854,7 @@
       "staffTitle": "Waiter, chef or manager",
       "staffBody": "Ask your owner or manager to set a new PIN for you.",
       "ownerTitle": "Owner",
-      "ownerBody": "Contact Smart Verify support to reset your PIN. Soon you will be able to reset it yourself with a code sent to your phone.",
+      "ownerBody": "Contact ገብቷል support to reset your PIN. Soon you will be able to reset it yourself with a code sent to your phone.",
       "back": "Back to sign in"
     },
     "forcedSubtitle": "Choose your own PIN to continue",
@@ -1085,22 +1085,22 @@
     "ownerOnly": "Only the owner can change the plan.",
     "telebirr": "telebirr",
     "telebirrNumber": "Telebirr transaction number",
-    "inReview": "We could not confirm this receipt automatically. The Smart Verify team will check it soon; your plan starts when they approve it."
+    "inReview": "We could not confirm this receipt automatically. The ገብቷል team will check it soon; your plan starts when they approve it."
   },
   "business": {
     "access": {
-      "trial": "Free trial: {{count}} days left. Choose a plan to keep using Smart Verify.",
+      "trial": "Free trial: {{count}} days left. Choose a plan to keep using ገብቷል.",
       "remind": "Your plan ends in {{count}} days. Pay now to keep everything working.",
       "grace": "Your plan has ended. Pay now: some features stop in {{count}} days.",
       "restricted": "Your plan has ended. Some features are paused until you pay.",
       "suspended": "Your account is paused. Pay to continue; your history is safe.",
-      "suspendedAdmin": "Your account is paused. Please contact Smart Verify.",
+      "suspendedAdmin": "Your account is paused. Please contact ገብቷል.",
       "pay": "Pay now",
       "blocked": "This is paused until the plan is paid."
     },
     "businessInfo": {
       "title": "Business information",
-      "subtitle": "Helps the Smart Verify team support you. Only they see it.",
+      "subtitle": "Helps the ገብቷል team support you. Only they see it.",
       "type": "Business type",
       "typePlaceholder": "Cafe, pharmacy, hotel…",
       "city": "City",
@@ -1152,5 +1152,88 @@
     "tableCount_other": "{{count}} tables",
     "manageTables": "Manage table categories",
     "manageTablesHint": "Main floor, VIP, garden… make your own"
+  },
+  "extras": {
+    "title": "Extra features",
+    "subtitle": "Turn on what your business needs",
+    "buyList": "Kitchen buy list",
+    "buyListHint": "The chef lists what ran out and the manager buys it",
+    "moneyOut": "Money out",
+    "moneyOutHint": "The manager records money the business paid out",
+    "hiddenNote": "Turning a feature off only hides it. Nothing is deleted.",
+    "saveFailedTitle": "Couldn't change the setting",
+    "cash": "Cash",
+    "bank": "Bank",
+    "errors": {
+      "title": "Write what it was for.",
+      "amount": "Enter an amount of at least 1 ETB.",
+      "conflict": "Someone already marked this as bought."
+    },
+    "finished": {
+      "title": "Finished items",
+      "subtitle": "What ran out in the kitchen",
+      "open": "Finished items",
+      "name": "Item",
+      "namePlaceholder": "e.g. Onions",
+      "nameError": "Enter the item name.",
+      "amount": "Amount (optional)",
+      "amountPlaceholder": "e.g. 3 boxes",
+      "when": "When is it needed?",
+      "today": "Today",
+      "week": "This week",
+      "add": "Add to list",
+      "ready": "Ready to send",
+      "send": "Send to manager ({{count}})",
+      "sentOk_one": "{{count}} item sent to the manager.",
+      "sentOk_other": "{{count}} items sent to the manager.",
+      "alreadySent": "Already sent",
+      "remove": "Remove {{name}}",
+      "removeDraft": "Take {{name}} off the list",
+      "removeTitle": "Remove {{name}} from the buy list?",
+      "removeAction": "Remove",
+      "sendFailedTitle": "Couldn't send the list",
+      "removeFailedTitle": "Couldn't remove the item"
+    },
+    "buy": {
+      "tab": "Buy list",
+      "title": "Buy list",
+      "subtitle": "What the kitchen needs",
+      "toBuy": "To buy",
+      "bought": "Bought",
+      "emptyOpen": "Nothing to buy right now.",
+      "emptyBought": "Nothing bought yet.",
+      "askedBy": "Asked by {{name}}",
+      "boughtBy": "Bought by {{name}}",
+      "sheetTitle": "Mark as bought",
+      "price": "Price (ETB)",
+      "paidCash": "Paid cash",
+      "paidBank": "Paid by bank",
+      "markBought": "Mark as bought",
+      "failedTitle": "Couldn't mark it as bought"
+    },
+    "money": {
+      "tab": "Money out",
+      "title": "Money out",
+      "subtitle": "What the business paid out",
+      "today": "Spent today",
+      "spentToday": "Spent today",
+      "week": "This week",
+      "entries": "Today's entries",
+      "empty": "Nothing spent today.",
+      "add": "Add spending",
+      "addTitle": "Add spending",
+      "what": "What for",
+      "whatPlaceholder": "e.g. Charcoal",
+      "amount": "Amount (ETB)",
+      "type": "Type",
+      "paidFrom": "Paid from",
+      "failedTitle": "Couldn't save the spending",
+      "categories": {
+        "FOOD": "Food",
+        "TRANSPORT": "Transport",
+        "BILLS": "Bills",
+        "OTHER": "Other"
+      }
+    }
   }
 }

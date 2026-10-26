@@ -1,6 +1,6 @@
 {
   "brand": {
-    "name": "Smart Verify",
+    "name": "ገብቷል",
     "tagline": "እያንዳንዱ ክፍያ። የተረጋገጠ።",
     "secure": "ደህንነቱ የተጠበቀ የክፍያ ማረጋገጫ"
   },
@@ -112,7 +112,7 @@
       "waitingFor": "የሚጠበቀው",
       "close": "ዝጋ",
       "permissionTitle": "ካሜራ ያስፈልጋል",
-      "permissionBody": "Smart Verify የደንበኛውን የክፍያ QR ኮድ ለመቃኘት ካሜራ ያስፈልገዋል።",
+      "permissionBody": "ገብቷል የደንበኛውን የክፍያ QR ኮድ ለመቃኘት ካሜራ ያስፈልገዋል።",
       "allow": "ካሜራ ፍቀድ",
       "openSettings": "ቅንብሮችን ክፈት"
     },
@@ -702,7 +702,7 @@
   "errors": {
     "noConnection": "ግንኙነት የለም። ኢንተርኔትዎን ያረጋግጡ እና እንደገና ይሞክሩ።",
     "noConnectionTitle": "ግንኙነት የለም",
-    "noConnectionBody": "ከSmart Verify ጋር መገናኘት አልተቻለም። የኢንተርኔት ግንኙነትዎን ያረጋግጡ እና እንደገና ይሞክሩ።",
+    "noConnectionBody": "ከገብቷል ጋር መገናኘት አልተቻለም። የኢንተርኔት ግንኙነትዎን ያረጋግጡ እና እንደገና ይሞክሩ።",
     "retry": "እንደገና ሞክር",
     "validation": "እባክዎ መረጃዎቹን ያረጋግጡ እና እንደገና ይሞክሩ።",
     "rateLimited": "በጣም ብዙ ሙከራዎች። እባክዎ ጥቂት ደቂቃዎች ጠብቀው እንደገና ይሞክሩ።",
@@ -854,7 +854,7 @@
       "staffTitle": "አስተናጋጅ፣ ሼፍ ወይም ሥራ አስኪያጅ",
       "staffBody": "ባለቤትዎን ወይም ሥራ አስኪያጅዎን አዲስ PIN እንዲያዘጋጁልዎ ይጠይቁ።",
       "ownerTitle": "ባለቤት",
-      "ownerBody": "PIN ዳግም ለማስጀመር የSmart Verify ድጋፍን ያግኙ። በቅርቡ ወደ ስልክዎ በሚላክ ኮድ እራስዎ ዳግም ማስጀመር ይችላሉ።",
+      "ownerBody": "PIN ዳግም ለማስጀመር የገብቷል ድጋፍን ያግኙ። በቅርቡ ወደ ስልክዎ በሚላክ ኮድ እራስዎ ዳግም ማስጀመር ይችላሉ።",
       "back": "ወደ መግቢያ ተመለስ"
     },
     "forcedSubtitle": "ለመቀጠል የራስዎን PIN ይምረጡ",
@@ -1085,22 +1085,22 @@
     "ownerOnly": "ዕቅዱን መቀየር የሚችለው ባለቤቱ ብቻ ነው።",
     "telebirr": "ቴሌብር",
     "telebirrNumber": "የቴሌብር የግብይት ቁጥር",
-    "inReview": "ይህን ደረሰኝ በራስ-ሰር ማረጋገጥ አልቻልንም። የSmart Verify ቡድን በቅርቡ ያየዋል፤ ዕቅድዎ የሚጀምረው ሲያጸድቁት ነው።"
+    "inReview": "ይህን ደረሰኝ በራስ-ሰር ማረጋገጥ አልቻልንም። የገብቷል ቡድን በቅርቡ ያየዋል፤ ዕቅድዎ የሚጀምረው ሲያጸድቁት ነው።"
   },
   "business": {
     "access": {
-      "trial": "ነፃ ሙከራ፦ {{count}} ቀናት ቀርተዋል። Smart Verifyን መጠቀም ለመቀጠል ዕቅድ ይምረጡ።",
+      "trial": "ነፃ ሙከራ፦ {{count}} ቀናት ቀርተዋል። ገብቷልን መጠቀም ለመቀጠል ዕቅድ ይምረጡ።",
       "remind": "ዕቅድዎ በ{{count}} ቀናት ውስጥ ያበቃል። ሁሉም እንዲሰራ አሁን ይክፈሉ።",
       "grace": "ዕቅድዎ አብቅቷል። አሁን ይክፈሉ፦ አንዳንድ አገልግሎቶች በ{{count}} ቀናት ውስጥ ይቆማሉ።",
       "restricted": "ዕቅድዎ አብቅቷል። እስኪከፍሉ ድረስ አንዳንድ አገልግሎቶች ቆመዋል።",
       "suspended": "መለያዎ ቆሟል። ለመቀጠል ይክፈሉ፤ ታሪክዎ ደህና ነው።",
-      "suspendedAdmin": "መለያዎ ቆሟል። እባክዎ Smart Verifyን ያግኙ።",
+      "suspendedAdmin": "መለያዎ ቆሟል። እባክዎ ገብቷልን ያግኙ።",
       "pay": "አሁን ክፈል",
       "blocked": "ዕቅዱ እስኪከፈል ድረስ ይህ ቆሟል።"
     },
     "businessInfo": {
       "title": "የንግድ መረጃ",
-      "subtitle": "የSmart Verify ቡድን እንዲረዳዎት ይጠቅማል። የሚያዩት እነሱ ብቻ ናቸው።",
+      "subtitle": "የገብቷል ቡድን እንዲረዳዎት ይጠቅማል። የሚያዩት እነሱ ብቻ ናቸው።",
       "type": "የንግድ ዓይነት",
       "typePlaceholder": "ካፌ፣ ፋርማሲ፣ ሆቴል…",
       "city": "ከተማ",
@@ -1152,5 +1152,88 @@
     "tableCount_other": "{{count}} ጠረጴዛዎች",
     "manageTables": "የጠረጴዛ ምድቦችን ያስተዳድሩ",
     "manageTablesHint": "ዋናው ወለል፣ VIP፣ የአትክልት ስፍራ… የራስዎን ይፍጠሩ"
+  },
+  "extras": {
+    "title": "ተጨማሪ አገልግሎቶች",
+    "subtitle": "ንግድዎ የሚፈልገውን ያብሩ",
+    "buyList": "የወጥ ቤት መግዣ ዝርዝር",
+    "buyListHint": "ምግብ አብሳዩ ያለቀውን ይዘረዝራል፣ ሥራ አስኪያጁ ይገዛል",
+    "moneyOut": "የወጪ ገንዘብ",
+    "moneyOutHint": "ሥራ አስኪያጁ ንግዱ የከፈለውን ገንዘብ ይመዘግባል",
+    "hiddenNote": "አገልግሎትን ማጥፋት መደበቅ ብቻ ነው። ምንም አይሰረዝም።",
+    "saveFailedTitle": "ቅንብሩን መቀየር አልተቻለም",
+    "cash": "ጥሬ ገንዘብ",
+    "bank": "ባንክ",
+    "errors": {
+      "title": "ለምን እንደሆነ ይጻፉ።",
+      "amount": "ቢያንስ 1 ብር ያስገቡ።",
+      "conflict": "ይህ አስቀድሞ እንደተገዛ ምልክት ተደርጎበታል።"
+    },
+    "finished": {
+      "title": "ያለቁ ዕቃዎች",
+      "subtitle": "በወጥ ቤት የለቀው",
+      "open": "ያለቁ ዕቃዎች",
+      "name": "ዕቃ",
+      "namePlaceholder": "ለምሳሌ ሽንኩርት",
+      "nameError": "የዕቃውን ስም ያስገቡ።",
+      "amount": "መጠን (አማራጭ)",
+      "amountPlaceholder": "ለምሳሌ 3 ሳጥን",
+      "when": "መቼ ያስፈልጋል?",
+      "today": "ዛሬ",
+      "week": "በዚህ ሳምንት",
+      "add": "ወደ ዝርዝር ጨምር",
+      "ready": "ለመላክ ዝግጁ",
+      "send": "ለሥራ አስኪያጅ ላክ ({{count}})",
+      "sentOk_one": "{{count}} ዕቃ ለሥራ አስኪያጁ ተልኳል።",
+      "sentOk_other": "{{count}} ዕቃዎች ለሥራ አስኪያጁ ተልከዋል።",
+      "alreadySent": "ቀደም ብለው የተላኩ",
+      "remove": "{{name}} አስወግድ",
+      "removeDraft": "{{name}} ከዝርዝሩ አውጣ",
+      "removeTitle": "{{name}} ከመግዣ ዝርዝር ይወገድ?",
+      "removeAction": "አስወግድ",
+      "sendFailedTitle": "ዝርዝሩን መላክ አልተቻለም",
+      "removeFailedTitle": "ዕቃውን ማስወገድ አልተቻለም"
+    },
+    "buy": {
+      "tab": "መግዣ",
+      "title": "የመግዣ ዝርዝር",
+      "subtitle": "ወጥ ቤቱ የሚፈልገው",
+      "toBuy": "የሚገዛ",
+      "bought": "የተገዛ",
+      "emptyOpen": "አሁን የሚገዛ ምንም የለም።",
+      "emptyBought": "ገና የተገዛ ምንም የለም።",
+      "askedBy": "የጠየቀው {{name}}",
+      "boughtBy": "የገዛው {{name}}",
+      "sheetTitle": "እንደተገዛ ምልክት አድርግ",
+      "price": "ዋጋ (ብር)",
+      "paidCash": "በጥሬ ገንዘብ ተከፍሏል",
+      "paidBank": "በባንክ ተከፍሏል",
+      "markBought": "እንደተገዛ ምልክት አድርግ",
+      "failedTitle": "እንደተገዛ ምልክት ማድረግ አልተቻለም"
+    },
+    "money": {
+      "tab": "ወጪ",
+      "title": "የወጪ ገንዘብ",
+      "subtitle": "ንግዱ የከፈለው",
+      "today": "ዛሬ የወጣ",
+      "spentToday": "ዛሬ የወጣ",
+      "week": "በዚህ ሳምንት",
+      "entries": "የዛሬ መዝገቦች",
+      "empty": "ዛሬ ምንም አልወጣም።",
+      "add": "ወጪ ጨምር",
+      "addTitle": "ወጪ ጨምር",
+      "what": "ለምን",
+      "whatPlaceholder": "ለምሳሌ ከሰል",
+      "amount": "መጠን (ብር)",
+      "type": "ዓይነት",
+      "paidFrom": "የተከፈለበት",
+      "failedTitle": "ወጪውን ማስቀመጥ አልተቻለም",
+      "categories": {
+        "FOOD": "ምግብ",
+        "TRANSPORT": "ትራንስፖርት",
+        "BILLS": "ሂሳቦች",
+        "OTHER": "ሌላ"
+      }
+    }
   }
 }

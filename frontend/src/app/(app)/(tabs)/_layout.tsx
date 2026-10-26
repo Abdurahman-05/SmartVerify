@@ -3,14 +3,17 @@ import {
   ChartColumn,
   Clock,
   House,
+  NotebookPen,
   ReceiptText,
   ShieldCheck,
   User,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react-native';
 import type { ColorValue } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { useFeatures } from '@/store/features';
 import { useBrandColors } from '@/store/theme';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
@@ -29,6 +32,8 @@ const HistoryIcon = icon(Clock);
 const ProfileIcon = icon(User);
 const NewOrderIcon = icon(ReceiptText);
 const ActivityIcon = icon(ChartColumn);
+const BuyListIcon = icon(NotebookPen);
+const MoneyOutIcon = icon(Wallet);
 
 export default function TabsLayout() {
   const brand = useBrandColors();
@@ -38,6 +43,10 @@ export default function TabsLayout() {
   // Waiters get their four everyday places; owner and manager keep Home / Verify / History.
   const isWaiter = role === 'waiter';
   const forWaiter = (show: boolean) => (show ? {} : { href: null });
+  // Manager extras: a tab only while its feature is on (otherwise no tab at all).
+  const isManager = role === 'manager';
+  const buyList = useFeatures((s) => s.featureBuyList);
+  const moneyOut = useFeatures((s) => s.featureMoneyOut);
 
   return (
     <Tabs
@@ -88,6 +97,22 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="transactions"
         options={{ title: t('nav.history'), tabBarIcon: HistoryIcon, ...forWaiter(!isWaiter) }}
+      />
+      <Tabs.Screen
+        name="buy-list"
+        options={{
+          title: t('extras.buy.tab'),
+          tabBarIcon: BuyListIcon,
+          ...forWaiter(isManager && buyList),
+        }}
+      />
+      <Tabs.Screen
+        name="money-out"
+        options={{
+          title: t('extras.money.tab'),
+          tabBarIcon: MoneyOutIcon,
+          ...forWaiter(isManager && moneyOut),
+        }}
       />
       <Tabs.Screen name="profile" options={{ title: t('nav.profile'), tabBarIcon: ProfileIcon }} />
     </Tabs>
