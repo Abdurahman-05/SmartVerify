@@ -21,6 +21,7 @@ import { Text } from '@/components/ui/Text';
 import { adminSignOut, getAdminProfile, getDashboard, hasAdminToken } from '@/lib/admin';
 import { ApiError } from '@/lib/api/client';
 import { colors } from '@/theme/tokens';
+import { wordmarkStyle } from '@/theme/wordmark';
 
 interface NavItem {
   key: string;
@@ -60,7 +61,7 @@ function BrandMark({ compact }: { compact?: boolean }) {
         <Check size={compact ? 20 : 24} color={colors.amber} strokeWidth={3} />
       </View>
       <View>
-        <Text font="heading" className={compact ? 'text-base' : 'text-lg'}>
+        <Text className={compact ? 'text-base' : 'text-lg'} style={wordmarkStyle}>
           {t('platformAdmin.brand')}
         </Text>
         {!compact ? (

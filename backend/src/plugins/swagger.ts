@@ -8,7 +8,7 @@ export default fp(
     await app.register(fastifySwagger, {
       openapi: {
         info: {
-          title: 'Smart Verify API',
+          title: 'ገብቷል API',
           description:
             'Backend for the Smart Verify app. Money is integer ETB; errors are `{ error: { code } }`.',
           version: '0.1.0',

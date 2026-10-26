@@ -46,7 +46,7 @@ export async function recordIssue(
     if (!before || before.resolvedAt) {
       void sendTelegram(
         env,
-        `Smart Verify: ${before ? 'back again' : 'new problem'} — ${issue.cause}` +
+        `ገብቷል: ${before ? 'back again' : 'new problem'} — ${issue.cause}` +
           (issue.route ? ` (${issue.route})` : '')
       );
     }

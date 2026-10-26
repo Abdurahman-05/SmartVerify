@@ -5,6 +5,7 @@ import { ScrollView, useWindowDimensions, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/theme/tokens';
+import { wordmarkStyle } from '@/theme/wordmark';
 
 /** At this width and wider the brand panel sits beside the form. */
 const WIDE = 900;
@@ -17,7 +18,7 @@ function Brand() {
         <Check size={24} color={colors.primary} strokeWidth={3} />
       </View>
       <View>
-        <Text font="heading" tone="inverse" className="text-xl">
+        <Text tone="inverse" className="text-xl" style={wordmarkStyle}>
           {t('platformAdmin.brand')}
         </Text>
         <Text tone="inverse" className="text-sm opacity-80">

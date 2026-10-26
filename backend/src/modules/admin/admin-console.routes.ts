@@ -1066,7 +1066,7 @@ export const adminConsoleRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => ({
-      sent: await sendTelegram(env, `Smart Verify: test message from ${request.admin.admin.name}.`),
+      sent: await sendTelegram(env, `ገብቷል: test message from ${request.admin.admin.name}.`),
     })
   );
 

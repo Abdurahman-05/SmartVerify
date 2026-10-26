@@ -18,7 +18,7 @@
   "errors": {
     "noConnection": "ግንኙነት የለም። ኢንተርኔትዎን ያረጋግጡ እና እንደገና ይሞክሩ።",
     "noConnectionTitle": "ግንኙነት የለም",
-    "noConnectionBody": "ከSmart Verify ጋር መገናኘት አልተቻለም። የኢንተርኔት ግንኙነትዎን ያረጋግጡ እና እንደገና ይሞክሩ።",
+    "noConnectionBody": "ከገብቷል ጋር መገናኘት አልተቻለም። የኢንተርኔት ግንኙነትዎን ያረጋግጡ እና እንደገና ይሞክሩ።",
     "retry": "እንደገና ሞክር",
     "validation": "እባክዎ መረጃዎቹን ያረጋግጡ እና እንደገና ይሞክሩ።",
     "rateLimited": "በጣም ብዙ ሙከራዎች። እባክዎ ጥቂት ደቂቃዎች ጠብቀው እንደገና ይሞክሩ።",
@@ -27,9 +27,9 @@
     "receiptUsed": "ይህ ደረሰኝ ቀደም ብሎ ለዕቅድ ክፍያ ጥቅም ላይ ውሏል።"
   },
   "platformAdmin": {
-    "brand": "Smart Verify",
+    "brand": "ገብቷል",
     "admin": "አስተዳዳሪ",
-    "teamOnly": "ለSmart Verify ቡድን ብቻ።",
+    "teamOnly": "ለገብቷል ቡድን ብቻ።",
     "webOnly": "አስተዳዳሪው በኮምፒውተር የድር አሳሽ ይከፈታል።",
     "signIn": {
       "title": "እንኳን ደህና መጡ",
@@ -51,7 +51,7 @@
       "title": "ኮድዎን ያስገቡ",
       "tagline": "አንድ ደረጃ ብቻ ቀረ።",
       "taglineSub": "የይለፍ ቃል ብቻውን የደንበኞችን ዝርዝር አይከፍትም።",
-      "body": "የማረጋገጫ መተግበሪያዎን ከፍተው ለSmart Verify ያለውን ባለ6 አሃዝ ኮድ ይጻፉ።",
+      "body": "የማረጋገጫ መተግበሪያዎን ከፍተው ለገብቷል ያለውን ባለ6 አሃዝ ኮድ ይጻፉ።",
       "code": "ባለ6 አሃዝ ኮድ",
       "changes": "ኮዱ በየ30 ሰከንዱ ይቀየራል።",
       "signIn": "ግባ",
@@ -66,7 +66,7 @@
       "title": "ባለሁለት ደረጃ ማዋቀር",
       "tagline": "አስተዳዳሪውን ይጠብቁ።",
       "taglineSub": "ይህ አንድ ደቂቃ ይወስዳል፤ የሚሆነውም ለመጀመሪያ ጊዜ ሲገቡ ብቻ ነው።",
-      "step1": "Smart Verifyን ወደ ማረጋገጫ መተግበሪያ ያክሉ",
+      "step1": "ገብቷልን ወደ ማረጋገጫ መተግበሪያ ያክሉ",
       "step1Body": "በGoogle Authenticator ወይም Microsoft Authenticator ውስጥ \"Enter a setup key\" መርጠው ይህን ቁልፍ ይጻፉ፦",
       "copyKey": "ቁልፉን ቅዳ",
       "copied": "ተቀድቷል",

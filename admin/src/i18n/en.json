@@ -18,7 +18,7 @@
   "errors": {
     "noConnection": "No connection. Check your internet and try again.",
     "noConnectionTitle": "No connection",
-    "noConnectionBody": "We couldn't reach Smart Verify. Check your internet connection and try again.",
+    "noConnectionBody": "We couldn't reach ገብቷል. Check your internet connection and try again.",
     "retry": "Retry",
     "validation": "Please check the details and try again.",
     "rateLimited": "Too many tries. Please wait a few minutes and try again.",
@@ -27,9 +27,9 @@
     "receiptUsed": "This receipt was already used to pay a plan."
   },
   "platformAdmin": {
-    "brand": "Smart Verify",
+    "brand": "ገብቷል",
     "admin": "Admin",
-    "teamOnly": "For the Smart Verify team only.",
+    "teamOnly": "For the ገብቷል team only.",
     "webOnly": "The admin opens in a web browser on a computer.",
     "signIn": {
       "title": "Welcome back",
@@ -51,7 +51,7 @@
       "title": "Enter your code",
       "tagline": "One more step.",
       "taglineSub": "A password alone cannot open the customer list.",
-      "body": "Open your authenticator app and type the 6-digit code for Smart Verify.",
+      "body": "Open your authenticator app and type the 6-digit code for ገብቷል.",
       "code": "6-digit code",
       "changes": "The code changes every 30 seconds.",
       "signIn": "Sign in",
@@ -66,7 +66,7 @@
       "title": "Two-step setup",
       "tagline": "Protect the admin.",
       "taglineSub": "This takes one minute and happens only the first time you sign in.",
-      "step1": "Add Smart Verify to an authenticator app",
+      "step1": "Add ገብቷል to an authenticator app",
       "step1Body": "In Google Authenticator or Microsoft Authenticator, choose \"Enter a setup key\" and type this key:",
       "copyKey": "Copy key",
       "copied": "Copied",

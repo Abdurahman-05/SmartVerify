@@ -74,5 +74,5 @@ export function matchTotp(
 
 /** The link authenticator apps read from a QR code (or the secret typed by hand). */
 export const otpauthUrl = (secret: string, email: string) =>
-  `otpauth://totp/${encodeURIComponent(`Smart Verify Admin:${email}`)}?secret=${secret}` +
-  `&issuer=${encodeURIComponent('Smart Verify Admin')}&algorithm=SHA1&digits=6&period=30`;
+  `otpauth://totp/${encodeURIComponent(`ገብቷል Admin:${email}`)}?secret=${secret}` +
+  `&issuer=${encodeURIComponent('ገብቷል Admin')}&algorithm=SHA1&digits=6&period=30`;
