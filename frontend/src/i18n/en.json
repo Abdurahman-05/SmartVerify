@@ -1044,7 +1044,9 @@
       "body": "The customer sent {{received}} for a {{bill}} bill. Ask the customer: keep the extra as {{name}}'s tip, or give it back in cash?",
       "keepTip": "Keep as tip",
       "giveBack": "Give back in cash"
-    }
+    },
+    "photoGivesAll_one": "Take a clear photo or pick a screenshot: it is read for you.",
+    "photoGivesAll_other": "Take a clear photo or pick a screenshot: they are read for you."
   },
   "devCompare": {
     "title": "Compare reading",

@@ -151,10 +151,12 @@ export default function ReadReceiptScreen() {
       // The server reads the picture (Gemini) and filters the bank's number: CBE FT reference or
       // telebirr transaction number. The confirm page shows it (or asks for it) and the rest.
       if (!asset.base64) throw new Error('no image data');
-      const tel = bank.code === 'TEL';
+      const tel = bank.code === 'TEL' || bank.code === 'MPE';
       const { reference } = await readReference(
         asset.base64,
-        tel ? 'TEL' : bank.code === 'DAS' ? 'DAS' : bank.code === 'BOA' ? 'BOA' : 'CBE'
+        bank.code === 'TEL' || bank.code === 'MPE' || bank.code === 'DAS' || bank.code === 'BOA'
+          ? bank.code
+          : 'CBE'
       );
       // BOA's SMS link gives FT reference + sender's last 5 at once.
       const boaId =
@@ -185,7 +187,7 @@ export default function ReadReceiptScreen() {
       .catch(failed);
   };
   // CBE and telebirr pictures are read by the server; other banks keep the fake reading.
-  const cbe = ['CBE', 'TEL', 'DAS', 'BOA'].includes(bank.code);
+  const cbe = ['CBE', 'TEL', 'DAS', 'BOA', 'MPE'].includes(bank.code);
 
   const names = onReceipt(bank).map((f) => t(`verifyBank.short.${f.key}`));
 

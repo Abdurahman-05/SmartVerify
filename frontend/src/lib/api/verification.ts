@@ -40,7 +40,10 @@ export const getFailedChecks = (period: Period) =>
  * POST /verify/read-reference — the Transaction ID and text of a receipt picture (base64), read
  * by Gemini on the server (OCR when Gemini is unavailable).
  */
-export const readReference = (imageBase64: string, bank: 'CBE' | 'TEL' | 'DAS' | 'BOA' = 'CBE') =>
+export const readReference = (
+  imageBase64: string,
+  bank: 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'MPE' = 'CBE'
+) =>
   api<{ reference: string | null; text: string; source: 'gemini' | 'ocr' }>(
     '/verify/read-reference',
     {
@@ -76,6 +79,18 @@ export const compareReading = (imageBase64: string) =>
  * POST /verify/telebirr — the server reads the telebirr receipt for this transaction number
  * and compares it with the business's accounts and the amount (from the receipt's HTML).
  */
+export const verifyMpesa = (
+  transactionNumber: string,
+  expectedAmountEtb: number,
+  billId?: string
+) =>
+  api<CbeCheck>('/verify/mpesa', {
+    method: 'POST',
+    body: { transactionNumber, expectedAmountEtb, ...(billId && { billId }) },
+    timeoutMs: 25_000,
+  });
+
+/** POST /verify/telebirr — the telebirr receipt page by transaction number. */
 export const verifyTelebirr = (
   transactionNumber: string,
   expectedAmountEtb: number,

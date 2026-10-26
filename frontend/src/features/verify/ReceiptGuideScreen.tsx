@@ -123,7 +123,7 @@ export default function ReceiptGuideScreen() {
         <View className="flex-row items-center gap-2 px-1">
           <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
           <Text tone="muted" className="flex-1 text-[15px]">
-            {t('verifyBank.qrGivesAll', { count })}
+            {t(bank.hasQr ? 'verifyBank.qrGivesAll' : 'verifyBank.photoGivesAll', { count })}
           </Text>
         </View>
       </ScrollView>

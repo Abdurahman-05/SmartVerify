@@ -131,9 +131,25 @@ export const payerBanks: PayerBank[] = [
     ],
     parseQr: () => null,
   },
+  {
+    code: 'MPE',
+    name: 'M-PESA',
+    shortName: 'M-PESA',
+    // No QR code: the number comes from the receipt picture (app screen or SMS), or is typed.
+    fields: [
+      {
+        // "Transaction ID" in the app, "Transaction number" in the SMS (10 letters / digits).
+        key: 'transactionNumber',
+        input: 'text',
+        sample: 'UJK0TV2TAO',
+        normalize: upper,
+        valid: (v) => /^[A-Z0-9]{10}$/.test(v),
+      },
+    ],
+    parseQr: () => null,
+  },
   referenceOnly('AWA', 'Awash Bank', 'Awash'),
   referenceOnly('ZEM', 'Zemen Bank', 'Zemen'),
-  referenceOnly('MPS', 'M-Pesa', 'M-Pesa'),
   referenceOnly('CBB', 'CBE Birr', 'CBE Birr'),
   referenceOnly('WEG', 'Wegagen Bank', 'Wegagen'),
 ];

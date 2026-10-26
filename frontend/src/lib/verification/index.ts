@@ -12,6 +12,7 @@ export const USE_MOCK_VERIFICATION = process.env.EXPO_PUBLIC_USE_MOCK_VERIFICATI
 
 export const verifyCbe = USE_MOCK_VERIFICATION ? mock.verifyCbe : real.verifyCbe;
 export const verifyTelebirr = USE_MOCK_VERIFICATION ? mock.verifyTelebirr : real.verifyTelebirr;
+export const verifyMpesa = USE_MOCK_VERIFICATION ? mock.verifyMpesa : real.verifyMpesa;
 export const verifyDashen = USE_MOCK_VERIFICATION ? mock.verifyDashen : real.verifyDashen;
 export const verifyBoa = USE_MOCK_VERIFICATION ? mock.verifyBoa : real.verifyBoa;
 export const getFailedChecks = USE_MOCK_VERIFICATION ? mock.getFailedChecks : real.getFailedChecks;
@@ -38,6 +39,8 @@ export async function checkReceipt(
 ): Promise<CbeCheck> {
   const telebirr = telebirrNumberOf(qrData);
   if (telebirr) return verifyTelebirr(telebirr, expectedAmountEtb, billId);
+  const mpesa = mpesaNumberOf(qrData);
+  if (mpesa) return verifyMpesa(mpesa, expectedAmountEtb, billId);
   const dashen = dashenReferenceOf(qrData);
   if (dashen) return verifyDashen(dashen, expectedAmountEtb, billId);
   const boa = boaReceiptIdOf(qrData);
@@ -63,6 +66,15 @@ export const telebirrReceiptLink = (transactionNumber: string) =>
 /** The transaction number of a telebirr receipt link, or null. */
 export const telebirrNumberOf = (text: string) =>
   /^https:\/\/transactioninfo\.ethiotelecom\.et\/receipt\/([A-Z0-9]{10})$/.exec(text.trim())?.[1] ??
+  null;
+
+/** The M-PESA receipt link for a transaction number (what the app checks for M-PESA). */
+export const mpesaReceiptLink = (transactionNumber: string) =>
+  `https://m-pesabusiness.safaricom.et/receipt/${transactionNumber}`;
+
+/** The transaction number of an M-PESA receipt link, or null. */
+export const mpesaNumberOf = (text: string) =>
+  /^https:\/\/m-pesabusiness\.safaricom\.et\/receipt\/([A-Z0-9]{10})$/.exec(text.trim())?.[1] ??
   null;
 
 /** The Dashen receipt link for an FT Ref (what the app checks for Dashen). */
