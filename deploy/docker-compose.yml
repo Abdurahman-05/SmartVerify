@@ -1,0 +1,46 @@
+# Production on one server: PostgreSQL, the API, and nginx (admin website + /api).
+# Secrets are in /opt/smartverify/.env on the server (never in git). See deploy/README.md.
+name: smartverify
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: smartverify
+      POSTGRES_USER: smartverify
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is not set}
+    volumes:
+      # On the separate data disk, so replacing the server does not lose the database.
+      - /data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U smartverify -d smartverify']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ../backend
+    restart: unless-stopped
+    env_file: /opt/smartverify/api.env
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: '3000'
+      DATABASE_URL: postgresql://smartverify:${DB_PASSWORD}@db:5432/smartverify
+      # CloudFront + nginx add X-Forwarded-For.
+      TRUST_PROXY_HOPS: '2'
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - /opt/smartverify/admin:/srv/admin:ro
+    depends_on:
+      - api

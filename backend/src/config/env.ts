@@ -47,6 +47,11 @@ const schema = z.object({
   TELEGRAM_BOT_TOKEN: z.string().min(20).optional(),
   TELEGRAM_CHAT_ID: z.string().min(1).optional(),
   WEB_ORIGINS: z.string().default('http://localhost:8082'),
+  /**
+   * Proxies in front of the API that add X-Forwarded-For (production: CloudFront + nginx = 2), so
+   * rate limits see the real client address. 0 = none (local development).
+   */
+  TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
   GEMINI_API_KEY: z.string().min(10).optional(),
   /** Optional key per bank (each from its own Google project, so each has its own rate limit). */
   GEMINI_API_KEY_CBE: z.string().min(10).optional(),

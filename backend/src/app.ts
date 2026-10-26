@@ -50,6 +50,10 @@ export interface BuildAppOptions {
 
 export async function buildApp({ env, logger }: BuildAppOptions) {
   const app = Fastify({
+    // Behind CloudFront + nginx the client address is in X-Forwarded-For (only trusted hops).
+    ...(env.TRUST_PROXY_HOPS > 0 && {
+      trustProxy: (_address: string, hop: number) => hop < env.TRUST_PROXY_HOPS,
+    }),
     logger: logger ?? {
       level: env.LOG_LEVEL,
       // Never log tokens. PINs are not logged because request bodies are not logged.
