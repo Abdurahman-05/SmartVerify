@@ -42,7 +42,7 @@ export const getFailedChecks = (period: Period) =>
  */
 export const readReference = (
   imageBase64: string,
-  bank: 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'MPE' = 'CBE'
+  bank: 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'MPE' | 'EBR' = 'CBE'
 ) =>
   api<{ reference: string | null; text: string; source: 'gemini' | 'ocr' }>(
     '/verify/read-reference',
@@ -79,6 +79,14 @@ export const compareReading = (imageBase64: string) =>
  * POST /verify/telebirr — the server reads the telebirr receipt for this transaction number
  * and compares it with the business's accounts and the amount (from the receipt's HTML).
  */
+export const verifyEbirr = (reference: string, expectedAmountEtb: number, billId?: string) =>
+  api<CbeCheck>('/verify/ebirr', {
+    method: 'POST',
+    body: { reference, expectedAmountEtb, ...(billId && { billId }) },
+    timeoutMs: 25_000,
+  });
+
+/** POST /verify/mpesa — the M-PESA receipt (a PDF) by transaction number. */
 export const verifyMpesa = (
   transactionNumber: string,
   expectedAmountEtb: number,

@@ -1,6 +1,6 @@
 /** One thing to find on the customer's receipt (or in its QR). */
 export interface ReceiptField {
-  key: 'reference' | 'senderAccount' | 'senderLast5' | 'transactionNumber';
+  key: 'reference' | 'senderAccount' | 'senderLast5' | 'transactionNumber' | 'receiptLink';
   /** What the user types when reading did not find it. */
   input: 'text' | 'digits';
   length?: number;
@@ -144,6 +144,23 @@ export const payerBanks: PayerBank[] = [
         sample: 'UJK0TV2TAO',
         normalize: upper,
         valid: (v) => /^[A-Z0-9]{10}$/.test(v),
+      },
+    ],
+    parseQr: () => null,
+  },
+  {
+    code: 'EBR',
+    name: 'eBirr',
+    shortName: 'eBirr',
+    // No QR code: the receipt link in the SMS is read from a picture of it, or typed.
+    fields: [
+      {
+        // "receipt.ebirr.com/<institution>/<token>": the token is case-sensitive, so no upper case.
+        key: 'receiptLink',
+        input: 'text',
+        sample: 'kaafimf/7Ca4gqKiADLtuj5VPOWuaQ',
+        normalize: (v) => v.replace(/\s/g, '').replace(/^https?:\/\/receipt\.ebirr\.com\//i, ''),
+        valid: (v) => /^[a-z0-9]{2,30}\/[A-Za-z0-9_-]{16,64}$/.test(v),
       },
     ],
     parseQr: () => null,

@@ -975,13 +975,15 @@
       "reference": "Reference No",
       "transactionNumber": "Transaction number",
       "senderAccount": "Sender account",
-      "senderLast5": "Sender account"
+      "senderLast5": "Sender account",
+      "receiptLink": "Receipt link"
     },
     "short": {
       "reference": "Transaction ID",
       "transactionNumber": "Transaction number",
       "senderAccount": "Sender account last 8 digits",
-      "senderLast5": "Sender account last 5 digits"
+      "senderLast5": "Sender account last 5 digits",
+      "receiptLink": "receipt link"
     },
     "scan": {
       "title": "Scan the QR",

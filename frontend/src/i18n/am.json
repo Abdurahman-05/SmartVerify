@@ -975,13 +975,15 @@
       "reference": "የማጣቀሻ ቁጥር",
       "transactionNumber": "የግብይት ቁጥር",
       "senderAccount": "የላኪ ሂሳብ",
-      "senderLast5": "የላኪ ሂሳብ"
+      "senderLast5": "የላኪ ሂሳብ",
+      "receiptLink": "የደረሰኝ ሊንክ"
     },
     "short": {
       "reference": "የግብይት መለያ",
       "transactionNumber": "የግብይት ቁጥር",
       "senderAccount": "የላኪ ሂሳብ የመጨረሻ 8 አሃዞች",
-      "senderLast5": "የላኪ ሂሳብ የመጨረሻ 5 አሃዞች"
+      "senderLast5": "የላኪ ሂሳብ የመጨረሻ 5 አሃዞች",
+      "receiptLink": "የደረሰኝ ሊንክ"
     },
     "scan": {
       "title": "QR ኮዱን ይቃኙ",

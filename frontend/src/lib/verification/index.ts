@@ -13,6 +13,7 @@ export const USE_MOCK_VERIFICATION = process.env.EXPO_PUBLIC_USE_MOCK_VERIFICATI
 export const verifyCbe = USE_MOCK_VERIFICATION ? mock.verifyCbe : real.verifyCbe;
 export const verifyTelebirr = USE_MOCK_VERIFICATION ? mock.verifyTelebirr : real.verifyTelebirr;
 export const verifyMpesa = USE_MOCK_VERIFICATION ? mock.verifyMpesa : real.verifyMpesa;
+export const verifyEbirr = USE_MOCK_VERIFICATION ? mock.verifyEbirr : real.verifyEbirr;
 export const verifyDashen = USE_MOCK_VERIFICATION ? mock.verifyDashen : real.verifyDashen;
 export const verifyBoa = USE_MOCK_VERIFICATION ? mock.verifyBoa : real.verifyBoa;
 export const getFailedChecks = USE_MOCK_VERIFICATION ? mock.getFailedChecks : real.getFailedChecks;
@@ -41,6 +42,8 @@ export async function checkReceipt(
   if (telebirr) return verifyTelebirr(telebirr, expectedAmountEtb, billId);
   const mpesa = mpesaNumberOf(qrData);
   if (mpesa) return verifyMpesa(mpesa, expectedAmountEtb, billId);
+  const ebirr = ebirrPathOf(qrData);
+  if (ebirr) return verifyEbirr(ebirr, expectedAmountEtb, billId);
   const dashen = dashenReferenceOf(qrData);
   if (dashen) return verifyDashen(dashen, expectedAmountEtb, billId);
   const boa = boaReceiptIdOf(qrData);
@@ -76,6 +79,15 @@ export const mpesaReceiptLink = (transactionNumber: string) =>
 export const mpesaNumberOf = (text: string) =>
   /^https:\/\/m-pesabusiness\.safaricom\.et\/receipt\/([A-Z0-9]{10})$/.exec(text.trim())?.[1] ??
   null;
+
+/** The eBirr receipt link for its path "<institution>/<token>" (the token is case-sensitive). */
+export const ebirrReceiptLink = (path: string) => `https://receipt.ebirr.com/${path}`;
+
+/** The "<institution>/<token>" path of an eBirr receipt link, or null. */
+export const ebirrPathOf = (text: string) =>
+  /^https:\/\/receipt\.ebirr\.com\/([a-z0-9]{2,30}\/[A-Za-z0-9_-]{16,64})$/.exec(
+    text.trim()
+  )?.[1] ?? null;
 
 /** The Dashen receipt link for an FT Ref (what the app checks for Dashen). */
 export const dashenReceiptLink = (reference: string) =>

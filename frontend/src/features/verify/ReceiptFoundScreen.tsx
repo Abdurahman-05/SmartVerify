@@ -12,6 +12,7 @@ import { Text } from '@/components/ui/Text';
 import {
   boaReceiptLink,
   cbeReceiptLink,
+  ebirrReceiptLink,
   mpesaReceiptLink,
   dashenReceiptLink,
   telebirrReceiptLink,
@@ -119,11 +120,13 @@ export default function ReceiptFoundScreen() {
           ? telebirrReceiptLink(values['transactionNumber'] ?? '')
           : bank.code === 'MPE'
             ? mpesaReceiptLink(values['transactionNumber'] ?? '')
-            : bank.code === 'DAS'
-              ? dashenReceiptLink(values['reference'] ?? '')
-              : bank.code === 'BOA'
-                ? boaReceiptLink(values['reference'] ?? '', values['senderLast5'] ?? '')
-                : JSON.stringify({ bank: bank.code, ...values })
+            : bank.code === 'EBR'
+              ? ebirrReceiptLink(values['receiptLink'] ?? '')
+              : bank.code === 'DAS'
+                ? dashenReceiptLink(values['reference'] ?? '')
+                : bank.code === 'BOA'
+                  ? boaReceiptLink(values['reference'] ?? '', values['senderLast5'] ?? '')
+                  : JSON.stringify({ bank: bank.code, ...values })
     );
     router.replace(checkingRoute(useReceiptFlow.getState().mode));
   };
