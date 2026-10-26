@@ -11,6 +11,7 @@ const LOGOS: Record<string, number> = {
   BOA: require('../../../assets/images/banks/boa.jpg') as number,
   MPE: require('../../../assets/images/banks/m-pesa.png') as number,
   EBR: require('../../../assets/images/banks/ebirr.jpg') as number,
+  CBB: require('../../../assets/images/banks/cbe-birr.jpg') as number,
 };
 
 export function BankBadge({ code, size = 48 }: { code: string; size?: 40 | 44 | 48 | 64 }) {
