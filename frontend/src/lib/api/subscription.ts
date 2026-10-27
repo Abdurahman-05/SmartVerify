@@ -34,7 +34,10 @@ export const getPaymentInfo = () => api<PaymentInfo>('/subscription/payment-info
 export const payForPlan = (
   plan: Plan,
   period: BillingPeriod,
-  receipt: { url: string } | { telebirrNumber: string },
+  receipt:
+    | { url: string }
+    | { telebirrNumber: string }
+    | { bank: 'DAS' | 'BOA' | 'MPE' | 'EBR'; reference: string },
   idempotencyKey = newIdempotencyKey()
 ) =>
   api<{ check: CbeCheck; subscription: Subscription | null; review?: 'pending' | null }>(

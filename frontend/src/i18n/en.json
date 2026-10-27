@@ -1080,16 +1080,17 @@
     "copied": "Copied",
     "step2": "2. Upload the receipt screenshot",
     "upload": "Upload receipt screenshot",
-    "orType": "We read it for you. Check the Transaction ID (CBE: also type your account's last 8 digits).",
+    "orType": "We read it for you. Check what was found and fill in anything missing.",
     "reference": "Transaction ID (FT…)",
     "last8": "Your account last 8 digits",
     "check": "Check payment and start plan",
-    "checking": "Checking your payment with CBE",
+    "checking": "Checking your payment with your bank",
     "notStarted": "Plan not started",
     "ownerOnly": "Only the owner can change the plan.",
     "telebirr": "telebirr",
     "telebirrNumber": "Telebirr transaction number",
-    "inReview": "We could not confirm this receipt automatically. The ገብቷል team will check it soon; your plan starts when they approve it."
+    "inReview": "We could not confirm this receipt automatically. The ገብቷል team will check it soon; your plan starts when they approve it.",
+    "chooseBank": "Which bank or wallet will you pay from?"
   },
   "business": {
     "access": {

@@ -20,15 +20,34 @@ import { Text } from '@/components/ui/Text';
 import { newIdempotencyKey } from '@/lib/api/idempotency';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { getPaymentInfo, payForPlan } from '@/lib/subscription';
+import { findPayerBank, type ReceiptField } from '@/features/verify/payerBanks';
 import { cbeReceiptLink, isCbeReceiptLink, readReference } from '@/lib/verification';
 import { useSession, type BillingPeriod, type Plan } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
-const FT = /^FT[A-Z0-9]{10}$/;
-const TELEBIRR = /^[A-Z0-9]{10}$/;
+/** Banks a plan can be paid from; each is checked with its own bank's receipt. */
+const SENDER_BANKS = ['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR'] as const;
+type Method = (typeof SENDER_BANKS)[number];
+type Values = Partial<Record<ReceiptField['key'], string>>;
 
-type Method = 'CBE' | 'TEL';
+/** What the server needs for each bank (same references as Verify). */
+function receiptFor(method: Method, v: Values) {
+  switch (method) {
+    case 'CBE':
+      return { url: cbeReceiptLink(v.reference ?? '', v.senderAccount ?? '') };
+    case 'TEL':
+      return { telebirrNumber: v.transactionNumber ?? '' };
+    case 'BOA':
+      return { bank: 'BOA' as const, reference: `${v.reference ?? ''}${v.senderLast5 ?? ''}` };
+    case 'MPE':
+      return { bank: 'MPE' as const, reference: v.transactionNumber ?? '' };
+    case 'EBR':
+      return { bank: 'EBR' as const, reference: v.receiptLink ?? '' };
+    case 'DAS':
+      return { bank: 'DAS' as const, reference: v.reference ?? '' };
+  }
+}
 
 /**
  * Pay for a plan by CBE transfer to Smart Verify, then upload the receipt: the server checks it
@@ -43,8 +62,7 @@ export default function SubscriptionPayScreen() {
   const isOwner = useSession((s) => s.user?.role === 'owner');
   const [copied, setCopied] = useState(false);
   const [reading, setReading] = useState(false);
-  const [reference, setReference] = useState('');
-  const [last8, setLast8] = useState('');
+  const [values, setValues] = useState<Values>({});
   const [error, setError] = useState<string | null>(null);
   const [payKey] = useState(newIdempotencyKey);
   const [method, setMethod] = useState<Method>('CBE');
@@ -56,7 +74,7 @@ export default function SubscriptionPayScreen() {
   const info = useQuery({ queryKey: ['subscription-payment-info'], queryFn: getPaymentInfo });
 
   const pay = useMutation({
-    mutationFn: (receipt: { url: string } | { telebirrNumber: string }) =>
+    mutationFn: (receipt: ReturnType<typeof receiptFor>) =>
       payForPlan(plan, period, receipt, payKey),
     onSuccess: (result) => {
       const { check, subscription } = result;
@@ -133,8 +151,21 @@ export default function SubscriptionPayScreen() {
         }
       }
       if (asset.base64) {
-        const read = await readReference(asset.base64, method);
-        if (read.reference) setReference(read.reference);
+        const { reference } = await readReference(asset.base64, method);
+        if (reference) {
+          // BOA's SMS link gives the FT reference and the sender's last 5 together.
+          const boa = method === 'BOA' ? /^(FT[A-Z0-9]{10})(\d{5})$/.exec(reference) : null;
+          setValues((v) => ({
+            ...v,
+            ...(method === 'TEL' || method === 'MPE'
+              ? { transactionNumber: reference }
+              : method === 'EBR'
+                ? { receiptLink: reference }
+                : boa
+                  ? { reference: boa[1], senderLast5: boa[2] }
+                  : { reference }),
+          }));
+        }
       }
     } catch (e) {
       setError(t(errorMessageKey(e)));
@@ -143,8 +174,12 @@ export default function SubscriptionPayScreen() {
     }
   };
 
-  const ready =
-    method === 'TEL' ? TELEBIRR.test(reference) : FT.test(reference) && /^\d{8}$/.test(last8);
+  const senderBank = findPayerBank(method);
+  const fields = senderBank?.fields ?? [];
+  const ready = fields.length > 0 && fields.every((f) => f.valid(values[f.key] ?? ''));
+  // Telebirr pays our telebirr number; every other bank pays our CBE account.
+  const toTelebirr = method === 'TEL';
+  const banks = SENDER_BANKS.filter((b) => b !== 'TEL' || payTo?.telebirr);
 
   return (
     <FormScreen>
@@ -167,45 +202,49 @@ export default function SubscriptionPayScreen() {
             <MoneyText value={price} tone="inverse" className="text-4xl" />
           </View>
 
-          {payTo.telebirr ? (
-            <View className="flex-row gap-2" accessibilityRole="radiogroup">
-              {(['CBE', 'TEL'] as const).map((m) => (
-                <Pressable
-                  key={m}
-                  onPress={() => {
-                    setMethod(m);
-                    setReference('');
-                  }}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected: method === m }}
-                  className={`h-12 flex-1 flex-row items-center justify-center gap-2 rounded-[24px] ${
-                    method === m ? 'bg-primary' : 'border-2 border-borderStrong bg-surface'
-                  }`}
-                >
-                  <Text
-                    font="bold"
-                    tone={method === m ? 'inverse' : 'default'}
-                    className="text-base"
+          <View className="gap-2">
+            <Text font="bold" className="text-[17px]">
+              {t('subscriptionPay.chooseBank')}
+            </Text>
+            <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
+              {banks.map((code) => {
+                const selected = method === code;
+                return (
+                  <Pressable
+                    key={code}
+                    onPress={() => {
+                      setMethod(code);
+                      setValues({});
+                    }}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected }}
+                    accessibilityLabel={findPayerBank(code)?.name}
+                    className={`min-h-12 flex-row items-center gap-2 rounded-[24px] py-1 pl-1 pr-3.5 ${
+                      selected ? 'bg-primary' : 'border-2 border-borderStrong bg-surface'
+                    }`}
                   >
-                    {t(m === 'CBE' ? 'subscriptionPay.bank' : 'subscriptionPay.telebirr')}
-                  </Text>
-                </Pressable>
-              ))}
+                    <BankBadge code={code} size={40} />
+                    <Text font="bold" tone={selected ? 'inverse' : 'default'} className="text-base">
+                      {findPayerBank(code)?.shortName}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
-          ) : null}
+          </View>
 
           <View className="gap-1">
             <Text font="bold" className="text-[17px]">
               {t('subscriptionPay.step1')}
             </Text>
             <View className="flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface p-3">
-              <BankBadge code={method === 'TEL' ? 'TEL' : 'CBE'} size={44} />
+              <BankBadge code={toTelebirr ? 'TEL' : 'CBE'} size={44} />
               <View className="min-w-0 flex-1">
                 <Text font="heading" className="text-xl" selectable>
-                  {method === 'TEL' ? payTo.telebirr?.number : payTo.accountNumber}
+                  {toTelebirr ? payTo.telebirr?.number : payTo.accountNumber}
                 </Text>
                 <Text tone="muted" className="text-sm" numberOfLines={1}>
-                  {method === 'TEL'
+                  {toTelebirr
                     ? `${payTo.telebirr?.name ?? ''} · ${t('subscriptionPay.telebirr')}`
                     : `${payTo.accountName} · ${t('subscriptionPay.bank')}`}
                 </Text>
@@ -242,36 +281,23 @@ export default function SubscriptionPayScreen() {
             <Text tone="muted" className="text-sm">
               {t('subscriptionPay.orType')}
             </Text>
-            <TextInput
-              value={reference}
-              onChangeText={(v) =>
-                setReference(
-                  v
-                    .replace(/\s/g, '')
-                    .toUpperCase()
-                    .slice(0, method === 'TEL' ? 10 : 12)
-                )
-              }
-              placeholder={method === 'TEL' ? 'DJD2QW8XTE' : 'FT26286JZH4B'}
-              placeholderTextColor={colors.placeholder}
-              autoCapitalize="characters"
-              autoCorrect={false}
-              accessibilityLabel={t(
-                method === 'TEL' ? 'subscriptionPay.telebirrNumber' : 'subscriptionPay.reference'
-              )}
-              className="h-14 rounded-input border-[1.5px] border-borderStrong bg-surface px-4 font-heading text-xl text-text"
-            />
-            {method === 'CBE' ? (
+            {fields.map((field) => (
               <TextInput
-                value={last8}
-                onChangeText={(v) => setLast8(v.replace(/\D/g, '').slice(0, 8))}
-                placeholder={t('subscriptionPay.last8')}
+                key={field.key}
+                value={values[field.key] ?? ''}
+                onChangeText={(v) =>
+                  setValues((current) => ({ ...current, [field.key]: field.normalize(v) }))
+                }
+                placeholder={field.typed ? t(`verifyBank.short.${field.key}`) : field.sample}
                 placeholderTextColor={colors.placeholder}
-                keyboardType="number-pad"
-                accessibilityLabel={t('subscriptionPay.last8')}
+                keyboardType={field.input === 'digits' ? 'number-pad' : 'default'}
+                autoCapitalize={method === 'EBR' ? 'none' : 'characters'}
+                autoCorrect={false}
+                maxLength={field.length ?? 120}
+                accessibilityLabel={t(`verifyBank.fields.${field.key}`)}
                 className="h-14 rounded-input border-[1.5px] border-borderStrong bg-surface px-4 font-heading text-xl text-text"
               />
-            ) : null}
+            ))}
           </View>
         </View>
       )}
@@ -283,13 +309,7 @@ export default function SubscriptionPayScreen() {
             label={t('subscriptionPay.check')}
             icon={Landmark}
             disabled={!ready}
-            onPress={() =>
-              pay.mutate(
-                method === 'TEL'
-                  ? { telebirrNumber: reference }
-                  : { url: cbeReceiptLink(reference, last8) }
-              )
-            }
+            onPress={() => pay.mutate(receiptFor(method, values))}
           />
         </View>
       ) : null}

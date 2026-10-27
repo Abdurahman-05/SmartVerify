@@ -16,4 +16,7 @@ export const explorePlan: (plan: Plan) => Promise<void> = USE_MOCK_SUBSCRIPTION
 
 export type { PaymentInfo } from '@/lib/api/subscription';
 export const getPaymentInfo = USE_MOCK_SUBSCRIPTION ? mockPay.getPaymentInfo : real.getPaymentInfo;
-export const payForPlan = USE_MOCK_SUBSCRIPTION ? mockPay.payForPlan : real.payForPlan;
+// The offline mock ignores the receipt, so it accepts every way to pay.
+export const payForPlan: typeof real.payForPlan = USE_MOCK_SUBSCRIPTION
+  ? (plan, period) => mockPay.payForPlan(plan, period, { url: '' })
+  : real.payForPlan;
