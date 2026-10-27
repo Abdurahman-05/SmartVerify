@@ -33,16 +33,65 @@ const words = (name: string) =>
     .split(/\s+/)
     .filter(Boolean);
 
+/** Letters to add, remove or change to turn one word into the other. */
+function editDistance(a: string, b: string): number {
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const row = [i];
+    for (let j = 1; j <= b.length; j++) {
+      row[j] = Math.min(
+        (prev[j] ?? 0) + 1,
+        (row[j - 1] ?? 0) + 1,
+        (prev[j - 1] ?? 0) + (a[i - 1] === b[j - 1] ? 0 : 1)
+      );
+    }
+    prev = row;
+  }
+  return prev[b.length] ?? 0;
+}
+
+/**
+ * Spelling differences of the same name (Mohammed / Mohamed / Muhammed, Elias / Eliyas,
+ * Abdurahman / Abdulrahman): one letter in a word of 4–7 letters, two in a longer word.
+ * Short words must be equal.
+ */
+const similar = (a: string, b: string) => {
+  if (a === b) return true;
+  const shorter = Math.min(a.length, b.length);
+  if (shorter < 4) return false;
+  return editDistance(a, b) <= (shorter >= 8 ? 2 : 1);
+};
+
 /**
  * The receipt name is the saved name, or contains all of its words (receipts may add a
- * grandfather's name). One word alone is too weak to count.
+ * grandfather's name), allowing small spelling differences. Words written together or apart
+ * ("Abdurahman" / "Abdu Rahman") match too. One word alone is too weak to count. The account is
+ * always checked separately and exactly, so this only decides "right name for that account".
  */
 export function sameName(receiptName: string, savedName: string) {
   const got = words(receiptName);
   const want = words(savedName);
   if (!want.length) return false;
   if (got.join(' ') === want.join(' ')) return true;
-  return want.length >= 2 && want.every((w) => got.includes(w));
+  if (want.length < 2) return false;
+  if (want.every((w) => got.some((g) => similar(g, w)))) return true;
+  // Same letters with the spaces in other places: compare the joined names.
+  const joinedWant = want.join('');
+  const joinedGot = got.join('');
+  if (joinedGot.startsWith(joinedWant) || joinedWant === joinedGot) return true;
+  if (joinedWant.length < 8) return false;
+  // The receipt may add words after the name: compare with its best-fitting beginning.
+  const allowed = Math.max(2, Math.floor(joinedWant.length / 10));
+  for (let n = joinedWant.length - allowed; n <= joinedWant.length + allowed; n++) {
+    if (
+      n > 0 &&
+      n <= joinedGot.length &&
+      editDistance(joinedGot.slice(0, n), joinedWant) <= allowed
+    ) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
