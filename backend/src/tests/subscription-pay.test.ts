@@ -203,3 +203,64 @@ describe('paying for a plan with telebirr', () => {
     await tApp.close();
   });
 });
+
+describe('paying for a plan from another bank (chosen by the owner)', () => {
+  const EBIRR = readFileSync(new URL('./fixtures/ebirr-receipt.html', import.meta.url), 'utf8');
+  const stamp = (d: Date) =>
+    new Date(d.getTime() + 3 * HOUR).toISOString().slice(0, 19).replace('T', ' ');
+  // eBirr to our CBE account 1000999990001, printed with its middle hidden.
+  const ebirrPage = (amount: number, account = '100XXXXXXXX01'): FetchedReceipt => ({
+    contentType: 'text/html; charset=utf-8',
+    body: Buffer.from(
+      EBIRR.replace(
+        '{{REASON}}',
+        `Bank Transfer of ETB${amount} from 251911000111 To Bank Account ${account}`
+      )
+        .split('{{AMOUNT}}')
+        .join(String(amount))
+        .replace('{{STATUS}}', 'Completed')
+        .split('{{RECEIPT}}')
+        .join('802648940777')
+        .split('{{DATE}}')
+        .join(stamp(new Date(Date.now() - HOUR)))
+    ),
+  });
+  const PATH = 'kaafimf/7Ca4gqKiADLtuj5VPOWuaQ';
+
+  it('an eBirr transfer to our account starts the plan; the token keeps its case', async () => {
+    const oApp = await createTestApp(PAY_TO);
+    const owner = (await createRestaurant(oApp)).owner.token;
+    const payOther = (body: Record<string, unknown>) =>
+      oApp.inject({
+        method: 'POST',
+        url: '/api/v1/subscription/pay',
+        headers: headers(owner, newKey()),
+        payload: { plan: 'normal', period: 'monthly', ...body },
+      });
+
+    fetchMock.mockResolvedValueOnce(ebirrPage(700, '100XXXXXXXX99'));
+    expect((await payOther({ bank: 'EBR', reference: PATH })).json()).toMatchObject({
+      check: { status: 'not_matching', reasons: ['WRONG_RECEIVER'] },
+      subscription: null,
+    });
+
+    fetchMock.mockResolvedValueOnce(ebirrPage(700));
+    const paid = await payOther({ bank: 'EBR', reference: PATH });
+    expect(paid.json()).toMatchObject({
+      check: { status: 'verified', reference: '802648940777' },
+      subscription: { plan: 'normal', period: 'monthly', priceEtb: 700 },
+    });
+    const [url] = fetchMock.mock.calls.at(-1) ?? [];
+    expect(url?.href).toBe(`https://receipt.ebirr.com/${PATH}`);
+    const latest = await oApp.prisma.subscription.findFirst({ orderBy: { createdAt: 'desc' } });
+    expect(latest?.paymentMethod).toBe('ebirr');
+
+    // One way to pay at a time, and the reference must fit the bank.
+    expect((await payOther({ bank: 'EBR' })).statusCode).toBe(400);
+    expect((await payOther({ bank: 'MPE', reference: 'short' })).statusCode).toBe(400);
+    expect((await payOther({ bank: 'MPE', reference: 'UJK0TV2TAO', url: URL_OK })).statusCode).toBe(
+      400
+    );
+    await oApp.close();
+  });
+});

@@ -10,10 +10,27 @@ import { addMonths, getSettings, planPricing } from '../../services/platform-set
 import { subscriptionSchema } from '../auth/session-user.js';
 import { verifyResponseSchema } from '../verification/verification.schemas.js';
 import {
+  BOA_RECEIPT_ID,
+  DASHEN_REFERENCE,
+  EBIRR_REFERENCE,
+  MPESA_NUMBER,
   TELEBIRR_NUMBER,
+  verifyBoa,
   verifyCbe,
+  verifyDashen,
+  verifyEbirr,
+  verifyMpesa,
   verifyTelebirr,
 } from '../verification/verification.service.js';
+
+/** The other banks a plan can be paid from: same check as for a business, against our accounts. */
+const OTHER_BANKS = {
+  DAS: { verify: verifyDashen, format: DASHEN_REFERENCE, method: 'dashen', caseSensitive: false },
+  BOA: { verify: verifyBoa, format: BOA_RECEIPT_ID, method: 'boa', caseSensitive: false },
+  MPE: { verify: verifyMpesa, format: MPESA_NUMBER, method: 'mpesa', caseSensitive: false },
+  EBR: { verify: verifyEbirr, format: EBIRR_REFERENCE, method: 'ebirr', caseSensitive: true },
+} as const;
+type OtherBank = keyof typeof OTHER_BANKS;
 
 const toSubscription = (s: {
   plan: Plan;
@@ -226,6 +243,17 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
             .regex(TELEBIRR_NUMBER)
             .optional()
             .describe('Or: the telebirr transaction number of a payment to Smart Verify'),
+          bank: z
+            .enum(['DAS', 'BOA', 'MPE', 'EBR'])
+            .optional()
+            .describe('Or: the bank the owner paid from (Dashen, BOA, M-PESA, eBirr) …'),
+          reference: z
+            .string()
+            .trim()
+            .min(1)
+            .max(100)
+            .optional()
+            .describe('… with its receipt reference (as for /verify/<bank>)'),
         }),
         response: {
           200: z.object({
@@ -245,9 +273,20 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
     async (request) => {
       if (!payTo) throw new AppError('PAYMENT_NOT_CONFIGURED');
       const { businessId } = request.auth;
-      const { plan, url, telebirrNumber } = request.body;
-      if (!url === !telebirrNumber)
-        throw new AppError('VALIDATION_ERROR', { reason: 'urlOrTelebirr' });
+      const { plan, url, telebirrNumber, bank } = request.body;
+      // Exactly one way: CBE link, telebirr number, or another bank + its reference.
+      const other = bank ? OTHER_BANKS[bank as OtherBank] : null;
+      const reference = other
+        ? other.caseSensitive
+          ? request.body.reference
+          : request.body.reference?.toUpperCase()
+        : undefined;
+      if ([url, telebirrNumber, bank].filter(Boolean).length !== 1) {
+        throw new AppError('VALIDATION_ERROR', { reason: 'oneWayToPay' });
+      }
+      if (other && !(reference && other.format.test(reference))) {
+        throw new AppError('VALIDATION_ERROR', { reason: 'reference' });
+      }
       if (telebirrNumber && !payToTelebirr) throw new AppError('PAYMENT_NOT_CONFIGURED');
       const period: BillingPeriod = plan === 'restaurant' ? 'monthly' : request.body.period;
       const pricing = planPricing(await getSettings(prisma), plan, period);
@@ -274,8 +313,41 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
         };
       }
 
-      const check =
-        telebirrNumber && payToTelebirr
+      // Our accounts a payment from another bank may arrive in (to the CBE account, or telebirr).
+      const ourAccounts = [
+        {
+          bankCode: 'CBE',
+          accountNumber: payTo.accountNumber,
+          last4: payTo.accountNumber.slice(-4),
+          holderName: payTo.accountName,
+        },
+        ...(payToTelebirr
+          ? [
+              {
+                bankCode: 'TEL',
+                accountNumber: payToTelebirr.number,
+                last4: payToTelebirr.number.slice(-4),
+                holderName: payToTelebirr.name,
+              },
+            ]
+          : []),
+      ];
+      const check = other
+        ? await other.verify(
+            prisma,
+            env,
+            businessId,
+            reference ?? '',
+            pricing.priceEtb,
+            request.log,
+            new Date(),
+            {
+              accounts: ourAccounts,
+              name: payTo.accountName,
+              maxAgeHours: env.SUBSCRIPTION_RECEIPT_MAX_AGE_HOURS,
+            }
+          )
+        : telebirrNumber && payToTelebirr
           ? await verifyTelebirr(
               prisma,
               env,
@@ -325,7 +397,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
             ? !check.reasons.some((r) => r === 'WRONG_RECEIVER' || r === 'NOT_SUCCESS')
             : check.status === 'unable_to_verify' && check.reason !== 'NOT_FOUND';
         if (!reviewable) return { check, subscription: null, review: null };
-        const receiptKey = telebirrNumber ?? url ?? '';
+        const receiptKey = other ? `${bank}:${reference}` : (telebirrNumber ?? url ?? '');
         await prisma.paymentReview.upsert({
           where: { businessId_receiptKey: { businessId, receiptKey } },
           update: {},
@@ -334,7 +406,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
             plan,
             period,
             expectedEtb: pricing.priceEtb,
-            bankCode: telebirrNumber ? 'TEL' : 'CBE',
+            bankCode: bank ?? (telebirrNumber ? 'TEL' : 'CBE'),
             receiptKey,
             reference: check.status === 'not_matching' ? check.reference : null,
             paidEtb: check.status === 'not_matching' ? check.amountEtb : null,
@@ -357,7 +429,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
             period,
             priceEtb: pricing.priceEtb,
             months: pricing.months,
-            paymentMethod: telebirrNumber ? 'telebirr' : 'cbe',
+            paymentMethod: other ? other.method : telebirrNumber ? 'telebirr' : 'cbe',
             paymentReference: check.reference,
             idempotencyKey,
           })

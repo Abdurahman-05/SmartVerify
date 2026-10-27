@@ -193,7 +193,9 @@ export async function verifyDashen(
   reference: string,
   expectedAmountEtb: number,
   log?: Pick<FastifyBaseLogger, 'info'>,
-  now = new Date()
+  now = new Date(),
+  /** Check against these accounts instead of the business's (subscription payments). */
+  receiver?: { accounts: OwnAccount[]; name: string; maxAgeHours?: number }
 ): Promise<VerifyResponse> {
   if (!DASHEN_REFERENCE.test(reference)) throw new AppError('INVALID_URL');
   return checkReceipt({
@@ -209,6 +211,7 @@ export async function verifyDashen(
     log,
     now,
     html: true,
+    receiver,
   });
 }
 
@@ -310,7 +313,9 @@ export async function verifyBoa(
   receiptId: string,
   expectedAmountEtb: number,
   log?: Pick<FastifyBaseLogger, 'info'>,
-  now = new Date()
+  now = new Date(),
+  /** Check against these accounts instead of the business's (subscription payments). */
+  receiver?: { accounts: OwnAccount[]; name: string; maxAgeHours?: number }
 ): Promise<VerifyResponse> {
   if (!BOA_RECEIPT_ID.test(receiptId)) throw new AppError('INVALID_URL');
   return checkReceipt({
@@ -329,6 +334,7 @@ export async function verifyBoa(
     now,
     // BOA answers 200 with this for an unknown id.
     isNotFound: (text) => BOA_NOT_FOUND.test(text),
+    receiver,
   });
 }
 

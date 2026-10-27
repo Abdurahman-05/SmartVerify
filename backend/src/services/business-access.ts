@@ -72,7 +72,7 @@ export async function startPaidPeriod(
     period: BillingPeriod;
     priceEtb: number;
     months: number;
-    paymentMethod: 'cbe' | 'telebirr' | 'manual' | 'free';
+    paymentMethod: 'cbe' | 'telebirr' | 'dashen' | 'boa' | 'mpesa' | 'ebirr' | 'manual' | 'free';
     paymentReference?: string | null;
     idempotencyKey?: string | null;
     note?: string | null;
