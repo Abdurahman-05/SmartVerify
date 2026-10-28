@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { Check, Clock } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View, type ScrollViewInstance } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
@@ -163,7 +163,7 @@ export default function SubscriptionScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const user = useSession((s) => s.user);
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ScrollViewInstance>(null);
   const [plansY, setPlansY] = useState(0);
 
   // Plans are paid by the owner (CBE transfer + receipt), on the pay page.

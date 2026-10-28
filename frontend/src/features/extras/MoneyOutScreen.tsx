@@ -127,7 +127,7 @@ function MoneyOut() {
       <FlatList
         data={query.data?.entries ?? []}
         keyExtractor={(entry) => entry.id}
-        ListHeaderComponent={header}
+        ListHeaderComponent={header ?? undefined}
         contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 16 }}
         renderItem={({ item }) => <SpendingRow entry={item} />}
         ListEmptyComponent={

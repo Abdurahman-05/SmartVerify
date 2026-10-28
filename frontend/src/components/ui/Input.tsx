@@ -1,5 +1,5 @@
 import { forwardRef, type ReactNode } from 'react';
-import { TextInput, View, type TextInputProps } from 'react-native';
+import { TextInput, View, type TextInputInstance, type TextInputProps } from 'react-native';
 
 import { colors } from '@/theme/tokens';
 
@@ -13,7 +13,7 @@ interface InputProps extends TextInputProps {
   error?: string;
 }
 
-export const Input = forwardRef<TextInput, InputProps>(function Input(
+export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
   { label, labelRight, prefix, rightAccessory, error, ...inputProps },
   ref
 ) {

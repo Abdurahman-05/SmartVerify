@@ -20,11 +20,12 @@ import { colors } from '@/theme/tokens';
 
 type TabIconProps = { color: ColorValue; focused: boolean };
 
-const icon =
-  (Icon: LucideIcon) =>
-  ({ color, focused }: TabIconProps) => (
-    <Icon size={focused ? 26 : 24} color={color as string} strokeWidth={focused ? 2.4 : 2} />
-  );
+const icon = (Icon: LucideIcon) =>
+  function TabIcon({ color, focused }: TabIconProps) {
+    return (
+      <Icon size={focused ? 26 : 24} color={color as string} strokeWidth={focused ? 2.4 : 2} />
+    );
+  };
 
 const HomeIcon = icon(House);
 const VerifyIcon = icon(ShieldCheck);
