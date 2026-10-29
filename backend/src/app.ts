@@ -24,6 +24,7 @@ import { tipRoutes } from './modules/tips/tip.routes.js';
 import { extrasRoutes } from './modules/extras/extras.routes.js';
 import { menuRoutes } from './modules/menu/menu.routes.js';
 import { staffRoutes } from './modules/staff/staff.routes.js';
+import { notificationRoutes } from './modules/notifications/notification.routes.js';
 import { orderRoutes } from './modules/orders/order.routes.js';
 import { subscriptionRoutes } from './modules/subscriptions/subscription.routes.js';
 import { tableRoutes } from './modules/tables/table.routes.js';
@@ -150,6 +151,7 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
         await secured.register(subscriptionRoutes);
         await secured.register(bankAccountRoutes);
         await secured.register(verificationRoutes);
+        await secured.register(notificationRoutes);
         // Restaurant Plus (each module requires the restaurant plan).
         await secured.register(orderRoutes);
         await secured.register(billRoutes);

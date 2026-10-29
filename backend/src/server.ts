@@ -1,6 +1,7 @@
 import { buildApp } from './app.js';
 import { loadEnv } from './config/env.js';
 import { deleteOldChecks } from './modules/verification/record-check.js';
+import { sendScheduledNotifications } from './services/notifications.js';
 
 const env = loadEnv();
 const app = await buildApp({ env });
@@ -27,6 +28,17 @@ try {
   };
   void cleanUp();
   setInterval(() => void cleanUp(), 24 * 3_600_000).unref();
+
+  // Every hour: the evening summary and the owner's plan reminders (each sent once).
+  const remind = async () => {
+    try {
+      await sendScheduledNotifications(app.prisma, app.log);
+    } catch (error) {
+      app.log.error(error, 'could not send scheduled notifications');
+    }
+  };
+  void remind();
+  setInterval(() => void remind(), 3_600_000).unref();
 } catch (error) {
   app.log.error(error);
   process.exit(1);

@@ -155,6 +155,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         bankCode: 'CBE',
         expectedAmountEtb,
         result,
+        log: request.log,
       });
     }
   );
@@ -232,6 +233,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
           bankCode: config.bankCode,
           expectedAmountEtb,
           result,
+          log: request.log,
         });
       }
     );

@@ -159,6 +159,8 @@ model Business {
   /// Owner-controlled extras (Restaurant Plus). Off only hides them: data is never deleted.
   featureBuyList  Boolean   @default(false)
   featureMoneyOut Boolean   @default(false)
+  /// Owner and managers are told about a verified payment of at least this much.
+  bigPaymentEtb   Int       @default(5000)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -182,6 +184,7 @@ model Business {
   kitchenOrders   KitchenOrder[]
   paymentScans    BillPaymentScan[]
   receiptChecks   ReceiptCheck[]
+  notifications   Notification[]
 }
 
 /// A person's role inside a business. The owner also has a member row (role = owner).
@@ -214,6 +217,7 @@ model BusinessMember {
   buyItemsCreated    BuyItem[]         @relation("BuyItemCreatedBy")
   buyItemsBought     BuyItem[]         @relation("BuyItemBoughtBy")
   spendings          Spending[]
+  notifications      Notification[]
 
   @@index([businessId])
 }
@@ -897,4 +901,24 @@ model Spending {
   createdAt   DateTime         @default(now())
 
   @@index([businessId, createdAt])
+}
+
+/// In-app inbox: one row per person told. The app writes the sentence from type + data.
+model Notification {
+  id         String         @id @default(cuid())
+  businessId String
+  business   Business       @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  memberId   String
+  member     BusinessMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  /// new_order | order_ready | big_payment | bad_receipt | daily_summary | plan_ending | plan_late
+  type       String
+  /// Values for the text (order number, table, amount, reasons…); never sentences.
+  data       Json           @default("{}")
+  /// Automatic ones are sent once per key (e.g. daily_summary:2026-10-29).
+  onceKey    String?
+  readAt     DateTime?
+  createdAt  DateTime       @default(now())
+
+  @@unique([memberId, onceKey])
+  @@index([memberId, createdAt])
 }

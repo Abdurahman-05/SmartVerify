@@ -1,4 +1,7 @@
+import type { FastifyBaseLogger } from 'fastify';
+
 import { Prisma, type PrismaClient } from '../../generated/prisma/client.js';
+import { notify } from '../../services/notifications.js';
 
 import { saveFailedCheck } from './verification.service.js';
 import type { VerifyResponse } from './verification.schemas.js';
@@ -24,11 +27,13 @@ export async function recordCheck(
     bankCode: string;
     expectedAmountEtb: number;
     result: VerifyResponse;
+    log?: FastifyBaseLogger;
   }
 ): Promise<VerifyResponse> {
   const { result } = input;
   if (result.status !== 'verified') {
     await saveFailedCheck(prisma, { ...input, checkedById: input.memberId, result });
+    await tellAboutBadReceipt(prisma, input, result);
     return result;
   }
 
@@ -47,6 +52,23 @@ export async function recordCheck(
         verifiedAt: new Date(),
       },
     });
+    const { bigPaymentEtb } = await prisma.business.findUniqueOrThrow({
+      where: { id: input.businessId },
+      select: { bigPaymentEtb: true },
+    });
+    if (result.amountEtb >= bigPaymentEtb) {
+      await notify(prisma, input.log, {
+        businessId: input.businessId,
+        to: { roles: ['owner', 'manager'] },
+        type: 'big_payment',
+        data: {
+          amountEtb: result.amountEtb,
+          bankCode: input.bankCode,
+          payerName: result.payerName,
+          reference: result.reference,
+        },
+      });
+    }
     return result;
   } catch (error) {
     if (!isUniqueViolation(error)) throw error;
@@ -78,7 +100,37 @@ export async function recordCheck(
     checkedById: input.memberId,
     result: duplicate,
   });
+  await tellAboutBadReceipt(prisma, input, duplicate);
   return duplicate;
+}
+
+/** Reasons that may mean cheating (not a typo or a slow bank): the owner and managers are told. */
+const SUSPICIOUS = ['DUPLICATE', 'WRONG_RECEIVER', 'WRONG_RECEIVER_NAME', 'NOT_SUCCESS'];
+
+async function tellAboutBadReceipt(
+  prisma: PrismaClient,
+  input: { businessId: string; memberId: string; bankCode: string; log?: FastifyBaseLogger },
+  result: VerifyResponse
+) {
+  if (result.status !== 'not_matching') return;
+  const reasons = result.reasons.filter((r) => SUSPICIOUS.includes(r));
+  if (reasons.length === 0) return;
+  const checker = await prisma.businessMember.findUnique({
+    where: { id: input.memberId },
+    select: { user: { select: { name: true } } },
+  });
+  await notify(prisma, input.log, {
+    businessId: input.businessId,
+    to: { roles: ['owner', 'manager'] },
+    type: 'bad_receipt',
+    data: {
+      reasons,
+      bankCode: input.bankCode,
+      reference: result.reference,
+      amountEtb: result.amountEtb,
+      checkedBy: checker?.user.name ?? '',
+    },
+  });
 }
 
 /** Verified receipts since `from`, newest first. Waiters see only their own checks. */

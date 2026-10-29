@@ -6,6 +6,7 @@ import type { AuthContext } from '../../plugins/auth.js';
 import { requireRestaurantPlan, requireRoles } from '../../plugins/auth.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { errorResponseSchema, idParamSchema } from '../../shared/schemas/common.js';
+import { notify } from '../../services/notifications.js';
 
 const statusSchema = z.enum(['new', 'cooking', 'ready']);
 
@@ -32,6 +33,7 @@ const include = {
     select: {
       number: true,
       notes: true,
+      waiterId: true,
       waiter: { select: { user: { select: { name: true } } } },
       items: { orderBy: { id: 'asc' }, select: { name: true, quantity: true } },
       bill: {
@@ -207,6 +209,17 @@ export const kitchenRoutes: FastifyPluginAsyncZod = async (app) => {
               data: { servedStatus: 'served' },
             });
           }
+        });
+        // The waiter who took the order picks it up.
+        await notify(prisma, request.log, {
+          businessId: request.auth.businessId,
+          to: { memberIds: [row.order.waiterId] },
+          type: 'order_ready',
+          data: {
+            orderNo: row.order.number,
+            type: row.order.bill.type,
+            table: row.order.bill.table?.number ?? null,
+          },
         });
       }
       return toKitchenOrder(await loadOne(prisma, request.auth, row.id));

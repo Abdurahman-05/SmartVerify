@@ -1,5 +1,6 @@
 import { Prisma, type OrderNote, type PrismaClient } from '../../generated/prisma/client.js';
 import type { AuthContext } from '../../plugins/auth.js';
+import { notify } from '../../services/notifications.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { loadBillDetail } from '../bills/bill.service.js';
 
@@ -161,6 +162,28 @@ export function createOrderService(prisma: PrismaClient) {
           throw new AppError('TABLE_BUSY');
         }
         throw error;
+      }
+      // The kitchen hears about it at once.
+      const order = await prisma.order.findFirst({
+        where: { billId },
+        select: {
+          number: true,
+          _count: { select: { items: true } },
+          bill: { select: { type: true, table: { select: { number: true } } } },
+        },
+      });
+      if (order) {
+        await notify(prisma, undefined, {
+          businessId,
+          to: { roles: ['chef'] },
+          type: 'new_order',
+          data: {
+            orderNo: order.number,
+            type: order.bill.type,
+            table: order.bill.table?.number ?? null,
+            items: order._count.items,
+          },
+        });
       }
       return loadBillDetail(prisma, { id: billId, businessId });
     },
