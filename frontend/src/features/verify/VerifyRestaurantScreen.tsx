@@ -14,6 +14,7 @@ import { OptionSheet } from '@/components/ui/OptionSheet';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
+import { maskedNumberKey } from '@/features/bank-accounts/telebirr';
 import { usePaymentBill } from '@/features/bills/usePaymentBill';
 import { newIdempotencyKey } from '@/lib/api/idempotency';
 import { errorMessageKey } from '@/lib/errors';
@@ -244,10 +245,11 @@ export default function VerifyRestaurantScreen() {
             <BankBadge code={account.bankCode} size={40} />
             <View className="flex-1">
               <Text font="bold" className="text-base" numberOfLines={1}>
-                {account.bankName}
+                {account.holderName}
               </Text>
-              <Text tone="muted" className="text-sm">
-                {t('verifyRestaurant.receivingAccount', { last4: account.last4 })}
+              <Text tone="muted" className="text-sm" numberOfLines={1}>
+                {account.shortName} ·{' '}
+                {t(maskedNumberKey(account.bankCode), { last4: account.last4 })}
               </Text>
             </View>
             <Pressable
@@ -302,7 +304,7 @@ export default function VerifyRestaurantScreen() {
         title={t('verifyRestaurant.chooseAccount')}
         options={accounts.map((a) => ({
           value: a.id,
-          label: a.bankName,
+          label: `${a.holderName} · ${a.shortName} ${t(maskedNumberKey(a.bankCode), { last4: a.last4 })}`,
           leading: <BankBadge code={a.bankCode} size={40} />,
         }))}
         selected={account?.id ?? ''}
