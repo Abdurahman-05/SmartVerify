@@ -59,7 +59,25 @@ const similar = (a: string, b: string) => {
   if (a === b) return true;
   const shorter = Math.min(a.length, b.length);
   if (shorter < 4) return false;
-  return editDistance(a, b) <= (shorter >= 9 ? 3 : shorter >= 6 ? 2 : 1);
+  if (sameSound(a, b)) return true;
+  const [x, y] = [single(a), single(b)];
+  return editDistance(x, y) <= (shorter >= 9 ? 3 : shorter >= 6 ? 2 : 1);
+};
+
+/** Doubled letters written once (Mohammed / Mohamed, Hussen / Husen). */
+const single = (w: string) => w.replace(/(.)\1+/g, '$1');
+
+/** The consonants as they sound: vowels, y, w and h dropped, ph/q/c read as f/k/k. */
+const sound = (w: string) =>
+  single(w.replace(/ph/g, 'f').replace(/[qc]/g, 'k').replace(/[aeiouyhw]/g, ''));
+
+/**
+ * Written differently but sounding the same (Mohammed / Muhamed, Gebremedhin / Gebremedihn,
+ * Eliyas / Elias): same first letter and the same consonants in the same order.
+ */
+const sameSound = (a: string, b: string) => {
+  const [x, y] = [sound(a), sound(b)];
+  return a[0] === b[0] && x.length >= 2 && x === y;
 };
 
 /** A receipt that cuts the name off: its last word is the start of the saved word. */

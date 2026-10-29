@@ -18,6 +18,10 @@ describe('receiver name on a receipt against the saved holder name', () => {
       ['Tigist Gebremedhin', 'Tigist Gebremedihn'],
       ['Abdurahman Eli', 'Abdurahman Eliyas'],
       ['Abdurahmn Eliyas Muhamed', 'Abdurahman Eliyas'],
+      ['Mohammmed Aliii', 'Mohamed Ali'],
+      ['Abdurahmn Eliyas', 'Abdurahman Eliyas'],
+      ['Muhamad Huseyin', 'Mohammed Hussen'],
+      ['Yohanis Gebremariam', 'Yohannes Gebremaryam'],
     ];
     for (const [receipt, saved] of same)
       expect(sameName(receipt, saved), `${receipt} / ${saved}`).toBe(true);
@@ -30,6 +34,7 @@ describe('receiver name on a receipt against the saved holder name', () => {
       ['Almaz Tesfaye', 'Alemu Tesfaye'],
       ['Ali Bekele', 'Abel Bekele'],
       ['Mohammed', 'Mohammed Ali'],
+      ['Meron Tadesse', 'Miriam Tadesse'],
       ['', 'Abebe Bekele'],
     ];
     for (const [receipt, saved] of different)
