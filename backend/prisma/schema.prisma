@@ -26,7 +26,10 @@ enum Role {
 }
 
 enum Plan {
+  /// Normal, 2 devices signed in at a time.
   normal
+  /// Normal, any number of devices.
+  normal_multi
   restaurant
 }
 
@@ -772,18 +775,19 @@ model PaymentReview {
 
 /// The admin's rules and prices (one row, id 1).
 model PlatformSettings {
-  id                     Int      @id @default(1)
-  trialEnabled           Boolean  @default(true)
-  trialDays              Int      @default(14)
-  reminderDays           Int[]    @default([7, 3, 1])
-  graceDays              Int      @default(3)
-  restrictedDays         Int      @default(7)
+  id                      Int      @id @default(1)
+  trialEnabled            Boolean  @default(true)
+  trialDays               Int      @default(14)
+  reminderDays            Int[]    @default([7, 3, 1])
+  graceDays               Int      @default(3)
+  restrictedDays          Int      @default(7)
   /// What Restricted blocks: receipt_checks | orders | reports | staff
-  restrictedBlocks       String[] @default(["receipt_checks", "orders", "reports", "staff"])
-  priceNormalMonthly     Int      @default(700)
-  priceNormalQuarterly   Int      @default(1500)
-  priceRestaurantMonthly Int      @default(4000)
-  updatedAt              DateTime @updatedAt
+  restrictedBlocks        String[] @default(["receipt_checks", "orders", "reports", "staff"])
+  priceNormalMonthly      Int      @default(1000)
+  priceNormalMultiMonthly Int      @default(1500)
+  priceNormalQuarterly    Int      @default(1500)
+  priceRestaurantMonthly  Int      @default(4000)
+  updatedAt               DateTime @updatedAt
 }
 
 /// Server problems grouped by cause: one row per kind, counted.

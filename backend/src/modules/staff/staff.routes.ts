@@ -93,6 +93,12 @@ export const staffRoutes: FastifyPluginAsyncZod = async (app) => {
     return target;
   }
 
+  /** Normal plans have one kind of staff: workers (the waiter role: verify, history). */
+  function onlyWorkersOnNormal(auth: AuthContext, role: Role) {
+    if (auth.plan === 'restaurant' || role === 'waiter') return;
+    throw new AppError('VALIDATION_ERROR', { reason: 'workerOnly' });
+  }
+
   app.get(
     '/staff',
     {
@@ -147,6 +153,7 @@ export const staffRoutes: FastifyPluginAsyncZod = async (app) => {
     async (request, reply) => {
       const { auth, body } = request;
       if (!canManage(auth.role, body.role)) throw new AppError('FORBIDDEN');
+      onlyWorkersOnNormal(auth, body.role);
 
       const existing = await prisma.user.findUnique({
         where: { phone: body.phone },
@@ -227,6 +234,7 @@ export const staffRoutes: FastifyPluginAsyncZod = async (app) => {
       const { auth, body } = request;
       const target = await manageable(auth, request.params.id);
       if (body.role && !canManage(auth.role, body.role)) throw new AppError('FORBIDDEN');
+      if (body.role) onlyWorkersOnNormal(auth, body.role);
 
       const { name, ...member } = body;
       const updated = await prisma.$transaction(async (tx) => {

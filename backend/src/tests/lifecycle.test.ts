@@ -15,6 +15,7 @@ const settings: PlatformSettings = {
   restrictedBlocks: ['receipt_checks', 'orders', 'reports', 'staff'],
   priceNormalMonthly: 700,
   priceNormalQuarterly: 1500,
+  priceNormalMultiMonthly: 1500,
   priceRestaurantMonthly: 4000,
   updatedAt: new Date(),
 };

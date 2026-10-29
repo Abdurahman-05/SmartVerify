@@ -91,15 +91,17 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
         security: [{ bearerAuth: [] }],
         description:
           'Starts a subscription right away. NO PAYMENT STEP YET: refused in production unless ' +
-          'ALLOW_UNPAID_SUBSCRIPTIONS=true. Normal: monthly 700 ETB / quarterly 1,500 ETB; ' +
-          'Restaurant Plus: monthly 4,000 ETB. Replaces the current subscription. ' +
+          'ALLOW_UNPAID_SUBSCRIPTIONS=true. Normal (2 devices at a time): monthly or quarterly; ' +
+          'Normal Multi (any number of devices) and Restaurant Plus: monthly only. Replaces the current subscription. ' +
           'Repeating an Idempotency-Key returns the first subscription.',
         headers: z.object({
           'idempotency-key': z.string().min(8).max(100).describe('A new UUID per user action'),
         }),
         body: z.object({
           plan: planSchema,
-          period: z.enum(['monthly', 'quarterly']).describe('Restaurant Plus is always monthly'),
+          period: z
+            .enum(['monthly', 'quarterly'])
+            .describe('Only Normal can be quarterly; the others are always monthly'),
         }),
         response: {
           201: subscriptionSchema,
@@ -112,7 +114,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
       if (!allowUnpaid) throw new AppError('PAYMENT_NOT_CONFIGURED');
       const { businessId } = request.auth;
       const { plan } = request.body;
-      const period: BillingPeriod = plan === 'restaurant' ? 'monthly' : request.body.period;
+      const period: BillingPeriod = plan === 'normal' ? request.body.period : 'monthly';
       const pricing = planPricing(await getSettings(prisma), plan, period);
       if (!pricing) throw new AppError('VALIDATION_ERROR');
       const idempotencyKey = request.headers['idempotency-key'];
@@ -188,6 +190,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
             telebirr: z.object({ number: z.string(), name: z.string() }).nullable(),
             prices: z.object({
               normal: z.object({ monthly: z.number().int(), quarterly: z.number().int() }),
+              normal_multi: z.object({ monthly: z.number().int() }),
               restaurant: z.object({ monthly: z.number().int() }),
             }),
           }),
@@ -208,6 +211,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
             monthly: settings.priceNormalMonthly,
             quarterly: settings.priceNormalQuarterly,
           },
+          normal_multi: { monthly: settings.priceNormalMultiMonthly },
           restaurant: { monthly: settings.priceRestaurantMonthly },
         },
       };
@@ -288,7 +292,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
         throw new AppError('VALIDATION_ERROR', { reason: 'reference' });
       }
       if (telebirrNumber && !payToTelebirr) throw new AppError('PAYMENT_NOT_CONFIGURED');
-      const period: BillingPeriod = plan === 'restaurant' ? 'monthly' : request.body.period;
+      const period: BillingPeriod = plan === 'normal' ? request.body.period : 'monthly';
       const pricing = planPricing(await getSettings(prisma), plan, period);
       if (!pricing) throw new AppError('VALIDATION_ERROR');
       const idempotencyKey = request.headers['idempotency-key'];

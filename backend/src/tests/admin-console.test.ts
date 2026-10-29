@@ -183,7 +183,7 @@ describe('admin console', () => {
           platformTransactionType: 'A2A',
           creditAccountHolder: 'SMART VERIFY PLC',
           creditAccountNo: '1****0001',
-          amountCredited: '650.00',
+          amountCredited: '950.00',
           dateTimes: [new Date(Date.now() - 60_000).toISOString()],
         })
       ),
@@ -203,7 +203,7 @@ describe('admin console', () => {
 
     const queue = await adminGet('/admin/reviews');
     const item = queue.json().items[0];
-    expect(item).toMatchObject({ paidEtb: 650, expectedEtb: 700, reasons: ['AMOUNT_TOO_LOW'] });
+    expect(item).toMatchObject({ paidEtb: 950, expectedEtb: 1000, reasons: ['AMOUNT_TOO_LOW'] });
 
     const ok = await adminPost(`/admin/reviews/${item.id}/decide`, {
       decision: 'approve',
@@ -239,7 +239,7 @@ describe('admin console', () => {
     const logged = await app.prisma.adminActivity.findFirst({
       where: { action: 'changed_prices' },
     });
-    expect(logged?.details).toMatchObject({ priceNormalMonthly: { from: 700, to: 800 } });
+    expect(logged?.details).toMatchObject({ priceNormalMonthly: { from: 1000, to: 800 } });
   });
 
   it('announcements reach the business app; location comes from a Maps link', async () => {

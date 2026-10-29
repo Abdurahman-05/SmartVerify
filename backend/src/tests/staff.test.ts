@@ -274,3 +274,26 @@ describe('staff', () => {
     ).toBe(404);
   });
 });
+
+describe('staff on the Normal plans', () => {
+  it('only workers (the waiter role) can be added or made', async () => {
+    for (const plan of ['normal', 'normal_multi'] as const) {
+      await app.prisma.business.update({ where: { id: r.businessId }, data: { plan } });
+      const body = { name: 'Almaz Worku', pin: '4321', role: 'manager' };
+      const refused = await call('POST', '/staff', r.owner.token, { ...body, phone: newPhone() });
+      expect(refused.json(), plan).toMatchObject({
+        error: { code: 'VALIDATION_ERROR', details: { reason: 'workerOnly' } },
+      });
+      const worker = await call('POST', '/staff', r.owner.token, {
+        ...body,
+        role: 'waiter',
+        phone: newPhone(),
+      });
+      expect(worker.statusCode, plan).toBe(201);
+      const id = worker.json<Member>().id;
+      expect(
+        (await call('PATCH', `/staff/${id}`, r.owner.token, { role: 'chef' })).statusCode
+      ).toBe(400);
+    }
+  });
+});

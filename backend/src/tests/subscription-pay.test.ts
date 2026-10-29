@@ -81,7 +81,11 @@ describe('paying for a plan with a CBE transfer', () => {
       bank: 'CBE',
       accountNumber: PAY_TO.SUBSCRIPTION_CBE_ACCOUNT,
       accountName: PAY_TO.SUBSCRIPTION_CBE_NAME,
-      prices: { normal: { monthly: 700, quarterly: 1500 }, restaurant: { monthly: 4000 } },
+      prices: {
+        normal: { monthly: 1000, quarterly: 1500 },
+        normal_multi: { monthly: 1500 },
+        restaurant: { monthly: 4000 },
+      },
     });
     const manager = await app.inject({
       method: 'GET',
@@ -186,10 +190,10 @@ describe('paying for a plan with telebirr', () => {
       subscription: null,
     });
 
-    fetchMock.mockResolvedValueOnce(telebirrPage('700'));
+    fetchMock.mockResolvedValueOnce(telebirrPage('1000'));
     expect((await payTel()).json()).toMatchObject({
       check: { status: 'verified', reference: 'DJD2QW8XTE' },
-      subscription: { plan: 'normal', period: 'monthly', priceEtb: 700 },
+      subscription: { plan: 'normal', period: 'monthly', priceEtb: 1000 },
     });
 
     const info = await tApp.inject({
@@ -238,17 +242,17 @@ describe('paying for a plan from another bank (chosen by the owner)', () => {
         payload: { plan: 'normal', period: 'monthly', ...body },
       });
 
-    fetchMock.mockResolvedValueOnce(ebirrPage(700, '100XXXXXXXX99'));
+    fetchMock.mockResolvedValueOnce(ebirrPage(1000, '100XXXXXXXX99'));
     expect((await payOther({ bank: 'EBR', reference: PATH })).json()).toMatchObject({
       check: { status: 'not_matching', reasons: ['WRONG_RECEIVER'] },
       subscription: null,
     });
 
-    fetchMock.mockResolvedValueOnce(ebirrPage(700));
+    fetchMock.mockResolvedValueOnce(ebirrPage(1000));
     const paid = await payOther({ bank: 'EBR', reference: PATH });
     expect(paid.json()).toMatchObject({
       check: { status: 'verified', reference: '802648940777' },
-      subscription: { plan: 'normal', period: 'monthly', priceEtb: 700 },
+      subscription: { plan: 'normal', period: 'monthly', priceEtb: 1000 },
     });
     const [url] = fetchMock.mock.calls.at(-1) ?? [];
     expect(url?.href).toBe(`https://receipt.ebirr.com/${PATH}`);

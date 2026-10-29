@@ -6,6 +6,7 @@ export type ErrorCode =
   | 'FORBIDDEN'
   | 'NOT_FOUND'
   | 'PHONE_TAKEN'
+  | 'DEVICE_LIMIT'
   | 'SUBSCRIPTION_REQUIRED'
   | 'TABLE_BUSY'
   | 'ITEM_UNAVAILABLE'
@@ -33,6 +34,8 @@ const statusByCode: Record<ErrorCode, number> = {
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   PHONE_TAKEN: 409,
+  /** Normal plan: 2 devices are already signed in (details.limit). */
+  DEVICE_LIMIT: 409,
   /** Dine-in table already has an open bill. */
   TABLE_BUSY: 409,
   /** A menu item is missing, inactive or from another business. */

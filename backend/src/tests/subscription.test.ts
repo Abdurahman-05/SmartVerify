@@ -75,7 +75,7 @@ describe('plan and subscription', () => {
     expect((await me(r.owner.token)).json()).toMatchObject({ plan: 'normal', subscription: sub });
 
     const monthly = (await subscribe(r.owner.token, { plan: 'normal', period: 'monthly' })).json();
-    expect(monthly).toMatchObject({ priceEtb: 700 });
+    expect(monthly).toMatchObject({ priceEtb: 1000 });
     expect(months(monthly.startedAt, monthly.endsAt)).toBe(1);
   });
 
