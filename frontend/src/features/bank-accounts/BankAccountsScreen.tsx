@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Check, EllipsisVertical, Plus, RefreshCw, Trash2 } from 'lucide-react-native';
+import { Check, EllipsisVertical, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, FlatList, Modal, Pressable, View } from 'react-native';
@@ -60,11 +60,11 @@ function AccountRow({ account, onMore }: { account: BankAccount; onMore: () => v
     <View className="flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface py-3 pl-3 pr-2">
       <BankBadge code={account.bankCode} />
       <View className="min-w-0 flex-1">
-        <Text font="bold" className="text-[17px]">
-          {account.bankName}
+        <Text font="bold" className="text-[17px]" numberOfLines={1}>
+          {account.holderName}
         </Text>
-        <Text tone="muted" className="mb-1 mt-px text-[15px]">
-          {t(maskedNumberKey(account.bankCode), { last4: account.last4 })}
+        <Text tone="muted" className="mb-1 mt-px text-[15px]" numberOfLines={1}>
+          {account.shortName} · {t(maskedNumberKey(account.bankCode), { last4: account.last4 })}
         </Text>
         <View className="flex-row items-center gap-1 self-start rounded-[14px] bg-successBg py-[3px] pl-2 pr-2.5">
           <Check size={14} color={colors.successFg} strokeWidth={2.6} />
@@ -87,10 +87,12 @@ function AccountRow({ account, onMore }: { account: BankAccount; onMore: () => v
 
 function AccountActions({
   account,
+  onEdit,
   onRemove,
   onClose,
 }: {
   account: BankAccount | null;
+  onEdit: (account: BankAccount) => void;
   onRemove: (account: BankAccount) => void;
   onClose: () => void;
 }) {
@@ -114,14 +116,25 @@ function AccountActions({
             <View className="flex-row items-center gap-3">
               <BankBadge code={account.bankCode} size={44} />
               <View className="flex-1">
-                <Text font="heading" className="text-lg">
-                  {account.bankName}
+                <Text font="heading" className="text-lg" numberOfLines={1}>
+                  {account.holderName}
                 </Text>
-                <Text tone="muted" className="text-[15px]">
+                <Text tone="muted" className="text-[15px]" numberOfLines={1}>
+                  {account.bankName} ·{' '}
                   {t(maskedNumberKey(account.bankCode), { last4: account.last4 })}
                 </Text>
               </View>
             </View>
+            <Pressable
+              onPress={() => onEdit(account)}
+              accessibilityRole="button"
+              className="min-h-14 flex-row items-center gap-3 rounded-[18px] border-2 border-border bg-surface px-4 active:bg-background"
+            >
+              <Pencil size={22} color={colors.text} strokeWidth={2.2} />
+              <Text font="bold" className="text-lg">
+                {t('bankAccounts.edit')}
+              </Text>
+            </Pressable>
             <Pressable
               onPress={() => onRemove(account)}
               accessibilityRole="button"
@@ -254,7 +267,15 @@ export default function BankAccountsScreen() {
         />
       </View>
 
-      <AccountActions account={menuFor} onRemove={confirmRemove} onClose={() => setMenuFor(null)} />
+      <AccountActions
+        account={menuFor}
+        onEdit={(account) => {
+          setMenuFor(null);
+          router.push({ pathname: '/add-bank-account', params: { id: account.id } });
+        }}
+        onRemove={confirmRemove}
+        onClose={() => setMenuFor(null)}
+      />
       <ErrorDialog
         visible={remove.isError}
         title={t('common.error')}

@@ -104,3 +104,33 @@ export async function removeBankAccount(id: string): Promise<void> {
   const account = stored.find((a) => a.id === id);
   if (account) account.removed = true;
 }
+
+export interface BankAccountChanges {
+  accountNumber?: string;
+  holderName?: string;
+}
+
+export async function updateBankAccount(
+  id: string,
+  changes: BankAccountChanges
+): Promise<BankAccount> {
+  await mockDelay(600);
+  const account = stored.find((a) => a.id === id && !a.removed);
+  if (!account) throw new Error('NOT_FOUND');
+  const { accountNumber, holderName } = changes;
+  if (
+    accountNumber &&
+    stored.some(
+      (a) =>
+        a !== account &&
+        !a.removed &&
+        a.bankCode === account.bankCode &&
+        a.accountNumber === accountNumber
+    )
+  ) {
+    throw new BankAccountError('duplicate');
+  }
+  if (accountNumber) Object.assign(account, { accountNumber, last4: accountNumber.slice(-4) });
+  if (holderName?.trim()) account.holderName = holderName.trim();
+  return toPublic(account);
+}

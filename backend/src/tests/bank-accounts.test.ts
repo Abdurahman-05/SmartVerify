@@ -25,7 +25,12 @@ beforeEach(async () => {
 
 type Res = { statusCode: number; json: () => unknown };
 const code = (res: Res) => (res.json() as { error?: { code?: string } }).error?.code;
-const call = (method: 'GET' | 'POST' | 'DELETE', url: string, token: string, payload?: object) =>
+const call = (
+  method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
+  url: string,
+  token: string,
+  payload?: object
+) =>
   app.inject({
     method,
     url: `/api/v1${url}`,
@@ -161,6 +166,72 @@ describe('bank accounts', () => {
         })
       )
     ).toBe('FORBIDDEN');
+  });
+
+  it('edits the holder name and number; refuses a duplicate, a bad phone, waiters and others', async () => {
+    const cbe = (
+      await add(r.owner.token, {
+        bankCode: 'CBE',
+        accountNumber: '1000293884582',
+        holderName: 'Abebe Kebede',
+      })
+    ).json() as Account;
+    const tele = (
+      await add(r.owner.token, {
+        bankCode: 'TEL',
+        accountNumber: '0911227788',
+        holderName: 'Abebe Kebede',
+      })
+    ).json() as Account;
+
+    const named = await call('PATCH', `/bank-accounts/${cbe.id}`, r.manager.token, {
+      holderName: 'Abebe Kebede Coffee',
+    });
+    expect(named.statusCode).toBe(200);
+    expect(named.json()).toMatchObject({ last4: '4582', holderName: 'Abebe Kebede Coffee' });
+
+    const renumbered = await call('PATCH', `/bank-accounts/${cbe.id}`, r.owner.token, {
+      accountNumber: '1000111122223',
+    });
+    expect(renumbered.json()).toMatchObject({ bankCode: 'CBE', last4: '2223' });
+    expect(JSON.stringify(renumbered.json())).not.toContain('1000111122223');
+    expect(
+      (await app.prisma.bankAccount.findUnique({ where: { id: cbe.id } }))?.accountNumber
+    ).toBe('1000111122223');
+
+    const other = (
+      await add(r.owner.token, {
+        bankCode: 'CBE',
+        accountNumber: '1000293884582',
+        holderName: 'Abebe Kebede',
+      })
+    ).json() as Account;
+    expect(
+      code(
+        await call('PATCH', `/bank-accounts/${other.id}`, r.owner.token, {
+          accountNumber: '1000111122223',
+        })
+      )
+    ).toBe('ACCOUNT_DUPLICATE');
+    expect(
+      code(
+        await call('PATCH', `/bank-accounts/${tele.id}`, r.owner.token, {
+          accountNumber: '1234567890',
+        })
+      )
+    ).toBe('VALIDATION_ERROR');
+    expect(
+      code(await call('PATCH', `/bank-accounts/${cbe.id}`, r.waiter.token, { holderName: 'X Y' }))
+    ).toBe('FORBIDDEN');
+
+    const stranger = await createRestaurant(app);
+    expect(
+      code(
+        await call('PATCH', `/bank-accounts/${cbe.id}`, stranger.owner.token, {
+          holderName: 'X Y',
+        })
+      )
+    ).toBe('NOT_FOUND');
   });
 
   it('remove is soft: it leaves the list, frees a place and can be added again', async () => {

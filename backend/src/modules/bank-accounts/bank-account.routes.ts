@@ -168,6 +168,82 @@ export const bankAccountRoutes: FastifyPluginAsyncZod = async (app) => {
     }
   );
 
+  app.patch(
+    '/bank-accounts/:id',
+    {
+      preHandler: requireRoles('owner', 'manager'),
+      schema: {
+        tags: ['bank accounts'],
+        security,
+        description:
+          'Change the holder name and/or the number of a connected account (the bank stays). ' +
+          'The new number follows the same rules as when adding; a number already connected ' +
+          'gives ACCOUNT_DUPLICATE.',
+        params: idParamSchema,
+        body: z.object({
+          accountNumber: z
+            .string()
+            .regex(/^\d{8,16}$/, '8–16 digits')
+            .optional(),
+          holderName: z.string().trim().min(1).max(80).optional(),
+        }),
+        response: {
+          200: accountSchema,
+          400: errorResponseSchema.describe('VALIDATION_ERROR'),
+          ...errors,
+          404: errorResponseSchema.describe('NOT_FOUND'),
+          409: errorResponseSchema.describe('ACCOUNT_DUPLICATE'),
+        },
+      },
+    },
+    async (request) => {
+      const { businessId } = request.auth;
+      const { accountNumber, holderName } = request.body;
+      const current = await prisma.bankAccount.findFirst({
+        where: { id: request.params.id, businessId, removedAt: null },
+        select: { bankCode: true },
+      });
+      if (!current) throw new AppError('NOT_FOUND');
+      const { bankCode } = current;
+      if (
+        accountNumber &&
+        bankCode === TELEBIRR &&
+        !customerPhoneSchema.safeParse(accountNumber).success
+      ) {
+        throw new AppError('VALIDATION_ERROR', { reason: 'telebirrPhone' });
+      }
+      if (accountNumber) {
+        const taken = await prisma.bankAccount.findFirst({
+          where: {
+            businessId,
+            bankCode,
+            accountNumber,
+            removedAt: null,
+            NOT: { id: request.params.id },
+          },
+          select: { id: true },
+        });
+        if (taken) throw new AppError('ACCOUNT_DUPLICATE');
+      }
+      try {
+        const row = await prisma.bankAccount.update({
+          where: { id: request.params.id },
+          data: {
+            ...(accountNumber && { accountNumber, last4: accountNumber.slice(-4) }),
+            ...(holderName && { holderName }),
+          },
+          select,
+        });
+        return toAccount(row);
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+          throw new AppError('ACCOUNT_DUPLICATE');
+        }
+        throw error;
+      }
+    }
+  );
+
   app.delete(
     '/bank-accounts/:id',
     {

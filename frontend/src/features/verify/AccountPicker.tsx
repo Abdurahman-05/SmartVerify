@@ -16,11 +16,11 @@ function AccountText({ account }: { account: BankAccount }) {
   const { t } = useTranslation();
   return (
     <View className="flex-1">
-      <Text font="bold" className="text-lg leading-tight">
-        {account.bankName}
+      <Text font="bold" className="text-lg leading-tight" numberOfLines={1}>
+        {account.holderName}
       </Text>
-      <Text tone="muted" className="mt-0.5 text-base">
-        {t(maskedNumberKey(account.bankCode), { last4: account.last4 })}
+      <Text tone="muted" className="mt-0.5 text-base" numberOfLines={1}>
+        {account.shortName} · {t(maskedNumberKey(account.bankCode), { last4: account.last4 })}
       </Text>
     </View>
   );
@@ -44,7 +44,7 @@ export function AccountPicker({ accounts, selected, onSelect, onAddAccount }: Ac
       <Pressable
         onPress={() => setOpen(true)}
         accessibilityRole="button"
-        accessibilityLabel={`${selected.bankName}, ${t(maskedNumberKey(selected.bankCode), { last4: selected.last4 })}. ${t('verify.chooseAccount')}`}
+        accessibilityLabel={`${selected.holderName}, ${selected.bankName}, ${t(maskedNumberKey(selected.bankCode), { last4: selected.last4 })}. ${t('verify.chooseAccount')}`}
         className="flex-row items-center gap-3 rounded-[18px] border-2 border-primary bg-surface px-3.5 py-3 active:bg-background"
       >
         <BankBadge code={selected.bankCode} />

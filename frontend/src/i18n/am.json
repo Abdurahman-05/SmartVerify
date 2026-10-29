@@ -325,7 +325,13 @@
     },
     "noAccountsVerify": "ገንዘቡ የት መድረስ እንዳለበት እንድናውቅ መጀመሪያ የባንክ ሂሳብ ይጨምሩ።",
     "required": "አስፈላጊ",
-    "holderNoteCbe": "ስሙን CBE በሚያሳየው መልኩ በትክክል ይጻፉ። በCBE ደረሰኞች ላይ እናረጋግጠዋለን።"
+    "holderNoteCbe": "ስሙን CBE በሚያሳየው መልኩ በትክክል ይጻፉ። በCBE ደረሰኞች ላይ እናረጋግጠዋለን።",
+    "edit": "ሂሳቡን አስተካክል",
+    "edit_title": "ሂሳቡን አስተካክል",
+    "edit_subtitle": "ስሙን ወይም ቁጥሩን ይቀይሩ",
+    "save": "ለውጡን አስቀምጥ",
+    "saving": "ለውጡን በማስቀመጥ ላይ",
+    "keepNumber": "{{number}} እንዲቀር ባዶ ይተዉት"
   },
   "subscription": {
     "title": "የደንበኝነት ምዝገባ",

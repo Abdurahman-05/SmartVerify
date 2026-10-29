@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'expo-router';
-import { ChevronDown, Info, Link } from 'lucide-react-native';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Check, ChevronDown, Info, Link } from 'lucide-react-native';
 import { useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -17,46 +17,60 @@ import { OptionSheet } from '@/components/ui/OptionSheet';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
-import { addBankAccount, BankAccountError, banks } from '@/lib/bankAccounts';
+import {
+  addBankAccount,
+  BankAccountError,
+  bankAccountsKey,
+  banks,
+  getBankAccounts,
+  updateBankAccount,
+  type BankAccount,
+} from '@/lib/bankAccounts';
 import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
-import { TELEBIRR, TELEBIRR_PHONE } from './telebirr';
+import { maskedNumberKey, TELEBIRR, TELEBIRR_PHONE } from './telebirr';
 
 /** CBE accounts need the holder name: CBE receipts show it and the check compares it. */
 const CBE = 'CBE';
 /** Banks whose receipts show the receiver's name, which payment checks compare. */
 const NAME_CHECKED = [CBE, TELEBIRR, 'DAS', 'BOA'];
 
-const schema = z
-  .object({
-    bankCode: z.string(),
-    accountNumber: z.string(),
-    holderName: z.string().trim().max(80),
-  })
-  .superRefine(({ bankCode, accountNumber, holderName }, ctx) => {
-    const telebirr = bankCode === TELEBIRR;
-    if (!(telebirr ? TELEBIRR_PHONE : /^\d{8,16}$/).test(accountNumber)) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['accountNumber'],
-        message: telebirr
-          ? 'bankAccounts.errors.telebirrPhone'
-          : 'bankAccounts.errors.accountNumber',
-      });
-    }
-    // CBE receipts show the receiver's name; payment checks compare it with this name.
-    if (NAME_CHECKED.includes(bankCode) && !holderName) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['holderName'],
-        message: 'bankAccounts.errors.holderRequired',
-      });
-    }
-  });
+/** When editing, an empty number keeps the saved one. */
+const schemaFor = (editing: boolean) =>
+  z
+    .object({
+      bankCode: z.string(),
+      accountNumber: z.string(),
+      holderName: z.string().trim().max(80),
+    })
+    .superRefine(({ bankCode, accountNumber, holderName }, ctx) => {
+      const telebirr = bankCode === TELEBIRR;
+      if (editing && !accountNumber) return checkName();
+      if (!(telebirr ? TELEBIRR_PHONE : /^\d{8,16}$/).test(accountNumber)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['accountNumber'],
+          message: telebirr
+            ? 'bankAccounts.errors.telebirrPhone'
+            : 'bankAccounts.errors.accountNumber',
+        });
+      }
+      checkName();
+      // CBE receipts show the receiver's name; payment checks compare it with this name.
+      function checkName() {
+        if (NAME_CHECKED.includes(bankCode) && !holderName) {
+          ctx.addIssue({
+            code: 'custom',
+            path: ['holderName'],
+            message: 'bankAccounts.errors.holderRequired',
+          });
+        }
+      }
+    });
 
-type Values = z.infer<typeof schema>;
+type Values = z.infer<ReturnType<typeof schemaFor>>;
 
 function Note({ children }: { children: string }) {
   const brand = useBrandColors();
@@ -78,8 +92,20 @@ function FieldHint({ children }: { children: string }) {
   );
 }
 
+/** Add a new account, or edit one when opened with ?id= (the bank stays the same). */
 export default function AddBankAccountScreen() {
   const { t } = useTranslation();
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const query = useQuery({ queryKey: bankAccountsKey, queryFn: getBankAccounts, enabled: !!id });
+  if (!id) return <AccountForm />;
+  const account = query.data?.find((a) => a.id === id);
+  if (!account) return <LoadingView screenTitle={t('bankAccounts.edit_title')} />;
+  return <AccountForm account={account} />;
+}
+
+function AccountForm({ account }: { account?: BankAccount }) {
+  const { t } = useTranslation();
+  const editing = account !== undefined;
   const router = useRouter();
   const queryClient = useQueryClient();
   const [bankSheetOpen, setBankSheetOpen] = useState(false);
@@ -92,8 +118,12 @@ export default function AddBankAccountScreen() {
     clearErrors,
     formState: { errors },
   } = useForm<Values>({
-    resolver: zodResolver(schema),
-    defaultValues: { bankCode: banks[0].code, accountNumber: '', holderName: '' },
+    resolver: zodResolver(schemaFor(editing)),
+    defaultValues: {
+      bankCode: account?.bankCode ?? banks[0].code,
+      accountNumber: '',
+      holderName: account?.holderName ?? '',
+    },
   });
 
   const bankCode = useWatch({ control, name: 'bankCode' });
@@ -101,7 +131,17 @@ export default function AddBankAccountScreen() {
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/bank-accounts'));
 
   const mutation = useMutation({
-    mutationFn: addBankAccount,
+    mutationFn: (values: Values) =>
+      account
+        ? updateBankAccount(account.id, {
+            accountNumber: values.accountNumber || undefined,
+            holderName: values.holderName || undefined,
+          })
+        : addBankAccount({
+            bankCode: values.bankCode,
+            accountNumber: values.accountNumber,
+            holderName: values.holderName || undefined,
+          }),
     onSuccess: () => {
       queryClient.invalidateQueries();
       goBack();
@@ -116,8 +156,8 @@ export default function AddBankAccountScreen() {
   if (mutation.isPending) {
     return (
       <LoadingView
-        title={t('bankAccounts.connecting')}
-        subtitle={t('bankAccounts.connectingSubtitle')}
+        title={t(editing ? 'bankAccounts.saving' : 'bankAccounts.connecting')}
+        subtitle={editing ? undefined : t('bankAccounts.connectingSubtitle')}
       />
     );
   }
@@ -137,8 +177,8 @@ export default function AddBankAccountScreen() {
   return (
     <FormScreen>
       <ScreenHeader
-        title={t('bankAccounts.add_title')}
-        subtitle={t('bankAccounts.add_subtitle')}
+        title={t(editing ? 'bankAccounts.edit_title' : 'bankAccounts.add_title')}
+        subtitle={t(editing ? 'bankAccounts.edit_subtitle' : 'bankAccounts.add_subtitle')}
         onBack={goBack}
       />
 
@@ -152,6 +192,7 @@ export default function AddBankAccountScreen() {
           </View>
           <Pressable
             onPress={() => setBankSheetOpen(true)}
+            disabled={editing}
             accessibilityRole="button"
             accessibilityLabel={`${t('bankAccounts.bank')}: ${bank.name}. ${t('bankAccounts.chooseBank')}`}
             className="h-[60px] flex-row items-center gap-3 rounded-input border-2 border-primary bg-surface pl-2.5 pr-3.5 active:bg-background"
@@ -160,7 +201,7 @@ export default function AddBankAccountScreen() {
             <Text font="bold" className="flex-1 text-[17px]" numberOfLines={1}>
               {bank.name}
             </Text>
-            <ChevronDown size={24} color={colors.text} strokeWidth={2} />
+            {editing ? null : <ChevronDown size={24} color={colors.text} strokeWidth={2} />}
           </Pressable>
           <Note>{t(telebirr ? 'bankAccounts.telebirrNote' : 'bankAccounts.bankNote')}</Note>
         </View>
@@ -173,16 +214,26 @@ export default function AddBankAccountScreen() {
               label={t(telebirr ? 'bankAccounts.telebirrPhone' : 'bankAccounts.accountNumber')}
               labelRight={
                 <FieldHint>
-                  {t(
-                    telebirr ? 'bankAccounts.telebirrPhoneHint' : 'bankAccounts.accountNumberHint'
-                  )}
+                  {editing
+                    ? t('bankAccounts.optional')
+                    : t(
+                        telebirr
+                          ? 'bankAccounts.telebirrPhoneHint'
+                          : 'bankAccounts.accountNumberHint'
+                      )}
                 </FieldHint>
               }
-              placeholder={t(
-                telebirr
-                  ? 'bankAccounts.telebirrPhonePlaceholder'
-                  : 'bankAccounts.accountNumberPlaceholder'
-              )}
+              placeholder={
+                account
+                  ? t('bankAccounts.keepNumber', {
+                      number: t(maskedNumberKey(account.bankCode), { last4: account.last4 }),
+                    })
+                  : t(
+                      telebirr
+                        ? 'bankAccounts.telebirrPhonePlaceholder'
+                        : 'bankAccounts.accountNumberPlaceholder'
+                    )
+              }
               value={field.value}
               onChangeText={(text) => field.onChange(digitsOnly(text, telebirr ? 10 : 16))}
               onBlur={field.onBlur}
@@ -230,15 +281,9 @@ export default function AddBankAccountScreen() {
           </Text>
         ) : null}
         <Button
-          label={t('bankAccounts.connect')}
-          icon={Link}
-          onPress={handleSubmit((values) =>
-            mutation.mutate({
-              bankCode: values.bankCode,
-              accountNumber: values.accountNumber,
-              holderName: values.holderName || undefined,
-            })
-          )}
+          label={t(editing ? 'bankAccounts.save' : 'bankAccounts.connect')}
+          icon={editing ? Check : Link}
+          onPress={handleSubmit((values) => mutation.mutate(values))}
         />
         <Button label={t('bankAccounts.cancel')} variant="outline" size="md" onPress={goBack} />
       </View>
