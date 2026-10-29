@@ -15,6 +15,8 @@ const keyByCode: Partial<Record<ApiErrorCode, string>> = {
   CATEGORY_DUPLICATE: 'categories.errors.duplicate',
   CATEGORY_NOT_EMPTY: 'categories.errors.notEmpty',
   TABLE_BUSY: 'orders.errors.tableBusy',
+  ORDER_LOCKED: 'bills.change.locked',
+  BILL_CLOSED: 'bills.change.locked',
   ITEM_UNAVAILABLE: 'orders.errors.itemUnavailable',
   NETWORK_ERROR: 'errors.noConnection',
   INVALID_URL: 'verifyBank.check.invalidUrl',

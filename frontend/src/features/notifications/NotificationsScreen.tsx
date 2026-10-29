@@ -35,6 +35,9 @@ import { colors } from '@/theme/tokens';
 
 const icons: Record<string, LucideIcon> = {
   new_order: ChefHat,
+  order_added: ChefHat,
+  order_changed: ChefHat,
+  order_cancelled: CircleAlert,
   order_ready: Bell,
   big_payment: Landmark,
   bad_receipt: ShieldAlert,
@@ -63,6 +66,24 @@ function useNotificationText() {
         return {
           title: t('notifications.newOrder.title', { label: orderLabel(d) }),
           body: t('notifications.newOrder.body', { count: num(d.items), number: str(d.orderNo) }),
+        };
+      case 'order_added':
+        return {
+          title: t('notifications.orderAdded.title', { label: orderLabel(d) }),
+          body: t('notifications.orderAdded.body', { count: num(d.items), number: str(d.orderNo) }),
+        };
+      case 'order_changed':
+        return {
+          title: t('notifications.orderChanged.title', { label: orderLabel(d) }),
+          body: t('notifications.orderChanged.body', { number: str(d.orderNo) }),
+        };
+      case 'order_cancelled':
+        return {
+          title: t('notifications.orderCancelled.title', { label: orderLabel(d) }),
+          body: t('notifications.orderCancelled.body', {
+            number: str(d.orderNo),
+            reason: str(d.reason),
+          }),
         };
       case 'order_ready':
         return {
@@ -112,6 +133,8 @@ function useNotificationText() {
 function targetOf(n: AppNotification, role: string | undefined): Href | null {
   switch (n.type) {
     case 'new_order':
+    case 'order_added':
+    case 'order_changed':
       return role === 'chef' ? '/cook' : null;
     case 'big_payment':
     case 'bad_receipt':

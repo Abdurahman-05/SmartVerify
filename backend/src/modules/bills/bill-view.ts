@@ -50,7 +50,12 @@ export const billDetailSchema = billListItemSchema.extend({
       createdAt: z.string(),
       notes: z.array(orderNoteSchema),
       items: z.array(
-        z.object({ name: z.string(), priceEtb: z.number().int(), quantity: z.number().int() })
+        z.object({
+          menuItemId: z.string().nullable(),
+          name: z.string(),
+          priceEtb: z.number().int(),
+          quantity: z.number().int(),
+        })
       ),
       kitchenStatus: kitchenStatusSchema,
       edited: z.boolean().describe('Items were changed before cooking'),
@@ -156,7 +161,12 @@ export function toBillDetail(row: DetailRow): BillDetail {
       number: o.number,
       createdAt: o.createdAt.toISOString(),
       notes: o.notes,
-      items: o.items.map((i) => ({ name: i.name, priceEtb: i.priceEtb, quantity: i.quantity })),
+      items: o.items.map((i) => ({
+        menuItemId: i.menuItemId,
+        name: i.name,
+        priceEtb: i.priceEtb,
+        quantity: i.quantity,
+      })),
       kitchenStatus: o.kitchenOrder?.status ?? 'new',
       edited: o.editedAt !== null,
       cancelled: o.cancelledAt !== null,

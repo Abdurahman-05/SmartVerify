@@ -43,6 +43,7 @@ export type ApiErrorCode =
   | 'TABLE_BUSY'
   | 'ITEM_UNAVAILABLE'
   | 'BILL_CLOSED'
+  | 'ORDER_LOCKED'
   | 'INVALID_URL'
   | 'RECEIPT_USED'
   | 'WRONG_CODE'

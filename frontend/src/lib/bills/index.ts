@@ -18,6 +18,8 @@ export const getBills = USE_MOCK_BILLS
 export const getBill = USE_MOCK_BILLS ? mock.getBill : real.getBill;
 
 export { payBill } from '@/lib/api/payments';
+// Adding to, changing and cancelling orders need the server (no offline mock).
+export { addToBill, cancelOrder, changeOrderItems } from '@/lib/api/orders';
 export type { PayRequest, PayResult } from '@/lib/api/payments';
 
 export const billsKey = (scope: 'mine' | 'all') => ['bills', scope] as const;

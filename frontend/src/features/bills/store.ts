@@ -16,7 +16,18 @@ const line = (itemId: string, name: string, priceEtb: number, quantity: number) 
 });
 
 const dineBill = (
-  bill: Pick<Bill, 'id' | 'orderNo' | 'tableNo' | 'guests' | 'items' | 'servedStatus' | 'createdAt' | 'waiterId' | 'waiterName'>
+  bill: Pick<
+    Bill,
+    | 'id'
+    | 'orderNo'
+    | 'tableNo'
+    | 'guests'
+    | 'items'
+    | 'servedStatus'
+    | 'createdAt'
+    | 'waiterId'
+    | 'waiterName'
+  >
 ): Bill => {
   const foodTotal = bill.items.reduce((sum, l) => sum + l.priceEtb * l.quantity, 0);
   return {
@@ -57,7 +68,11 @@ const seedBills: Bill[] = [
     waiterName: 'Dawit G.',
     servedStatus: 'served',
     createdAt: todayAt(10, 20),
-    items: [line('m-kitfo', 'Kitfo', 260, 3), line('m-tibs', 'Beef Tibs', 220, 2), line('m-tea', 'Shai (Tea)', 30, 1)],
+    items: [
+      line('m-kitfo', 'Kitfo', 260, 3),
+      line('m-tibs', 'Beef Tibs', 220, 2),
+      line('m-tea', 'Shai (Tea)', 30, 1),
+    ],
   }),
   dineBill({
     id: 'bill-1041',
@@ -96,10 +111,10 @@ export const useBills = create<BillsState>((set) => ({
   markPaid: (id) =>
     set((s) => ({ bills: s.bills.map((b) => (b.id === id ? { ...b, status: 'paid' } : b)) })),
   setServed: (id) =>
-    set((s) => ({ bills: s.bills.map((b) => (b.id === id ? { ...b, servedStatus: 'served' } : b)) })),
+    set((s) => ({
+      bills: s.bills.map((b) => (b.id === id ? { ...b, servedStatus: 'served' } : b)),
+    })),
 }));
 
 export const openBills = (bills: Bill[]) =>
-  bills
-    .filter((b) => b.status === 'open')
-    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  bills.filter((b) => b.status === 'open').sort((a, b) => a.createdAt.localeCompare(b.createdAt));

@@ -50,6 +50,7 @@ import { areaLabel } from '@/lib/areaLabel';
 import { getMenuCategories, itemCategoryKey, menuCategoriesKey } from '@/lib/menuCategories';
 import { useBrandColors } from '@/store/theme';
 import { digitsOnly } from '@/lib/format';
+import { addToBill, billKey } from '@/lib/bills';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
@@ -103,7 +104,8 @@ function TypeButton({
   );
 }
 
-export default function NewOrderScreen() {
+/** addTo: a bill id — the items go on that open bill (no table or customer to choose). */
+export default function NewOrderScreen({ addTo }: { addTo?: string } = {}) {
   const brand = useBrandColors();
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -152,6 +154,23 @@ export default function NewOrderScreen() {
     },
   });
 
+  const addMutation = useMutation({
+    mutationFn: () =>
+      addToBill(
+        addTo ?? '',
+        Object.entries(cart)
+          .filter(([, quantity]) => quantity > 0)
+          .map(([menuItemId, quantity]) => ({ menuItemId, quantity })),
+        notes,
+        orderKey
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: billKey(addTo ?? '') });
+      void queryClient.invalidateQueries({ queryKey: ['bills'] });
+      router.back();
+    },
+  });
+
   const menu = menuQuery.data;
   const tables = tablesQuery.data;
   const fees = feesQuery.data;
@@ -168,7 +187,7 @@ export default function NewOrderScreen() {
     );
   }
   if (!menu || !tables || !fees) return <LoadingView screenTitle={t('orders.title')} />;
-  if (mutation.isPending) {
+  if (mutation.isPending || addMutation.isPending) {
     return <LoadingView title={t('orders.sending')} subtitle={t('orders.sendingSubtitle')} />;
   }
 
@@ -213,6 +232,10 @@ export default function NewOrderScreen() {
 
   const onSend = () => {
     if (itemCount === 0) return;
+    if (addTo) {
+      addMutation.mutate();
+      return;
+    }
     if (type === 'dineIn') {
       setSheet(table ? 'confirm' : 'table');
       return;
@@ -243,8 +266,9 @@ export default function NewOrderScreen() {
     });
   };
 
-  const sendLabel =
-    type === 'takeaway'
+  const sendLabel = addTo
+    ? t('bills.addToBill')
+    : type === 'takeaway'
       ? t('orders.sendTakeaway')
       : type === 'delivery'
         ? t('orders.sendDelivery')
@@ -259,7 +283,7 @@ export default function NewOrderScreen() {
         className="flex-1"
       >
         <ScreenHeader
-          title={t('orders.title')}
+          title={addTo ? t('bills.addMore') : t('orders.title')}
           subtitle={t('orders.waiter', { name: waiterName })}
           onBack={() => (router.canGoBack() ? router.back() : router.replace('/home'))}
         />
@@ -268,7 +292,10 @@ export default function NewOrderScreen() {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{ paddingBottom: 8 }}
         >
-          <View className="flex-row gap-2 px-4 pb-2.5 pt-1" accessibilityRole="radiogroup">
+          <View
+            className={`flex-row gap-2 px-4 pb-2.5 pt-1 ${addTo ? 'hidden' : ''}`}
+            accessibilityRole="radiogroup"
+          >
             {orderTypes.map(({ type: value, icon }) => (
               <TypeButton
                 key={value}
@@ -280,7 +307,7 @@ export default function NewOrderScreen() {
             ))}
           </View>
 
-          {type === 'dineIn' ? (
+          {type === 'dineIn' && !addTo ? (
             <View className="mx-4 flex-row items-center justify-between gap-2 rounded-[20px] bg-primary py-3 pl-[18px] pr-3">
               <View className="flex-1">
                 <Text font="semibold" tone="inverse" className="text-sm opacity-90">
@@ -313,7 +340,7 @@ export default function NewOrderScreen() {
             </View>
           ) : null}
 
-          {type === 'takeaway' ? (
+          {type === 'takeaway' && !addTo ? (
             <View className="mx-4 gap-2.5 rounded-[20px] border-[1.5px] border-border bg-surface px-3.5 py-3">
               <Field
                 label={t('orders.customerName')}
@@ -337,7 +364,7 @@ export default function NewOrderScreen() {
             </View>
           ) : null}
 
-          {type === 'delivery' && !area ? (
+          {type === 'delivery' && !area && !addTo ? (
             <View className="mx-4 gap-1 rounded-[20px] border-[1.5px] border-border bg-surface px-3.5 py-3">
               <Text font="bold" className="text-base">
                 {t('orders.noAreas')}
@@ -348,7 +375,7 @@ export default function NewOrderScreen() {
             </View>
           ) : null}
 
-          {type === 'delivery' && area ? (
+          {type === 'delivery' && area && !addTo ? (
             <View className="mx-4 gap-2.5 rounded-[20px] border-[1.5px] border-border bg-surface px-3.5 py-3">
               <View className="flex-row items-start gap-2.5">
                 <View className="min-w-0 flex-1 gap-1">
@@ -547,6 +574,13 @@ export default function NewOrderScreen() {
         message={t(errorMessageKey(mutation.error))}
         actionLabel={t('errors.retry')}
         onClose={mutation.reset}
+      />
+      <ErrorDialog
+        visible={addMutation.isError}
+        title={t('orders.sendFailedTitle')}
+        message={t(errorMessageKey(addMutation.error))}
+        actionLabel={t('errors.retry')}
+        onClose={addMutation.reset}
       />
       <TableSheet
         visible={sheet === 'table'}

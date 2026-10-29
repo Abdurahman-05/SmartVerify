@@ -1,4 +1,4 @@
-import type { Bill, BillType } from '@/features/bills/types';
+import type { Bill, BillOrder, BillType } from '@/features/bills/types';
 
 import { api, ApiError } from './client';
 
@@ -15,7 +15,7 @@ interface ServerBillListItem {
   orderNo: number;
   waiterId: string;
   waiterName: string;
-  status: 'open' | 'paid';
+  status: 'open' | 'paid' | 'cancelled';
   servedStatus: 'kitchen' | 'served';
   totalEtb: number;
   createdAt: string;
@@ -28,7 +28,7 @@ interface ServerBillDetail extends ServerBillListItem {
   foodTotalEtb: number;
   packingFeeEtb: number;
   deliveryFeeEtb: number;
-  orders: { id: string; items: { name: string; priceEtb: number; quantity: number }[] }[];
+  orders: BillOrder[];
 }
 
 const base = (
@@ -72,9 +72,18 @@ export async function getBill(id: string): Promise<Bill | null> {
       ...base(b),
       phone: b.customerPhone ?? undefined,
       address: b.address ?? undefined,
-      items: b.orders.flatMap((order) =>
-        order.items.map((item, i) => ({ itemId: `${order.id}-${i}`, ...item }))
-      ),
+      // Cancelled orders are not on the bill (they still show in `orders`).
+      items: b.orders
+        .filter((order) => !order.cancelled)
+        .flatMap((order) =>
+          order.items.map((item, i) => ({
+            itemId: `${order.id}-${i}`,
+            name: item.name,
+            priceEtb: item.priceEtb,
+            quantity: item.quantity,
+          }))
+        ),
+      orders: b.orders,
       foodTotal: b.foodTotalEtb,
       packingFee: b.packingFeeEtb,
       deliveryFee: b.deliveryFeeEtb,

@@ -494,7 +494,31 @@
     "paid": "Paid",
     "notFound": "This bill could not be found.",
     "paidByCash": "Paid by cash",
-    "payByBank": "Pay by bank · scan QR"
+    "payByBank": "Pay by bank · scan QR",
+    "addToBill": "Add to bill",
+    "change": {
+      "title": "Change order #{{number}}",
+      "less": "One less {{name}}",
+      "more": "One more {{name}}",
+      "newTotal": "New order total",
+      "emptyHint": "To remove everything, cancel the order instead.",
+      "save": "Save changes",
+      "edit": "Change",
+      "cancel": "Cancel order",
+      "cancelTitle": "Cancel order #{{number}}?",
+      "cancelBody": "Why is it cancelled? The kitchen will be told.",
+      "keep": "Keep it",
+      "cancelled": "Cancelled",
+      "edited": "Changed",
+      "cooking": "Cooking started: it can no longer change.",
+      "locked": "This order can no longer change: the kitchen started it, or the bill is paid.",
+      "order": "Order #{{number}}",
+      "reason": {
+        "customerLeft": "Customer left",
+        "mistake": "Wrong order",
+        "outOfStock": "Out of stock"
+      }
+    }
   },
   "verifyRestaurant": {
     "title": "Verify payment",
@@ -1296,6 +1320,19 @@
       "restricted": "Some features are paused",
       "suspended": "Your account is paused",
       "body": "Pay for your plan to turn everything back on."
+    },
+    "orderAdded": {
+      "title": "More items · {{label}}",
+      "body_one": "{{count}} item · order #{{number}}",
+      "body_other": "{{count}} items · order #{{number}}"
+    },
+    "orderChanged": {
+      "title": "Order changed · {{label}}",
+      "body": "Order #{{number}} has new items: check the ticket."
+    },
+    "orderCancelled": {
+      "title": "Order cancelled · {{label}}",
+      "body": "Order #{{number}}: {{reason}}"
     }
   }
 }

@@ -494,7 +494,31 @@
     "paid": "ተከፍሏል",
     "notFound": "ይህ ሂሳብ አልተገኘም።",
     "paidByCash": "በጥሬ ገንዘብ ተከፍሏል",
-    "payByBank": "በባንክ ክፈል · QR ቃኝ"
+    "payByBank": "በባንክ ክፈል · QR ቃኝ",
+    "addToBill": "ወደ ሂሳቡ ጨምር",
+    "change": {
+      "title": "ትዕዛዝ #{{number}} ቀይር",
+      "less": "አንድ ያነሰ {{name}}",
+      "more": "አንድ ተጨማሪ {{name}}",
+      "newTotal": "አዲሱ የትዕዛዝ ድምር",
+      "emptyHint": "ሁሉንም ለማስወገድ ትዕዛዙን ይሰርዙ።",
+      "save": "ለውጡን አስቀምጥ",
+      "edit": "ቀይር",
+      "cancel": "ትዕዛዝ ሰርዝ",
+      "cancelTitle": "ትዕዛዝ #{{number}} ይሰረዝ?",
+      "cancelBody": "ለምን ይሰረዛል? ወጥ ቤቱ ይነገረዋል።",
+      "keep": "ይቆይ",
+      "cancelled": "ተሰርዟል",
+      "edited": "ተቀይሯል",
+      "cooking": "ማብሰል ተጀምሯል፦ ከእንግዲህ መቀየር አይቻልም።",
+      "locked": "ይህ ትዕዛዝ ከእንግዲህ መቀየር አይቻልም፦ ወጥ ቤቱ ጀምሮታል ወይም ሂሳቡ ተከፍሏል።",
+      "order": "ትዕዛዝ #{{number}}",
+      "reason": {
+        "customerLeft": "ደንበኛው ሄዷል",
+        "mistake": "የተሳሳተ ትዕዛዝ",
+        "outOfStock": "አልቋል"
+      }
+    }
   },
   "verifyRestaurant": {
     "title": "ክፍያ አረጋግጥ",
@@ -1296,6 +1320,19 @@
       "restricted": "አንዳንድ አገልግሎቶች ቆመዋል",
       "suspended": "መለያዎ ቆሟል",
       "body": "ሁሉንም መልሶ ለማብራት የፕላን ክፍያ ይፈጽሙ።"
+    },
+    "orderAdded": {
+      "title": "ተጨማሪ ዕቃዎች · {{label}}",
+      "body_one": "{{count}} ዕቃ · ትዕዛዝ #{{number}}",
+      "body_other": "{{count}} ዕቃዎች · ትዕዛዝ #{{number}}"
+    },
+    "orderChanged": {
+      "title": "ትዕዛዝ ተቀይሯል · {{label}}",
+      "body": "ትዕዛዝ #{{number}} አዲስ ዕቃዎች አሉት፦ ቲኬቱን ይመልከቱ።"
+    },
+    "orderCancelled": {
+      "title": "ትዕዛዝ ተሰርዟል · {{label}}",
+      "body": "ትዕዛዝ #{{number}}፦ {{reason}}"
     }
   }
 }
