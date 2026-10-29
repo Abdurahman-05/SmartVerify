@@ -106,6 +106,7 @@ export default function MessagesScreen() {
               onChange={setPlan}
               options={[
                 { key: 'normal', label: t('platformAdmin.plans.normal') },
+                { key: 'normal_multi', label: t('platformAdmin.plans.normal_multi') },
                 { key: 'restaurant', label: t('platformAdmin.plans.restaurant') },
               ]}
             />

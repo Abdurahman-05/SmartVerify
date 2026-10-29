@@ -121,7 +121,7 @@ export default function CustomerDetailScreen() {
       const n = note.trim() || undefined;
       if (kind === 'extend') return extendCustomer(id, Number(days), n);
       if (kind === 'paid')
-        return markCustomerPaid(id, plan, plan === 'restaurant' ? 'monthly' : period, n);
+        return markCustomerPaid(id, plan, plan === 'normal' ? period : 'monthly', n);
       if (kind === 'suspend') return suspendCustomer(id, true, n);
       if (kind === 'reactivate') return suspendCustomer(id, false);
       if (kind === 'plan') return changeCustomerPlan(id, plan);
@@ -286,6 +286,7 @@ export default function CustomerDetailScreen() {
                   onChange={setPlan}
                   options={[
                     { key: 'normal', label: t('platformAdmin.plans.normal') },
+                    { key: 'normal_multi', label: t('platformAdmin.plans.normal_multi') },
                     { key: 'restaurant', label: t('platformAdmin.plans.restaurant') },
                   ]}
                 />
@@ -305,9 +306,11 @@ export default function CustomerDetailScreen() {
                   value={
                     plan === 'restaurant'
                       ? c.prices.restaurantMonthly
-                      : period === 'monthly'
-                        ? c.prices.normalMonthly
-                        : c.prices.normalQuarterly
+                      : plan === 'normal_multi'
+                        ? (c.prices.normalMultiMonthly ?? 0)
+                        : period === 'monthly'
+                          ? c.prices.normalMonthly
+                          : c.prices.normalQuarterly
                   }
                   className="text-2xl"
                 />

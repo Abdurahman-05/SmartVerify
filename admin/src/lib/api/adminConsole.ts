@@ -4,7 +4,7 @@ import { API_BASE_URL } from './client';
 /** The admin console's data: customers, money, rules, health and messages. */
 
 export type AccessStatus = 'trial' | 'active' | 'grace' | 'restricted' | 'suspended';
-export type PlanCode = 'normal' | 'restaurant';
+export type PlanCode = 'normal' | 'normal_multi' | 'restaurant';
 
 export interface CustomerSummary {
   id: string;
@@ -96,7 +96,13 @@ export interface CustomerDetail {
     startedAt: string;
     endsAt: string;
   } | null;
-  prices: { normalMonthly: number; normalQuarterly: number; restaurantMonthly: number };
+  prices: {
+    normalMonthly: number;
+    normalQuarterly: number;
+    /** Missing from older servers (and the mock). */
+    normalMultiMonthly?: number;
+    restaurantMonthly: number;
+  };
   payments: {
     id: string;
     plan: PlanCode;
@@ -147,13 +153,15 @@ export interface PlatformSettings {
   restrictedBlocks: RestrictedBlock[];
   priceNormalMonthly: number;
   priceNormalQuarterly: number;
+  /** Missing from older servers (and the mock). */
+  priceNormalMultiMonthly?: number;
   priceRestaurantMonthly: number;
 }
 export interface SettingsPage {
   settings: PlatformSettings;
   exceptions: { businessId: string; name: string; reason: string | null }[];
   impact: { overdue: number; restricted: number };
-  planCounts: Record<PlanCode, number>;
+  planCounts: { normal: number; normal_multi?: number; restaurant: number };
   payTo: {
     cbe: { name: string; last4: string } | null;
     telebirr: { name: string; last4: string } | null;

@@ -24,7 +24,11 @@ import { colors } from '@/theme/tokens';
 import { AdminShell } from './AdminShell';
 import { ActionButton, Card, CardTitle, Chip, ErrorNote, PageTitle, Row, Tabs } from './ui';
 
-type PriceKey = 'priceNormalMonthly' | 'priceNormalQuarterly' | 'priceRestaurantMonthly';
+type PriceKey =
+  | 'priceNormalMonthly'
+  | 'priceNormalQuarterly'
+  | 'priceNormalMultiMonthly'
+  | 'priceRestaurantMonthly';
 
 function PriceInput({
   value,
@@ -70,6 +74,7 @@ export default function PlansScreen() {
         ...page.data.settings,
         priceNormalMonthly: Number(prices.priceNormalMonthly),
         priceNormalQuarterly: Number(prices.priceNormalQuarterly),
+        priceNormalMultiMonthly: Number(prices.priceNormalMultiMonthly),
         priceRestaurantMonthly: Number(prices.priceRestaurantMonthly),
       });
     },
@@ -111,12 +116,14 @@ export default function PlansScreen() {
   const prices = priceEdits ?? {
     priceNormalMonthly: String(s.priceNormalMonthly),
     priceNormalQuarterly: String(s.priceNormalQuarterly),
+    priceNormalMultiMonthly: String(s.priceNormalMultiMonthly ?? 1500),
     priceRestaurantMonthly: String(s.priceRestaurantMonthly),
   };
   const valid = Object.values(prices).every((v) => Number(v) >= 1);
   const dirty =
     Number(prices.priceNormalMonthly) !== s.priceNormalMonthly ||
     Number(prices.priceNormalQuarterly) !== s.priceNormalQuarterly ||
+    Number(prices.priceNormalMultiMonthly) !== (s.priceNormalMultiMonthly ?? 1500) ||
     Number(prices.priceRestaurantMonthly) !== s.priceRestaurantMonthly;
   const setPrice = (key: PriceKey) => (v: string) => {
     save.reset();
@@ -175,6 +182,33 @@ export default function PlansScreen() {
                 onChange={setPrice('priceNormalQuarterly')}
                 label={`${t('platformAdmin.plans.normal')} ${t('platformAdmin.plansPage.every3')}`}
               />
+            </Row>
+          </View>
+          <View className="min-w-[280px] flex-1 gap-3 rounded-2xl border-[1.5px] border-border p-5">
+            <View className="flex-row flex-wrap items-center justify-between gap-2">
+              <Text font="heading" className="text-lg">
+                {t('platformAdmin.plans.normal_multi')}
+              </Text>
+              <Chip
+                label={t('platformAdmin.plansPage.customers', {
+                  count: page.data.planCounts.normal_multi ?? 0,
+                })}
+              />
+            </View>
+            <Text tone="muted" className="text-sm">
+              {t('platformAdmin.plansPage.normalMultiDesc')}
+            </Text>
+            <Row label={t('platformAdmin.plansPage.everyMonth')}>
+              <PriceInput
+                value={prices.priceNormalMultiMonthly}
+                onChange={setPrice('priceNormalMultiMonthly')}
+                label={`${t('platformAdmin.plans.normal_multi')} ${t('platformAdmin.plansPage.everyMonth')}`}
+              />
+            </Row>
+            <Row label={t('platformAdmin.plansPage.every3')}>
+              <Text tone="muted" className="text-[15px]">
+                {t('platformAdmin.plansPage.notOffered')}
+              </Text>
             </Row>
           </View>
           <View className="min-w-[280px] flex-1 gap-3 rounded-2xl border-[1.5px] border-border p-5">

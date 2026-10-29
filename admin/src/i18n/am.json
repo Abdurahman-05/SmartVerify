@@ -217,7 +217,8 @@
       "restaurant": "ሬስቶራንት ፕላስ",
       "monthly": "ወርሃዊ",
       "quarterly": "በየ3 ወሩ",
-      "none": "ዕቅድ የለም"
+      "none": "ዕቅድ የለም",
+      "normal_multi": "Normal Multi"
     },
     "banks": {
       "CBE": "ንግድ ባንክ",
@@ -401,7 +402,7 @@
       "subtitle": "ዋጋዎች፣ ደንበኞች የሚከፍሉዎት፣ ማንቂያዎች እና መለያዎ።",
       "prices": "ዕቅዶች እና ዋጋዎች",
       "customers": "{{count}} ደንበኞች",
-      "normalDesc": "ለሱቆች እና ካፌዎች የደረሰኝ ማረጋገጫ",
+      "normalDesc": "ለሱቆች እና ካፌዎች የደረሰኝ ማረጋገጫ · በአንድ ጊዜ 2 ስልኮች",
       "restaurantDesc": "የደረሰኝ ማረጋገጫ እና ትዕዛዞች፣ አስተናጋጆች እና ወጥ ቤት",
       "everyMonth": "በየወሩ",
       "every3": "በየ3 ወሩ",
@@ -428,7 +429,8 @@
       "idle480": "8 ሰዓት",
       "otherDevices": "ሌሎች መሣሪያዎች",
       "otherCount": "{{count}} ሌሎች መሣሪያዎች ገብተዋል",
-      "signOutOthers": "ሁሉንም አስወጣ"
+      "signOutOthers": "ሁሉንም አስወጣ",
+      "normalMultiDesc": "የደረሰኝ ማረጋገጫ ባልተገደበ ስልኮች (ብዙ ሰራተኞች ወይም ቅርንጫፎች)"
     },
     "health": {
       "title": "ጤና እና ስህተቶች",
