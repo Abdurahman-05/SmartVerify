@@ -11,6 +11,7 @@ export type ErrorCode =
   | 'TABLE_BUSY'
   | 'ITEM_UNAVAILABLE'
   | 'BILL_CLOSED'
+  | 'ORDER_LOCKED'
   | 'MENU_DUPLICATE'
   | 'CATEGORY_DUPLICATE'
   | 'CATEGORY_NOT_EMPTY'
@@ -42,6 +43,8 @@ const statusByCode: Record<ErrorCode, number> = {
   ITEM_UNAVAILABLE: 409,
   /** The bill is already paid. */
   BILL_CLOSED: 409,
+  /** The order can no longer change: cooking started, paid, cancelled (details.reason). */
+  ORDER_LOCKED: 409,
   /** The business already has a menu item with this name (ignoring case and spaces). */
   MENU_DUPLICATE: 409,
   /** The business already has a category (menu or table) with this name (ignoring case and spaces). */

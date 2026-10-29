@@ -7,6 +7,9 @@ import { getSettings } from './platform-settings.js';
 export type NotificationType =
   | 'new_order'
   | 'order_ready'
+  | 'order_added'
+  | 'order_changed'
+  | 'order_cancelled'
   | 'big_payment'
   | 'bad_receipt'
   | 'daily_summary'

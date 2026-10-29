@@ -2,12 +2,26 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 
 import { requireRestaurantPlan, requireRoles } from '../../plugins/auth.js';
-import { customerPhoneSchema, errorResponseSchema } from '../../shared/schemas/common.js';
+import {
+  customerPhoneSchema,
+  errorResponseSchema,
+  idParamSchema,
+} from '../../shared/schemas/common.js';
 import { billDetailSchema } from '../bills/bill-view.js';
 
 import { createOrderService } from './order.service.js';
 
 const id = z.string().min(1).max(64);
+
+// Only id + quantity: prices always come from the menu in the database.
+const itemsSchema = z
+  .array(z.object({ menuItemId: id, quantity: z.number().int().min(1).max(99) }))
+  .min(1)
+  .max(50);
+const notesSchema = z
+  .array(z.enum(['noOnion', 'lessSpicy', 'rush', 'takeaway']))
+  .max(10)
+  .default([]);
 
 const newOrderSchema = z
   .object({
@@ -18,15 +32,8 @@ const newOrderSchema = z
     customerPhone: customerPhoneSchema.optional().describe('10 digits, 09… or 07…'),
     deliveryAreaId: id.optional(),
     address: z.string().trim().min(1).max(200).optional(),
-    notes: z
-      .array(z.enum(['noOnion', 'lessSpicy', 'rush', 'takeaway']))
-      .max(10)
-      .default([]),
-    // Only id + quantity: prices always come from the menu in the database.
-    items: z
-      .array(z.object({ menuItemId: id, quantity: z.number().int().min(1).max(99) }))
-      .min(1)
-      .max(50),
+    notes: notesSchema,
+    items: itemsSchema,
   })
   .superRefine((o, ctx) => {
     const need = (field: keyof typeof o, when: boolean) => {
@@ -45,7 +52,7 @@ const newOrderSchema = z
     need('customerPhone', o.type === 'delivery');
   });
 
-/** Restaurant Plus: send a new order to the kitchen (creates its bill). */
+/** Restaurant Plus: send orders to the kitchen; add to, change or cancel them before cooking. */
 export const orderRoutes: FastifyPluginAsyncZod = async (app) => {
   const orders = createOrderService(app.prisma);
   app.addHook('preHandler', requireRestaurantPlan);
@@ -81,5 +88,87 @@ export const orderRoutes: FastifyPluginAsyncZod = async (app) => {
       reply
         .status(201)
         .send(await orders.place(request.auth, request.body, request.headers['idempotency-key']))
+  );
+
+  const security = [{ bearerAuth: [] }];
+  const staff = requireRoles('owner', 'manager', 'waiter');
+  const changeErrors = {
+    400: errorResponseSchema.describe('VALIDATION_ERROR'),
+    401: errorResponseSchema.describe('UNAUTHORIZED'),
+    403: errorResponseSchema.describe('FORBIDDEN (chef, or another waiter’s order)'),
+    404: errorResponseSchema.describe('NOT_FOUND'),
+    409: errorResponseSchema.describe(
+      'ORDER_LOCKED (details.reason: cooking | paymentStarted | billClosed | cancelled), ' +
+        'BILL_CLOSED, ITEM_UNAVAILABLE'
+    ),
+  };
+
+  app.post(
+    '/bills/:id/orders',
+    {
+      preHandler: staff,
+      schema: {
+        tags: ['orders'],
+        security,
+        description:
+          'More items for an open bill: a new order and kitchen ticket on the same bill; the ' +
+          'total goes up. Waiters only on their own bills. Repeating an Idempotency-Key does ' +
+          'nothing more.',
+        params: idParamSchema,
+        headers: z.object({
+          'idempotency-key': z.string().min(8).max(100).describe('A new UUID per user action'),
+        }),
+        body: z.object({ notes: notesSchema, items: itemsSchema }),
+        response: { 201: billDetailSchema, ...changeErrors },
+      },
+    },
+    async (request, reply) =>
+      reply
+        .status(201)
+        .send(
+          await orders.addToBill(
+            request.auth,
+            request.params.id,
+            request.body,
+            request.headers['idempotency-key']
+          )
+        )
+  );
+
+  app.put(
+    '/orders/:id/items',
+    {
+      preHandler: staff,
+      schema: {
+        tags: ['orders'],
+        security,
+        description:
+          'Replace the items of an order the kitchen has NOT started yet (ORDER_LOCKED once ' +
+          'cooking starts, or after a bank payment). The bill total follows.',
+        params: idParamSchema,
+        body: z.object({ items: itemsSchema }),
+        response: { 200: billDetailSchema, ...changeErrors },
+      },
+    },
+    async (request) => orders.changeItems(request.auth, request.params.id, request.body.items)
+  );
+
+  app.post(
+    '/orders/:id/cancel',
+    {
+      preHandler: staff,
+      schema: {
+        tags: ['orders'],
+        security,
+        description:
+          'Cancel an order the kitchen has NOT started yet (ORDER_LOCKED once cooking starts). ' +
+          'It leaves the kitchen and the bill total; it is kept (with the reason) for reports. ' +
+          'A bill with no order left is cancelled and its table is free again.',
+        params: idParamSchema,
+        body: z.object({ reason: z.string().trim().min(2).max(200) }),
+        response: { 200: billDetailSchema, ...changeErrors },
+      },
+    },
+    async (request) => orders.cancel(request.auth, request.params.id, request.body.reason)
   );
 };

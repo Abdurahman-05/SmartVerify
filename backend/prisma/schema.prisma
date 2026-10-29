@@ -73,6 +73,8 @@ enum BillType {
 enum BillStatus {
   open
   paid
+  /// Every order on it was cancelled (before cooking).
+  cancelled
 }
 
 enum ServedStatus {
@@ -218,6 +220,7 @@ model BusinessMember {
   buyItemsBought     BuyItem[]         @relation("BuyItemBoughtBy")
   spendings          Spending[]
   notifications      Notification[]
+  ordersCancelled    Order[]           @relation("OrderCancelledBy")
 
   @@index([businessId])
 }
@@ -496,19 +499,26 @@ model Bill {
 
 /// One send to the kitchen. The first order creates the bill.
 model Order {
-  id             String         @id @default(cuid())
+  id             String          @id @default(cuid())
   businessId     String
-  business       Business       @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  business       Business        @relation(fields: [businessId], references: [id], onDelete: Restrict)
   billId         String
-  bill           Bill           @relation(fields: [billId], references: [id], onDelete: Restrict)
+  bill           Bill            @relation(fields: [billId], references: [id], onDelete: Restrict)
   /// Human number per business (#1043).
   number         Int
   notes          OrderNote[]
   waiterId       String
-  waiter         BusinessMember @relation(fields: [waiterId], references: [id], onDelete: Restrict)
+  waiter         BusinessMember  @relation(fields: [waiterId], references: [id], onDelete: Restrict)
   foodTotalEtb   Int
   idempotencyKey String?
-  createdAt      DateTime       @default(now())
+  createdAt      DateTime        @default(now())
+  /// Items changed before the kitchen started.
+  editedAt       DateTime?
+  /// Cancelled before the kitchen started: kept for reports, not counted in the bill.
+  cancelledAt    DateTime?
+  cancelReason   String?
+  cancelledById  String?
+  cancelledBy    BusinessMember? @relation("OrderCancelledBy", fields: [cancelledById], references: [id], onDelete: Restrict)
 
   items        OrderItem[]
   kitchenOrder KitchenOrder?

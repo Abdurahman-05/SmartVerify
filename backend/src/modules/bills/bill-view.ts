@@ -21,7 +21,7 @@ export const billListItemSchema = z.object({
   deliveryAreaName: z.string().nullable(),
   orderNo: z.number().int().describe('Number of the first order on the bill'),
   waiterId: z.string(),
-  status: z.enum(['open', 'paid']),
+  status: z.enum(['open', 'paid', 'cancelled']),
   servedStatus: z.enum(['kitchen', 'served']),
   totalEtb: z.number().int(),
   createdAt: z.string(),
@@ -53,6 +53,9 @@ export const billDetailSchema = billListItemSchema.extend({
         z.object({ name: z.string(), priceEtb: z.number().int(), quantity: z.number().int() })
       ),
       kitchenStatus: kitchenStatusSchema,
+      edited: z.boolean().describe('Items were changed before cooking'),
+      cancelled: z.boolean().describe('Cancelled before cooking: not counted in the total'),
+      cancelReason: z.string().nullable(),
     })
   ),
 });
@@ -155,6 +158,9 @@ export function toBillDetail(row: DetailRow): BillDetail {
       notes: o.notes,
       items: o.items.map((i) => ({ name: i.name, priceEtb: i.priceEtb, quantity: i.quantity })),
       kitchenStatus: o.kitchenOrder?.status ?? 'new',
+      edited: o.editedAt !== null,
+      cancelled: o.cancelledAt !== null,
+      cancelReason: o.cancelReason,
     })),
   };
 }

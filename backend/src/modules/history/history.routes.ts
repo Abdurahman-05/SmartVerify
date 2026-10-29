@@ -65,6 +65,8 @@ const include = {
       waiter: { select: { user: { select: { name: true } } } },
       table: { select: { number: true } },
       orders: {
+        // Cancelled orders were never paid for.
+        where: { cancelledAt: null },
         orderBy: { number: 'asc' },
         select: {
           number: true,
