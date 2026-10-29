@@ -33,7 +33,8 @@ describe('receiver name on a receipt against the saved holder name', () => {
       ['Abebe Kebede', 'Abebe Bekele Tadesse'],
       ['Almaz Tesfaye', 'Alemu Tesfaye'],
       ['Ali Bekele', 'Abel Bekele'],
-      ['Mohammed', 'Mohammed Ali'],
+      ['Mohammed', 'Ali Mohammed'],
+      ['Abebe K.', 'Kebede Abebe'],
       ['Meron Tadesse', 'Miriam Tadesse'],
       ['', 'Abebe Bekele'],
     ];
@@ -41,8 +42,11 @@ describe('receiver name on a receipt against the saved holder name', () => {
       expect(sameName(receipt, saved), `${receipt} / ${saved}`).toBe(false);
   });
 
-  it('one saved word alone is too weak to count unless it is exactly the name', () => {
+  it('a first name alone passes when it is the right first name', () => {
     expect(sameName('Abebe', 'Abebe')).toBe(true);
-    expect(sameName('Abebe Bekele', 'Abebe')).toBe(false);
+    expect(sameName('Abebe Bekele', 'Abebe')).toBe(true);
+    expect(sameName('Mohammed', 'Mohammed Ali')).toBe(true);
+    expect(sameName('MUHAMED A.', 'Mohammed Ali')).toBe(true);
+    expect(sameName('Abdurahman E', 'Abdurahman Eliyas')).toBe(true);
   });
 });

@@ -94,7 +94,12 @@ export function sameName(receiptName: string, savedName: string) {
   const want = words(savedName);
   if (!want.length) return false;
   if (got.join(' ') === want.join(' ')) return true;
-  if (want.length < 2) return false;
+  // Only a first name (maybe with initials) on one side: the first names must match.
+  const [gotFirst, wantFirst] = [got[0] ?? '', want[0] ?? ''];
+  const full = (ws: string[]) => ws.filter((w) => w.length > 1);
+  if (full(got).length === 1 || full(want).length === 1) {
+    return gotFirst.length > 1 && wantFirst.length > 1 && similar(gotFirst, wantFirst);
+  }
   const last = got[got.length - 1] ?? '';
   if (want.every((w) => got.some((g) => similar(g, w) || (g === last && cutOff(g, w))))) {
     return true;
