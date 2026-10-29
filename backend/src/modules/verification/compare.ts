@@ -52,15 +52,18 @@ function editDistance(a: string, b: string): number {
 
 /**
  * Spelling differences of the same name (Mohammed / Mohamed / Muhammed, Elias / Eliyas,
- * Abdurahman / Abdulrahman): one letter in a word of 4–7 letters, two in a longer word.
- * Short words must be equal.
+ * Abdurahman / Abdulrahman, Hussen / Husein / Hussien): one letter in a word of 4–5 letters, two
+ * in 6–8, three in a longer word. Short words must be equal.
  */
 const similar = (a: string, b: string) => {
   if (a === b) return true;
   const shorter = Math.min(a.length, b.length);
   if (shorter < 4) return false;
-  return editDistance(a, b) <= (shorter >= 8 ? 2 : 1);
+  return editDistance(a, b) <= (shorter >= 9 ? 3 : shorter >= 6 ? 2 : 1);
 };
+
+/** A receipt that cuts the name off: its last word is the start of the saved word. */
+const cutOff = (got: string, want: string) => got.length >= 3 && want.startsWith(got);
 
 /**
  * The receipt name is the saved name, or contains all of its words (receipts may add a
@@ -74,14 +77,17 @@ export function sameName(receiptName: string, savedName: string) {
   if (!want.length) return false;
   if (got.join(' ') === want.join(' ')) return true;
   if (want.length < 2) return false;
-  if (want.every((w) => got.some((g) => similar(g, w)))) return true;
+  const last = got[got.length - 1] ?? '';
+  if (want.every((w) => got.some((g) => similar(g, w) || (g === last && cutOff(g, w))))) {
+    return true;
+  }
   // Same letters with the spaces in other places: compare the joined names.
   const joinedWant = want.join('');
   const joinedGot = got.join('');
   if (joinedGot.startsWith(joinedWant) || joinedWant === joinedGot) return true;
   if (joinedWant.length < 8) return false;
   // The receipt may add words after the name: compare with its best-fitting beginning.
-  const allowed = Math.max(2, Math.floor(joinedWant.length / 10));
+  const allowed = Math.max(2, Math.floor(joinedWant.length / 6));
   for (let n = joinedWant.length - allowed; n <= joinedWant.length + allowed; n++) {
     if (
       n > 0 &&
