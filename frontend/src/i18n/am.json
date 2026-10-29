@@ -60,8 +60,7 @@
       "wrongCredentials": "የተሳሳተ ስልክ ቁጥር ወይም PIN።",
       "phoneTaken": "ይህ ስልክ ቁጥር አስቀድሞ መለያ አለው።",
       "signInFailedTitle": "መግባት አልተቻለም",
-      "createFailedTitle": "መለያ መፍጠር አልተቻለም",
-      "deviceLimit": "ለዚህ ንግድ 2 ስልኮች አስቀድመው ገብተዋል። ባለቤቱ አንዱን እንዲያስወጣ ወይም ወደ Normal Multi እንዲያሳድግ ይጠይቁ።"
+      "createFailedTitle": "መለያ መፍጠር አልተቻለም"
     }
   },
   "plan": {
@@ -366,8 +365,8 @@
     "goHome": "ወደ መነሻ ሂድ",
     "error": "እቅዱን ማስጀመር አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
     "errorTitle": "እቅዱን መጀመር አልተቻለም",
-    "twoDevices": "በአንድ ጊዜ 2 ስልኮች መግባት ይችላሉ",
-    "anyDevices": "ያልተገደበ ስልኮች · ለብዙ ሰራተኞች ወይም ቅርንጫፎች"
+    "twoDevices": "ባለቤት + 2 ሰራተኞች",
+    "anyDevices": "ያልተገደበ ሰራተኞች · ለብዙ ሰራተኞች ወይም ቅርንጫፎች"
   },
   "orders": {
     "title": "አዲስ ትዕዛዝ",
@@ -681,7 +680,8 @@
     "errors": {
       "name": "ሙሉ ስሙን ያስገቡ",
       "phoneTaken": "ይህ ስልክ ቁጥር አስቀድሞ ጥቅም ላይ ውሏል",
-      "pin": "PIN 4 አሃዝ መሆን አለበት"
+      "pin": "PIN 4 አሃዝ መሆን አለበት",
+      "limit": "Normal ፕላን እስከ 2 ሰራተኞች ብቻ ይፈቅዳል። አንዱን ያጥፉ ወይም ለተጨማሪ ወደ Normal Multi ያሳድጉ።"
     },
     "inactive": "ንቁ ያልሆነ",
     "tempPin": "ጊዜያዊ PIN",

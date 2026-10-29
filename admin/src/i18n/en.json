@@ -409,7 +409,7 @@
       "subtitle": "Prices, where customers pay you, alerts and your account.",
       "prices": "Plans and prices",
       "customers": "{{count}} customers",
-      "normalDesc": "Receipt checks for shops and cafés · 2 phones at a time",
+      "normalDesc": "Receipt checks for shops and cafés · owner + 2 workers",
       "restaurantDesc": "Receipt checks plus orders, waiters and kitchen",
       "everyMonth": "Every month",
       "every3": "Every 3 months",
@@ -440,7 +440,7 @@
       "customers_one": "{{count}} customer",
       "otherCount_one": "{{count}} other device signed in",
       "backupLeft_one": "{{count}} backup code left",
-      "normalMultiDesc": "Receipt checks with any number of phones (many workers or branches)"
+      "normalMultiDesc": "Receipt checks with any number of workers (or branches)"
     },
     "health": {
       "title": "Health and errors",

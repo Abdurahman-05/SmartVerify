@@ -64,6 +64,9 @@ function view(row: MemberRow, auth: AuthContext) {
 const isUniqueViolation = (error: unknown) =>
   error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
 
+/** Normal plan (and no plan yet): active workers besides the owner. Normal Multi: no limit. */
+export const NORMAL_STAFF_LIMIT = 2;
+
 /** A retried "add" (the answer was lost) finds the member it already created. */
 const REPLAY_WINDOW_MS = 10 * 60_000;
 
@@ -84,7 +87,7 @@ export const staffRoutes: FastifyPluginAsyncZod = async (app) => {
   async function manageable(auth: AuthContext, id: string) {
     const target = await prisma.businessMember.findFirst({
       where: { id, businessId: auth.businessId },
-      select: { id: true, userId: true, role: true },
+      select: { id: true, userId: true, role: true, active: true },
     });
     if (!target) throw new AppError('NOT_FOUND');
     if (target.id === auth.memberId || !canManage(auth.role, target.role)) {
@@ -97,6 +100,17 @@ export const staffRoutes: FastifyPluginAsyncZod = async (app) => {
   function onlyWorkersOnNormal(auth: AuthContext, role: Role) {
     if (auth.plan === 'restaurant' || role === 'waiter') return;
     throw new AppError('VALIDATION_ERROR', { reason: 'workerOnly' });
+  }
+
+  /** Normal plan: refuse one more active worker past the limit. */
+  async function roomForOneMore(auth: AuthContext) {
+    if (auth.plan === 'normal_multi' || auth.plan === 'restaurant') return;
+    const active = await prisma.businessMember.count({
+      where: { businessId: auth.businessId, role: { not: 'owner' }, active: true },
+    });
+    if (active >= NORMAL_STAFF_LIMIT) {
+      throw new AppError('STAFF_LIMIT', { limit: NORMAL_STAFF_LIMIT });
+    }
   }
 
   app.get(
@@ -145,7 +159,7 @@ export const staffRoutes: FastifyPluginAsyncZod = async (app) => {
         response: {
           201: staffSchema,
           400: errorResponseSchema.describe('VALIDATION_ERROR'),
-          409: errorResponseSchema.describe('PHONE_TAKEN'),
+          409: errorResponseSchema.describe('PHONE_TAKEN, STAFF_LIMIT (Normal: 2 workers)'),
           ...errors,
         },
       },
@@ -172,6 +186,7 @@ export const staffRoutes: FastifyPluginAsyncZod = async (app) => {
         throw new AppError('PHONE_TAKEN');
       }
 
+      await roomForOneMore(auth);
       const pinHash = await hashPin(body.pin);
       try {
         const created = await prisma.$transaction(async (tx) => {
@@ -226,6 +241,7 @@ export const staffRoutes: FastifyPluginAsyncZod = async (app) => {
           200: staffSchema,
           400: errorResponseSchema.describe('VALIDATION_ERROR'),
           404: errorResponseSchema.describe('NOT_FOUND'),
+          409: errorResponseSchema.describe('STAFF_LIMIT (turning on a 3rd worker on Normal)'),
           ...errors,
         },
       },
@@ -235,6 +251,7 @@ export const staffRoutes: FastifyPluginAsyncZod = async (app) => {
       const target = await manageable(auth, request.params.id);
       if (body.role && !canManage(auth.role, body.role)) throw new AppError('FORBIDDEN');
       if (body.role) onlyWorkersOnNormal(auth, body.role);
+      if (body.active && !target.active) await roomForOneMore(auth);
 
       const { name, ...member } = body;
       const updated = await prisma.$transaction(async (tx) => {

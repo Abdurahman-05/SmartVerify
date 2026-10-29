@@ -26,9 +26,9 @@ enum Role {
 }
 
 enum Plan {
-  /// Normal, 2 devices signed in at a time.
+  /// Normal: the owner and up to 2 workers.
   normal
-  /// Normal, any number of devices.
+  /// Normal Multi: any number of workers.
   normal_multi
   restaurant
 }

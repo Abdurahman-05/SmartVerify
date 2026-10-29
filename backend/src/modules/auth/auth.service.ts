@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 
-import { Prisma, type Plan, type Role } from '../../generated/prisma/client.js';
+import { Prisma } from '../../generated/prisma/client.js';
 import type { AuthContext } from '../../plugins/auth.js';
 import { hashPin, verifyAgainstDummy, verifyPin } from '../../services/pin-hasher.js';
 import { hashSessionToken, newSessionToken } from '../../services/session-token.js';
@@ -11,8 +11,6 @@ import { loadSessionUser } from './session-user.js';
 /** Session length without and with "Remember me" (registration is always remembered). */
 const SESSION_TTL_MS = 12 * 3_600_000;
 const SESSION_REMEMBER_TTL_MS = 30 * 86_400_000;
-/** Normal plan (and no plan yet): devices signed in at a time, across the whole business. */
-export const NORMAL_DEVICE_LIMIT = 2;
 
 export interface RegisterInput {
   fullName: string;
@@ -46,39 +44,6 @@ export function createAuthService(app: FastifyInstance) {
       expiresAt: expiresAt.toISOString(),
       user: await loadSessionUser(prisma, memberId),
     };
-  }
-
-  /**
-   * Normal plan: before a new sign-in, make sure fewer than 2 devices are signed in. The same
-   * person signing in again (new phone, reinstall) replaces their own older device first. The
-   * owner is never locked out: the oldest other devices are signed out. Staff get DEVICE_LIMIT.
-   */
-  async function makeRoomForDevice(
-    userId: string,
-    businessId: string,
-    role: Role,
-    plan: Plan | null
-  ) {
-    if (plan === 'normal_multi' || plan === 'restaurant') return;
-    const open = await prisma.session.findMany({
-      where: { revokedAt: null, expiresAt: { gt: new Date() }, member: { businessId } },
-      orderBy: { createdAt: 'asc' },
-      select: { id: true, userId: true },
-    });
-    const free = NORMAL_DEVICE_LIMIT - 1;
-    if (open.length <= free) return;
-    const others = open.filter((s) => s.userId !== userId);
-    if (others.length > free && role !== 'owner') {
-      throw new AppError('DEVICE_LIMIT', { limit: NORMAL_DEVICE_LIMIT });
-    }
-    const revoke = [
-      ...open.filter((s) => s.userId === userId),
-      ...others.slice(0, Math.max(others.length - free, 0)),
-    ];
-    await prisma.session.updateMany({
-      where: { id: { in: revoke.map((s) => s.id) } },
-      data: { revokedAt: new Date() },
-    });
   }
 
   return {
@@ -123,7 +88,6 @@ export function createAuthService(app: FastifyInstance) {
       if (!pinOk || !member || !member.active || member.business.deactivatedAt) {
         throw new AppError('WRONG_CREDENTIALS');
       }
-      await makeRoomForDevice(user.id, member.businessId, member.role, member.business.plan);
       return openSession(user.id, member.id, input.rememberMe);
     },
 

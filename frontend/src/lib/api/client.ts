@@ -30,7 +30,7 @@ export type ApiErrorCode =
   | 'FORBIDDEN'
   | 'NOT_FOUND'
   | 'PHONE_TAKEN'
-  | 'DEVICE_LIMIT'
+  | 'STAFF_LIMIT'
   | 'ACCOUNT_DUPLICATE'
   | 'ACCOUNT_LIMIT'
   | 'SUBSCRIPTION_REQUIRED'

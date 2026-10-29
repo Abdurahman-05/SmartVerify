@@ -12,6 +12,7 @@ import {
 } from 'lucide-react-native';
 
 import type { Plan, Role } from '@/store/session';
+import { isNormalApp } from '@/lib/variant';
 
 export type HomeActionKey =
   | 'verify'
@@ -60,7 +61,9 @@ const restaurantKeys: HomeActionKey[] = [
 ];
 
 export function getHomeActions(plan: Plan | null, role: Role): HomeAction[] {
-  const base = plan === 'normal' ? normalKeys : restaurantKeys;
+  // Normal and Normal Multi: no restaurant buttons. No plan yet: everything (not in the Normal app).
+  const showRestaurant = plan === 'restaurant' || (plan === null && !isNormalApp);
+  const base = showRestaurant ? restaurantKeys : normalKeys;
   // The overview (sales, cash, bank, tips) is for owner and manager on Restaurant Plus.
   const manages = role === 'owner' || role === 'manager';
   const keys: HomeActionKey[] =

@@ -277,6 +277,11 @@ describe('staff', () => {
 
 describe('staff on the Normal plans', () => {
   it('only workers (the waiter role) can be added or made', async () => {
+    // Room for new workers: the restaurant's staff are turned off.
+    await app.prisma.businessMember.updateMany({
+      where: { businessId: r.businessId, role: { not: 'owner' } },
+      data: { active: false },
+    });
     for (const plan of ['normal', 'normal_multi'] as const) {
       await app.prisma.business.update({ where: { id: r.businessId }, data: { plan } });
       const body = { name: 'Almaz Worku', pin: '4321', role: 'manager' };
@@ -295,5 +300,43 @@ describe('staff on the Normal plans', () => {
         (await call('PATCH', `/staff/${id}`, r.owner.token, { role: 'chef' })).statusCode
       ).toBe(400);
     }
+  });
+});
+
+describe('how many workers', () => {
+  it('Normal: the owner and 2 active workers; Normal Multi: no limit', async () => {
+    await app.prisma.businessMember.updateMany({
+      where: { businessId: r.businessId, role: { not: 'owner' } },
+      data: { active: false },
+    });
+    await app.prisma.business.update({ where: { id: r.businessId }, data: { plan: 'normal' } });
+    const add = () =>
+      call('POST', '/staff', r.owner.token, {
+        name: 'Branch 1 Worker',
+        phone: newPhone(),
+        pin: '4321',
+        role: 'waiter',
+      });
+    expect((await add()).statusCode).toBe(201);
+    const second = await add();
+    expect(second.statusCode).toBe(201);
+    const third = await add();
+    expect(third.json()).toMatchObject({ error: { code: 'STAFF_LIMIT', details: { limit: 2 } } });
+
+    // Turning one off makes room; turning it back on while full is refused.
+    const id = second.json<Member>().id;
+    await call('PATCH', `/staff/${id}`, r.owner.token, { active: false });
+    expect((await add()).statusCode).toBe(201);
+    const back = await call('PATCH', `/staff/${id}`, r.owner.token, { active: true });
+    expect(back.json()).toMatchObject({ error: { code: 'STAFF_LIMIT' } });
+
+    await app.prisma.business.update({
+      where: { id: r.businessId },
+      data: { plan: 'normal_multi' },
+    });
+    expect((await add()).statusCode).toBe(201);
+    expect((await call('PATCH', `/staff/${id}`, r.owner.token, { active: true })).statusCode).toBe(
+      200
+    );
   });
 });

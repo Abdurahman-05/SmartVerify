@@ -60,8 +60,7 @@
       "wrongCredentials": "Wrong phone number or PIN.",
       "phoneTaken": "This phone number already has an account.",
       "signInFailedTitle": "Couldn't sign in",
-      "createFailedTitle": "Couldn't create account",
-      "deviceLimit": "2 phones are already signed in for this business. Ask the owner to sign one out, or to upgrade to Normal Multi."
+      "createFailedTitle": "Couldn't create account"
     }
   },
   "plan": {
@@ -366,8 +365,8 @@
     "goHome": "Go to home",
     "error": "Could not start the plan. Please try again.",
     "errorTitle": "Couldn't start the plan",
-    "twoDevices": "2 phones signed in at a time",
-    "anyDevices": "Any number of phones · for many workers or branches"
+    "twoDevices": "Owner + 2 workers",
+    "anyDevices": "Any number of workers · for many workers or branches"
   },
   "orders": {
     "title": "New order",
@@ -681,7 +680,8 @@
     "errors": {
       "name": "Enter the full name",
       "phoneTaken": "This phone number is already used",
-      "pin": "PIN must be 4 digits"
+      "pin": "PIN must be 4 digits",
+      "limit": "The Normal plan has up to 2 workers. Turn one off, or upgrade to Normal Multi for more."
     },
     "inactive": "Inactive",
     "tempPin": "Temporary PIN",

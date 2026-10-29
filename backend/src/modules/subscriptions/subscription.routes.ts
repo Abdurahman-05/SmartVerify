@@ -91,8 +91,8 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
         security: [{ bearerAuth: [] }],
         description:
           'Starts a subscription right away. NO PAYMENT STEP YET: refused in production unless ' +
-          'ALLOW_UNPAID_SUBSCRIPTIONS=true. Normal (2 devices at a time): monthly or quarterly; ' +
-          'Normal Multi (any number of devices) and Restaurant Plus: monthly only. Replaces the current subscription. ' +
+          'ALLOW_UNPAID_SUBSCRIPTIONS=true. Normal (owner + 2 workers): monthly or quarterly; ' +
+          'Normal Multi (any number of workers) and Restaurant Plus: monthly only. Replaces the current subscription. ' +
           'Repeating an Idempotency-Key returns the first subscription.',
         headers: z.object({
           'idempotency-key': z.string().min(8).max(100).describe('A new UUID per user action'),
