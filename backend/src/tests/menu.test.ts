@@ -136,7 +136,7 @@ describe('menu', () => {
         headers: headers(r.owner.token),
       })
     ).json();
-    expect(bill.orders[0].items[0]).toEqual({ name: 'Tibs', priceEtb: 450, quantity: 1 });
+    expect(bill.orders[0].items[0]).toMatchObject({ name: 'Tibs', priceEtb: 450, quantity: 1 });
 
     expect((await patch(r.manager.token, r.menu.tibs.id, { active: true })).json().active).toBe(
       true

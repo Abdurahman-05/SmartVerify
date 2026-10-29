@@ -93,8 +93,8 @@ describe('POST /orders — totals', () => {
       kitchenStatus: 'new',
     });
     expect(bill.orders[0].items).toEqual([
-      { name: 'Tibs', priceEtb: 450, quantity: 2 },
-      { name: 'Coffee', priceEtb: 60, quantity: 1 },
+      { menuItemId: r.menu.tibs.id, name: 'Tibs', priceEtb: 450, quantity: 2 },
+      { menuItemId: r.menu.coffee.id, name: 'Coffee', priceEtb: 60, quantity: 1 },
     ]);
     expect(await app.prisma.kitchenOrder.count()).toBe(1);
   });
