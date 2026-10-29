@@ -1,5 +1,7 @@
+import { useQuery } from '@tanstack/react-query';
 import { Tabs } from 'expo-router';
 import {
+  Bell,
   ChartColumn,
   ChefHat,
   Clock,
@@ -14,6 +16,7 @@ import {
 import type { ColorValue } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
+import { getNotifications, NOTIFICATIONS_POLL_MS, notificationsKey } from '@/lib/notifications';
 import { useFeatures } from '@/store/features';
 import { useBrandColors } from '@/store/theme';
 import { useSession } from '@/store/session';
@@ -37,6 +40,7 @@ const ActivityIcon = icon(ChartColumn);
 const BuyListIcon = icon(NotebookPen);
 const MoneyOutIcon = icon(Wallet);
 const KitchenIcon = icon(ChefHat);
+const BellIcon = icon(Bell);
 
 export default function TabsLayout() {
   const brand = useBrandColors();
@@ -51,6 +55,13 @@ export default function TabsLayout() {
   const isManager = role === 'manager';
   const buyList = useFeatures((s) => s.featureBuyList);
   const moneyOut = useFeatures((s) => s.featureMoneyOut);
+  // The unread count on the bell, checked every 30 seconds while the app is open.
+  const { data: inbox } = useQuery({
+    queryKey: notificationsKey,
+    queryFn: getNotifications,
+    refetchInterval: NOTIFICATIONS_POLL_MS,
+  });
+  const unread = inbox?.unread ?? 0;
 
   return (
     <Tabs
@@ -127,6 +138,14 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="cook"
         options={{ title: t('kitchen.title'), tabBarIcon: KitchenIcon, ...forWaiter(isChef) }}
+      />
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          title: t('notifications.tab'),
+          tabBarIcon: BellIcon,
+          tabBarBadge: unread > 0 ? (unread > 99 ? '99+' : unread) : undefined,
+        }}
       />
       <Tabs.Screen name="profile" options={{ title: t('nav.profile'), tabBarIcon: ProfileIcon }} />
     </Tabs>

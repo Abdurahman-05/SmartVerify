@@ -1257,5 +1257,45 @@
     "title": "This business uses the Restaurant app",
     "body": "Your business is on Restaurant Plus. Open the ገብቷል Restaurant app and sign in with the same phone and PIN.",
     "signOut": "Sign out"
+  },
+  "notifications": {
+    "tab": "Alerts",
+    "title": "Notifications",
+    "empty": "No notifications yet. New orders, ready food, big payments and plan reminders show up here.",
+    "table": "Table {{table}}",
+    "takeaway": "Takeaway #{{number}}",
+    "delivery": "Delivery #{{number}}",
+    "newOrder": {
+      "title": "New order · {{label}}",
+      "body_one": "{{count}} item · order #{{number}}",
+      "body_other": "{{count}} items · order #{{number}}"
+    },
+    "orderReady": {
+      "title": "Food ready · {{label}}",
+      "body": "Order #{{number}} is ready to serve."
+    },
+    "bigPayment": {
+      "title": "Big payment: {{amount}}",
+      "body": "From {{name}} · {{bank}}"
+    },
+    "badReceipt": {
+      "title": "Suspicious receipt checked by {{name}}"
+    },
+    "dailySummary": {
+      "title": "Today's payments",
+      "body_one": "{{count}} verified payment · {{amount}}",
+      "body_other": "{{count}} verified payments · {{amount}}"
+    },
+    "planEnding": {
+      "title_one": "Your plan ends in {{count}} day",
+      "title_other": "Your plan ends in {{count}} days",
+      "body": "Pay now to keep verifying without a break."
+    },
+    "planLate": {
+      "grace": "Your plan has ended",
+      "restricted": "Some features are paused",
+      "suspended": "Your account is paused",
+      "body": "Pay for your plan to turn everything back on."
+    }
   }
 }

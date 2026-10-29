@@ -1257,5 +1257,45 @@
     "title": "ይህ ንግድ የሬስቶራንት መተግበሪያውን ይጠቀማል",
     "body": "ንግድዎ Restaurant Plus ላይ ነው። የገብቷል ሬስቶራንት መተግበሪያውን ይክፈቱ እና በተመሳሳይ ስልክና ፒን ይግቡ።",
     "signOut": "ውጣ"
+  },
+  "notifications": {
+    "tab": "ማሳወቂያ",
+    "title": "ማሳወቂያዎች",
+    "empty": "እስካሁን ማሳወቂያ የለም። አዳዲስ ትዕዛዞች፣ የተዘጋጀ ምግብ፣ ትልቅ ክፍያዎች እና የፕላን ማስታወሻዎች እዚህ ይታያሉ።",
+    "table": "ጠረጴዛ {{table}}",
+    "takeaway": "ለመውሰድ #{{number}}",
+    "delivery": "ዴሊቨሪ #{{number}}",
+    "newOrder": {
+      "title": "አዲስ ትዕዛዝ · {{label}}",
+      "body_one": "{{count}} ዕቃ · ትዕዛዝ #{{number}}",
+      "body_other": "{{count}} ዕቃዎች · ትዕዛዝ #{{number}}"
+    },
+    "orderReady": {
+      "title": "ምግብ ተዘጋጅቷል · {{label}}",
+      "body": "ትዕዛዝ #{{number}} ለማቅረብ ዝግጁ ነው።"
+    },
+    "bigPayment": {
+      "title": "ትልቅ ክፍያ፦ {{amount}}",
+      "body": "ከ{{name}} · {{bank}}"
+    },
+    "badReceipt": {
+      "title": "አጠራጣሪ ደረሰኝ በ{{name}} ተረጋግጧል"
+    },
+    "dailySummary": {
+      "title": "የዛሬ ክፍያዎች",
+      "body_one": "{{count}} የተረጋገጠ ክፍያ · {{amount}}",
+      "body_other": "{{count}} የተረጋገጡ ክፍያዎች · {{amount}}"
+    },
+    "planEnding": {
+      "title_one": "ፕላንዎ በ{{count}} ቀን ያበቃል",
+      "title_other": "ፕላንዎ በ{{count}} ቀናት ያበቃል",
+      "body": "ያለ መቋረጥ ለማረጋገጥ አሁን ይክፈሉ።"
+    },
+    "planLate": {
+      "grace": "ፕላንዎ አብቅቷል",
+      "restricted": "አንዳንድ አገልግሎቶች ቆመዋል",
+      "suspended": "መለያዎ ቆሟል",
+      "body": "ሁሉንም መልሶ ለማብራት የፕላን ክፍያ ይፈጽሙ።"
+    }
   }
 }
