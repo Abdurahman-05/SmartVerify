@@ -60,7 +60,8 @@
       "wrongCredentials": "Wrong phone number or PIN.",
       "phoneTaken": "This phone number already has an account.",
       "signInFailedTitle": "Couldn't sign in",
-      "createFailedTitle": "Couldn't create account"
+      "createFailedTitle": "Couldn't create account",
+      "deviceLimit": "2 phones are already signed in for this business. Ask the owner to sign one out, or to upgrade to Normal Multi."
     }
   },
   "plan": {
@@ -162,7 +163,8 @@
     "owner": "Owner",
     "manager": "Manager",
     "waiter": "Waiter",
-    "chef": "Chef"
+    "chef": "Chef",
+    "worker": "Worker"
   },
   "home": {
     "exploring": "Exploring",
@@ -363,7 +365,9 @@
     "threeMonths": "3 months",
     "goHome": "Go to home",
     "error": "Could not start the plan. Please try again.",
-    "errorTitle": "Couldn't start the plan"
+    "errorTitle": "Couldn't start the plan",
+    "twoDevices": "2 phones signed in at a time",
+    "anyDevices": "Any number of phones · for many workers or branches"
   },
   "orders": {
     "title": "New order",

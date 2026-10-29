@@ -16,8 +16,10 @@ import { formatPhone } from '@/lib/format';
 import { getStaff, staffKey, type StaffMember } from '@/lib/staff';
 import { colors } from '@/theme/tokens';
 
+import { useRoleLabel } from './roleLabel';
+
 export function RolePill({ role }: { role: StaffMember['role'] }) {
-  const { t } = useTranslation();
+  const roleLabel = useRoleLabel();
   const isManager = role === 'manager';
   return (
     <View
@@ -28,7 +30,7 @@ export function RolePill({ role }: { role: StaffMember['role'] }) {
         className="text-sm"
         style={{ color: isManager ? colors.surface : colors.successFg }}
       >
-        {t(`roles.${role}`)}
+        {roleLabel(role)}
       </Text>
     </View>
   );
@@ -66,6 +68,7 @@ function PinPill() {
 /** Owner and manager: the team. Tap a person to edit, reset a forgotten PIN, or turn them on/off. */
 export default function StaffScreen() {
   const { t } = useTranslation();
+  const roleLabel = useRoleLabel();
   const router = useRouter();
 
   const query = useQuery({ queryKey: staffKey, queryFn: getStaff });
@@ -133,7 +136,7 @@ export default function StaffScreen() {
               accessibilityRole="button"
               accessibilityLabel={t('staff.rowLabel', {
                 name: item.name,
-                role: t(`roles.${item.role}`),
+                role: roleLabel(item.role),
                 state: item.active ? t('staff.active') : t('staff.inactive'),
               })}
               className={`flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface px-3 py-2.5 active:bg-background ${

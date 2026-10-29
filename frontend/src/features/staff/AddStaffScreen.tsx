@@ -30,6 +30,8 @@ import { addStaff, randomPin, staffKey, type StaffRole } from '@/lib/staff';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
+import { useRoleLabel, useWorkersOnly } from './roleLabel';
+
 const STAFF_PIN_DIGITS = 4;
 
 const schema = z.object({
@@ -78,6 +80,8 @@ export default function AddStaffScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isOwner = useSession((s) => s.user?.role === 'owner');
+  const workersOnly = useWorkersOnly();
+  const roleLabel = useRoleLabel();
 
   const {
     control,
@@ -183,35 +187,37 @@ export default function AddStaffScreen() {
             name="role"
             render={({ field }) => (
               <View className="flex-row gap-2" accessibilityRole="radiogroup">
-                {roleOptions.map(({ role: value, icon: Icon }) => {
-                  const selected = field.value === value;
-                  const disabled = value === 'manager' && !isOwner;
-                  return (
-                    <Pressable
-                      key={value}
-                      onPress={() => field.onChange(value)}
-                      disabled={disabled}
-                      accessibilityRole="radio"
-                      accessibilityState={{ selected, disabled }}
-                      className={`h-[76px] flex-1 items-center justify-center gap-1 rounded-[18px] ${
-                        selected ? 'bg-primary' : 'border-2 border-borderStrong bg-surface'
-                      } ${disabled ? 'opacity-40' : ''}`}
-                    >
-                      <Icon
-                        size={24}
-                        color={selected ? colors.surface : brand.primary}
-                        strokeWidth={2.2}
-                      />
-                      <Text
-                        font="bold"
-                        tone={selected ? 'inverse' : 'default'}
-                        className="text-base"
+                {(workersOnly ? roleOptions.filter((o) => o.role === 'waiter') : roleOptions).map(
+                  ({ role: value, icon: Icon }) => {
+                    const selected = field.value === value;
+                    const disabled = value === 'manager' && !isOwner;
+                    return (
+                      <Pressable
+                        key={value}
+                        onPress={() => field.onChange(value)}
+                        disabled={disabled}
+                        accessibilityRole="radio"
+                        accessibilityState={{ selected, disabled }}
+                        className={`h-[76px] flex-1 items-center justify-center gap-1 rounded-[18px] ${
+                          selected ? 'bg-primary' : 'border-2 border-borderStrong bg-surface'
+                        } ${disabled ? 'opacity-40' : ''}`}
                       >
-                        {t(`roles.${value}`)}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
+                        <Icon
+                          size={24}
+                          color={selected ? colors.surface : brand.primary}
+                          strokeWidth={2.2}
+                        />
+                        <Text
+                          font="bold"
+                          tone={selected ? 'inverse' : 'default'}
+                          className="text-base"
+                        >
+                          {roleLabel(value)}
+                        </Text>
+                      </Pressable>
+                    );
+                  }
+                )}
               </View>
             )}
           />
@@ -250,7 +256,7 @@ export default function AddStaffScreen() {
         </View>
       </View>
 
-      {role === 'waiter' ? (
+      {role === 'waiter' && !workersOnly ? (
         <View className="mx-4 mt-3 rounded-[20px] border-[1.5px] border-border bg-surface px-4 py-0.5">
           <Text font="bold" tone="muted" className="pt-2.5 text-[15px]">
             {t('staff.permissions')}

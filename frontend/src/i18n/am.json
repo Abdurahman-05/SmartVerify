@@ -60,7 +60,8 @@
       "wrongCredentials": "የተሳሳተ ስልክ ቁጥር ወይም PIN።",
       "phoneTaken": "ይህ ስልክ ቁጥር አስቀድሞ መለያ አለው።",
       "signInFailedTitle": "መግባት አልተቻለም",
-      "createFailedTitle": "መለያ መፍጠር አልተቻለም"
+      "createFailedTitle": "መለያ መፍጠር አልተቻለም",
+      "deviceLimit": "ለዚህ ንግድ 2 ስልኮች አስቀድመው ገብተዋል። ባለቤቱ አንዱን እንዲያስወጣ ወይም ወደ Normal Multi እንዲያሳድግ ይጠይቁ።"
     }
   },
   "plan": {
@@ -162,7 +163,8 @@
     "owner": "ባለቤት",
     "manager": "ሥራ አስኪያጅ",
     "waiter": "አስተናጋጅ",
-    "chef": "ሼፍ"
+    "chef": "ሼፍ",
+    "worker": "ሰራተኛ"
   },
   "home": {
     "exploring": "በመቃኘት ላይ",
@@ -363,7 +365,9 @@
     "threeMonths": "3 ወር",
     "goHome": "ወደ መነሻ ሂድ",
     "error": "እቅዱን ማስጀመር አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
-    "errorTitle": "እቅዱን መጀመር አልተቻለም"
+    "errorTitle": "እቅዱን መጀመር አልተቻለም",
+    "twoDevices": "በአንድ ጊዜ 2 ስልኮች መግባት ይችላሉ",
+    "anyDevices": "ያልተገደበ ስልኮች · ለብዙ ሰራተኞች ወይም ቅርንጫፎች"
   },
   "orders": {
     "title": "አዲስ ትዕዛዝ",

@@ -16,6 +16,7 @@ import { colors } from '@/theme/tokens';
 
 import {
   normalPricing,
+  normalMultiMonthlyEtb,
   normalQuarterlySavingEtb,
   restaurantFeatureKeys,
   restaurantMonthlyEtb,
@@ -172,7 +173,7 @@ export default function SubscriptionScreen() {
 
   const current = user?.subscription ?? null;
   const isCurrent = (plan: Plan, period: BillingPeriod) =>
-    current?.plan === plan && (plan === 'restaurant' || current.period === period);
+    current?.plan === plan && (plan !== 'normal' || current.period === period);
   const choose = (plan: Plan, period: BillingPeriod) => {
     if (user?.role !== 'owner') {
       setOwnerOnly(true);
@@ -217,6 +218,9 @@ export default function SubscriptionScreen() {
             <Text tone="muted" className="mt-0.5 text-[15px]">
               {t('plan.normalFeatures')}
             </Text>
+            <Text font="semibold" className="mt-1 text-[15px]">
+              {t('subscription.twoDevices')}
+            </Text>
             <View className="mt-4 flex-row gap-2.5">
               {(['monthly', 'quarterly'] as const).map((period) => (
                 <NormalOption
@@ -226,6 +230,42 @@ export default function SubscriptionScreen() {
                   onChoose={() => choose('normal', period)}
                 />
               ))}
+            </View>
+          </View>
+
+          <View className="mx-4 mt-3 rounded-card border-[1.5px] border-border bg-surface p-3.5">
+            <Text font="heading" className="text-xl">
+              {t('plans.normal_multi')}
+            </Text>
+            <Text tone="muted" className="mt-0.5 text-[15px]">
+              {t('plan.normalFeatures')}
+            </Text>
+            <Text font="semibold" className="mt-1 text-[15px]">
+              {t('subscription.anyDevices')}
+            </Text>
+            <View className="mt-3.5 flex-row items-center justify-between gap-3">
+              <Text font="heading" className="text-2xl">
+                <MoneyText value={normalMultiMonthlyEtb} showCurrency={false} />{' '}
+                <Text font="heading" className="text-sm">
+                  {t('plan.perMonth')}
+                </Text>
+              </Text>
+              <ChooseButton
+                className="px-8"
+                label={
+                  isCurrent('normal_multi', 'monthly')
+                    ? t('subscription.current')
+                    : t('subscription.choose')
+                }
+                filled
+                disabled={isCurrent('normal_multi', 'monthly')}
+                accessibilityLabel={t('subscription.chooseLabel', {
+                  plan: t('plans.normal_multi'),
+                  length: t('subscription.oneMonth'),
+                  price: formatMoney(normalMultiMonthlyEtb, false),
+                })}
+                onPress={() => choose('normal_multi', 'monthly')}
+              />
             </View>
           </View>
 

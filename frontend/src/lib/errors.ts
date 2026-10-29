@@ -5,6 +5,7 @@ import { WrongCredentialsError } from '@/lib/mock/auth';
 const keyByCode: Partial<Record<ApiErrorCode, string>> = {
   WRONG_CREDENTIALS: 'auth.errors.wrongCredentials',
   PHONE_TAKEN: 'auth.errors.phoneTaken',
+  DEVICE_LIMIT: 'auth.errors.deviceLimit',
   VALIDATION_ERROR: 'errors.validation',
   RATE_LIMITED: 'errors.rateLimited',
   SUBSCRIPTION_REQUIRED: 'errors.subscriptionRequired',
@@ -23,7 +24,11 @@ const keyByCode: Partial<Record<ApiErrorCode, string>> = {
 export function errorMessageKey(error: unknown): string {
   if (error instanceof WrongCredentialsError) return 'auth.errors.wrongCredentials';
   // Paused for late payment (not the Restaurant Plus check).
-  if (error instanceof ApiError && error.code === 'SUBSCRIPTION_REQUIRED' && error.details?.access) {
+  if (
+    error instanceof ApiError &&
+    error.code === 'SUBSCRIPTION_REQUIRED' &&
+    error.details?.access
+  ) {
     return 'business.access.blocked';
   }
   if (error instanceof ApiError) return keyByCode[error.code] ?? 'common.somethingWrong';

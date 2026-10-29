@@ -24,7 +24,12 @@ export interface PaymentInfo {
   accountName: string;
   /** Smart Verify's telebirr, when it accepts telebirr payments. */
   telebirr: { number: string; name: string } | null;
-  prices: { normal: { monthly: number; quarterly: number }; restaurant: { monthly: number } };
+  prices: {
+    normal: { monthly: number; quarterly: number };
+    /** Missing from older servers (and the mock). */
+    normal_multi?: { monthly: number };
+    restaurant: { monthly: number };
+  };
 }
 
 /** GET /subscription/payment-info — owner only. */

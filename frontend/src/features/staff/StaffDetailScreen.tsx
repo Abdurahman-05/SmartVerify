@@ -31,6 +31,8 @@ import {
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
+import { useRoleLabel, useWorkersOnly } from './roleLabel';
+
 import { ActivePill, RolePill } from './StaffScreen';
 
 const STAFF_PIN_DIGITS = 4;
@@ -75,7 +77,13 @@ function StaffForm({ member }: { member: StaffMember }) {
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/staff'));
   const refresh = () => queryClient.invalidateQueries({ queryKey: staffKey });
 
-  const roles: StaffRole[] = isOwner ? ['waiter', 'chef', 'manager'] : ['waiter', 'chef'];
+  const workersOnly = useWorkersOnly();
+  const roleLabel = useRoleLabel();
+  const roles: StaffRole[] = workersOnly
+    ? ['waiter']
+    : isOwner
+      ? ['waiter', 'chef', 'manager']
+      : ['waiter', 'chef'];
 
   const { control, handleSubmit, formState } = useForm<Values>({
     resolver: zodResolver(schema),
@@ -209,7 +217,7 @@ function StaffForm({ member }: { member: StaffMember }) {
                     {roles.map((value) => (
                       <Pill
                         key={value}
-                        label={t(`roles.${value}`)}
+                        label={roleLabel(value)}
                         selected={field.value === value}
                         onPress={() => {
                           setSaved(false);
@@ -223,7 +231,7 @@ function StaffForm({ member }: { member: StaffMember }) {
             </View>
           </View>
 
-          {role === 'waiter' ? (
+          {role === 'waiter' && !workersOnly ? (
             <View className="mx-4 mt-3 rounded-[20px] border-[1.5px] border-border bg-surface px-4 py-0.5">
               <Text font="bold" tone="muted" className="pt-2.5 text-[15px]">
                 {t('staff.permissions')}

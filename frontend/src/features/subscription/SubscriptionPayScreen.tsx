@@ -26,6 +26,8 @@ import { useSession, type BillingPeriod, type Plan } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
+import { normalMultiMonthlyEtb } from './plans';
+
 /** Banks a plan can be paid from; each is checked with its own bank's receipt. */
 const SENDER_BANKS = ['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR'] as const;
 type Method = (typeof SENDER_BANKS)[number];
@@ -67,9 +69,10 @@ export default function SubscriptionPayScreen() {
   const [payKey] = useState(newIdempotencyKey);
   const [method, setMethod] = useState<Method>('CBE');
 
-  const plan: Plan = params.plan === 'restaurant' ? 'restaurant' : 'normal';
+  const plan: Plan =
+    params.plan === 'restaurant' || params.plan === 'normal_multi' ? params.plan : 'normal';
   const period: BillingPeriod =
-    plan === 'restaurant' ? 'monthly' : params.period === 'quarterly' ? 'quarterly' : 'monthly';
+    plan === 'normal' && params.period === 'quarterly' ? 'quarterly' : 'monthly';
 
   const info = useQuery({ queryKey: ['subscription-payment-info'], queryFn: getPaymentInfo });
 
@@ -117,7 +120,9 @@ export default function SubscriptionPayScreen() {
   const price = payTo
     ? plan === 'restaurant'
       ? payTo.prices.restaurant.monthly
-      : payTo.prices.normal[period]
+      : plan === 'normal_multi'
+        ? (payTo.prices.normal_multi?.monthly ?? normalMultiMonthlyEtb)
+        : payTo.prices.normal[period]
     : 0;
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/subscription'));
 
