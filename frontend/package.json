@@ -64,6 +64,8 @@
   "scripts": {
     "dev": "expo start",
     "start": "expo start",
+    "start:normal": "node scripts/start-variant.js normal",
+    "start:restaurant": "node scripts/start-variant.js restaurant",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
