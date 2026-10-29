@@ -82,9 +82,11 @@ export const dashenParser: ReceiptParser = {
     const date = addisDate(get('transaction date'));
     const amount = /ETB\s*([\d,]+(?:\.\d+)?)/i.exec(get('transaction amount'));
     const receiverName = get('receiver name');
-    const receiverAccount = get('receiver account number').replace(/\s/g, '');
+    // A Telebirr transfer shows the wallet phone as "+251******175".
+    const receiverAccount = get('receiver account number').replace(/[\s+]/g, '');
     if (!/^[A-Z0-9]{10,24}$/.test(reference) || !date || !amount?.[1]) return null;
     if (!receiverName || !/^\d+\*+\d+$/.test(receiverAccount)) return null;
+    const toTelebirr = /telebirr/i.test(`${get('service type')} ${get('narrative')}`);
     const value = Number(amount[1].replace(/,/g, ''));
     if (!Number.isFinite(value)) return null;
 
@@ -98,7 +100,7 @@ export const dashenParser: ReceiptParser = {
       date,
       reference,
       status: 'COMPLETED',
-      transfer: 'masked_account',
+      transfer: toTelebirr ? 'wallet' : 'masked_account',
       reason: get('narrative') || get('service type'),
       destinationAccount: '',
       // Which bank received it; Dashen to Dashen says "Dashen Bank".

@@ -143,12 +143,16 @@ function sameMaskedAccount(printed: string, saved: string) {
   return saved.length === printed.length && saved.startsWith(m[1]) && saved.endsWith(m[3]);
 }
 
-/** A phone as Telebirr prints it (2519****8175) against a saved 09xxxxxxxx / 07xxxxxxxx. */
+/**
+ * A masked phone against a saved 09xxxxxxxx / 07xxxxxxxx: the shown digits at the start and end
+ * must match (Telebirr prints 2519****8175, Dashen's Telebirr transfers 251******175).
+ */
 function samePhone(printed: string, saved: string) {
   const intl = `251${saved.replace(/^0/, '')}`;
   if (!printed.includes('*')) return printed === intl;
+  const m = /^(\d+)\*+(\d{3,})$/.exec(printed);
   return (
-    printed.length >= 8 && intl.startsWith(printed.slice(0, 4)) && intl.endsWith(printed.slice(-4))
+    !!m?.[1] && !!m[2] && printed.length >= 8 && intl.startsWith(m[1]) && intl.endsWith(m[2])
   );
 }
 

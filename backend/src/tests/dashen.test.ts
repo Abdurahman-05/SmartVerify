@@ -145,6 +145,32 @@ describe('POST /verify/dashen', () => {
     }
   });
 
+  it('a transfer to Telebirr is checked against our Telebirr number (251******175)', async () => {
+    const telebirr = await app.prisma.bankAccount.create({
+      data: {
+        businessId: r.businessId,
+        bankCode: 'TEL',
+        accountNumber: '0911223175',
+        last4: '3175',
+        holderName: 'Abebe Coffee Bekele',
+      },
+    });
+    const toWallet = (number: string): [string, string][] => [
+      ['Transfer to Dashen Bank', 'Telebirr Transfer'],
+      ['5555******678', number],
+    ];
+    fetchMock.mockResolvedValueOnce(page(toWallet('+251******175')));
+    expect(
+      (await verify({ reference: 'C65LTWI261110001', expectedAmountEtb: 12 })).json()
+    ).toMatchObject({ status: 'verified', amountEtb: 12 });
+
+    fetchMock.mockResolvedValueOnce(page(toWallet('+251******999')));
+    expect(
+      (await verify({ reference: 'C65LTWI261110001', expectedAmountEtb: 12 })).json()
+    ).toMatchObject({ status: 'not_matching', reasons: ['WRONG_RECEIVER'] });
+    await app.prisma.bankAccount.delete({ where: { id: telebirr.id } });
+  });
+
   it('an unknown FT Ref is NOT_FOUND (saved as a failed try); a bad one is refused', async () => {
     // Dashen answers 400 "Transaction not found"; the fetcher turns that into NOT_FOUND.
     fetchMock.mockRejectedValueOnce(new ReceiptFetchError('NOT_FOUND'));
