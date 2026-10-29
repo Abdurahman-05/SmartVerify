@@ -41,8 +41,9 @@ export default function TabsLayout() {
   const { t } = useTranslation();
   const role = useSession((s) => s.user?.role);
   const isChef = role === 'chef';
-  // Waiters get their four everyday places; owner and manager keep Home / Verify / History.
-  const isWaiter = role === 'waiter';
+  // Restaurant waiters get their four everyday places; owner, manager and Normal-plan workers
+  // keep Home / Verify / History.
+  const isWaiter = useSession((s) => s.user?.role === 'waiter' && s.user.plan === 'restaurant');
   const forWaiter = (show: boolean) => (show ? {} : { href: null });
   // Manager extras: a tab only while its feature is on (otherwise no tab at all).
   const isManager = role === 'manager';

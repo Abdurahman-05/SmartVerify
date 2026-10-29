@@ -155,7 +155,8 @@
   },
   "plans": {
     "normal": "Normal Verify",
-    "restaurant": "Restaurant Plus"
+    "restaurant": "Restaurant Plus",
+    "normal_multi": "Normal Multi"
   },
   "roles": {
     "owner": "Owner",
@@ -1247,5 +1248,10 @@
         "OTHER": "Other"
       }
     }
+  },
+  "wrongApp": {
+    "title": "This business uses the Restaurant app",
+    "body": "Your business is on Restaurant Plus. Open the ገብቷል Restaurant app and sign in with the same phone and PIN.",
+    "signOut": "Sign out"
   }
 }

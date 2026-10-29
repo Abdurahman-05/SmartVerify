@@ -155,7 +155,8 @@
   },
   "plans": {
     "normal": "Normal Verify",
-    "restaurant": "Restaurant Plus"
+    "restaurant": "Restaurant Plus",
+    "normal_multi": "Normal Multi"
   },
   "roles": {
     "owner": "ባለቤት",
@@ -1247,5 +1248,10 @@
         "OTHER": "ሌላ"
       }
     }
+  },
+  "wrongApp": {
+    "title": "ይህ ንግድ የሬስቶራንት መተግበሪያውን ይጠቀማል",
+    "body": "ንግድዎ Restaurant Plus ላይ ነው። የገብቷል ሬስቶራንት መተግበሪያውን ይክፈቱ እና በተመሳሳይ ስልክና ፒን ይግቡ።",
+    "signOut": "ውጣ"
   }
 }

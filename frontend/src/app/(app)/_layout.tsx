@@ -1,6 +1,8 @@
 import { Stack } from 'expo-router';
 import { useEffect } from 'react';
 
+import { WrongAppScreen } from '@/features/variant/WrongAppScreen';
+import { isNormalApp } from '@/lib/variant';
 import { useFeatures } from '@/store/features';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
@@ -11,6 +13,9 @@ export default function AppLayout() {
   useEffect(() => {
     if (userId) void useFeatures.getState().load();
   }, [userId]);
+  // A Restaurant Plus business uses the Restaurant app.
+  const wrongApp = useSession((s) => isNormalApp && s.user?.plan === 'restaurant');
+  if (wrongApp) return <WrongAppScreen />;
 
   return (
     <Stack

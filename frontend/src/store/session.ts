@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { useStaff } from '@/features/staff/store';
 import { useFeatures } from '@/store/features';
 
-export type Plan = 'normal' | 'restaurant';
+export type Plan = 'normal' | 'normal_multi' | 'restaurant';
 export type Role = 'owner' | 'manager' | 'waiter' | 'chef';
 
 /**

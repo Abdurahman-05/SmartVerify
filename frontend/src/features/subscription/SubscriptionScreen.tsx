@@ -10,6 +10,7 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
+import { isNormalApp } from '@/lib/variant';
 import { useSession, type BillingPeriod, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
@@ -228,70 +229,72 @@ export default function SubscriptionScreen() {
             </View>
           </View>
 
-          <View className="mx-4 mt-3 rounded-card border-[2.5px] border-primary bg-surface p-3.5">
-            <View className="flex-row items-center justify-between">
-              <Text font="heading" className="text-xl">
-                {t('plans.restaurant')}
-              </Text>
-              <View className="rounded-xl bg-primary px-2.5 py-[3px]">
-                <Text font="bold" tone="inverse" className="text-sm">
-                  {t('subscription.pro')}
+          {isNormalApp ? null : (
+            <View className="mx-4 mt-3 rounded-card border-[2.5px] border-primary bg-surface p-3.5">
+              <View className="flex-row items-center justify-between">
+                <Text font="heading" className="text-xl">
+                  {t('plans.restaurant')}
                 </Text>
-              </View>
-            </View>
-            <Text tone="muted" className="mt-0.5 text-[15px]">
-              {t('subscription.restaurantSubtitle')}
-            </Text>
-            <View className="mt-3 flex-row flex-wrap gap-y-2">
-              {restaurantFeatureKeys.map((key) => (
-                <View key={key} className="w-1/2 flex-row items-center gap-1.5 pr-2">
-                  <Check size={18} color={brand.primaryText} strokeWidth={3} />
-                  <Text font="semibold" className="flex-1 text-[15px]">
-                    {t(`plan.features.${key}`)}
+                <View className="rounded-xl bg-primary px-2.5 py-[3px]">
+                  <Text font="bold" tone="inverse" className="text-sm">
+                    {t('subscription.pro')}
                   </Text>
                 </View>
-              ))}
-            </View>
-            <View className="mt-3.5 flex-row items-center justify-between gap-3">
-              <View>
-                <Text font="semibold" tone="muted" className="text-sm">
-                  {t('subscription.totalPrice')}
-                </Text>
-                <Text font="heading" className="text-2xl">
-                  <MoneyText value={restaurantMonthlyEtb} showCurrency={false} />{' '}
-                  <Text font="heading" className="text-sm">
-                    {t('plan.perMonth')}
-                  </Text>
-                </Text>
               </View>
-              <Pressable
-                onPress={() => choose('restaurant', 'monthly')}
-                disabled={isCurrent('restaurant', 'monthly')}
-                accessibilityRole="button"
-                accessibilityLabel={t('subscription.chooseLabel', {
-                  plan: t('plans.restaurant'),
-                  length: t('subscription.oneMonth'),
-                  price: formatMoney(restaurantMonthlyEtb, false),
-                })}
-                accessibilityState={{ disabled: isCurrent('restaurant', 'monthly') }}
-                className={`h-[52px] justify-center rounded-input px-8 ${
-                  isCurrent('restaurant', 'monthly')
-                    ? 'bg-neutralBg'
-                    : 'bg-primary active:opacity-80'
-                }`}
-              >
-                <Text
-                  font="bold"
-                  tone={isCurrent('restaurant', 'monthly') ? 'default' : 'inverse'}
-                  className="text-lg"
+              <Text tone="muted" className="mt-0.5 text-[15px]">
+                {t('subscription.restaurantSubtitle')}
+              </Text>
+              <View className="mt-3 flex-row flex-wrap gap-y-2">
+                {restaurantFeatureKeys.map((key) => (
+                  <View key={key} className="w-1/2 flex-row items-center gap-1.5 pr-2">
+                    <Check size={18} color={brand.primaryText} strokeWidth={3} />
+                    <Text font="semibold" className="flex-1 text-[15px]">
+                      {t(`plan.features.${key}`)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+              <View className="mt-3.5 flex-row items-center justify-between gap-3">
+                <View>
+                  <Text font="semibold" tone="muted" className="text-sm">
+                    {t('subscription.totalPrice')}
+                  </Text>
+                  <Text font="heading" className="text-2xl">
+                    <MoneyText value={restaurantMonthlyEtb} showCurrency={false} />{' '}
+                    <Text font="heading" className="text-sm">
+                      {t('plan.perMonth')}
+                    </Text>
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => choose('restaurant', 'monthly')}
+                  disabled={isCurrent('restaurant', 'monthly')}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('subscription.chooseLabel', {
+                    plan: t('plans.restaurant'),
+                    length: t('subscription.oneMonth'),
+                    price: formatMoney(restaurantMonthlyEtb, false),
+                  })}
+                  accessibilityState={{ disabled: isCurrent('restaurant', 'monthly') }}
+                  className={`h-[52px] justify-center rounded-input px-8 ${
+                    isCurrent('restaurant', 'monthly')
+                      ? 'bg-neutralBg'
+                      : 'bg-primary active:opacity-80'
+                  }`}
                 >
-                  {isCurrent('restaurant', 'monthly')
-                    ? t('subscription.current')
-                    : t('subscription.choose')}
-                </Text>
-              </Pressable>
+                  <Text
+                    font="bold"
+                    tone={isCurrent('restaurant', 'monthly') ? 'default' : 'inverse'}
+                    className="text-lg"
+                  >
+                    {isCurrent('restaurant', 'monthly')
+                      ? t('subscription.current')
+                      : t('subscription.choose')}
+                  </Text>
+                </Pressable>
+              </View>
             </View>
-          </View>
+          )}
         </View>
 
         <Text font="semibold" tone="muted" className="px-4 pt-3 text-center text-sm">

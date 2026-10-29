@@ -15,6 +15,7 @@ import { Text } from '@/components/ui/Text';
 import { errorMessageKey } from '@/lib/errors';
 import { explorePlan } from '@/lib/subscription';
 import { useBrandColors } from '@/store/theme';
+import { isNormalApp } from '@/lib/variant';
 import { useSession, type Plan } from '@/store/session';
 
 import {
@@ -135,39 +136,41 @@ export default function ChoosePlanScreen() {
           </View>
         </View>
 
-        <View className="mx-4 mt-3 rounded-card border-[2.5px] border-primary bg-surface p-3.5">
-          <View className="flex-row flex-wrap items-center justify-between gap-x-2">
-            <Text font="heading" className="text-xl">
-              {t('plans.restaurant')}
-            </Text>
-            <Text font="heading" className="text-xl">
-              <MoneyText value={restaurantMonthlyEtb} showCurrency={false} />{' '}
-              <Text font="heading" className="text-sm">
-                {t('plan.perMonth')}
+        {isNormalApp ? null : (
+          <View className="mx-4 mt-3 rounded-card border-[2.5px] border-primary bg-surface p-3.5">
+            <View className="flex-row flex-wrap items-center justify-between gap-x-2">
+              <Text font="heading" className="text-xl">
+                {t('plans.restaurant')}
               </Text>
-            </Text>
-          </View>
-          <Text tone="muted" className="mt-0.5 text-[15px]">
-            {t('plan.restaurantSubtitle')}
-          </Text>
-          <View className="mt-3 flex-row flex-wrap gap-y-2">
-            {restaurantFeatureKeys.map((key) => (
-              <View key={key} className="w-1/2 flex-row items-center gap-1.5 pr-2">
-                <Check size={18} color={brand.primaryText} strokeWidth={3} />
-                <Text font="semibold" className="flex-1 text-[15px]">
-                  {t(`plan.features.${key}`)}
+              <Text font="heading" className="text-xl">
+                <MoneyText value={restaurantMonthlyEtb} showCurrency={false} />{' '}
+                <Text font="heading" className="text-sm">
+                  {t('plan.perMonth')}
                 </Text>
-              </View>
-            ))}
+              </Text>
+            </View>
+            <Text tone="muted" className="mt-0.5 text-[15px]">
+              {t('plan.restaurantSubtitle')}
+            </Text>
+            <View className="mt-3 flex-row flex-wrap gap-y-2">
+              {restaurantFeatureKeys.map((key) => (
+                <View key={key} className="w-1/2 flex-row items-center gap-1.5 pr-2">
+                  <Check size={18} color={brand.primaryText} strokeWidth={3} />
+                  <Text font="semibold" className="flex-1 text-[15px]">
+                    {t(`plan.features.${key}`)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+            <View className="mt-3">
+              <Button
+                label={t('plan.exploreRestaurant')}
+                size="md"
+                onPress={() => explore('restaurant')}
+              />
+            </View>
           </View>
-          <View className="mt-3">
-            <Button
-              label={t('plan.exploreRestaurant')}
-              size="md"
-              onPress={() => explore('restaurant')}
-            />
-          </View>
-        </View>
+        )}
 
         <View className="min-h-6 flex-1" />
 

@@ -28,12 +28,15 @@ import { signOut as signOutRequest } from '@/lib/auth';
 import { formatPhone } from '@/lib/format';
 import { queryClient } from '@/lib/queryClient';
 import { explorePlan } from '@/lib/subscription';
+import { isNormalApp } from '@/lib/variant';
 import { useSession, type Plan, type Role, type SessionUser } from '@/store/session';
 
 import { ThemeSwatches } from './ThemeSwatches';
 
 const roles: Role[] = ['owner', 'manager', 'waiter', 'chef'];
-const plans: Plan[] = ['normal', 'restaurant'];
+const plans: Plan[] = isNormalApp
+  ? ['normal', 'normal_multi']
+  : ['normal', 'normal_multi', 'restaurant'];
 
 function HeaderPill({ label }: { label: string }) {
   return (
