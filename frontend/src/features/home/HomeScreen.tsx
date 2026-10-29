@@ -245,7 +245,7 @@ export default function HomeScreen() {
   const subtitleFor = useActionSubtitle(user?.plan ?? null, tablesWaiting);
 
   if (!user) return <Redirect href="/sign-in" />;
-  if (user.role === 'chef') return <Redirect href="/kitchen" />;
+  if (user.role === 'chef') return <Redirect href="/cook" />;
 
   const actions = getHomeActions(user.plan, user.role);
 

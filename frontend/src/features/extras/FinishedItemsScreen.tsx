@@ -108,7 +108,7 @@ function FinishedItems() {
     onSettled: () => queryClient.invalidateQueries({ queryKey: buyItemsKey }),
   });
 
-  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/kitchen'));
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace('/cook'));
 
   const add = () => {
     Keyboard.dismiss();

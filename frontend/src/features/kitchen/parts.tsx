@@ -79,7 +79,8 @@ export function useOrderSubtitle() {
   return (order: KitchenOrder) => {
     const waiter = t('kitchen.waiter', { name: order.waiterName });
     if (order.type === 'delivery' && order.area) return `${order.area} · ${waiter}`;
-    if (order.type === 'takeaway' && order.customerName) return t('kitchen.forCustomer', { name: order.customerName });
+    if (order.type === 'takeaway' && order.customerName)
+      return t('kitchen.forCustomer', { name: order.customerName });
     return waiter;
   };
 }

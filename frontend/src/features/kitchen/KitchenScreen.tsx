@@ -157,7 +157,7 @@ export default function KitchenScreen() {
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView edges={['top']} className="flex-1 bg-background">
       <ScreenHeader
         title={t('kitchen.title')}
         subtitle={t('kitchen.chef', { name: chefName })}

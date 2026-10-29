@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import {
   ChartColumn,
+  ChefHat,
   Clock,
   House,
   NotebookPen,
@@ -35,6 +36,7 @@ const NewOrderIcon = icon(ReceiptText);
 const ActivityIcon = icon(ChartColumn);
 const BuyListIcon = icon(NotebookPen);
 const MoneyOutIcon = icon(Wallet);
+const KitchenIcon = icon(ChefHat);
 
 export default function TabsLayout() {
   const brand = useBrandColors();
@@ -58,13 +60,11 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: colors.navInactive,
         tabBarLabelStyle: { fontFamily: 'DMSans_700Bold', fontSize: 14 },
         tabBarItemStyle: { paddingTop: 4 },
-        tabBarStyle: isChef
-          ? { display: 'none' }
-          : {
-              backgroundColor: colors.surface,
-              borderTopColor: colors.border,
-              ...(isWaiter && { height: 72, paddingBottom: 10 }),
-            },
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+          ...((isWaiter || isChef) && { height: 72, paddingBottom: 10 }),
+        },
         sceneStyle: { backgroundColor: colors.background },
       }}
     >
@@ -90,15 +90,23 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="home"
-        options={{ title: t('nav.home'), tabBarIcon: HomeIcon, ...forWaiter(!isWaiter) }}
+        options={{ title: t('nav.home'), tabBarIcon: HomeIcon, ...forWaiter(!isWaiter && !isChef) }}
       />
       <Tabs.Screen
         name="verify"
-        options={{ title: t('nav.verify'), tabBarIcon: VerifyIcon, ...forWaiter(!isWaiter) }}
+        options={{
+          title: t('nav.verify'),
+          tabBarIcon: VerifyIcon,
+          ...forWaiter(!isWaiter && !isChef),
+        }}
       />
       <Tabs.Screen
         name="transactions"
-        options={{ title: t('nav.history'), tabBarIcon: HistoryIcon, ...forWaiter(!isWaiter) }}
+        options={{
+          title: t('nav.history'),
+          tabBarIcon: HistoryIcon,
+          ...forWaiter(!isWaiter && !isChef),
+        }}
       />
       <Tabs.Screen
         name="buy-list"
@@ -115,6 +123,10 @@ export default function TabsLayout() {
           tabBarIcon: MoneyOutIcon,
           ...forWaiter(isManager && moneyOut),
         }}
+      />
+      <Tabs.Screen
+        name="cook"
+        options={{ title: t('kitchen.title'), tabBarIcon: KitchenIcon, ...forWaiter(isChef) }}
       />
       <Tabs.Screen name="profile" options={{ title: t('nav.profile'), tabBarIcon: ProfileIcon }} />
     </Tabs>

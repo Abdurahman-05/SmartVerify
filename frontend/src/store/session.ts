@@ -15,7 +15,7 @@ export const homeRouteFor = (
   user: { role: Role; plan: Plan | null; pinIsTemporary?: boolean } | null | undefined
 ): Href => {
   if (user?.pinIsTemporary) return '/change-pin';
-  if (user?.role === 'chef') return '/kitchen';
+  if (user?.role === 'chef') return '/cook';
   if (user?.role === 'owner' && user.plan === null) return '/choose-plan';
   return '/home';
 };

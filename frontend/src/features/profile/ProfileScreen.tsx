@@ -104,7 +104,6 @@ export default function ProfileScreen() {
   };
 
   const isStaff = user.role === 'waiter' || user.role === 'chef';
-  const isChef = user.role === 'chef';
   const canManageStaff = user.role === 'owner' || user.role === 'manager';
 
   const leave = async () => {
@@ -114,15 +113,8 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView edges={isChef ? undefined : ['top']} className="flex-1 bg-background">
-      <ScreenHeader
-        title={t('profile.title')}
-        onBack={
-          isChef
-            ? () => (router.canGoBack() ? router.back() : router.replace('/kitchen'))
-            : undefined
-        }
-      />
+    <SafeAreaView edges={['top']} className="flex-1 bg-background">
+      <ScreenHeader title={t('profile.title')} />
       <ScrollView
         contentContainerStyle={{ paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}

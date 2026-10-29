@@ -32,7 +32,7 @@ export default function KitchenOrderScreen() {
   const { start, ready, failed } = useKitchenActions();
   const now = useNow();
 
-  const backToKitchen = () => (router.canGoBack() ? router.back() : router.replace('/kitchen'));
+  const backToKitchen = () => (router.canGoBack() ? router.back() : router.replace('/cook'));
 
   if (query.isPending || start.isPending || ready.isPending) return <LoadingView />;
   if (query.isError && !query.data && isNetworkError(query.error)) {
