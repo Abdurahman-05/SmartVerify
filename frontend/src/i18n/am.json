@@ -987,8 +987,8 @@
     "short": {
       "reference": "የግብይት መለያ",
       "transactionNumber": "የግብይት ቁጥር",
-      "senderAccount": "የላኪ ሂሳብ የመጨረሻ 8 አሃዞች",
-      "senderLast5": "የላኪ ሂሳብ የመጨረሻ 5 አሃዞች",
+      "senderAccount": "የላኪው ሙሉ ሂሳብ ቁጥር",
+      "senderLast5": "የላኪው ሙሉ ሂሳብ ቁጥር",
       "receiptLink": "የደረሰኝ ሊንክ"
     },
     "scan": {
@@ -1013,7 +1013,8 @@
       "typeHere": "እዚህ ይጻፉ",
       "wrong": "ይህን ቁጥር በደረሰኙ ላይ ያረጋግጡ",
       "check": "አረጋግጥ · {{amount}}",
-      "readAgain": "እንደገና ያንብቡ"
+      "readAgain": "እንደገና ያንብቡ",
+      "fullAccount": "ሙሉ የሂሳብ ቁጥር"
     },
     "qrResult": {
       "title": "የQR ውጤት",

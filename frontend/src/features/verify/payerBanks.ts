@@ -11,7 +11,16 @@ export interface ReceiptField {
   valid: (value: string) => boolean;
   /** Not on the receipt: the user types it (e.g. CBE's receiver account digits). */
   typed?: boolean;
+  /**
+   * The receipt link needs only the last digits of an account: the user types the whole
+   * number (people do not know it from the middle) and the link takes these last digits.
+   */
+  last?: number;
 }
+
+/** The value as the receipt link needs it (the last digits of a typed full account). */
+export const linkValue = (field: ReceiptField | undefined, value: string) =>
+  field?.last ? value.slice(-field.last) : value;
 
 /** A bank the customer paid from. Screens render from `fields`, never per bank. */
 export interface PayerBank {
@@ -58,14 +67,16 @@ export const payerBanks: PayerBank[] = [
       reference,
       {
         // CBE's receipt link is the Transaction ID + the SENDER's account last 8 digits
-        // (checked on a real receipt); receipts show only 4 of them, so the user types them.
+        // (checked on a real receipt); receipts show only 4 of them, so the user types the
+        // full account number and the link takes its last 8.
         key: 'senderAccount',
         input: 'digits',
-        length: 8,
-        sample: '29213267',
+        length: 16,
+        last: 8,
+        sample: '1000429213267',
         typed: true,
         normalize: digits,
-        valid: (v) => /^\d{8}$/.test(v),
+        valid: (v) => /^\d{8,16}$/.test(v),
       },
     ],
     // CBE receipt link: ...?id=FT26283K4Z9P29213267 (reference + sender account last 8).
@@ -119,14 +130,16 @@ export const payerBanks: PayerBank[] = [
     fields: [
       reference,
       {
-        // BOA's receipt id is the FT reference + the SENDER's account last 5 digits.
+        // BOA's receipt id is the FT reference + the SENDER's account last 5 digits: the user
+        // types the full account number and the link takes its last 5.
         key: 'senderLast5',
         input: 'digits',
-        length: 5,
-        sample: '10431',
+        length: 16,
+        last: 5,
+        sample: '91110431',
         typed: true,
         normalize: digits,
-        valid: (v) => /^\d{5}$/.test(v),
+        valid: (v) => /^\d{5,16}$/.test(v),
       },
     ],
     parseQr: () => null,

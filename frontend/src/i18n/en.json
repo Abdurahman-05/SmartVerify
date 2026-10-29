@@ -987,8 +987,8 @@
     "short": {
       "reference": "Transaction ID",
       "transactionNumber": "Transaction number",
-      "senderAccount": "Sender account last 8 digits",
-      "senderLast5": "Sender account last 5 digits",
+      "senderAccount": "Sender's full account number",
+      "senderLast5": "Sender's full account number",
       "receiptLink": "receipt link"
     },
     "scan": {
@@ -1013,7 +1013,8 @@
       "typeHere": "Type it here",
       "wrong": "Check this number on the receipt",
       "check": "Check · {{amount}}",
-      "readAgain": "Read again"
+      "readAgain": "Read again",
+      "fullAccount": "Whole account number"
     },
     "qrResult": {
       "title": "QR result",

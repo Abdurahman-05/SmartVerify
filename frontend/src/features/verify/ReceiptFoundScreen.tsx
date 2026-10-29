@@ -19,7 +19,7 @@ import {
 } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
-import { findPayerBank, type ReceiptField } from './payerBanks';
+import { findPayerBank, linkValue, type ReceiptField } from './payerBanks';
 import { checkingRoute, useReceiptFlow, type ReceiptValues } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
 
@@ -54,7 +54,8 @@ function MissingValue({
 }) {
   const { t } = useTranslation();
   const label = t('verifyBank.found.typeIt', { field: t(`verifyBank.short.${field.key}`) });
-  const wrong = value.length > 0 && !field.valid(value) && value.length >= (field.length ?? 8);
+  const wrong =
+    value.length > 0 && !field.valid(value) && value.length >= (field.last ?? field.length ?? 8);
   return (
     <View className="gap-1.5">
       <View className="flex-row items-center gap-1.5">
@@ -76,9 +77,11 @@ function MissingValue({
           autoCorrect={false}
           maxLength={field.length ?? 20}
           placeholder={
-            field.length
-              ? t('verifyBank.found.digits', { count: field.length })
-              : t('verifyBank.found.typeHere')
+            field.last
+              ? t('verifyBank.found.fullAccount')
+              : field.length
+                ? t('verifyBank.found.digits', { count: field.length })
+                : t('verifyBank.found.typeHere')
           }
           placeholderTextColor={colors.placeholder}
           accessibilityLabel={label}
@@ -110,7 +113,8 @@ export default function ReceiptFoundScreen() {
   const ready = bank.fields.every((f) => f.valid(valueOf(f)));
 
   const check = () => {
-    const values = Object.fromEntries(bank.fields.map((f) => [f.key, valueOf(f)]));
+    // A typed full account gives only its last digits to the link.
+    const values = Object.fromEntries(bank.fields.map((f) => [f.key, linkValue(f, valueOf(f))]));
     // CBE: Transaction ID + sender account's last 8 make the receipt link; telebirr: the
     // transaction number does. Both are checked by the server. Other banks: fake check for now.
     setQrData(

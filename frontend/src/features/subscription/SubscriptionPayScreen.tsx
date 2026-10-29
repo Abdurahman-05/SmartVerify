@@ -20,7 +20,7 @@ import { Text } from '@/components/ui/Text';
 import { newIdempotencyKey } from '@/lib/api/idempotency';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { getPaymentInfo, payForPlan } from '@/lib/subscription';
-import { findPayerBank, type ReceiptField } from '@/features/verify/payerBanks';
+import { findPayerBank, linkValue, type ReceiptField } from '@/features/verify/payerBanks';
 import { cbeReceiptLink, isCbeReceiptLink, readReference } from '@/lib/verification';
 import { useSession, type BillingPeriod, type Plan } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
@@ -309,7 +309,14 @@ export default function SubscriptionPayScreen() {
             label={t('subscriptionPay.check')}
             icon={Landmark}
             disabled={!ready}
-            onPress={() => pay.mutate(receiptFor(method, values))}
+            onPress={() =>
+              pay.mutate(
+                receiptFor(
+                  method,
+                  Object.fromEntries(fields.map((f) => [f.key, linkValue(f, values[f.key] ?? '')]))
+                )
+              )
+            }
           />
         </View>
       ) : null}
