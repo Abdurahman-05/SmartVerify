@@ -59,6 +59,42 @@ export const notificationRoutes: FastifyPluginAsyncZod = async (app) => {
     }
   );
 
+  app.put(
+    '/notifications/push-token',
+    {
+      schema: {
+        tags: ['notifications'],
+        security,
+        description:
+          'This phone wants push notifications (when the app is closed) for the signed-in ' +
+          'person. The same token moves to whoever signed in last on that phone; signing out ' +
+          'stops them.',
+        body: z.object({
+          token: z
+            .string()
+            .regex(/^Expo(nent)?PushToken\[[\w-]+\]$/)
+            .describe('ExponentPushToken[...] from the app'),
+          language: z.enum(['en', 'am']).default('en'),
+        }),
+        response: {
+          204: z.null(),
+          400: errorResponseSchema.describe('VALIDATION_ERROR'),
+          401: errorResponseSchema.describe('UNAUTHORIZED'),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { memberId, sessionId } = request.auth;
+      const { token, language } = request.body;
+      await prisma.pushToken.upsert({
+        where: { token },
+        update: { memberId, sessionId, language },
+        create: { token, memberId, sessionId, language },
+      });
+      return reply.status(204).send(null);
+    }
+  );
+
   app.post(
     '/notifications/read',
     {

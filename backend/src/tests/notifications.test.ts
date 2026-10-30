@@ -3,6 +3,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { recordCheck } from '../modules/verification/record-check.js';
 import type { VerifyResponse } from '../modules/verification/verification.schemas.js';
 import { sendScheduledNotifications } from '../services/notifications.js';
+import { pushText } from '../services/push.js';
 import {
   createRestaurant,
   createTestApp,
@@ -162,5 +163,37 @@ describe('notifications', () => {
     expect(owner.items.find((n) => n.type === 'plan_ending')!.data).toMatchObject({ daysLeft: 3 });
     // Managers get the summary, not the plan reminder.
     expect((await inbox(r.manager.token)).items.map((n) => n.type)).toEqual(['daily_summary']);
+  });
+});
+
+describe('push notifications', () => {
+  it('a phone registers its push token; it moves to whoever signs in last on it', async () => {
+    const token = 'ExponentPushToken[abc-123]';
+    const put = (who: string, body: object) =>
+      app.inject({
+        method: 'PUT',
+        url: '/api/v1/notifications/push-token',
+        headers: headers(who),
+        payload: body,
+      });
+    expect((await put(r.chef.token, { token, language: 'am' })).statusCode).toBe(204);
+    expect((await put(r.waiter.token, { token })).statusCode).toBe(204);
+    const rows = await app.prisma.pushToken.findMany();
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ memberId: r.waiter.memberId, language: 'en' });
+    expect((await put(r.waiter.token, { token: 'not-a-token' })).statusCode).toBe(400);
+  });
+
+  it('lock-screen text in English and Amharic', () => {
+    const order = { orderNo: 1002, type: 'dine', table: 2, items: 2 };
+    expect(pushText('new_order', order, 'en')).toEqual({
+      title: 'New order · Table 2',
+      body: '2 item(s) · order #1002',
+    });
+    expect(pushText('order_ready', order, 'am')?.title).toBe('ምግብ ተዘጋጅቷል · ጠረጴዛ 2');
+    expect(
+      pushText('big_payment', { amountEtb: 6500, payerName: 'Kebede', bankCode: 'CBE' }, 'en')
+    ).toMatchObject({ title: 'Big payment: 6,500 ETB' });
+    expect(pushText('something_else', {}, 'en')).toBeNull();
   });
 });

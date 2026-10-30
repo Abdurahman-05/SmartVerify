@@ -3,6 +3,7 @@ import type { FastifyBaseLogger } from 'fastify';
 import type { Prisma, PrismaClient, Role } from '../generated/prisma/client.js';
 import { businessAccess } from './business-access.js';
 import { getSettings } from './platform-settings.js';
+import { sendPush } from './push.js';
 
 export type NotificationType =
   | 'new_order'
@@ -47,9 +48,21 @@ export async function notify(
       },
       select: { id: true },
     });
-    if (members.length === 0) return;
+    // A once-only one already sent to someone is not sent (or pushed) to them again.
+    const already = input.onceKey
+      ? new Set(
+          (
+            await prisma.notification.findMany({
+              where: { onceKey: input.onceKey, memberId: { in: members.map((m) => m.id) } },
+              select: { memberId: true },
+            })
+          ).map((n) => n.memberId)
+        )
+      : new Set<string>();
+    const fresh = members.filter((m) => !already.has(m.id));
+    if (fresh.length === 0) return;
     await prisma.notification.createMany({
-      data: members.map((m) => ({
+      data: fresh.map((m) => ({
         businessId: input.businessId,
         memberId: m.id,
         type: input.type,
@@ -57,6 +70,12 @@ export async function notify(
         onceKey: input.onceKey ?? null,
       })),
       skipDuplicates: true,
+    });
+    // To the lock screen too; not awaited, so a slow push service never slows the action.
+    void sendPush(prisma, log, {
+      memberIds: fresh.map((m) => m.id),
+      type: input.type,
+      data: (input.data ?? {}) as Record<string, unknown>,
     });
   } catch (error) {
     log?.error({ err: error, type: input.type }, 'could not save a notification');

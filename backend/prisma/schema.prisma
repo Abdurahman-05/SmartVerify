@@ -221,6 +221,7 @@ model BusinessMember {
   spendings          Spending[]
   notifications      Notification[]
   ordersCancelled    Order[]           @relation("OrderCancelledBy")
+  pushTokens         PushToken[]
 
   @@index([businessId])
 }
@@ -237,6 +238,8 @@ model Session {
   expiresAt DateTime
   revokedAt DateTime?
   createdAt DateTime       @default(now())
+
+  pushTokens PushToken[]
 
   @@index([userId])
 }
@@ -931,4 +934,22 @@ model Notification {
 
   @@unique([memberId, onceKey])
   @@index([memberId, createdAt])
+}
+
+/// A phone that can get push notifications (Expo push token), for one signed-in session.
+/// Signing out ends the session, so that phone stops getting this person's notifications.
+model PushToken {
+  id        String         @id @default(cuid())
+  /// ExponentPushToken[...]
+  token     String         @unique
+  memberId  String
+  member    BusinessMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  sessionId String
+  session   Session        @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  /// en | am: the language of the push text.
+  language  String         @default("en")
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@index([memberId])
 }

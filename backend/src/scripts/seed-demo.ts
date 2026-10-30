@@ -24,6 +24,9 @@ const MENU = [
   { name: 'Soft drink', priceEtb: 60, kind: 'drinks' as const },
 ];
 
+/** Prints one line (the linter keeps console for warnings and errors). */
+const say = (line: string) => process.stdout.write(line + '\n');
+
 async function main() {
   const env = loadEnv();
   if (env.NODE_ENV === 'production') {
@@ -54,7 +57,7 @@ async function main() {
         where: { user: { phone: { in: PEOPLE.map((p) => p.phone) } }, revokedAt: null },
         data: { revokedAt: new Date() },
       });
-      console.log(`${BUSINESS} already exists: PINs reset.`);
+      say(`${BUSINESS} already exists: PINs reset.`);
     } else {
       const [ownerInfo, ...staff] = PEOPLE;
       if (!ownerInfo) return;
@@ -117,12 +120,12 @@ async function main() {
           },
         });
       });
-      console.log(`${BUSINESS} created (Restaurant Plus, 14-day trial).`);
+      say(`${BUSINESS} created (Restaurant Plus, 14-day trial).`);
     }
 
-    console.log('\nSign in with (phone without +251):');
+    say('\nSign in with (phone without +251):');
     for (const p of PEOPLE) {
-      console.log(`  ${p.role.padEnd(8)} ${p.name.padEnd(13)} phone ${p.phone}   PIN ${p.pin}`);
+      say(`  ${p.role.padEnd(8)} ${p.name.padEnd(13)} phone ${p.phone}   PIN ${p.pin}`);
     }
   } finally {
     await prisma.$disconnect();
