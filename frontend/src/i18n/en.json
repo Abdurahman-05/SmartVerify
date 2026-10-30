@@ -1127,7 +1127,8 @@
     "telebirr": "telebirr",
     "telebirrNumber": "Telebirr transaction number",
     "inReview": "We could not confirm this receipt automatically. The ገብቷል team will check it soon; your plan starts when they approve it.",
-    "chooseBank": "Which bank or wallet will you pay from?"
+    "chooseBank": "Which bank or wallet will you pay from?",
+    "needMore": "No QR code in the picture: type what is missing to finish."
   },
   "business": {
     "access": {

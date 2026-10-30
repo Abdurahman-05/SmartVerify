@@ -21,7 +21,15 @@ import { newIdempotencyKey } from '@/lib/api/idempotency';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { getPaymentInfo, payForPlan } from '@/lib/subscription';
 import { findPayerBank, linkValue, type ReceiptField } from '@/features/verify/payerBanks';
-import { cbeReceiptLink, isCbeReceiptLink, readReference } from '@/lib/verification';
+import {
+  cbeReceiptLink,
+  dashenReferenceFromQr,
+  dashenReferenceOf,
+  isCbeReceiptLink,
+  readReference,
+  telebirrNumberFromQr,
+  telebirrNumberOf,
+} from '@/lib/verification';
 import { useSession, type BillingPeriod, type Plan } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
@@ -31,7 +39,7 @@ import { normalMultiMonthlyEtb } from './plans';
 /** Banks a plan can be paid from; each is checked with its own bank's receipt. */
 const SENDER_BANKS = ['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR'] as const;
 type Method = (typeof SENDER_BANKS)[number];
-type Values = Partial<Record<ReceiptField['key'], string>>;
+type Values = Partial<Record<ReceiptField['key'] | 'qr', string>>;
 
 /** What the server needs for each bank (same references as Verify). */
 function receiptFor(method: Method, v: Values) {
@@ -68,6 +76,8 @@ export default function SubscriptionPayScreen() {
   const [error, setError] = useState<string | null>(null);
   const [payKey] = useState(newIdempotencyKey);
   const [method, setMethod] = useState<Method>('CBE');
+  // After an upload without a usable QR: the boxes for what the picture did not give.
+  const [ask, setAsk] = useState<ReceiptField['key'][]>([]);
 
   const plan: Plan =
     params.plan === 'restaurant' || params.plan === 'normal_multi' ? params.plan : 'normal';
@@ -135,7 +145,34 @@ export default function SubscriptionPayScreen() {
     });
   };
 
-  // The receipt screenshot: its QR gives the whole link; otherwise read the FT reference.
+  const fieldsOf = (m: Method) => findPayerBank(m)?.fields ?? [];
+  const send = (m: Method, v: Values) =>
+    pay.mutate(
+      receiptFor(
+        m,
+        Object.fromEntries(fieldsOf(m).map((f) => [f.key, linkValue(f, v[f.key] ?? '')]))
+      )
+    );
+
+  /** What a receipt QR gives for this bank, or null when it is not one of its receipts. */
+  const fromQr = (data: string): Values | null => {
+    if (method === 'CBE') return isCbeReceiptLink(data) ? { qr: data.trim() } : null;
+    if (method === 'TEL') {
+      const number = telebirrNumberFromQr(data) ?? telebirrNumberOf(data);
+      return number ? { transactionNumber: number } : null;
+    }
+    if (method === 'DAS') {
+      const reference = dashenReferenceFromQr(data) ?? dashenReferenceOf(data);
+      return reference ? { reference } : null;
+    }
+    return null;
+  };
+
+  /**
+   * The receipt screenshot. 1) A receipt QR in it: pay at once. 2) No QR: the server reads the
+   * number (Gemini); then only what is still missing is asked (e.g. the sender's full account
+   * number, of which the link takes the last 8 for CBE or 5 for BOA).
+   */
   const upload = async () => {
     const picked = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
@@ -146,36 +183,43 @@ export default function SubscriptionPayScreen() {
     if (!asset) return;
     setReading(true);
     try {
-      if (method === 'CBE') {
-        const codes = await scanFromURLAsync(asset.uri, ['qr']).catch(() => []);
-        const link = codes.map((c) => c.data.trim()).find(isCbeReceiptLink);
-        if (link) {
-          setReading(false);
-          pay.mutate({ url: link });
-          return;
-        }
+      const codes = await scanFromURLAsync(asset.uri, ['qr']).catch(() => []);
+      const qr = codes.map((c) => fromQr(c.data)).find((v): v is Values => v !== null);
+      if (qr) {
+        setReading(false);
+        if ('qr' in qr && qr.qr) pay.mutate({ url: qr.qr });
+        else send(method, qr);
+        return;
       }
+      let found: Values = {};
       if (asset.base64) {
         const { reference } = await readReference(asset.base64, method);
         if (reference) {
           // BOA's SMS link gives the FT reference and the sender's last 5 together.
           const boa = method === 'BOA' ? /^(FT[A-Z0-9]{10})(\d{5})$/.exec(reference) : null;
-          setValues((v) => ({
-            ...v,
-            ...(method === 'TEL' || method === 'MPE'
+          found =
+            method === 'TEL' || method === 'MPE'
               ? { transactionNumber: reference }
               : method === 'EBR'
                 ? { receiptLink: reference }
                 : boa
                   ? { reference: boa[1], senderLast5: boa[2] }
-                  : { reference }),
-          }));
+                  : { reference };
         }
       }
-    } catch (e) {
-      setError(t(errorMessageKey(e)));
-    } finally {
+      const missing = fieldsOf(method)
+        .filter((f) => !f.valid(found[f.key] ?? ''))
+        .map((f) => f.key);
       setReading(false);
+      if (missing.length === 0) {
+        send(method, found);
+        return;
+      }
+      setValues(found);
+      setAsk(missing);
+    } catch (e) {
+      setReading(false);
+      setError(t(errorMessageKey(e)));
     }
   };
 
@@ -220,6 +264,7 @@ export default function SubscriptionPayScreen() {
                     onPress={() => {
                       setMethod(code);
                       setValues({});
+                      setAsk([]);
                     }}
                     accessibilityRole="radio"
                     accessibilityState={{ selected }}
@@ -283,45 +328,48 @@ export default function SubscriptionPayScreen() {
               size="md"
               onPress={() => void upload()}
             />
-            <Text tone="muted" className="text-sm">
-              {t('subscriptionPay.orType')}
-            </Text>
-            {fields.map((field) => (
-              <TextInput
-                key={field.key}
-                value={values[field.key] ?? ''}
-                onChangeText={(v) =>
-                  setValues((current) => ({ ...current, [field.key]: field.normalize(v) }))
-                }
-                placeholder={field.typed ? t(`verifyBank.short.${field.key}`) : field.sample}
-                placeholderTextColor={colors.placeholder}
-                keyboardType={field.input === 'digits' ? 'number-pad' : 'default'}
-                autoCapitalize={method === 'EBR' ? 'none' : 'characters'}
-                autoCorrect={false}
-                maxLength={field.length ?? 120}
-                accessibilityLabel={t(`verifyBank.fields.${field.key}`)}
-                className="h-14 rounded-input border-[1.5px] border-borderStrong bg-surface px-4 font-heading text-xl text-text"
-              />
-            ))}
+            {ask.length > 0 ? (
+              <Text font="semibold" className="text-[15px] text-warnFg">
+                {t('subscriptionPay.needMore')}
+              </Text>
+            ) : null}
+            {fields
+              .filter((field) => ask.includes(field.key))
+              .map((field) => (
+                <TextInput
+                  key={field.key}
+                  value={values[field.key] ?? ''}
+                  onChangeText={(v) =>
+                    setValues((current) => ({ ...current, [field.key]: field.normalize(v) }))
+                  }
+                  placeholder={
+                    field.last
+                      ? t('verifyBank.found.fullAccount')
+                      : field.typed
+                        ? t(`verifyBank.short.${field.key}`)
+                        : field.sample
+                  }
+                  placeholderTextColor={colors.placeholder}
+                  keyboardType={field.input === 'digits' ? 'number-pad' : 'default'}
+                  autoCapitalize={method === 'EBR' ? 'none' : 'characters'}
+                  autoCorrect={false}
+                  maxLength={field.length ?? 120}
+                  accessibilityLabel={t(`verifyBank.short.${field.key}`)}
+                  className="h-14 rounded-input border-[1.5px] border-borderStrong bg-surface px-4 font-heading text-xl text-text"
+                />
+              ))}
           </View>
         </View>
       )}
 
       <View className="min-h-6 flex-1" />
-      {payTo ? (
+      {payTo && ask.length > 0 ? (
         <View className="px-4 pb-6 pt-2">
           <Button
             label={t('subscriptionPay.check')}
             icon={Landmark}
             disabled={!ready}
-            onPress={() =>
-              pay.mutate(
-                receiptFor(
-                  method,
-                  Object.fromEntries(fields.map((f) => [f.key, linkValue(f, values[f.key] ?? '')]))
-                )
-              )
-            }
+            onPress={() => send(method, values)}
           />
         </View>
       ) : null}
