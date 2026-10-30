@@ -1,7 +1,11 @@
-import { Stack } from 'expo-router';
+import { useQueryClient } from '@tanstack/react-query';
+import * as Notifications from 'expo-notifications';
+import { Stack, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 
 import { WrongAppScreen } from '@/features/variant/WrongAppScreen';
+import { notificationsKey } from '@/lib/notifications';
+import { registerForPush } from '@/lib/push';
 import { isNormalApp } from '@/lib/variant';
 import { useFeatures } from '@/store/features';
 import { useSession } from '@/store/session';
@@ -13,6 +17,25 @@ export default function AppLayout() {
   useEffect(() => {
     if (userId) void useFeatures.getState().load();
   }, [userId]);
+  // Push: this phone gets the signed-in person's alerts when the app is closed.
+  useEffect(() => {
+    if (userId) void registerForPush();
+  }, [userId]);
+  // A push arrives: the Alerts badge updates at once. Tapping one opens Alerts.
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  useEffect(() => {
+    const received = Notifications.addNotificationReceivedListener(() => {
+      void queryClient.invalidateQueries({ queryKey: notificationsKey });
+    });
+    const tapped = Notifications.addNotificationResponseReceivedListener(() => {
+      router.push('/notifications');
+    });
+    return () => {
+      received.remove();
+      tapped.remove();
+    };
+  }, [queryClient, router]);
   // A Restaurant Plus business uses the Restaurant app.
   const wrongApp = useSession((s) => isNormalApp && s.user?.plan === 'restaurant');
   if (wrongApp) return <WrongAppScreen />;
