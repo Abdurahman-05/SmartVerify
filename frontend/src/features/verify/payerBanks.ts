@@ -47,15 +47,6 @@ const reference: ReceiptField = {
   valid: (v) => /^[A-Z0-9]{8,20}$/.test(v),
 };
 
-// Placeholder banks: the real supported banks and their fields replace these with the backend.
-const referenceOnly = (code: string, name: string, shortName: string): PayerBank => ({
-  code,
-  name,
-  shortName,
-  fields: [reference],
-  parseQr: () => null,
-});
-
 export const payerBanks: PayerBank[] = [
   {
     code: 'CBE',
@@ -178,10 +169,8 @@ export const payerBanks: PayerBank[] = [
     ],
     parseQr: () => null,
   },
-  referenceOnly('AWA', 'Awash Bank', 'Awash'),
-  referenceOnly('ZEM', 'Zemen Bank', 'Zemen'),
-  referenceOnly('CBB', 'CBE Birr', 'CBE Birr'),
-  referenceOnly('WEG', 'Wegagen Bank', 'Wegagen'),
+  // Only banks the server can check. Others (Awash, Zemen, CBE Birr, Wegagen…) go through
+  // "Other bank", which says they cannot be checked yet, instead of failing after the photo.
 ];
 
 export const findPayerBank = (code: string | null) => payerBanks.find((b) => b.code === code);
