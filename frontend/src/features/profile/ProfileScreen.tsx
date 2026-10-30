@@ -7,7 +7,6 @@ import {
   Landmark,
   LifeBuoy,
   LogOut,
-  ScanText,
   SlidersHorizontal,
   Star,
   Store,
@@ -15,7 +14,7 @@ import {
   UtensilsCrossed,
 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Alert, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
@@ -23,21 +22,11 @@ import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { ListRow } from '@/components/ui/ListRow';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { Pill } from '@/features/orders/Pill';
 import { signOut as signOutRequest } from '@/lib/auth';
 import { formatPhone } from '@/lib/format';
-import { queryClient } from '@/lib/queryClient';
-import { errorMessageKey } from '@/lib/errors';
-import { explorePlan } from '@/lib/subscription';
-import { isNormalApp } from '@/lib/variant';
-import { useSession, type Plan, type Role, type SessionUser } from '@/store/session';
+import { useSession, type SessionUser } from '@/store/session';
 
 import { ThemeSwatches } from './ThemeSwatches';
-
-const roles: Role[] = ['owner', 'manager', 'waiter', 'chef'];
-const plans: Plan[] = isNormalApp
-  ? ['normal', 'normal_multi']
-  : ['normal', 'normal_multi', 'restaurant'];
 
 function HeaderPill({ label }: { label: string }) {
   return (
@@ -86,25 +75,9 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const user = useSession((s) => s.user);
-  const { signOut, setRole, setPlan } = useSession();
+  const { signOut } = useSession();
 
   if (!user) return null;
-
-  // Dev only. The server decides the plan, so an owner's change is saved there first (like Choose
-  // Plan); otherwise the app would show Restaurant Plus while the server still refuses it.
-  const changePlan = async (plan: Plan) => {
-    if (user.role === 'owner') {
-      try {
-        await explorePlan(plan);
-      } catch (error) {
-        // Say why (no connection, signed out…) instead of silently doing nothing.
-        Alert.alert(t('common.error'), t(errorMessageKey(error)));
-        return;
-      }
-    }
-    setPlan(plan);
-    void queryClient.invalidateQueries();
-  };
 
   const isStaff = user.role === 'waiter' || user.role === 'chef';
   const canManageStaff = user.role === 'owner' || user.role === 'manager';
@@ -198,47 +171,6 @@ export default function ProfileScreen() {
         <View className="mx-4 mt-4">
           <Button label={t('profile.signOut')} icon={LogOut} variant="outline" onPress={leave} />
         </View>
-
-        {__DEV__ ? (
-          <View className="mx-4 mt-5 gap-2 rounded-input border-2 border-dashed border-amber p-3">
-            <Text font="bold" tone="muted" className="text-sm">
-              {t('profile.devTitle')}
-            </Text>
-            <Text font="semibold" className="text-[15px]">
-              {t('profile.devRole')}
-            </Text>
-            <View className="flex-row flex-wrap gap-2">
-              {roles.map((role) => (
-                <Pill
-                  key={role}
-                  label={t(`roles.${role}`)}
-                  selected={user.role === role}
-                  onPress={() => setRole(role)}
-                />
-              ))}
-            </View>
-            <Text font="semibold" className="text-[15px]">
-              {t('profile.devPlan')}
-            </Text>
-            <View className="flex-row flex-wrap gap-2">
-              {plans.map((plan) => (
-                <Pill
-                  key={plan}
-                  label={t(`plans.${plan}`)}
-                  selected={user.plan === plan}
-                  onPress={() => void changePlan(plan)}
-                />
-              ))}
-            </View>
-            <Button
-              label={t('devCompare.open')}
-              icon={ScanText}
-              variant="outline"
-              size="md"
-              onPress={() => router.push('/dev-read-compare')}
-            />
-          </View>
-        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
