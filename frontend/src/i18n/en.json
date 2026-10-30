@@ -461,7 +461,8 @@
     "noAreasHint": "Owner or manager: add them in Profile → Fees & delivery.",
     "search": "Search food by name or number",
     "clearSearch": "Clear search",
-    "noMatch": "No food matches your search."
+    "noMatch": "No food matches your search.",
+    "loadFailed": "Could not open the order page"
   },
   "bills": {
     "title": "Open bills",

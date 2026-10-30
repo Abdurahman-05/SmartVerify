@@ -29,6 +29,7 @@ import { LoadingView } from '@/components/ui/LoadingView';
 import { NoConnection } from '@/components/ui/NoConnection';
 import { OptionSheet } from '@/components/ui/OptionSheet';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { newIdempotencyKey } from '@/lib/api/idempotency';
 import { ApiError } from '@/lib/api/client';
@@ -175,15 +176,24 @@ export default function NewOrderScreen({ addTo }: { addTo?: string } = {}) {
   const tables = tablesQuery.data;
   const fees = feesQuery.data;
   const loadError = menuQuery.error ?? tablesQuery.error ?? feesQuery.error;
-  if (loadError && isNetworkError(loadError)) {
+  const retryLoad = () => {
+    void menuQuery.refetch();
+    void tablesQuery.refetch();
+    void feesQuery.refetch();
+  };
+  if (loadError && isNetworkError(loadError)) return <NoConnection onRetry={retryLoad} />;
+  // Any other answer (not Restaurant Plus, signed out…): say so, never spin forever.
+  if (loadError && (!menu || !tables || !fees)) {
     return (
-      <NoConnection
-        onRetry={() => {
-          void menuQuery.refetch();
-          void tablesQuery.refetch();
-          void feesQuery.refetch();
-        }}
-      />
+      <SafeAreaView className="flex-1 justify-center gap-4 bg-background px-6">
+        <Text font="heading" className="text-center text-xl">
+          {t('orders.loadFailed')}
+        </Text>
+        <Text tone="muted" className="text-center text-base">
+          {t(errorMessageKey(loadError))}
+        </Text>
+        <Button label={t('errors.retry')} onPress={retryLoad} />
+      </SafeAreaView>
     );
   }
   if (!menu || !tables || !fees) return <LoadingView screenTitle={t('orders.title')} />;
