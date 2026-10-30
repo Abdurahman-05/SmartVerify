@@ -19,7 +19,8 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "admin:create": "tsx src/scripts/create-admin.ts",
-    "admin:reset-password": "tsx src/scripts/reset-admin-password.ts"
+    "admin:reset-password": "tsx src/scripts/reset-admin-password.ts",
+    "seed:demo": "tsx src/scripts/seed-demo.ts"
   },
   "dependencies": {
     "@fastify/rate-limit": "^11.2.1",
