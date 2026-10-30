@@ -15,7 +15,7 @@ import {
   UtensilsCrossed,
 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, View } from 'react-native';
+import { Alert, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
@@ -27,6 +27,7 @@ import { Pill } from '@/features/orders/Pill';
 import { signOut as signOutRequest } from '@/lib/auth';
 import { formatPhone } from '@/lib/format';
 import { queryClient } from '@/lib/queryClient';
+import { errorMessageKey } from '@/lib/errors';
 import { explorePlan } from '@/lib/subscription';
 import { isNormalApp } from '@/lib/variant';
 import { useSession, type Plan, type Role, type SessionUser } from '@/store/session';
@@ -95,7 +96,9 @@ export default function ProfileScreen() {
     if (user.role === 'owner') {
       try {
         await explorePlan(plan);
-      } catch {
+      } catch (error) {
+        // Say why (no connection, signed out…) instead of silently doing nothing.
+        Alert.alert(t('common.error'), t(errorMessageKey(error)));
         return;
       }
     }
