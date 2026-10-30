@@ -1335,5 +1335,29 @@
       "title": "Order cancelled · {{label}}",
       "body": "Order #{{number}}: {{reason}}"
     }
+  },
+  "lock": {
+    "createTitle": "Create your passcode",
+    "createBody": "4 digits to open the app quickly, even offline.",
+    "confirmTitle": "Type it again",
+    "confirmBody": "To be sure it is right.",
+    "mismatch": "They did not match. Start again.",
+    "fingerprintTitle": "Use your fingerprint?",
+    "fingerprintBody": "Open the app with your fingerprint. The passcode always works too.",
+    "fingerprintYes": "Use fingerprint",
+    "notNow": "Not now",
+    "welcomeBack": "Welcome back, {{name}}",
+    "enterBody": "Enter your passcode",
+    "wrong_one": "Wrong passcode. {{count}} try left, then you sign in with your phone and PIN.",
+    "wrong_other": "Wrong passcode. {{count}} tries left, then you sign in with your phone and PIN.",
+    "anotherAccount": "Use another account",
+    "useFingerprint": "Use fingerprint",
+    "usePasscode": "Use passcode",
+    "fingerprintPrompt": "Open ገብቷል",
+    "delete": "Delete",
+    "changeTitle": "Change passcode",
+    "changePasscode": "Change passcode",
+    "fingerprintSetting": "Open with fingerprint",
+    "fullSignOut": "Sign out completely"
   }
 }

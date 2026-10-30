@@ -1,5 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 
+import { useAppLock } from '@/lib/appLock';
 import { useSession, type SessionUser } from '@/store/session';
 
 import { setAuthToken } from './client';
@@ -13,17 +14,20 @@ export async function saveToken(token: string, remember: boolean) {
   setAuthToken(token);
   if (remember) await SecureStore.setItemAsync(KEY, token);
   else await SecureStore.deleteItemAsync(KEY);
+  useAppLock.getState().setRemembered(remember);
 }
 
 /** Loads a remembered token into the client. Returns null if there is none. */
 export async function loadToken(): Promise<string | null> {
   const token = await SecureStore.getItemAsync(KEY);
   setAuthToken(token);
+  useAppLock.getState().setRemembered(token !== null);
   return token;
 }
 
 export async function clearToken() {
   setAuthToken(null);
+  useAppLock.getState().setRemembered(false);
   await SecureStore.deleteItemAsync(KEY);
   await SecureStore.deleteItemAsync(USER_KEY);
 }

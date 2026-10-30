@@ -18,7 +18,7 @@ import { useFullFieldFeedback } from '@/hooks/useFullFieldFeedback';
 import { createAccount } from '@/lib/auth';
 import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
-import { useSession } from '@/store/session';
+import { homeRouteFor, useSession } from '@/store/session';
 
 import { AuthHeader } from './AuthHeader';
 import { FormScreen } from '@/components/ui/FormScreen';
@@ -45,7 +45,8 @@ export default function CreateAccountScreen() {
     mutationFn: createAccount,
     onSuccess: (user) => {
       startSession(user);
-      router.replace('/choose-plan');
+      // New owner: passcode first, then Choose plan (no plan yet).
+      router.replace(homeRouteFor(user));
     },
   });
 

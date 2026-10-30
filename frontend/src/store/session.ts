@@ -2,19 +2,23 @@ import type { Href } from 'expo-router';
 import { create } from 'zustand';
 
 import { useStaff } from '@/features/staff/store';
+import { needsPasscode } from '@/lib/appLock';
 import { useFeatures } from '@/store/features';
 
 export type Plan = 'normal' | 'normal_multi' | 'restaurant';
 export type Role = 'owner' | 'manager' | 'waiter' | 'chef';
 
 /**
- * First screen after sign in: someone with a temporary PIN chooses their own first; chefs only
- * see the kitchen; an owner without a plan picks one.
+ * First screen after sign in: someone with a temporary PIN chooses their own first, then makes an
+ * app passcode; chefs only see the kitchen; an owner without a plan picks one.
  */
 export const homeRouteFor = (
-  user: { role: Role; plan: Plan | null; pinIsTemporary?: boolean } | null | undefined
+  user:
+    { userId?: string; role: Role; plan: Plan | null; pinIsTemporary?: boolean } | null | undefined
 ): Href => {
   if (user?.pinIsTemporary) return '/change-pin';
+  // A remembered sign-in gets an app passcode first (opens the app offline afterwards).
+  if (needsPasscode(user?.userId)) return '/set-passcode';
   if (user?.role === 'chef') return '/cook';
   if (user?.role === 'owner' && user.plan === null) return '/choose-plan';
   return '/home';

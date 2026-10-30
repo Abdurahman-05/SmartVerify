@@ -1,6 +1,9 @@
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import {
   Armchair,
+  Fingerprint,
+  Lock,
   KeyRound,
   Bike,
   Globe,
@@ -20,9 +23,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/Button';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { ListRow } from '@/components/ui/ListRow';
+import { Switch } from '@/components/ui/Switch';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { signOut as signOutRequest } from '@/lib/auth';
+import { signOutCompletely } from '@/features/lock/signOut';
+import { biometricAvailable, setBiometric, useAppLock } from '@/lib/appLock';
 import { formatPhone } from '@/lib/format';
 import { useSession, type SessionUser } from '@/store/session';
 
@@ -75,17 +80,27 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const user = useSession((s) => s.user);
-  const { signOut } = useSession();
+  const hasPasscode = useAppLock((s) => s.remembered && s.passcodeUserId === user?.userId);
+  const biometric = useAppLock((s) => s.biometric);
+  const [canFingerprint, setCanFingerprint] = useState(false);
+  useEffect(() => {
+    void biometricAvailable().then(setCanFingerprint);
+  }, []);
 
   if (!user) return null;
 
   const isStaff = user.role === 'waiter' || user.role === 'chef';
   const canManageStaff = user.role === 'owner' || user.role === 'manager';
 
-  const leave = async () => {
-    await signOutRequest();
-    signOut();
+  // Like a bank app: with a passcode, Sign out only locks (the passcode opens it again, offline).
+  // "Use another account" on the lock screen, or "Sign out completely", forgets the phone.
+  const leaveCompletely = async () => {
+    await signOutCompletely();
     router.replace('/sign-in');
+  };
+  const leave = () => {
+    if (hasPasscode) useAppLock.getState().lock(user.userId);
+    else void leaveCompletely();
   };
 
   return (
@@ -157,6 +172,26 @@ export default function ProfileScreen() {
             label={t('profile.changePin')}
             onPress={() => router.push('/change-pin')}
           />
+          {hasPasscode ? (
+            <ListRow
+              icon={Lock}
+              label={t('lock.changePasscode')}
+              onPress={() => router.push({ pathname: '/set-passcode', params: { change: '1' } })}
+            />
+          ) : null}
+          {hasPasscode && canFingerprint ? (
+            <ListRow
+              icon={Fingerprint}
+              label={t('lock.fingerprintSetting')}
+              right={
+                <Switch
+                  value={biometric}
+                  onValueChange={(on) => void setBiometric(on)}
+                  accessibilityLabel={t('lock.fingerprintSetting')}
+                />
+              }
+            />
+          ) : null}
           <ListRow icon={Globe} label={t('profile.language')} right={<LanguageToggle />} />
           <ListRow
             icon={LifeBuoy}
@@ -168,8 +203,16 @@ export default function ProfileScreen() {
 
         <ThemeSwatches />
 
-        <View className="mx-4 mt-4">
+        <View className="mx-4 mt-4 gap-2">
           <Button label={t('profile.signOut')} icon={LogOut} variant="outline" onPress={leave} />
+          {hasPasscode ? (
+            <Button
+              label={t('lock.fullSignOut')}
+              variant="secondary"
+              size="md"
+              onPress={() => void leaveCompletely()}
+            />
+          ) : null}
         </View>
       </ScrollView>
     </SafeAreaView>

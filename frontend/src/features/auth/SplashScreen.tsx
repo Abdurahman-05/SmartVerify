@@ -12,6 +12,7 @@ import { useBrandColors } from '@/store/theme';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { NoConnection } from '@/components/ui/NoConnection';
 import { loadSavedUser } from '@/lib/api/token';
+import { loadAppLock, useAppLock } from '@/lib/appLock';
 import { getMe } from '@/lib/auth';
 import { homeRouteFor, useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
@@ -34,6 +35,7 @@ export default function SplashScreen() {
     let cancelled = false;
     const timer = setTimeout(
       async () => {
+        await loadAppLock();
         const current = useSession.getState().user;
         if (current) {
           router.replace(homeRouteFor(current));
@@ -48,6 +50,7 @@ export default function SplashScreen() {
             return;
           }
           useSession.getState().signIn(user);
+          useAppLock.getState().lock(user.userId);
           router.replace(homeRouteFor(user));
         } catch {
           // No internet: open with the remembered user; the server checks again when online.
@@ -55,6 +58,7 @@ export default function SplashScreen() {
           if (cancelled) return;
           if (saved) {
             useSession.getState().signIn(saved);
+            useAppLock.getState().lock(saved.userId);
             router.replace(homeRouteFor(saved));
             return;
           }

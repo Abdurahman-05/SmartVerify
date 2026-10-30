@@ -9,7 +9,9 @@ const pin = z.string().regex(new RegExp(`^\\d{${PIN_LENGTH}}$`), 'auth.errors.pi
 
 export const signInSchema = z.object({
   phone,
-  pin: z.string().regex(new RegExp(`^\\d{${STAFF_PIN_LENGTH},${PIN_LENGTH}}$`), 'auth.errors.signInPin'),
+  pin: z
+    .string()
+    .regex(new RegExp(`^\\d{${STAFF_PIN_LENGTH},${PIN_LENGTH}}$`), 'auth.errors.signInPin'),
   rememberMe: z.boolean(),
 });
 

@@ -1335,5 +1335,29 @@
       "title": "ትዕዛዝ ተሰርዟል · {{label}}",
       "body": "ትዕዛዝ #{{number}}፦ {{reason}}"
     }
+  },
+  "lock": {
+    "createTitle": "የይለፍ ኮድ ይፍጠሩ",
+    "createBody": "መተግበሪያውን በፍጥነት ለመክፈት 4 አሃዞች፣ ያለ ኢንተርኔትም ጭምር።",
+    "confirmTitle": "እንደገና ያስገቡ",
+    "confirmBody": "ትክክል መሆኑን ለማረጋገጥ።",
+    "mismatch": "አልተመሳሰሉም። እንደገና ይጀምሩ።",
+    "fingerprintTitle": "የጣት አሻራ ይጠቀሙ?",
+    "fingerprintBody": "መተግበሪያውን በጣት አሻራ ይክፈቱ። የይለፍ ኮዱም ሁልጊዜ ይሰራል።",
+    "fingerprintYes": "የጣት አሻራ ተጠቀም",
+    "notNow": "አሁን አይደለም",
+    "welcomeBack": "እንኳን ደህና መጡ፣ {{name}}",
+    "enterBody": "የይለፍ ኮድዎን ያስገቡ",
+    "wrong_one": "የተሳሳተ ኮድ። {{count}} ሙከራ ቀርቷል፣ ከዚያ በስልክና በፒን ይገባሉ።",
+    "wrong_other": "የተሳሳተ ኮድ። {{count}} ሙከራዎች ቀርተዋል፣ ከዚያ በስልክና በፒን ይገባሉ።",
+    "anotherAccount": "ሌላ መለያ ተጠቀም",
+    "useFingerprint": "የጣት አሻራ ተጠቀም",
+    "usePasscode": "ኮድ ተጠቀም",
+    "fingerprintPrompt": "ገብቷልን ክፈት",
+    "delete": "አጥፋ",
+    "changeTitle": "የይለፍ ኮድ ቀይር",
+    "changePasscode": "የይለፍ ኮድ ቀይር",
+    "fingerprintSetting": "በጣት አሻራ ክፈት",
+    "fullSignOut": "ሙሉ በሙሉ ውጣ"
   }
 }
