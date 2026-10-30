@@ -11,27 +11,31 @@
       },
       "env": {
         "EXPO_PUBLIC_API_URL": "https://51-21-74-119.sslip.io/api/v1"
-      }
+      },
+      "environment": "preview"
     },
     "production": {
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_API_URL": "https://51-21-74-119.sslip.io/api/v1"
-      }
+      },
+      "environment": "production"
     },
     "preview-normal": {
       "extends": "preview",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://51-21-74-119.sslip.io/api/v1",
         "EXPO_PUBLIC_APP_VARIANT": "normal"
-      }
+      },
+      "environment": "preview"
     },
     "production-normal": {
       "extends": "production",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://51-21-74-119.sslip.io/api/v1",
         "EXPO_PUBLIC_APP_VARIANT": "normal"
-      }
+      },
+      "environment": "production"
     }
   }
 }

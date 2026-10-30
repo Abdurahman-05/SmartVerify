@@ -42,3 +42,6 @@ example
 # generated native folders
 /ios
 /android
+
+# Firebase (Android push): uploaded to EAS as GOOGLE_SERVICES_JSON
+google-services.json
