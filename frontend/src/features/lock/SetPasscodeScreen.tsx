@@ -74,7 +74,9 @@ export default function SetPasscodeScreen() {
         <Button
           label={t('lock.fingerprintYes')}
           icon={Fingerprint}
-          onPress={() => void setBiometric(true).then(finish)}
+          onPress={() =>
+            void (user ? setBiometric(user.userId, true) : Promise.resolve()).then(finish)
+          }
         />
         <Button label={t('lock.notNow')} variant="outline" onPress={finish} />
       </SafeAreaView>

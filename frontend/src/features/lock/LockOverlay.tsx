@@ -44,7 +44,8 @@ export function LockOverlay() {
 function LockScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const biometric = useAppLock((s) => s.biometric);
+  const userId = useSession((s) => s.user?.userId ?? '');
+  const biometric = useAppLock((s) => s.biometricUsers.includes(userId));
   const tries = useAppLock((s) => s.tries);
   const name = useSession((s) => s.user?.displayName ?? '');
   const [value, setValue] = useState('');
@@ -63,7 +64,7 @@ function LockScreen() {
     void signOutCompletely({ forgetPasscode }).then(() => router.replace('/sign-in'));
 
   const onDone = async (code: string) => {
-    const result = await checkPasscode(code);
+    const result = await checkPasscode(userId, code);
     setValue('');
     if (result === 'blocked') {
       // Too many wrong passcodes: this one is no longer trusted.

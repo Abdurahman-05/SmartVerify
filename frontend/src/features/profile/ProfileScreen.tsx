@@ -89,8 +89,9 @@ export default function ProfileScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const user = useSession((s) => s.user);
-  const hasPasscode = useAppLock((s) => s.remembered && s.passcodeUserId === user?.userId);
-  const biometric = useAppLock((s) => s.biometric);
+  const userId = user?.userId ?? '';
+  const hasPasscode = useAppLock((s) => s.remembered && s.passcodeUsers.includes(userId));
+  const biometric = useAppLock((s) => s.biometricUsers.includes(userId));
   const [canFingerprint, setCanFingerprint] = useState(false);
   const lockAfter = useAppLock((s) => s.lockAfter);
   const [lockSheet, setLockSheet] = useState(false);
@@ -206,7 +207,7 @@ export default function ProfileScreen() {
               right={
                 <Switch
                   value={biometric}
-                  onValueChange={(on) => void setBiometric(on)}
+                  onValueChange={(on) => void setBiometric(userId, on)}
                   accessibilityLabel={t('lock.fingerprintSetting')}
                 />
               }
