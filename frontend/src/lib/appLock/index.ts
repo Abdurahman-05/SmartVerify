@@ -20,9 +20,15 @@ export const MAX_TRIES = 5;
  * Choices for "Ask for passcode after" (ms in the background). No "every time": opening the camera
  * or gallery (scanning or uploading a receipt) also leaves the app for a moment.
  */
-export const LOCK_AFTER_CHOICES = [60_000, 5 * 60_000, 15 * 60_000, 60 * 60_000] as const;
+export const LOCK_AFTER_CHOICES = [
+  60_000,
+  3 * 60_000,
+  5 * 60_000,
+  15 * 60_000,
+  60 * 60_000,
+] as const;
 export type LockAfter = (typeof LOCK_AFTER_CHOICES)[number];
-const DEFAULT_LOCK_AFTER: LockAfter = 60_000;
+const DEFAULT_LOCK_AFTER: LockAfter = 3 * 60_000;
 
 interface Saved {
   userId: string;
