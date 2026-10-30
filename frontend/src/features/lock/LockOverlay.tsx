@@ -59,13 +59,15 @@ function LockScreen() {
     if (biometric) fingerprint();
   }, [biometric, fingerprint]);
 
-  const leave = () => void signOutCompletely().then(() => router.replace('/sign-in'));
+  const leave = (forgetPasscode = false) =>
+    void signOutCompletely({ forgetPasscode }).then(() => router.replace('/sign-in'));
 
   const onDone = async (code: string) => {
     const result = await checkPasscode(code);
     setValue('');
     if (result === 'blocked') {
-      leave();
+      // Too many wrong passcodes: this one is no longer trusted.
+      leave(true);
       return;
     }
     setWrong(result === 'wrong');
@@ -98,7 +100,7 @@ function LockScreen() {
           onFingerprint={biometric ? fingerprint : undefined}
         />
         <Pressable
-          onPress={leave}
+          onPress={() => leave()}
           accessibilityRole="button"
           className="min-h-11 items-center justify-center"
         >
