@@ -63,7 +63,7 @@
   },
   "scripts": {
     "dev": "expo start",
-    "start": "expo start",
+    "start": "node scripts/start-variant.js restaurant",
     "start:normal": "node scripts/start-variant.js normal",
     "start:restaurant": "node scripts/start-variant.js restaurant",
     "reset-project": "node ./scripts/reset-project.js",
