@@ -6,20 +6,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandMark } from '@/components/ui/BrandMark';
 import { Text } from '@/components/ui/Text';
-import { askBiometric, checkPasscode, LOCK_AFTER_MS, MAX_TRIES, useAppLock } from '@/lib/appLock';
+import { askBiometric, checkPasscode, MAX_TRIES, useAppLock } from '@/lib/appLock';
 import { useSession } from '@/store/session';
 
 import { PasscodeDots, PasscodePad } from './PasscodePad';
 import { signOutCompletely } from './signOut';
 
-/** Locks the app again when it comes back after a while in the background. */
+/** Locks the app again when it comes back after the chosen time in the background. */
 function useLockOnReturn() {
   const lastSeen = useRef(0);
   useEffect(() => {
     lastSeen.current = Date.now();
     const sub = AppState.addEventListener('change', (state) => {
       if (state === 'active') {
-        if (Date.now() - lastSeen.current > LOCK_AFTER_MS) {
+        if (Date.now() - lastSeen.current >= useAppLock.getState().lockAfter) {
           useAppLock.getState().lock(useSession.getState().user?.userId);
         }
       } else {

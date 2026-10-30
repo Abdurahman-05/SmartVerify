@@ -4,6 +4,7 @@ import {
   Armchair,
   Fingerprint,
   Lock,
+  Timer,
   KeyRound,
   Bike,
   Globe,
@@ -27,7 +28,15 @@ import { Switch } from '@/components/ui/Switch';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { signOutCompletely } from '@/features/lock/signOut';
-import { biometricAvailable, setBiometric, useAppLock } from '@/lib/appLock';
+import { OptionSheet } from '@/components/ui/OptionSheet';
+import {
+  biometricAvailable,
+  LOCK_AFTER_CHOICES,
+  setBiometric,
+  setLockAfter,
+  useAppLock,
+  type LockAfter,
+} from '@/lib/appLock';
 import { formatPhone } from '@/lib/format';
 import { useSession, type SessionUser } from '@/store/session';
 
@@ -83,6 +92,8 @@ export default function ProfileScreen() {
   const hasPasscode = useAppLock((s) => s.remembered && s.passcodeUserId === user?.userId);
   const biometric = useAppLock((s) => s.biometric);
   const [canFingerprint, setCanFingerprint] = useState(false);
+  const lockAfter = useAppLock((s) => s.lockAfter);
+  const [lockSheet, setLockSheet] = useState(false);
   useEffect(() => {
     void biometricAvailable().then(setCanFingerprint);
   }, []);
@@ -92,16 +103,13 @@ export default function ProfileScreen() {
   const isStaff = user.role === 'waiter' || user.role === 'chef';
   const canManageStaff = user.role === 'owner' || user.role === 'manager';
 
-  // Like a bank app: with a passcode, Sign out only locks (the passcode opens it again, offline).
-  // "Use another account" on the lock screen, or "Sign out completely", forgets the phone.
-  const leaveCompletely = async () => {
+  // Sign out forgets this phone's sign-in (phone + PIN next time); the passcode stays for the
+  // same person. While signed in, the passcode is asked after the chosen time away.
+  const leave = async () => {
     await signOutCompletely();
     router.replace('/sign-in');
   };
-  const leave = () => {
-    if (hasPasscode) useAppLock.getState().lock(user.userId);
-    else void leaveCompletely();
-  };
+  const lockLabel = (ms: LockAfter) => t('lock.after.minutes', { count: ms / 60_000 });
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-background">
@@ -179,6 +187,18 @@ export default function ProfileScreen() {
               onPress={() => router.push({ pathname: '/set-passcode', params: { change: '1' } })}
             />
           ) : null}
+          {hasPasscode ? (
+            <ListRow
+              icon={Timer}
+              label={t('lock.after.label')}
+              right={
+                <Text font="semibold" tone="muted" className="text-[15px]">
+                  {lockLabel(lockAfter)}
+                </Text>
+              }
+              onPress={() => setLockSheet(true)}
+            />
+          ) : null}
           {hasPasscode && canFingerprint ? (
             <ListRow
               icon={Fingerprint}
@@ -204,17 +224,25 @@ export default function ProfileScreen() {
         <ThemeSwatches />
 
         <View className="mx-4 mt-4 gap-2">
-          <Button label={t('profile.signOut')} icon={LogOut} variant="outline" onPress={leave} />
-          {hasPasscode ? (
-            <Button
-              label={t('lock.fullSignOut')}
-              variant="secondary"
-              size="md"
-              onPress={() => void leaveCompletely()}
-            />
-          ) : null}
+          <Button
+            label={t('profile.signOut')}
+            icon={LogOut}
+            variant="outline"
+            onPress={() => void leave()}
+          />
         </View>
       </ScrollView>
+      <OptionSheet
+        visible={lockSheet}
+        title={t('lock.after.label')}
+        options={LOCK_AFTER_CHOICES.map((ms) => ({ value: String(ms), label: lockLabel(ms) }))}
+        selected={String(lockAfter)}
+        onSelect={(value) => {
+          const ms = LOCK_AFTER_CHOICES.find((c) => String(c) === value);
+          if (ms !== undefined) void setLockAfter(ms);
+        }}
+        onClose={() => setLockSheet(false)}
+      />
     </SafeAreaView>
   );
 }

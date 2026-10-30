@@ -1359,6 +1359,10 @@
     "changeTitle": "Change passcode",
     "changePasscode": "Change passcode",
     "fingerprintSetting": "Open with fingerprint",
-    "fullSignOut": "Sign out completely"
+    "after": {
+      "label": "Ask for passcode after",
+      "minutes_one": "{{count}} minute",
+      "minutes_other": "{{count}} minutes"
+    }
   }
 }

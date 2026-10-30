@@ -1359,6 +1359,10 @@
     "changeTitle": "የይለፍ ኮድ ቀይር",
     "changePasscode": "የይለፍ ኮድ ቀይር",
     "fingerprintSetting": "በጣት አሻራ ክፈት",
-    "fullSignOut": "ሙሉ በሙሉ ውጣ"
+    "after": {
+      "label": "የይለፍ ኮድ ከዚህ በኋላ ይጠየቅ",
+      "minutes_one": "{{count}} ደቂቃ",
+      "minutes_other": "{{count}} ደቂቃዎች"
+    }
   }
 }

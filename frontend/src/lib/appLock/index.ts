@@ -11,12 +11,18 @@ import { create } from 'zustand';
 const PASSCODE_KEY = 'smartverify.passcode';
 const BIOMETRIC_KEY = 'smartverify.biometric';
 const TRIES_KEY = 'smartverify.passcodeTries';
+const LOCK_AFTER_KEY = 'smartverify.lockAfter';
 
 export const PASSCODE_LENGTH = 4;
 /** After this many wrong passcodes the phone forgets the account: sign in with phone + PIN. */
 export const MAX_TRIES = 5;
-/** Back from the background after this long: locked again. */
-export const LOCK_AFTER_MS = 60_000;
+/**
+ * Choices for "Ask for passcode after" (ms in the background). No "every time": opening the camera
+ * or gallery (scanning or uploading a receipt) also leaves the app for a moment.
+ */
+export const LOCK_AFTER_CHOICES = [60_000, 5 * 60_000, 15 * 60_000, 60 * 60_000] as const;
+export type LockAfter = (typeof LOCK_AFTER_CHOICES)[number];
+const DEFAULT_LOCK_AFTER: LockAfter = 60_000;
 
 interface Saved {
   userId: string;
@@ -31,6 +37,8 @@ interface AppLockState {
   /** Whose passcode is set here (another person signing in makes their own). */
   passcodeUserId: string | null;
   biometric: boolean;
+  /** Back from the background after this long: locked again. */
+  lockAfter: LockAfter;
   locked: boolean;
   tries: number;
   setRemembered: (remembered: boolean) => void;
@@ -44,6 +52,7 @@ export const useAppLock = create<AppLockState>((set) => ({
   remembered: false,
   passcodeUserId: null,
   biometric: false,
+  lockAfter: DEFAULT_LOCK_AFTER,
   locked: false,
   tries: 0,
   setRemembered: (remembered) => set({ remembered }),
@@ -63,13 +72,16 @@ async function readSaved(): Promise<Saved | null> {
 
 /** Reads the lock settings once, at start. */
 export async function loadAppLock() {
-  const [saved, biometric, tries] = await Promise.all([
+  const [saved, biometric, tries, lockAfter] = await Promise.all([
     readSaved(),
     SecureStore.getItemAsync(BIOMETRIC_KEY).catch(() => null),
     SecureStore.getItemAsync(TRIES_KEY).catch(() => null),
+    SecureStore.getItemAsync(LOCK_AFTER_KEY).catch(() => null),
   ]);
+  const chosen = LOCK_AFTER_CHOICES.find((c) => String(c) === lockAfter);
   useAppLock.setState({
     loaded: true,
+    lockAfter: chosen ?? DEFAULT_LOCK_AFTER,
     passcodeUserId: saved?.userId ?? null,
     biometric: biometric === '1' && saved !== null,
     tries: Number(tries) || 0,
@@ -132,6 +144,11 @@ export async function biometricAvailable() {
   } catch {
     return false;
   }
+}
+
+export async function setLockAfter(ms: LockAfter) {
+  await SecureStore.setItemAsync(LOCK_AFTER_KEY, String(ms));
+  useAppLock.setState({ lockAfter: ms });
 }
 
 export async function setBiometric(on: boolean) {
