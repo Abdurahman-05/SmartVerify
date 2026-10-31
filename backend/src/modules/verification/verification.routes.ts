@@ -355,6 +355,125 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
   );
 
   app.post(
+    '/verify/tip',
+    {
+      preHandler: requireRoles('owner', 'manager', 'waiter'),
+      schema: {
+        tags: ['verification'],
+        security: [{ bearerAuth: [] }],
+        description:
+          'Restaurant app, Normal plan: the customer paid more than asked and the waiter keeps ' +
+          'the extra (or part of it) as a tip. Only for a receipt this person verified, at most ' +
+          'the extra (received − expected). tipEtb 0 = it was given back. Setting it again ' +
+          'replaces it.',
+        body: z.object({
+          bankCode: z.string().min(2).max(5),
+          reference: z.string().min(1).max(120),
+          tipEtb: z.number().int().nonnegative(),
+        }),
+        response: {
+          200: z.object({ tipEtb: z.number().int() }),
+          400: errorResponseSchema.describe('VALIDATION_ERROR (more than the extra)'),
+          401: errorResponseSchema.describe('UNAUTHORIZED'),
+          403: errorResponseSchema.describe('FORBIDDEN'),
+          404: errorResponseSchema.describe('NOT_FOUND (not your verified receipt)'),
+        },
+      },
+    },
+    async (request) => {
+      const { businessId, memberId } = request.auth;
+      const { bankCode, reference, tipEtb } = request.body;
+      const row = await app.prisma.transaction.findFirst({
+        where: { businessId, memberId, bankCode, reference, status: 'verified', billId: null },
+        select: { id: true, expectedAmount: true, receivedAmount: true },
+      });
+      if (!row) throw new AppError('NOT_FOUND');
+      if (tipEtb > row.receivedAmount - row.expectedAmount) {
+        throw new AppError('VALIDATION_ERROR', { reason: 'tipTooHigh' });
+      }
+      await app.prisma.transaction.update({ where: { id: row.id }, data: { tipEtb } });
+      return { tipEtb };
+    }
+  );
+
+  app.get(
+    '/verify/tips',
+    {
+      preHandler: requireRoles('owner', 'manager', 'waiter'),
+      schema: {
+        tags: ['verification'],
+        security: [{ bearerAuth: [] }],
+        description:
+          'Tips kept from overpaid receipts in the period, newest first (at most 500), with the ' +
+          'total per waiter. Waiters only get their own.',
+        querystring: z.object({ period: periodSchema }),
+        response: {
+          200: z.object({
+            totalEtb: z.number().int(),
+            byWaiter: z.array(
+              z.object({ name: z.string(), totalEtb: z.number().int(), count: z.number().int() })
+            ),
+            items: z.array(
+              z.object({
+                id: z.string(),
+                tipEtb: z.number().int(),
+                amountEtb: z.number().int(),
+                waiterName: z.string(),
+                bankCode: z.string(),
+                createdAt: z.string(),
+              })
+            ),
+          }),
+          401: errorResponseSchema.describe('UNAUTHORIZED'),
+          403: errorResponseSchema.describe('FORBIDDEN'),
+        },
+      },
+    },
+    async (request) => {
+      const { businessId, memberId, role } = request.auth;
+      const rows = await app.prisma.transaction.findMany({
+        where: {
+          businessId,
+          status: 'verified',
+          tipEtb: { gt: 0 },
+          createdAt: { gte: periodStart(request.query.period) },
+          ...(role === 'waiter' && { memberId }),
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 500,
+        select: {
+          id: true,
+          tipEtb: true,
+          receivedAmount: true,
+          bankCode: true,
+          createdAt: true,
+          member: { select: { user: { select: { name: true } } } },
+        },
+      });
+      const byWaiter = new Map<string, { name: string; totalEtb: number; count: number }>();
+      for (const r of rows) {
+        const name = r.member.user.name;
+        const entry = byWaiter.get(name) ?? { name, totalEtb: 0, count: 0 };
+        entry.totalEtb += r.tipEtb;
+        entry.count += 1;
+        byWaiter.set(name, entry);
+      }
+      return {
+        totalEtb: rows.reduce((sum, r) => sum + r.tipEtb, 0),
+        byWaiter: [...byWaiter.values()].sort((a, b) => b.totalEtb - a.totalEtb),
+        items: rows.map((r) => ({
+          id: r.id,
+          tipEtb: r.tipEtb,
+          amountEtb: r.receivedAmount,
+          waiterName: r.member.user.name,
+          bankCode: r.bankCode,
+          createdAt: r.createdAt.toISOString(),
+        })),
+      };
+    }
+  );
+
+  app.post(
     '/verify/read-reference',
     {
       preHandler: requireRoles('owner', 'manager', 'waiter'),

@@ -328,6 +328,8 @@ model Transaction {
   registeredName String?
   expectedAmount Int
   receivedAmount Int                @default(0)
+  /// Restaurant app, Normal plan: the part of an overpayment the waiter kept as a tip.
+  tipEtb         Int                @default(0)
   status         TransactionStatus
   reason         TransactionReason?
   /// For duplicates: the first verified transaction with this reference.
