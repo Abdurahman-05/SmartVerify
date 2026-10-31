@@ -367,7 +367,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
           'the extra (received − expected). tipEtb 0 = it was given back. Setting it again ' +
           'replaces it.',
         body: z.object({
-          bankCode: z.string().min(2).max(5),
+          bankCode: z.string().min(2).max(5).optional(),
           reference: z.string().min(1).max(120),
           tipEtb: z.number().int().nonnegative(),
         }),
@@ -384,7 +384,14 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
       const { businessId, memberId } = request.auth;
       const { bankCode, reference, tipEtb } = request.body;
       const row = await app.prisma.transaction.findFirst({
-        where: { businessId, memberId, bankCode, reference, status: 'verified', billId: null },
+        where: {
+          businessId,
+          memberId,
+          reference,
+          status: 'verified',
+          billId: null,
+          ...(bankCode && { bankCode }),
+        },
         select: { id: true, expectedAmount: true, receivedAmount: true },
       });
       if (!row) throw new AppError('NOT_FOUND');
