@@ -64,7 +64,7 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "dev": "expo start",
+    "dev": "node scripts/start-variant.js restaurant",
     "start": "node scripts/start-variant.js restaurant",
     "start:normal": "node scripts/start-variant.js normal",
     "start:restaurant": "node scripts/start-variant.js restaurant",
