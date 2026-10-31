@@ -1,7 +1,5 @@
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
-import { AndroidImportance } from 'expo-notifications';
 import { Platform } from 'react-native';
 
 import i18n from '@/i18n';
@@ -11,18 +9,39 @@ import { USE_MOCK_NOTIFICATIONS } from '@/lib/notifications';
 /** Android shows our alerts in this channel (sound, heads-up). Same id as the server sends. */
 const CHANNEL_ID = 'alerts';
 
-// A push that arrives while the app is open still shows as a banner with sound.
-Notifications.setNotificationHandler({
-  handleNotification: async () => {
-    await Promise.resolve();
-    return {
-      shouldShowBanner: true,
-      shouldShowList: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-    };
-  },
-});
+/**
+ * Push works only in the installed app. In Expo Go (and on web) expo-notifications is never
+ * loaded: loading it there fails (it needs native parts Expo Go does not give this app).
+ */
+const pushPossible =
+  !USE_MOCK_NOTIFICATIONS &&
+  Platform.OS !== 'web' &&
+  Constants.executionEnvironment !== ExecutionEnvironment.StoreClient;
+
+type NotificationsModule = typeof import('expo-notifications');
+let loaded: NotificationsModule | null = null;
+
+/** expo-notifications, loaded on first use (null where push cannot work). */
+function notifications(): NotificationsModule | null {
+  if (!pushPossible) return null;
+  if (!loaded) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    loaded = require('expo-notifications') as NotificationsModule;
+    // A push that arrives while the app is open still shows as a banner with sound.
+    loaded.setNotificationHandler({
+      handleNotification: async () => {
+        await Promise.resolve();
+        return {
+          shouldShowBanner: true,
+          shouldShowList: true,
+          shouldPlaySound: true,
+          shouldSetBadge: false,
+        };
+      },
+    });
+  }
+  return loaded;
+}
 
 /**
  * Lets this phone get notifications when the app is closed: asks permission once, gets the
@@ -30,14 +49,13 @@ Notifications.setNotificationHandler({
  * push cannot work (Expo Go, emulator, web, permission refused, offline).
  */
 export async function registerForPush(): Promise<void> {
-  if (USE_MOCK_NOTIFICATIONS || Platform.OS === 'web' || !Device.isDevice) return;
-  // Expo Go cannot receive pushes for this app: only the installed app can.
-  if (Constants.executionEnvironment === ExecutionEnvironment.StoreClient) return;
+  const Notifications = notifications();
+  if (!Notifications || !Device.isDevice) return;
   try {
     if (Platform.OS === 'android') {
       await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
         name: i18n.t('notifications.title'),
-        importance: AndroidImportance.HIGH,
+        importance: Notifications.AndroidImportance.HIGH,
         sound: 'default',
         vibrationPattern: [0, 250, 250, 250],
       });
@@ -57,4 +75,19 @@ export async function registerForPush(): Promise<void> {
     // Push is extra: the in-app Alerts tab still works without it.
     if (__DEV__) console.warn('push registration failed', error);
   }
+}
+
+/**
+ * Pushes while the app runs: onReceived when one arrives, onTapped when the person taps one.
+ * Returns the cleanup. Does nothing where push cannot work.
+ */
+export function listenToPushes(onReceived: () => void, onTapped: () => void): () => void {
+  const Notifications = notifications();
+  if (!Notifications) return () => {};
+  const received = Notifications.addNotificationReceivedListener(onReceived);
+  const tapped = Notifications.addNotificationResponseReceivedListener(onTapped);
+  return () => {
+    received.remove();
+    tapped.remove();
+  };
 }

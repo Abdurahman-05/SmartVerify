@@ -1,12 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query';
-import * as Notifications from 'expo-notifications';
 import { Stack, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 
 import { LockOverlay } from '@/features/lock/LockOverlay';
 import { WrongAppScreen } from '@/features/variant/WrongAppScreen';
 import { notificationsKey } from '@/lib/notifications';
-import { registerForPush } from '@/lib/push';
+import { listenToPushes, registerForPush } from '@/lib/push';
 import { isNormalApp } from '@/lib/variant';
 import { useFeatures } from '@/store/features';
 import { useSession } from '@/store/session';
@@ -25,18 +24,14 @@ export default function AppLayout() {
   // A push arrives: the Alerts badge updates at once. Tapping one opens Alerts.
   const queryClient = useQueryClient();
   const router = useRouter();
-  useEffect(() => {
-    const received = Notifications.addNotificationReceivedListener(() => {
-      void queryClient.invalidateQueries({ queryKey: notificationsKey });
-    });
-    const tapped = Notifications.addNotificationResponseReceivedListener(() => {
-      router.push('/notifications');
-    });
-    return () => {
-      received.remove();
-      tapped.remove();
-    };
-  }, [queryClient, router]);
+  useEffect(
+    () =>
+      listenToPushes(
+        () => void queryClient.invalidateQueries({ queryKey: notificationsKey }),
+        () => router.push('/notifications')
+      ),
+    [queryClient, router]
+  );
   // A restaurant business (Restaurant Plus or Normal Verify) uses the Restaurant app.
   const wrongApp = useSession(
     (s) => isNormalApp && (s.user?.plan === 'restaurant' || s.user?.plan === 'restaurant_normal')
