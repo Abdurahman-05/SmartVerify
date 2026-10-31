@@ -23,7 +23,7 @@ export const forgetSettings = () => {
   cached = null;
 };
 
-/** Price and length of a plan. Normal Multi and Restaurant Plus are monthly only. */
+/** Price and length of a plan. Normal and the Restaurant app's Normal Verify: 1 or 3 months; Normal Multi and Restaurant Plus: monthly only. */
 export function planPricing(
   settings: PlatformSettings,
   plan: Plan,
@@ -31,6 +31,11 @@ export function planPricing(
 ): { priceEtb: number; months: number } | null {
   if (plan === 'restaurant') {
     return period === 'monthly' ? { priceEtb: settings.priceRestaurantMonthly, months: 1 } : null;
+  }
+  if (plan === 'restaurant_normal') {
+    return period === 'monthly'
+      ? { priceEtb: settings.priceRestaurantNormalMonthly, months: 1 }
+      : { priceEtb: settings.priceRestaurantNormalQuarterly, months: 3 };
   }
   if (plan === 'normal_multi') {
     return period === 'monthly' ? { priceEtb: settings.priceNormalMultiMonthly, months: 1 } : null;

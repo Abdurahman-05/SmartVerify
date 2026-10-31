@@ -16,6 +16,8 @@ const settings: PlatformSettings = {
   priceNormalMonthly: 700,
   priceNormalQuarterly: 1500,
   priceNormalMultiMonthly: 1500,
+  priceRestaurantNormalMonthly: 1000,
+  priceRestaurantNormalQuarterly: 1500,
   priceRestaurantMonthly: 4000,
   updatedAt: new Date(),
 };

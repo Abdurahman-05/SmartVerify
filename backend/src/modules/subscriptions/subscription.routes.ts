@@ -52,6 +52,9 @@ const errors = {
   403: errorResponseSchema.describe('FORBIDDEN (owner only)'),
 };
 
+/** Plans that can be paid for 3 months at once. */
+const hasQuarterly = (plan: Plan) => plan === 'normal' || plan === 'restaurant_normal';
+
 /** The business plan. Owner only: staff share the owner's plan. */
 export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
   const { prisma, env } = app;
@@ -114,7 +117,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
       if (!allowUnpaid) throw new AppError('PAYMENT_NOT_CONFIGURED');
       const { businessId } = request.auth;
       const { plan } = request.body;
-      const period: BillingPeriod = plan === 'normal' ? request.body.period : 'monthly';
+      const period: BillingPeriod = hasQuarterly(plan) ? request.body.period : 'monthly';
       const pricing = planPricing(await getSettings(prisma), plan, period);
       if (!pricing) throw new AppError('VALIDATION_ERROR');
       const idempotencyKey = request.headers['idempotency-key'];
@@ -191,6 +194,10 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
             prices: z.object({
               normal: z.object({ monthly: z.number().int(), quarterly: z.number().int() }),
               normal_multi: z.object({ monthly: z.number().int() }),
+              restaurant_normal: z.object({
+                monthly: z.number().int(),
+                quarterly: z.number().int(),
+              }),
               restaurant: z.object({ monthly: z.number().int() }),
             }),
           }),
@@ -212,6 +219,10 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
             quarterly: settings.priceNormalQuarterly,
           },
           normal_multi: { monthly: settings.priceNormalMultiMonthly },
+          restaurant_normal: {
+            monthly: settings.priceRestaurantNormalMonthly,
+            quarterly: settings.priceRestaurantNormalQuarterly,
+          },
           restaurant: { monthly: settings.priceRestaurantMonthly },
         },
       };
@@ -292,7 +303,7 @@ export const subscriptionRoutes: FastifyPluginAsyncZod = async (app) => {
         throw new AppError('VALIDATION_ERROR', { reason: 'reference' });
       }
       if (telebirrNumber && !payToTelebirr) throw new AppError('PAYMENT_NOT_CONFIGURED');
-      const period: BillingPeriod = plan === 'normal' ? request.body.period : 'monthly';
+      const period: BillingPeriod = hasQuarterly(plan) ? request.body.period : 'monthly';
       const pricing = planPricing(await getSettings(prisma), plan, period);
       if (!pricing) throw new AppError('VALIDATION_ERROR');
       const idempotencyKey = request.headers['idempotency-key'];

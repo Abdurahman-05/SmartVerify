@@ -31,7 +31,7 @@ const DAY_MS = 24 * 60 * 60_000;
 /** Tells Excel the CSV is UTF-8 (Amharic names). */
 const EXCEL_BOM = String.fromCharCode(0xfeff);
 const STATUSES = ['trial', 'active', 'grace', 'restricted', 'suspended'] as const;
-const planSchema = z.enum(['normal', 'normal_multi', 'restaurant']);
+const planSchema = z.enum(['normal', 'normal_multi', 'restaurant_normal', 'restaurant']);
 const periodSchema = z.enum(['monthly', 'quarterly']);
 const idParams = z.object({ id: z.string().min(1).max(40) });
 const iso = (d: Date | null | undefined) => (d ? d.toISOString() : null);
@@ -423,6 +423,8 @@ export const adminConsoleRoutes: FastifyPluginAsyncZod = async (app) => {
           normalMonthly: settings.priceNormalMonthly,
           normalQuarterly: settings.priceNormalQuarterly,
           normalMultiMonthly: settings.priceNormalMultiMonthly,
+          restaurantNormalMonthly: settings.priceRestaurantNormalMonthly,
+          restaurantNormalQuarterly: settings.priceRestaurantNormalQuarterly,
           restaurantMonthly: settings.priceRestaurantMonthly,
         },
         payments: business.subscriptions.map((s) => ({
@@ -548,7 +550,8 @@ export const adminConsoleRoutes: FastifyPluginAsyncZod = async (app) => {
     async (request, reply) => {
       const business = await businessExists(request.params.id);
       const { plan } = request.body;
-      const period = plan === 'normal' ? request.body.period : 'monthly';
+      const period =
+        plan === 'normal' || plan === 'restaurant_normal' ? request.body.period : 'monthly';
       const pricing = planPricing(await getSettings(prisma), plan, period);
       if (!pricing) throw new AppError('VALIDATION_ERROR');
       const sub = await prisma.$transaction((tx) =>
@@ -856,6 +859,8 @@ export const adminConsoleRoutes: FastifyPluginAsyncZod = async (app) => {
     priceNormalMonthly: z.number().int().min(1).max(1_000_000),
     priceNormalQuarterly: z.number().int().min(1).max(1_000_000),
     priceNormalMultiMonthly: z.number().int().min(1).max(1_000_000),
+    priceRestaurantNormalMonthly: z.number().int().min(1).max(1_000_000),
+    priceRestaurantNormalQuarterly: z.number().int().min(1).max(1_000_000),
     priceRestaurantMonthly: z.number().int().min(1).max(1_000_000),
   });
   const settingsOut = (s: Awaited<ReturnType<typeof getSettings>>) => ({
@@ -870,6 +875,8 @@ export const adminConsoleRoutes: FastifyPluginAsyncZod = async (app) => {
     priceNormalMonthly: s.priceNormalMonthly,
     priceNormalQuarterly: s.priceNormalQuarterly,
     priceNormalMultiMonthly: s.priceNormalMultiMonthly,
+    priceRestaurantNormalMonthly: s.priceRestaurantNormalMonthly,
+    priceRestaurantNormalQuarterly: s.priceRestaurantNormalQuarterly,
     priceRestaurantMonthly: s.priceRestaurantMonthly,
   });
 
@@ -890,7 +897,7 @@ export const adminConsoleRoutes: FastifyPluginAsyncZod = async (app) => {
         where: { exemptFromRules: true },
         select: { id: true, name: true, exemptReason: true },
       });
-      const planCounts = { normal: 0, normal_multi: 0, restaurant: 0 };
+      const planCounts = { normal: 0, normal_multi: 0, restaurant_normal: 0, restaurant: 0 };
       for (const c of customers) if (c.plan) planCounts[c.plan] += 1;
       return {
         settings: settingsOut(settings),

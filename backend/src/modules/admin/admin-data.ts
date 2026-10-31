@@ -7,7 +7,7 @@ export interface CustomerRow {
   name: string;
   businessType: string | null;
   city: string | null;
-  plan: 'normal' | 'normal_multi' | 'restaurant' | null;
+  plan: 'normal' | 'normal_multi' | 'restaurant_normal' | 'restaurant' | null;
   ownerName: string;
   ownerPhone: string;
   createdAt: Date;

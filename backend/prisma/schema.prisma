@@ -30,6 +30,9 @@ enum Plan {
   normal
   /// Normal Multi: any number of workers.
   normal_multi
+  /// Restaurant app "Normal Verify": waiters verify payments (and keep tips), any number of
+  /// waiters, 1 or 3 months. No orders or kitchen (that is Restaurant Plus).
+  restaurant_normal
   restaurant
 }
 
@@ -794,19 +797,21 @@ model PaymentReview {
 
 /// The admin's rules and prices (one row, id 1).
 model PlatformSettings {
-  id                      Int      @id @default(1)
-  trialEnabled            Boolean  @default(true)
-  trialDays               Int      @default(14)
-  reminderDays            Int[]    @default([7, 3, 1])
-  graceDays               Int      @default(3)
-  restrictedDays          Int      @default(7)
+  id                             Int      @id @default(1)
+  trialEnabled                   Boolean  @default(true)
+  trialDays                      Int      @default(14)
+  reminderDays                   Int[]    @default([7, 3, 1])
+  graceDays                      Int      @default(3)
+  restrictedDays                 Int      @default(7)
   /// What Restricted blocks: receipt_checks | orders | reports | staff
-  restrictedBlocks        String[] @default(["receipt_checks", "orders", "reports", "staff"])
-  priceNormalMonthly      Int      @default(1000)
-  priceNormalMultiMonthly Int      @default(1500)
-  priceNormalQuarterly    Int      @default(1500)
-  priceRestaurantMonthly  Int      @default(4000)
-  updatedAt               DateTime @updatedAt
+  restrictedBlocks               String[] @default(["receipt_checks", "orders", "reports", "staff"])
+  priceNormalMonthly             Int      @default(1000)
+  priceNormalMultiMonthly        Int      @default(1500)
+  priceRestaurantNormalMonthly   Int      @default(1000)
+  priceRestaurantNormalQuarterly Int      @default(1500)
+  priceNormalQuarterly           Int      @default(1500)
+  priceRestaurantMonthly         Int      @default(4000)
+  updatedAt                      DateTime @updatedAt
 }
 
 /// Server problems grouped by cause: one row per kind, counted.

@@ -104,7 +104,13 @@ export const staffRoutes: FastifyPluginAsyncZod = async (app) => {
 
   /** Normal plan: refuse one more active worker past the limit. */
   async function roomForOneMore(auth: AuthContext) {
-    if (auth.plan === 'normal_multi' || auth.plan === 'restaurant') return;
+    if (
+      auth.plan === 'normal_multi' ||
+      auth.plan === 'restaurant_normal' ||
+      auth.plan === 'restaurant'
+    ) {
+      return;
+    }
     const active = await prisma.businessMember.count({
       where: { businessId: auth.businessId, role: { not: 'owner' }, active: true },
     });

@@ -340,3 +340,32 @@ describe('how many workers', () => {
     );
   });
 });
+
+describe('Normal Verify in the Restaurant app (restaurant_normal)', () => {
+  it('waiters only, any number of them', async () => {
+    await app.prisma.businessMember.updateMany({
+      where: { businessId: r.businessId, role: { not: 'owner' } },
+      data: { active: false },
+    });
+    await app.prisma.business.update({
+      where: { id: r.businessId },
+      data: { plan: 'restaurant_normal' },
+    });
+    for (let i = 0; i < 3; i += 1) {
+      const res = await call('POST', '/staff', r.owner.token, {
+        name: 'Waiter Many',
+        phone: newPhone(),
+        pin: '4321',
+        role: 'waiter',
+      });
+      expect(res.statusCode).toBe(201);
+    }
+    const chef = await call('POST', '/staff', r.owner.token, {
+      name: 'Chef No',
+      phone: newPhone(),
+      pin: '4321',
+      role: 'chef',
+    });
+    expect(chef.statusCode).toBe(400);
+  });
+});

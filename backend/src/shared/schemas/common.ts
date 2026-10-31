@@ -14,7 +14,7 @@ export const etbSchema = z.number().int().nonnegative();
 export const idParamSchema = z.object({ id: z.string().min(1).max(64) });
 
 export const roleSchema = z.enum(['owner', 'manager', 'waiter', 'chef']);
-export const planSchema = z.enum(['normal', 'normal_multi', 'restaurant']);
+export const planSchema = z.enum(['normal', 'normal_multi', 'restaurant_normal', 'restaurant']);
 
 export const errorResponseSchema = z.object({
   error: z.object({ code: z.string(), details: z.record(z.string(), z.unknown()).optional() }),
