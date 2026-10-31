@@ -1,6 +1,13 @@
+/* global __dirname */
+const path = require('path');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./src/**/*.{js,jsx,ts,tsx}'],
+  // Shared code and both apps' routes (paths from this file, wherever the build runs).
+  content: [
+    path.join(__dirname, 'src/**/*.{js,jsx,ts,tsx}'),
+    path.join(__dirname, 'apps/*/src/**/*.{js,jsx,ts,tsx}'),
+  ],
   presets: [require('nativewind/preset')],
   theme: {
     extend: {

@@ -8,6 +8,29 @@ Smart Verify offers two plans:
 - **Normal Verify**: Verify bank and Telebirr payments, view transactions and reports
 - **Restaurant Plus**: Everything in Normal plus ordering, open bills, table management, and admin features
 
+## Two apps, one shared code
+
+```
+frontend/
+├─ src/              shared code for both apps (screens, verify, banks, login, UI, i18n…)
+├─ assets/           shared images (icons, bank logos)
+├─ apps/restaurant/  ገብቷል (com.gebtual.app): app.json, eas.json, routes in src/app
+└─ apps/shop/        ገብቷል Shop (com.gebtual.shop): app.json, eas.json, routes in src/app (no restaurant pages)
+```
+
+One `npm install` in `frontend/` (npm workspaces). Run from `frontend/`:
+
+| Command | |
+| --- | --- |
+| `npm run start` | Restaurant app (Expo Go) |
+| `npm run start:shop` | Shop app (Expo Go) |
+| `npm run typecheck` / `npm run lint` | both apps |
+| `cd apps/restaurant && npx eas-cli build --profile preview` | Restaurant APK |
+| `cd apps/shop && npx eas-cli build --profile preview` | Shop APK |
+
+A new page: put the screen in `src/features/…`, then a one-line route file in the app(s) that
+show it (`apps/<app>/src/app/…`).
+
 ## Tech Stack
 
 - **Framework**: React Native with Expo
