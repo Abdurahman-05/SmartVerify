@@ -152,7 +152,13 @@
       "firstVerified": "First verified",
       "noMoneyTaken": "No money was taken from your account for this attempt.",
       "tryAgain": "Try again",
-      "contactSupport": "Contact support"
+      "contactSupport": "Contact support",
+      "tipTitle": "Paid {{amount}} more",
+      "tipBody": "Did you keep it as your tip or give it back?",
+      "keepTip": "Keep as my tip",
+      "gaveBack": "I gave it back",
+      "tipSaved": "Saved as your tip: {{amount}}",
+      "gaveBackSaved": "Noted: given back to the customer."
     }
   },
   "plans": {
@@ -1366,5 +1372,13 @@
       "minutes_one": "{{count}} minute",
       "minutes_other": "{{count}} minutes"
     }
+  },
+  "verifyTips": {
+    "title": "Tips",
+    "subtitle": "From customers who paid more",
+    "total": "Total tips",
+    "byWaiter": "Per waiter",
+    "empty": "No tips in this period.",
+    "paid": "Paid {{amount}}"
   }
 }

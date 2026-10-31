@@ -32,6 +32,29 @@ export interface VerifiedCheck {
 export const getVerifiedChecks = (period: Period) =>
   api<VerifiedCheck[]>('/verify/history', { query: { period } });
 
+/** Tips kept from overpaid receipts (Normal plan in the Restaurant app). */
+export interface VerifyTips {
+  totalEtb: number;
+  byWaiter: { name: string; totalEtb: number; count: number }[];
+  items: {
+    id: string;
+    tipEtb: number;
+    amountEtb: number;
+    waiterName: string;
+    bankCode: string;
+    createdAt: string;
+  }[];
+}
+
+/** POST /verify/tip — keep (part of) a receipt's extra as the waiter's tip; 0 = given back. */
+export async function keepTip(reference: string, tipEtb: number): Promise<void> {
+  await api('/verify/tip', { method: 'POST', body: { reference, tipEtb } });
+}
+
+/** GET /verify/tips — tips in the period (waiters: their own), with totals per waiter. */
+export const getVerifyTips = (period: Period) =>
+  api<VerifyTips>('/verify/tips', { query: { period } });
+
 /** GET /verify/failed — checks that did not verify in the period, newest first. */
 export const getFailedChecks = (period: Period) =>
   api<FailedCheck[]>('/verify/failed', { query: { period } });

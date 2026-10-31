@@ -152,7 +152,13 @@
       "firstVerified": "መጀመሪያ የተረጋገጠበት",
       "noMoneyTaken": "ለዚህ ሙከራ ከሂሳብዎ ምንም ገንዘብ አልተወሰደም።",
       "tryAgain": "እንደገና ሞክር",
-      "contactSupport": "ድጋፍ ያግኙ"
+      "contactSupport": "ድጋፍ ያግኙ",
+      "tipTitle": "{{amount}} በላይ ተከፍሏል",
+      "tipBody": "እንደ ቲፕ ያዙት ወይስ መለሱት?",
+      "keepTip": "እንደ ቲፕ ያዝ",
+      "gaveBack": "መለስኩት",
+      "tipSaved": "እንደ ቲፕዎ ተቀምጧል፦ {{amount}}",
+      "gaveBackSaved": "ተመዝግቧል፦ ለደንበኛው ተመልሷል።"
     }
   },
   "plans": {
@@ -1366,5 +1372,13 @@
       "minutes_one": "{{count}} ደቂቃ",
       "minutes_other": "{{count}} ደቂቃዎች"
     }
+  },
+  "verifyTips": {
+    "title": "ቲፕ",
+    "subtitle": "በላይ ከከፈሉ ደንበኞች",
+    "total": "ጠቅላላ ቲፕ",
+    "byWaiter": "በአስተናጋጅ",
+    "empty": "በዚህ ጊዜ ቲፕ የለም።",
+    "paid": "{{amount}} ተከፍሏል"
   }
 }

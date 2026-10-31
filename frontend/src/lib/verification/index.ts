@@ -28,6 +28,13 @@ export const getVerifiedChecks: typeof real.getVerifiedChecks = USE_MOCK_VERIFIC
   : real.getVerifiedChecks;
 export const verifiedChecksKey = (period: Period) => ['verified-checks', period] as const;
 
+export type { VerifyTips } from '@/lib/api/verification';
+export const keepTip = USE_MOCK_VERIFICATION ? mock.keepTip : real.keepTip;
+export const getVerifyTips: typeof real.getVerifyTips = USE_MOCK_VERIFICATION
+  ? mock.getVerifyTips
+  : real.getVerifyTips;
+export const verifyTipsKey = (period: Period) => ['verify-tips', period] as const;
+
 /**
  * Checks a scanned receipt with the server, the same way for normal Verify and restaurant bills:
  * a CBE link, a telebirr number, a Dashen reference or a BOA receipt id. Anything else cannot be

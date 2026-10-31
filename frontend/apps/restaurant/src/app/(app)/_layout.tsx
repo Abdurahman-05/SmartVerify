@@ -86,6 +86,7 @@ export default function AppLayout() {
         <Stack.Screen name="kitchen/[id]" />
         <Stack.Screen name="admin" />
         <Stack.Screen name="tips-admin" />
+        <Stack.Screen name="verify-tips" />
         <Stack.Screen name="change-pin" />
         <Stack.Screen name="extra-features" />
         <Stack.Screen name="finished" />

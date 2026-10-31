@@ -117,3 +117,14 @@ export const verifyDashen = (reference: string, expectedAmountEtb: number, billI
 /** Offline stand-in for the BOA check: paid exactly. */
 export const verifyBoa = (receiptId: string, expectedAmountEtb: number, billId?: string) =>
   verifyCbe(receiptId, expectedAmountEtb, billId);
+
+/** Offline: tips are not kept. */
+export const keepTip = async (_reference: string, _tipEtb: number): Promise<void> => {
+  await Promise.resolve();
+};
+
+/** Offline: no tips yet. */
+export const getVerifyTips = async (_period: unknown) => {
+  await Promise.resolve();
+  return { totalEtb: 0, byWaiter: [], items: [] };
+};

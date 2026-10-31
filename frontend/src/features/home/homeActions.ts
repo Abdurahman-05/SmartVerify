@@ -63,7 +63,12 @@ const restaurantKeys: HomeActionKey[] = [
 export function getHomeActions(plan: Plan | null, role: Role): HomeAction[] {
   // Normal and Normal Multi: no restaurant buttons. No plan yet: everything (not in the Normal app).
   const showRestaurant = plan === 'restaurant' || (plan === null && !isNormalApp);
-  const base = showRestaurant ? restaurantKeys : normalKeys;
+  // Normal plan in the Restaurant app: waiters keep tips from overpaid receipts.
+  const base = showRestaurant
+    ? restaurantKeys
+    : isNormalApp
+      ? normalKeys
+      : [...normalKeys.slice(0, 2), 'tips' as const, ...normalKeys.slice(2)];
   // The overview (sales, cash, bank, tips) is for owner and manager on Restaurant Plus.
   const manages = role === 'owner' || role === 'manager';
   const keys: HomeActionKey[] =
@@ -73,6 +78,7 @@ export function getHomeActions(plan: Plan | null, role: Role): HomeAction[] {
   return visible.map((key) => {
     if (key === 'verify' && plan === 'restaurant') return { ...actions.verify, href: '/bills' };
     // Owner and manager see every waiter's tips, not their own.
+    if (key === 'tips' && !showRestaurant) return { ...actions.tips, href: '/verify-tips' };
     if (key === 'tips' && manages) return { ...actions.tips, href: '/tips-admin' };
     return actions[key];
   });

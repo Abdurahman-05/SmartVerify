@@ -1,3 +1,4 @@
+import { useMutation } from '@tanstack/react-query';
 import { Redirect, useRouter } from 'expo-router';
 import { CircleAlert } from 'lucide-react-native';
 import { useState } from 'react';
@@ -9,7 +10,11 @@ import { formatMoney } from '@/components/ui/MoneyText';
 import { Button } from '@/components/ui/Button';
 import { ResultBadge } from '@/components/ui/ResultBadge';
 import { Text } from '@/components/ui/Text';
+import { errorMessageKey } from '@/lib/errors';
 import { formatDateTime } from '@/lib/format';
+import { isNormalApp } from '@/lib/variant';
+import { keepTip } from '@/lib/verification';
+import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
 import { useReceiptFlow } from './receiptFlow';
@@ -99,12 +104,70 @@ function useResultContent({ check, expectedAmountEtb, checkedAt }: VerificationR
   };
 }
 
+/**
+ * Normal plan in the Restaurant app: the customer paid more. The waiter says whether they kept the
+ * extra as their tip or gave it back (the server keeps the tip for the Tips page).
+ */
+function TipChoice({ reference, extraEtb }: { reference: string; extraEtb: number }) {
+  const { t } = useTranslation();
+  const [choice, setChoice] = useState<'tip' | 'back' | null>(null);
+  const save = useMutation({
+    mutationFn: (kept: boolean) => keepTip(reference, kept ? extraEtb : 0),
+    onSuccess: (_, kept) => setChoice(kept ? 'tip' : 'back'),
+  });
+  const amount = formatMoney(extraEtb);
+  return (
+    <View className="mt-4 gap-2.5 rounded-[20px] border-2 border-amber bg-tipBg px-4 py-3.5">
+      <Text font="heading" className="text-lg">
+        {t('verify.result.tipTitle', { amount })}
+      </Text>
+      {choice ? (
+        <Text font="semibold" className="text-base">
+          {choice === 'tip'
+            ? t('verify.result.tipSaved', { amount })
+            : t('verify.result.gaveBackSaved')}
+        </Text>
+      ) : (
+        <>
+          <Text tone="muted" className="text-[15px]">
+            {t('verify.result.tipBody')}
+          </Text>
+          <Button
+            label={t('verify.result.keepTip')}
+            variant="amber"
+            size="md"
+            disabled={save.isPending}
+            onPress={() => save.mutate(true)}
+          />
+          <Button
+            label={t('verify.result.gaveBack')}
+            variant="secondary"
+            size="md"
+            disabled={save.isPending}
+            onPress={() => save.mutate(false)}
+          />
+          {save.isError ? (
+            <Text className="text-[15px] text-dangerFg">{t(errorMessageKey(save.error))}</Text>
+          ) : null}
+        </>
+      )}
+    </View>
+  );
+}
+
 function ResultView({ result }: { result: VerificationResult }) {
   const { t } = useTranslation();
   const router = useRouter();
   const finish = useVerifyFlow((s) => s.finish);
   const success = result.check.status === 'verified';
   const content = useResultContent(result);
+  // Tips from overpayments: only the Restaurant app's Normal plan (Restaurant Plus uses bills).
+  const plan = useSession((s) => s.user?.plan);
+  const askTip =
+    !isNormalApp &&
+    plan !== 'restaurant' &&
+    result.check.status === 'verified' &&
+    result.check.extraEtb > 0;
 
   const done = () => {
     finish();
@@ -147,6 +210,10 @@ function ResultView({ result }: { result: VerificationResult }) {
         </View>
 
         <DetailsCard rows={content.rows} />
+
+        {askTip && result.check.status === 'verified' ? (
+          <TipChoice reference={result.check.reference} extraEtb={result.check.extraEtb} />
+        ) : null}
 
         <View className="mt-4 flex-row items-start gap-2.5 px-1">
           <CircleAlert size={18} color={success ? colors.success : colors.alert} strokeWidth={2} />
