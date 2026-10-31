@@ -50,16 +50,10 @@ export async function verifyPayment(input: VerifyPaymentInput): Promise<Verifica
   const result = mockResult(input);
   recordTransaction({
     accountId: input.account.id,
-    payerName:
-      result.status === 'failed' && result.reason === 'nameMismatch'
-        ? result.payerName
-        : 'Customer',
+    payerName: result.status === 'failed' && result.reason === 'nameMismatch' ? result.payerName : 'Customer',
     reference: result.reference,
     expectedAmount: input.amount,
-    receivedAmount:
-      result.status === 'failed' && result.reason === 'amountMismatch'
-        ? result.paidAmount
-        : input.amount,
+    receivedAmount: result.status === 'failed' && result.reason === 'amountMismatch' ? result.paidAmount : input.amount,
     status: statusOf(result),
     createdAt: new Date().toISOString(),
   });
