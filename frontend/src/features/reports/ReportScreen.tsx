@@ -21,6 +21,7 @@ import { periods, type Period } from '@/lib/period';
 import { useSession } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
+import { isNormalApp } from '@/lib/variant';
 
 type Row = PaymentsReport['rows'][number];
 
@@ -112,7 +113,10 @@ function buildReportTable(
       `${row.share}%`,
       formatMoney(row.totalEtb, false),
     ]),
-    footer: `${t('history.total', { amount: formatMoney(report.totalEtb, false) })} · ${t('history.report.tips', { amount: formatMoney(report.tipsEtb, false) })}`,
+    // The Shop app has no tips.
+    footer: isNormalApp
+      ? t('history.total', { amount: formatMoney(report.totalEtb, false) })
+      : `${t('history.total', { amount: formatMoney(report.totalEtb, false) })} · ${t('history.report.tips', { amount: formatMoney(report.tipsEtb, false) })}`,
   };
 }
 
@@ -197,9 +201,11 @@ export default function ReportScreen() {
                 numberOfLines={1}
                 adjustsFontSizeToFit
               />
-              <Text font="semibold" tone="inverse" className="text-sm opacity-90">
-                {t('history.report.tips', { amount: formatMoney(report.tipsEtb, false) })}
-              </Text>
+              {isNormalApp ? null : (
+                <Text font="semibold" tone="inverse" className="text-sm opacity-90">
+                  {t('history.report.tips', { amount: formatMoney(report.tipsEtb, false) })}
+                </Text>
+              )}
             </View>
 
             <Text font="heading" className="px-4 pb-2 pt-3.5 text-lg" accessibilityRole="header">
