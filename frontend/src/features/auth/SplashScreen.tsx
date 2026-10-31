@@ -1,3 +1,4 @@
+import { onlineManager } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
@@ -72,6 +73,16 @@ export default function SplashScreen() {
       clearTimeout(timer);
     };
   }, [attempt, router]);
+
+  // Opened offline: try again by itself as soon as the internet is back.
+  useEffect(() => {
+    if (phase !== 'offline') return;
+    return onlineManager.subscribe((online) => {
+      if (!online) return;
+      setPhase('restoring');
+      setAttempt((n) => n + 1);
+    });
+  }, [phase]);
 
   if (phase === 'restoring') return <LoadingView />;
   if (phase === 'offline') {

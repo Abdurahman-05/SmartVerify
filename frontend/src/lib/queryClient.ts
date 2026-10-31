@@ -1,8 +1,26 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import { QueryClient } from '@tanstack/react-query';
+import { focusManager, onlineManager, QueryClient } from '@tanstack/react-query';
+import * as Network from 'expo-network';
+import { AppState, Platform } from 'react-native';
 
 import { useSession } from '@/store/session';
+
+// Back online: React Query refetches what is on screen (and resumes paused saves) by itself.
+// A phone does not tell it about the network on its own, expo-network does.
+if (Platform.OS !== 'web') {
+  onlineManager.setEventListener((setOnline) => {
+    const sub = Network.addNetworkStateListener((state) => {
+      setOnline(state.isConnected === true && state.isInternetReachable !== false);
+    });
+    return () => sub.remove();
+  });
+  // Back to the app (from another app or the lock screen): fresh data too.
+  focusManager.setEventListener((setFocused) => {
+    const sub = AppState.addEventListener('change', (state) => setFocused(state === 'active'));
+    return () => sub.remove();
+  });
+}
 
 /**
  * The app's one React Query client (also used outside components, e.g. after a payment).
