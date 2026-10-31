@@ -15,8 +15,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { useReducedMotion } from '@/hooks/useReducedMotion';
+import { isNormalApp } from '@/lib/variant';
 import { colors } from '@/theme/tokens';
 
+import { FoodLoadingAnimation } from './FoodLoadingAnimation';
 import { ScreenHeader } from './ScreenHeader';
 import { SecureFooter } from './SecureFooter';
 import { SpinnerRing } from './Spinner';
@@ -147,10 +149,27 @@ export function LoadingView({ title, subtitle, screenTitle, onBack }: LoadingVie
   return <BrandLoading title={title} subtitle={subtitle} />;
 }
 
+/**
+ * The Restaurant app shows the food animation on its full loading page. Set to false to go back
+ * to the shield for both apps.
+ */
+const FOOD_LOADING_IN_RESTAURANT_APP = true;
+
 /** The full Smart Verify loading page. */
 function BrandLoading({ title, subtitle }: Pick<LoadingViewProps, 'title' | 'subtitle'>) {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotion();
+
+  if (FOOD_LOADING_IN_RESTAURANT_APP && !isNormalApp) {
+    return (
+      <SafeAreaView className="flex-1 bg-background">
+        <FoodLoadingAnimation title={title} subtitle={subtitle} />
+        <View className="pb-9">
+          <SecureFooter />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView
