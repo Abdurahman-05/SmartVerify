@@ -15,15 +15,19 @@ import { Input } from '@/components/ui/Input';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
 import { useFullFieldFeedback } from '@/hooks/useFullFieldFeedback';
-import { signIn } from '@/lib/auth';
+import { signIn, signOut } from '@/lib/auth';
 import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
+import { belongsToOtherApp, isNormalApp } from '@/lib/variant';
 import { homeRouteFor, useSession } from '@/store/session';
 
 import { AuthHeader } from './AuthHeader';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { PinVisibilityButton } from './PinVisibilityButton';
 import { PIN_LENGTH, signInSchema, type SignInValues } from './schemas';
+
+/** The account belongs to the other app (shop plan in the Restaurant app, or the reverse). */
+class WrongAppError extends Error {}
 
 export default function SignInScreen() {
   const { t } = useTranslation();
@@ -42,7 +46,15 @@ export default function SignInScreen() {
   });
 
   const mutation = useMutation({
-    mutationFn: signIn,
+    // A business of the other app is not signed in here at all.
+    mutationFn: async (values: SignInValues) => {
+      const user = await signIn(values);
+      if (belongsToOtherApp(user.plan)) {
+        await signOut();
+        throw new WrongAppError();
+      }
+      return user;
+    },
     onSuccess: (user) => {
       startSession(user);
       router.replace(homeRouteFor(user));
@@ -145,7 +157,11 @@ export default function SignInScreen() {
       <ErrorDialog
         visible={mutation.isError}
         title={t('auth.errors.signInFailedTitle')}
-        message={t(errorMessageKey(mutation.error))}
+        message={
+          mutation.error instanceof WrongAppError
+            ? t(isNormalApp ? 'wrongApp.body' : 'wrongApp.shopBody')
+            : t(errorMessageKey(mutation.error))
+        }
         actionLabel={t('errors.retry')}
         onClose={mutation.reset}
       />
