@@ -8,5 +8,4 @@ const config = getDefaultConfig(__dirname);
 
 module.exports = withNativeWind(config, {
   input: path.join(shared, 'src/global.css'),
-  configPath: path.join(shared, 'tailwind.config.js'),
 });
