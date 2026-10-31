@@ -32,6 +32,7 @@ import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
 import { useRoleLabel, useWorkersOnly } from './roleLabel';
+import { isStaffLimit, StaffLimitSheet } from './StaffLimitSheet';
 
 import { ActivePill, RolePill } from './StaffScreen';
 
@@ -364,8 +365,9 @@ function StaffForm({ member }: { member: StaffMember }) {
         </>
       )}
 
+      <StaffLimitSheet visible={isStaffLimit(failed?.error)} onClose={() => failed?.reset()} />
       <ErrorDialog
-        visible={Boolean(failed)}
+        visible={Boolean(failed) && !isStaffLimit(failed?.error)}
         title={t(failedTitle)}
         message={t(errorMessageKey(failed?.error))}
         actionLabel={t('errors.retry')}

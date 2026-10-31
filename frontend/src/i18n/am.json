@@ -734,7 +734,13 @@
     "generatePin": "PIN ፍጠር",
     "resetAction": "PIN አስጀምር",
     "resetDone": "ለ{{name}} ጊዜያዊ PIN፦",
-    "resetDoneNote": "ይህን PIN አሁኑኑ ይንገሯቸው። እንደገና አይታይም።"
+    "resetDoneNote": "ይህን PIN አሁኑኑ ይንገሯቸው። እንደገና አይታይም።",
+    "limit": {
+      "title": "Normal 2 ሰራተኞችን ብቻ ይፈቅዳል",
+      "body": "ተጨማሪ ሰራተኞችን ለመጨመር ወደ Normal Multi ይቀይሩ፦ ያልተገደበ ሰራተኞች፣ ለቅርንጫፎችም ጭምር።",
+      "upgrade": "Normal Multi ያግኙ",
+      "notNow": "አሁን አይደለም"
+    }
   },
   "themes": {
     "forest": "ደን",

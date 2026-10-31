@@ -31,6 +31,7 @@ import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
 import { useRoleLabel, useWorkersOnly } from './roleLabel';
+import { isStaffLimit, StaffLimitSheet } from './StaffLimitSheet';
 
 const STAFF_PIN_DIGITS = 4;
 
@@ -289,8 +290,9 @@ export default function AddStaffScreen() {
 
       <View className="min-h-6 flex-1" />
 
+      <StaffLimitSheet visible={isStaffLimit(mutation.error)} onClose={mutation.reset} />
       <ErrorDialog
-        visible={mutation.isError}
+        visible={mutation.isError && !isStaffLimit(mutation.error)}
         title={t('staff.saveFailedTitle')}
         message={t(errorMessageKey(mutation.error))}
         actionLabel={t('errors.retry')}

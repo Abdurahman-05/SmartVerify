@@ -734,7 +734,13 @@
     "generatePin": "Make a PIN",
     "resetAction": "Reset PIN",
     "resetDone": "Temporary PIN for {{name}}:",
-    "resetDoneNote": "Tell them this PIN now. It is not shown again."
+    "resetDoneNote": "Tell them this PIN now. It is not shown again.",
+    "limit": {
+      "title": "Normal allows 2 workers",
+      "body": "To add more workers, move to Normal Multi: any number of workers, for branches too.",
+      "upgrade": "Get Normal Multi",
+      "notNow": "Not now"
+    }
   },
   "themes": {
     "forest": "Forest",
