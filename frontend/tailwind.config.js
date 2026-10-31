@@ -1,12 +1,13 @@
 /* global __dirname */
-const path = require('path');
+const here = __dirname.split('\\').join('/');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   // Shared code and both apps' routes (paths from this file, wherever the build runs).
+  // Forward slashes: Tailwind's file search does not understand Windows backslashes.
   content: [
-    path.join(__dirname, 'src/**/*.{js,jsx,ts,tsx}'),
-    path.join(__dirname, 'apps/*/src/**/*.{js,jsx,ts,tsx}'),
+    `${here}/src/**/*.{js,jsx,ts,tsx}`,
+    `${here}/apps/*/src/**/*.{js,jsx,ts,tsx}`,
   ],
   presets: [require('nativewind/preset')],
   theme: {
