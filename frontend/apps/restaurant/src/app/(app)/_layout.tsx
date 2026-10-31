@@ -6,7 +6,7 @@ import { LockOverlay } from '@/features/lock/LockOverlay';
 import { WrongAppScreen } from '@/features/variant/WrongAppScreen';
 import { notificationsKey } from '@/lib/notifications';
 import { listenToPushes, registerForPush } from '@/lib/push';
-import { isNormalApp } from '@/lib/variant';
+import { belongsToOtherApp } from '@/lib/variant';
 import { useFeatures } from '@/store/features';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
@@ -32,10 +32,8 @@ export default function AppLayout() {
       ),
     [queryClient, router]
   );
-  // A restaurant business (Restaurant Plus or Normal Verify) uses the Restaurant app.
-  const wrongApp = useSession(
-    (s) => isNormalApp && (s.user?.plan === 'restaurant' || s.user?.plan === 'restaurant_normal')
-  );
+  // Each business uses its own app: restaurants the Restaurant app, shops the Shop app.
+  const wrongApp = useSession((s) => belongsToOtherApp(s.user?.plan));
   if (wrongApp) return <WrongAppScreen />;
 
   return (

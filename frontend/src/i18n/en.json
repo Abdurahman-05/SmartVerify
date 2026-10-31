@@ -1291,8 +1291,10 @@
   },
   "wrongApp": {
     "title": "This business uses the Restaurant app",
-    "body": "Your business is on Restaurant Plus. Open the ገብቷል Restaurant app and sign in with the same phone and PIN.",
-    "signOut": "Sign out"
+    "body": "Your business is a restaurant plan. Open the ገብቷል Restaurant app and sign in with the same phone and PIN.",
+    "signOut": "Sign out",
+    "shopTitle": "This business uses the Shop app",
+    "shopBody": "Your business is on a shop plan. Open the ገብቷል Shop app and sign in with the same phone and PIN."
   },
   "notifications": {
     "tab": "Alerts",

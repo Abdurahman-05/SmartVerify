@@ -19,8 +19,7 @@
     "../../nativewind-env.d.ts",
     "app.config.ts",
     "nativewind-env.d.ts",
-    "expo-env.d.ts",
-    ".expo/types/**/*.ts"
+    "app-env.d.ts"
   ],
   "exclude": [
     "node_modules"

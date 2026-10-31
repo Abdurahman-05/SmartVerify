@@ -7,9 +7,10 @@ import { BrandMark } from '@/components/ui/BrandMark';
 import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { signOut as signOutRequest } from '@/lib/auth';
+import { isNormalApp } from '@/lib/variant';
 import { useSession } from '@/store/session';
 
-/** Normal app, Restaurant Plus business: send them to the Restaurant app. */
+/** A business signed in to the other app: send them to their own app. */
 export function WrongAppScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -25,10 +26,10 @@ export function WrongAppScreen() {
       <View className="items-center gap-3">
         <BrandMark size={56} />
         <Text font="heading" className="text-center text-2xl" accessibilityRole="header">
-          {t('wrongApp.title')}
+          {t(isNormalApp ? 'wrongApp.title' : 'wrongApp.shopTitle')}
         </Text>
         <Text tone="muted" className="text-center text-base">
-          {t('wrongApp.body')}
+          {t(isNormalApp ? 'wrongApp.body' : 'wrongApp.shopBody')}
         </Text>
       </View>
       <Button label={t('wrongApp.signOut')} variant="outline" onPress={() => void leave()} />
