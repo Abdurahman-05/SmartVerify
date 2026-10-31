@@ -15,6 +15,8 @@ import { useSession, type BillingPeriod, type Plan, type SessionUser } from '@/s
 import { colors } from '@/theme/tokens';
 
 import {
+  hasQuarterly,
+  normalPlan,
   normalPricing,
   normalMultiMonthlyEtb,
   normalQuarterlySavingEtb,
@@ -150,7 +152,7 @@ function NormalOption({
         filled={recommended}
         disabled={current}
         accessibilityLabel={t('subscription.chooseLabel', {
-          plan: t('plans.normal'),
+          plan: t(`plans.${normalPlan}`),
           length,
           price: formatMoney(priceEtb, false),
         })}
@@ -173,7 +175,7 @@ export default function SubscriptionScreen() {
 
   const current = user?.subscription ?? null;
   const isCurrent = (plan: Plan, period: BillingPeriod) =>
-    current?.plan === plan && (plan !== 'normal' || current.period === period);
+    current?.plan === plan && (!hasQuarterly(plan) || current.period === period);
   const choose = (plan: Plan, period: BillingPeriod) => {
     if (user?.role !== 'owner') {
       setOwnerOnly(true);
@@ -207,7 +209,7 @@ export default function SubscriptionScreen() {
           <View className="mx-4 mt-3 rounded-card border-[1.5px] border-border bg-surface p-3.5">
             <View className="flex-row items-center justify-between">
               <Text font="heading" className="text-xl">
-                {t('plans.normal')}
+                {t(`plans.${normalPlan}`)}
               </Text>
               <View className="rounded-xl bg-neutralBg px-2.5 py-[3px]">
                 <Text font="bold" tone="muted" className="text-sm">
@@ -219,55 +221,58 @@ export default function SubscriptionScreen() {
               {t('plan.normalFeatures')}
             </Text>
             <Text font="semibold" className="mt-1 text-[15px]">
-              {t('subscription.twoDevices')}
+              {isNormalApp ? t('subscription.twoDevices') : t('subscription.anyWaiters')}
             </Text>
             <View className="mt-4 flex-row gap-2.5">
               {(['monthly', 'quarterly'] as const).map((period) => (
                 <NormalOption
                   key={period}
                   period={period}
-                  current={isCurrent('normal', period)}
-                  onChoose={() => choose('normal', period)}
+                  current={isCurrent(normalPlan, period)}
+                  onChoose={() => choose(normalPlan, period)}
                 />
               ))}
             </View>
           </View>
 
-          <View className="mx-4 mt-3 rounded-card border-[1.5px] border-border bg-surface p-3.5">
-            <Text font="heading" className="text-xl">
-              {t('plans.normal_multi')}
-            </Text>
-            <Text tone="muted" className="mt-0.5 text-[15px]">
-              {t('plan.normalFeatures')}
-            </Text>
-            <Text font="semibold" className="mt-1 text-[15px]">
-              {t('subscription.anyDevices')}
-            </Text>
-            <View className="mt-3.5 flex-row items-center justify-between gap-3">
-              <Text font="heading" className="text-2xl">
-                <MoneyText value={normalMultiMonthlyEtb} showCurrency={false} />{' '}
-                <Text font="heading" className="text-sm">
-                  {t('plan.perMonth')}
-                </Text>
+          {/* Normal Multi: Shop app only (the Restaurant app's Normal Verify has any number of waiters). */}
+          {isNormalApp ? (
+            <View className="mx-4 mt-3 rounded-card border-[1.5px] border-border bg-surface p-3.5">
+              <Text font="heading" className="text-xl">
+                {t('plans.normal_multi')}
               </Text>
-              <ChooseButton
-                className="px-8"
-                label={
-                  isCurrent('normal_multi', 'monthly')
-                    ? t('subscription.current')
-                    : t('subscription.choose')
-                }
-                filled
-                disabled={isCurrent('normal_multi', 'monthly')}
-                accessibilityLabel={t('subscription.chooseLabel', {
-                  plan: t('plans.normal_multi'),
-                  length: t('subscription.oneMonth'),
-                  price: formatMoney(normalMultiMonthlyEtb, false),
-                })}
-                onPress={() => choose('normal_multi', 'monthly')}
-              />
+              <Text tone="muted" className="mt-0.5 text-[15px]">
+                {t('plan.normalFeatures')}
+              </Text>
+              <Text font="semibold" className="mt-1 text-[15px]">
+                {t('subscription.anyDevices')}
+              </Text>
+              <View className="mt-3.5 flex-row items-center justify-between gap-3">
+                <Text font="heading" className="text-2xl">
+                  <MoneyText value={normalMultiMonthlyEtb} showCurrency={false} />{' '}
+                  <Text font="heading" className="text-sm">
+                    {t('plan.perMonth')}
+                  </Text>
+                </Text>
+                <ChooseButton
+                  className="px-8"
+                  label={
+                    isCurrent('normal_multi', 'monthly')
+                      ? t('subscription.current')
+                      : t('subscription.choose')
+                  }
+                  filled
+                  disabled={isCurrent('normal_multi', 'monthly')}
+                  accessibilityLabel={t('subscription.chooseLabel', {
+                    plan: t('plans.normal_multi'),
+                    length: t('subscription.oneMonth'),
+                    price: formatMoney(normalMultiMonthlyEtb, false),
+                  })}
+                  onPress={() => choose('normal_multi', 'monthly')}
+                />
+              </View>
             </View>
-          </View>
+          ) : null}
 
           {isNormalApp ? null : (
             <View className="mx-4 mt-3 rounded-card border-[2.5px] border-primary bg-surface p-3.5">

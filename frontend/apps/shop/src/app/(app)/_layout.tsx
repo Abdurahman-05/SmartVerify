@@ -37,8 +37,10 @@ export default function AppLayout() {
       tapped.remove();
     };
   }, [queryClient, router]);
-  // A Restaurant Plus business uses the Restaurant app.
-  const wrongApp = useSession((s) => isNormalApp && s.user?.plan === 'restaurant');
+  // A restaurant business (Restaurant Plus or Normal Verify) uses the Restaurant app.
+  const wrongApp = useSession(
+    (s) => isNormalApp && (s.user?.plan === 'restaurant' || s.user?.plan === 'restaurant_normal')
+  );
   if (wrongApp) return <WrongAppScreen />;
 
   return (

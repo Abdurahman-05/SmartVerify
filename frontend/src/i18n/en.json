@@ -164,7 +164,8 @@
   "plans": {
     "normal": "Normal Verify",
     "restaurant": "Restaurant Plus",
-    "normal_multi": "Normal Multi"
+    "normal_multi": "Normal Multi",
+    "restaurant_normal": "Normal Verify"
   },
   "roles": {
     "owner": "Owner",
@@ -374,7 +375,8 @@
     "error": "Could not start the plan. Please try again.",
     "errorTitle": "Couldn't start the plan",
     "twoDevices": "Owner + 2 workers",
-    "anyDevices": "Any number of workers · for many workers or branches"
+    "anyDevices": "Any number of workers · for many workers or branches",
+    "anyWaiters": "Any number of waiters · tips from overpayments"
   },
   "orders": {
     "title": "New order",

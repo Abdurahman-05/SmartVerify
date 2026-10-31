@@ -164,7 +164,8 @@
   "plans": {
     "normal": "Normal Verify",
     "restaurant": "Restaurant Plus",
-    "normal_multi": "Normal Multi"
+    "normal_multi": "Normal Multi",
+    "restaurant_normal": "Normal Verify"
   },
   "roles": {
     "owner": "ባለቤት",
@@ -374,7 +375,8 @@
     "error": "እቅዱን ማስጀመር አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
     "errorTitle": "እቅዱን መጀመር አልተቻለም",
     "twoDevices": "ባለቤት + 2 ሰራተኞች",
-    "anyDevices": "ያልተገደበ ሰራተኞች · ለብዙ ሰራተኞች ወይም ቅርንጫፎች"
+    "anyDevices": "ያልተገደበ ሰራተኞች · ለብዙ ሰራተኞች ወይም ቅርንጫፎች",
+    "anyWaiters": "ያልተገደበ አስተናጋጆች · ከትርፍ ክፍያ ቲፕ"
   },
   "orders": {
     "title": "አዲስ ትዕዛዝ",

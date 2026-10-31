@@ -107,6 +107,7 @@ export default function MessagesScreen() {
               options={[
                 { key: 'normal', label: t('platformAdmin.plans.normal') },
                 { key: 'normal_multi', label: t('platformAdmin.plans.normal_multi') },
+                { key: 'restaurant_normal', label: t('platformAdmin.plans.restaurant_normal') },
                 { key: 'restaurant', label: t('platformAdmin.plans.restaurant') },
               ]}
             />

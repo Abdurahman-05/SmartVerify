@@ -19,6 +19,7 @@ import { isNormalApp } from '@/lib/variant';
 import { useSession, type Plan } from '@/store/session';
 
 import {
+  normalPlan,
   normalPricing,
   normalQuarterlySavingEtb,
   restaurantFeatureKeys,
@@ -109,7 +110,7 @@ export default function ChoosePlanScreen() {
 
         <View className="mx-4 mt-2 rounded-card border-[1.5px] border-border bg-surface p-3.5">
           <Text font="heading" className="text-xl">
-            {t('plans.normal')}
+            {t(`plans.${normalPlan}`)}
           </Text>
           <Text tone="muted" className="mt-0.5 text-[15px]">
             {t('plan.normalFeatures')}
@@ -132,7 +133,7 @@ export default function ChoosePlanScreen() {
             />
           </View>
           <View className="mt-3">
-            <Button label={t('plan.exploreNormal')} size="md" onPress={() => explore('normal')} />
+            <Button label={t('plan.exploreNormal')} size="md" onPress={() => explore(normalPlan)} />
           </View>
         </View>
 

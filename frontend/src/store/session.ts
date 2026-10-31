@@ -5,7 +5,7 @@ import { useStaff } from '@/features/staff/store';
 import { needsPasscode } from '@/lib/appLock';
 import { useFeatures } from '@/store/features';
 
-export type Plan = 'normal' | 'normal_multi' | 'restaurant';
+export type Plan = 'normal' | 'normal_multi' | 'restaurant_normal' | 'restaurant';
 export type Role = 'owner' | 'manager' | 'waiter' | 'chef';
 
 /**

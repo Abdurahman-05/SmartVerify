@@ -34,7 +34,7 @@ import { useSession, type BillingPeriod, type Plan } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
-import { normalMultiMonthlyEtb } from './plans';
+import { hasQuarterly, normalMultiMonthlyEtb, normalPricing } from './plans';
 
 /** Banks a plan can be paid from; each is checked with its own bank's receipt. */
 const SENDER_BANKS = ['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR'] as const;
@@ -80,9 +80,13 @@ export default function SubscriptionPayScreen() {
   const [ask, setAsk] = useState<ReceiptField['key'][]>([]);
 
   const plan: Plan =
-    params.plan === 'restaurant' || params.plan === 'normal_multi' ? params.plan : 'normal';
+    params.plan === 'restaurant' ||
+    params.plan === 'normal_multi' ||
+    params.plan === 'restaurant_normal'
+      ? params.plan
+      : 'normal';
   const period: BillingPeriod =
-    plan === 'normal' && params.period === 'quarterly' ? 'quarterly' : 'monthly';
+    hasQuarterly(plan) && params.period === 'quarterly' ? 'quarterly' : 'monthly';
 
   const info = useQuery({ queryKey: ['subscription-payment-info'], queryFn: getPaymentInfo });
 
@@ -132,7 +136,9 @@ export default function SubscriptionPayScreen() {
       ? payTo.prices.restaurant.monthly
       : plan === 'normal_multi'
         ? (payTo.prices.normal_multi?.monthly ?? normalMultiMonthlyEtb)
-        : payTo.prices.normal[period]
+        : plan === 'restaurant_normal'
+          ? (payTo.prices.restaurant_normal?.[period] ?? normalPricing[period].priceEtb)
+          : payTo.prices.normal[period]
     : 0;
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/subscription'));
 

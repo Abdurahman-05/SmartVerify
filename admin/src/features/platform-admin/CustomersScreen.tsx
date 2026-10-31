@@ -86,7 +86,12 @@ export default function CustomersScreen() {
         <ActionButton
           label={plan ? t(`platformAdmin.plans.${plan}`) : t('platformAdmin.customers.allPlans')}
           onPress={() => {
-            setPlan(cycle<PlanCode>([undefined, 'normal', 'normal_multi', 'restaurant'], plan));
+            setPlan(
+              cycle<PlanCode>(
+                [undefined, 'normal', 'normal_multi', 'restaurant_normal', 'restaurant'],
+                plan
+              )
+            );
             setPage(1);
           }}
         />

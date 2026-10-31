@@ -121,7 +121,12 @@ export default function CustomerDetailScreen() {
       const n = note.trim() || undefined;
       if (kind === 'extend') return extendCustomer(id, Number(days), n);
       if (kind === 'paid')
-        return markCustomerPaid(id, plan, plan === 'normal' ? period : 'monthly', n);
+        return markCustomerPaid(
+          id,
+          plan,
+          plan === 'normal' || plan === 'restaurant_normal' ? period : 'monthly',
+          n
+        );
       if (kind === 'suspend') return suspendCustomer(id, true, n);
       if (kind === 'reactivate') return suspendCustomer(id, false);
       if (kind === 'plan') return changeCustomerPlan(id, plan);
@@ -287,11 +292,15 @@ export default function CustomerDetailScreen() {
                   options={[
                     { key: 'normal', label: t('platformAdmin.plans.normal') },
                     { key: 'normal_multi', label: t('platformAdmin.plans.normal_multi') },
+                    {
+                      key: 'restaurant_normal',
+                      label: t('platformAdmin.plans.restaurant_normal'),
+                    },
                     { key: 'restaurant', label: t('platformAdmin.plans.restaurant') },
                   ]}
                 />
               ) : null}
-              {panel === 'paid' && plan === 'normal' ? (
+              {panel === 'paid' && (plan === 'normal' || plan === 'restaurant_normal') ? (
                 <Tabs<'monthly' | 'quarterly'>
                   value={period}
                   onChange={setPeriod}
@@ -308,9 +317,13 @@ export default function CustomerDetailScreen() {
                       ? c.prices.restaurantMonthly
                       : plan === 'normal_multi'
                         ? (c.prices.normalMultiMonthly ?? 0)
-                        : period === 'monthly'
-                          ? c.prices.normalMonthly
-                          : c.prices.normalQuarterly
+                        : plan === 'restaurant_normal'
+                          ? ((period === 'monthly'
+                              ? c.prices.restaurantNormalMonthly
+                              : c.prices.restaurantNormalQuarterly) ?? 0)
+                          : period === 'monthly'
+                            ? c.prices.normalMonthly
+                            : c.prices.normalQuarterly
                   }
                   className="text-2xl"
                 />

@@ -224,7 +224,8 @@
       "monthly": "monthly",
       "quarterly": "every 3 months",
       "none": "No plan",
-      "normal_multi": "Normal Multi"
+      "normal_multi": "Normal Multi",
+      "restaurant_normal": "Normal Verify (Restaurant app)"
     },
     "banks": {
       "CBE": "CBE",
@@ -440,7 +441,8 @@
       "customers_one": "{{count}} customer",
       "otherCount_one": "{{count}} other device signed in",
       "backupLeft_one": "{{count}} backup code left",
-      "normalMultiDesc": "Receipt checks with any number of workers (or branches)"
+      "normalMultiDesc": "Receipt checks with any number of workers (or branches)",
+      "restaurantNormalDesc": "Restaurant app: waiters verify payments and keep tips · any number of waiters"
     },
     "health": {
       "title": "Health and errors",

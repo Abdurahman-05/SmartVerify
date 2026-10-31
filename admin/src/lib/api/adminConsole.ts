@@ -4,7 +4,7 @@ import { API_BASE_URL } from './client';
 /** The admin console's data: customers, money, rules, health and messages. */
 
 export type AccessStatus = 'trial' | 'active' | 'grace' | 'restricted' | 'suspended';
-export type PlanCode = 'normal' | 'normal_multi' | 'restaurant';
+export type PlanCode = 'normal' | 'normal_multi' | 'restaurant_normal' | 'restaurant';
 
 export interface CustomerSummary {
   id: string;
@@ -101,6 +101,8 @@ export interface CustomerDetail {
     normalQuarterly: number;
     /** Missing from older servers (and the mock). */
     normalMultiMonthly?: number;
+    restaurantNormalMonthly?: number;
+    restaurantNormalQuarterly?: number;
     restaurantMonthly: number;
   };
   payments: {
@@ -155,13 +157,21 @@ export interface PlatformSettings {
   priceNormalQuarterly: number;
   /** Missing from older servers (and the mock). */
   priceNormalMultiMonthly?: number;
+  /** Restaurant app's Normal Verify (missing from older servers and the mock). */
+  priceRestaurantNormalMonthly?: number;
+  priceRestaurantNormalQuarterly?: number;
   priceRestaurantMonthly: number;
 }
 export interface SettingsPage {
   settings: PlatformSettings;
   exceptions: { businessId: string; name: string; reason: string | null }[];
   impact: { overdue: number; restricted: number };
-  planCounts: { normal: number; normal_multi?: number; restaurant: number };
+  planCounts: {
+    normal: number;
+    normal_multi?: number;
+    restaurant_normal?: number;
+    restaurant: number;
+  };
   payTo: {
     cbe: { name: string; last4: string } | null;
     telebirr: { name: string; last4: string } | null;

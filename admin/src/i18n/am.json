@@ -218,7 +218,8 @@
       "monthly": "ወርሃዊ",
       "quarterly": "በየ3 ወሩ",
       "none": "ዕቅድ የለም",
-      "normal_multi": "Normal Multi"
+      "normal_multi": "Normal Multi",
+      "restaurant_normal": "Normal Verify (የሬስቶራንት መተግበሪያ)"
     },
     "banks": {
       "CBE": "ንግድ ባንክ",
@@ -430,7 +431,8 @@
       "otherDevices": "ሌሎች መሣሪያዎች",
       "otherCount": "{{count}} ሌሎች መሣሪያዎች ገብተዋል",
       "signOutOthers": "ሁሉንም አስወጣ",
-      "normalMultiDesc": "የደረሰኝ ማረጋገጫ ባልተገደበ ሰራተኞች (ወይም ቅርንጫፎች)"
+      "normalMultiDesc": "የደረሰኝ ማረጋገጫ ባልተገደበ ሰራተኞች (ወይም ቅርንጫፎች)",
+      "restaurantNormalDesc": "የሬስቶራንት መተግበሪያ፦ አስተናጋጆች ክፍያ ያረጋግጣሉ፣ ቲፕ ይይዛሉ · ያልተገደበ አስተናጋጆች"
     },
     "health": {
       "title": "ጤና እና ስህተቶች",

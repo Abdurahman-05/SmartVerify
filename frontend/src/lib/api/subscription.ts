@@ -28,6 +28,8 @@ export interface PaymentInfo {
     normal: { monthly: number; quarterly: number };
     /** Missing from older servers (and the mock). */
     normal_multi?: { monthly: number };
+    /** Restaurant app's Normal Verify (missing from older servers). */
+    restaurant_normal?: { monthly: number; quarterly: number };
     restaurant: { monthly: number };
   };
 }
