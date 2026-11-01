@@ -10,9 +10,14 @@ import { useSession } from '@/store/session';
 // A phone does not tell it about the network on its own, expo-network does.
 if (Platform.OS !== 'web') {
   onlineManager.setEventListener((setOnline) => {
-    const sub = Network.addNetworkStateListener((state) => {
+    const apply = (state: Network.NetworkState) =>
       setOnline(state.isConnected === true && state.isInternetReachable !== false);
-    });
+    // The listener only reports changes: start from the real state, so that going from offline
+    // (e.g. the app opened without internet) to online is seen and everything is fetched again.
+    void Network.getNetworkStateAsync()
+      .then(apply)
+      .catch(() => undefined);
+    const sub = Network.addNetworkStateListener(apply);
     return () => sub.remove();
   });
   // Back to the app (from another app or the lock screen): fresh data too.
