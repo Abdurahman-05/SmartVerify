@@ -13,10 +13,10 @@ const CHANNEL_ID = 'alerts';
  * Push works only in the installed app. In Expo Go (and on web) expo-notifications is never
  * loaded: loading it there fails (it needs native parts Expo Go does not give this app).
  */
-const pushPossible =
-  !USE_MOCK_NOTIFICATIONS &&
-  Platform.OS !== 'web' &&
-  Constants.executionEnvironment !== ExecutionEnvironment.StoreClient;
+const inExpoGo =
+  Constants.executionEnvironment === ExecutionEnvironment.StoreClient ||
+  Constants.appOwnership === 'expo';
+let pushPossible = !USE_MOCK_NOTIFICATIONS && Platform.OS !== 'web' && !inExpoGo;
 
 type NotificationsModule = typeof import('expo-notifications');
 let loaded: NotificationsModule | null = null;
@@ -25,8 +25,16 @@ let loaded: NotificationsModule | null = null;
 function notifications(): NotificationsModule | null {
   if (!pushPossible) return null;
   if (!loaded) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    loaded = require('expo-notifications') as NotificationsModule;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      loaded = require('expo-notifications') as NotificationsModule;
+      if (!loaded?.setNotificationHandler) throw new Error('expo-notifications not available');
+    } catch {
+      // Its native parts are missing (e.g. Expo Go): no push this time, in-app Alerts still work.
+      pushPossible = false;
+      loaded = null;
+      return null;
+    }
     // A push that arrives while the app is open still shows as a banner with sound.
     loaded.setNotificationHandler({
       handleNotification: async () => {
