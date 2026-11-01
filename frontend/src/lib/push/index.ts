@@ -1,3 +1,4 @@
+import { requireOptionalNativeModule } from 'expo';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
@@ -16,7 +17,15 @@ const CHANNEL_ID = 'alerts';
 const inExpoGo =
   Constants.executionEnvironment === ExecutionEnvironment.StoreClient ||
   Constants.appOwnership === 'expo';
-let pushPossible = !USE_MOCK_NOTIFICATIONS && Platform.OS !== 'web' && !inExpoGo;
+/**
+ * expo-notifications needs these native parts; checked without loading anything (a failed load
+ * would still show Expo's red error screen in development).
+ */
+const nativePartsPresent = () =>
+  requireOptionalNativeModule('ExpoApplication') !== null &&
+  requireOptionalNativeModule('ExpoPushTokenManager') !== null;
+let pushPossible =
+  !USE_MOCK_NOTIFICATIONS && Platform.OS !== 'web' && !inExpoGo && nativePartsPresent();
 
 type NotificationsModule = typeof import('expo-notifications');
 let loaded: NotificationsModule | null = null;
