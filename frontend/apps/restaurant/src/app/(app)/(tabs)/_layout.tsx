@@ -15,6 +15,7 @@ import {
 } from 'lucide-react-native';
 import type { ColorValue } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getNotifications, NOTIFICATIONS_POLL_MS, notificationsKey } from '@/lib/notifications';
 import { useFeatures } from '@/store/features';
@@ -44,6 +45,7 @@ const BellIcon = icon(Bell);
 
 export default function TabsLayout() {
   const brand = useBrandColors();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const role = useSession((s) => s.user?.role);
   const isChef = role === 'chef';
@@ -74,7 +76,11 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
-          ...((isWaiter || isChef) && { height: 72, paddingBottom: 10 }),
+          // Taller for waiter/chef, plus the room Android's own buttons take at the bottom.
+          ...((isWaiter || isChef) && {
+            height: 72 + insets.bottom,
+            paddingBottom: 10 + insets.bottom,
+          }),
         },
         sceneStyle: { backgroundColor: colors.background },
       }}
