@@ -3,6 +3,7 @@ import { Tabs } from 'expo-router';
 import { Bell, Clock, House, ShieldCheck, User, type LucideIcon } from 'lucide-react-native';
 import type { ColorValue } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getNotifications, NOTIFICATIONS_POLL_MS, notificationsKey } from '@/lib/notifications';
 import { useBrandColors } from '@/store/theme';
@@ -26,6 +27,7 @@ const ProfileIcon = icon(User);
 /** Shop app: the same five tabs for the owner and the workers. */
 export default function TabsLayout() {
   const brand = useBrandColors();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   // The unread count on the bell, checked every 30 seconds while the app is open.
   const { data: inbox } = useQuery({
@@ -43,7 +45,13 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: colors.navInactive,
         tabBarLabelStyle: { fontFamily: 'DMSans_700Bold', fontSize: 14 },
         tabBarItemStyle: { paddingTop: 4 },
-        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+          // Room for the icon and full label, plus the room Android's own buttons take.
+          height: 66 + insets.bottom,
+          paddingBottom: 8 + insets.bottom,
+        },
         sceneStyle: { backgroundColor: colors.background },
       }}
     >

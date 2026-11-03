@@ -76,11 +76,10 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
-          // Taller for waiter/chef, plus the room Android's own buttons take at the bottom.
-          ...((isWaiter || isChef) && {
-            height: 72 + insets.bottom,
-            paddingBottom: 10 + insets.bottom,
-          }),
+          // Room for the icon and full label (taller for waiter/chef), plus the room Android's own
+          // buttons take at the bottom.
+          height: (isWaiter || isChef ? 72 : 66) + insets.bottom,
+          paddingBottom: (isWaiter || isChef ? 10 : 8) + insets.bottom,
         },
         sceneStyle: { backgroundColor: colors.background },
       }}
