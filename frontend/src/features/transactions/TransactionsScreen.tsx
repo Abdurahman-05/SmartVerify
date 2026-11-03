@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { Download } from 'lucide-react-native';
+import { Calendar, Download } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, FlatList, Pressable, ScrollView, View } from 'react-native';
@@ -18,6 +18,7 @@ import { syncPayments, payMethods, paymentsKey, type PayMethod } from '@/lib/his
 import { isDay, isPeriod, type Period } from '@/lib/period';
 import { failedChecksKey, getFailedChecks } from '@/lib/verification';
 import { useSession } from '@/store/session';
+import { colors } from '@/theme/tokens';
 
 import { CalendarSheet } from './CalendarSheet';
 import { methodKey } from './methods';
@@ -193,12 +194,12 @@ export default function TransactionsScreen() {
             onPress={() => setSheet('period')}
             accessibilityRole="button"
             accessibilityLabel={t('period.choose')}
-            className="h-11 w-11 overflow-hidden rounded-[10px] border-2 border-text active:opacity-70"
+            className="h-11 w-11 items-center justify-center rounded-full active:bg-border"
           >
-            {/* A small calendar page: the chosen day's number (today's when a period is shown). */}
-            <View className="h-2.5 bg-text" />
-            <View className="flex-1 items-center justify-center">
-              <Text font="bold" className="text-base leading-tight">
+            {/* The calendar icon with the chosen day's number inside (today's for a period). */}
+            <Calendar size={34} color={colors.text} strokeWidth={2} />
+            <View className="absolute inset-x-0 bottom-[7px] items-center">
+              <Text font="bold" className="text-sm leading-none">
                 {(dayDate ?? new Date()).getDate()}
               </Text>
             </View>
