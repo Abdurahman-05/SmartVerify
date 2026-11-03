@@ -54,7 +54,16 @@ export function Button({
       className={`w-full rounded-button ${heights[size]} ${containers[variant]} ${disabled ? 'opacity-50' : 'active:opacity-80'}`}
     >
       <View className="flex-1 flex-row items-center justify-center gap-2 px-4">
-        <Text font="bold" className="text-[19px]" style={{ color: textColor[variant] }}>
+        {/* One line always: on phones with large text the label shrinks a little instead of
+            breaking out of the button. */}
+        <Text
+          font="bold"
+          className="shrink text-[19px]"
+          style={{ color: textColor[variant] }}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.75}
+        >
           {label}
         </Text>
         {Icon ? <Icon size={22} color={textColor[variant]} strokeWidth={2.4} /> : null}

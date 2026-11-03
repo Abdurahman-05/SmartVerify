@@ -515,7 +515,7 @@
       "emptyHint": "To remove everything, cancel the order instead.",
       "save": "Save changes",
       "edit": "Change",
-      "cancel": "Cancel order",
+      "cancel": "Cancel",
       "cancelTitle": "Cancel order #{{number}}?",
       "cancelBody": "Why is it cancelled? The kitchen will be told.",
       "keep": "Keep it",
