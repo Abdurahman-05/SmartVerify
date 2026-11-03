@@ -208,7 +208,11 @@
       "overview": "አጠቃላይ እይታ",
       "overviewSub": "ሽያጭ፣ ጥሬ ገንዘብ፣ ባንክ እና ጉርሻ",
       "moneyFlow": "የገንዘብ ፍሰት",
-      "moneyFlowSub": "ሽያጭ፣ ወጪ፣ የቀረው"
+      "moneyFlowSub": "ሽያጭ፣ ወጪ፣ የቀረው",
+      "buyList": "የግዢ ዝርዝር",
+      "buyListSub": "ኩሽናው የሚያስፈልገው",
+      "moneyOut": "ወጪዎች",
+      "moneyOutSub": "የወጣ ገንዘብ አስገባ እና እይ"
     }
   },
   "nav": {

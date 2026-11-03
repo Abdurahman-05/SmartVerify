@@ -6,11 +6,9 @@ import {
   ChefHat,
   Clock,
   House,
-  NotebookPen,
   ReceiptText,
   ShieldCheck,
   User,
-  Wallet,
   type LucideIcon,
 } from 'lucide-react-native';
 import type { ColorValue } from 'react-native';
@@ -19,7 +17,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { TabButton } from '@/components/ui/TabButton';
 import { getNotifications, NOTIFICATIONS_POLL_MS, notificationsKey } from '@/lib/notifications';
-import { useFeatures } from '@/store/features';
 import { useBrandColors } from '@/store/theme';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
@@ -39,8 +36,6 @@ const HistoryIcon = icon(Clock);
 const ProfileIcon = icon(User);
 const NewOrderIcon = icon(ReceiptText);
 const ActivityIcon = icon(ChartColumn);
-const BuyListIcon = icon(NotebookPen);
-const MoneyOutIcon = icon(Wallet);
 const KitchenIcon = icon(ChefHat);
 const BellIcon = icon(Bell);
 
@@ -54,10 +49,6 @@ export default function TabsLayout() {
   // keep Home / Verify / History.
   const isWaiter = useSession((s) => s.user?.role === 'waiter' && s.user.plan === 'restaurant');
   const forWaiter = (show: boolean) => (show ? {} : { href: null });
-  // Manager extras: a tab only while its feature is on (otherwise no tab at all).
-  const isManager = role === 'manager';
-  const buyList = useFeatures((s) => s.featureBuyList);
-  const moneyOut = useFeatures((s) => s.featureMoneyOut);
   // The unread count on the bell, checked every 30 seconds while the app is open.
   const { data: inbox } = useQuery({
     queryKey: notificationsKey,
@@ -128,20 +119,10 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="buy-list"
-        options={{
-          title: t('extras.buy.tab'),
-          tabBarIcon: BuyListIcon,
-          ...forWaiter(isManager && buyList),
-        }}
+        // Opened from Home tiles: five tabs are enough.
+        options={{ title: t('extras.buy.tab'), href: null }}
       />
-      <Tabs.Screen
-        name="money-out"
-        options={{
-          title: t('extras.money.tab'),
-          tabBarIcon: MoneyOutIcon,
-          ...forWaiter(isManager && moneyOut),
-        }}
-      />
+      <Tabs.Screen name="money-out" options={{ title: t('extras.money.tab'), href: null }} />
       <Tabs.Screen
         name="cook"
         options={{ title: t('kitchen.title'), tabBarIcon: KitchenIcon, ...forWaiter(isChef) }}

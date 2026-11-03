@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Check, ChevronRight } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -78,6 +78,7 @@ function BuyRow({ item, onPress }: { item: BuyItem; onPress?: () => void }) {
 
 function BuyList() {
   const { t } = useTranslation();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<BuyStatus>('OPEN');
   const [picked, setPicked] = useState<BuyItem | null>(null);
@@ -134,7 +135,11 @@ function BuyList() {
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-background">
-      <ScreenHeader title={t('extras.buy.title')} subtitle={t('extras.buy.subtitle')} />
+      <ScreenHeader
+        title={t('extras.buy.title')}
+        subtitle={t('extras.buy.subtitle')}
+        onBack={() => (router.canGoBack() ? router.back() : router.navigate('/home'))}
+      />
       <View className="flex-row gap-2 px-4 pb-2.5" accessibilityRole="radiogroup">
         <Pill
           label={`${t('extras.buy.toBuy')} (${openCount.data?.length ?? 0})`}

@@ -245,11 +245,12 @@ export default function HomeScreen() {
   });
   const subtitleFor = useActionSubtitle(user?.plan ?? null, tablesWaiting);
   const moneyOut = useFeatures((s) => s.featureMoneyOut);
+  const buyList = useFeatures((s) => s.featureBuyList);
 
   if (!user) return <Redirect href="/sign-in" />;
   if (user.role === 'chef') return <Redirect href="/cook" />;
 
-  const actions = getHomeActions(user.plan, user.role, moneyOut);
+  const actions = getHomeActions(user.plan, user.role, { buyList, moneyOut });
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-background">

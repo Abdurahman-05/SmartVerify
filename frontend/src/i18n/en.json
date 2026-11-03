@@ -208,7 +208,11 @@
       "overview": "Overview",
       "overviewSub": "Sales, cash, bank and tips",
       "moneyFlow": "Money flow",
-      "moneyFlowSub": "Sales, expenses, what is left"
+      "moneyFlowSub": "Sales, expenses, what is left",
+      "buyList": "Buy list",
+      "buyListSub": "What the kitchen needs",
+      "moneyOut": "Expenses",
+      "moneyOutSub": "Add and see money paid out"
     }
   },
   "nav": {

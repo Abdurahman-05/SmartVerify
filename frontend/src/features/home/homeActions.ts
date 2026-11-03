@@ -1,10 +1,12 @@
 import type { Href } from 'expo-router';
 import {
+  Banknote,
   ChartColumn,
   CircleDollarSign,
   LayoutDashboard,
   Landmark,
   List,
+  NotebookPen,
   ReceiptText,
   ShieldCheck,
   Wallet,
@@ -20,6 +22,8 @@ export type HomeActionKey =
   | 'newOrder'
   | 'overview'
   | 'moneyFlow'
+  | 'buyList'
+  | 'moneyOut'
   | 'tips'
   | 'transactions'
   | 'reports'
@@ -37,6 +41,8 @@ const actions: Record<HomeActionKey, HomeAction> = {
   newOrder: { key: 'newOrder', icon: ReceiptText, href: '/orders' },
   overview: { key: 'overview', icon: LayoutDashboard, href: '/admin' },
   moneyFlow: { key: 'moneyFlow', icon: Wallet, href: '/money-flow' },
+  buyList: { key: 'buyList', icon: NotebookPen, href: '/buy-list' },
+  moneyOut: { key: 'moneyOut', icon: Banknote, href: '/money-out' },
   tips: { key: 'tips', icon: CircleDollarSign, href: '/tips' },
   transactions: { key: 'transactions', icon: List, href: '/transactions' },
   reports: { key: 'reports', icon: ChartColumn, href: '/reports' },
@@ -63,8 +69,12 @@ const restaurantKeys: HomeActionKey[] = [
   'subscription',
 ];
 
-/** moneyFlow: Money out is switched on (Restaurant Plus), so owner and manager get Money flow. */
-export function getHomeActions(plan: Plan | null, role: Role, moneyFlow = false): HomeAction[] {
+/** The owner extras switched on (Restaurant Plus): each adds its Home tiles for owner and manager. */
+export function getHomeActions(
+  plan: Plan | null,
+  role: Role,
+  extras: { buyList: boolean; moneyOut: boolean } = { buyList: false, moneyOut: false }
+): HomeAction[] {
   // Normal and Normal Multi: no restaurant buttons. No plan yet: everything (not in the Normal app).
   const showRestaurant = plan === 'restaurant' || (plan === null && !isNormalApp);
   // Normal plan in the Restaurant app: waiters keep tips from overpaid receipts.
@@ -75,7 +85,11 @@ export function getHomeActions(plan: Plan | null, role: Role, moneyFlow = false)
       : [...normalKeys.slice(0, 2), 'tips' as const, ...normalKeys.slice(2)];
   // The overview (sales, cash, bank, tips) is for owner and manager on Restaurant Plus.
   const manages = role === 'owner' || role === 'manager';
-  const extra: HomeActionKey[] = moneyFlow ? ['overview', 'moneyFlow'] : ['overview'];
+  const extra: HomeActionKey[] = [
+    'overview',
+    ...(extras.moneyOut ? (['moneyFlow', 'moneyOut'] as const) : []),
+    ...(extras.buyList ? (['buyList'] as const) : []),
+  ];
   const keys: HomeActionKey[] =
     plan === 'restaurant' && manages ? [...base.slice(0, 2), ...extra, ...base.slice(2)] : base;
   // Bank accounts and the subscription are the owner's and manager's.

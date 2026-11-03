@@ -237,6 +237,7 @@ function MoneyOut() {
       <ScreenHeader
         title={t('extras.money.title')}
         subtitle={t('extras.money.subtitle')}
+        onBack={() => (router.canGoBack() ? router.back() : router.navigate('/home'))}
         right={<CalendarButton day={dayDate} onPress={() => setChoosing(true)} />}
       />
       <FlatList
