@@ -320,7 +320,7 @@ function OrderBlock({
             <Button
               label={t('bills.change.edit')}
               icon={Pencil}
-              variant="outline"
+              variant="primary"
               size="md"
               onPress={onEdit}
             />
@@ -329,7 +329,7 @@ function OrderBlock({
             <Button
               label={t('bills.change.cancel')}
               icon={X}
-              variant="outline"
+              variant="danger"
               size="md"
               onPress={onCancel}
             />
