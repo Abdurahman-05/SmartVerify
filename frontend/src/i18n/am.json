@@ -206,7 +206,9 @@
       "subscription": "የደንበኝነት ምዝገባ",
       "subscriptionSubNone": "እቅድ ይምረጡ",
       "overview": "አጠቃላይ እይታ",
-      "overviewSub": "ሽያጭ፣ ጥሬ ገንዘብ፣ ባንክ እና ጉርሻ"
+      "overviewSub": "ሽያጭ፣ ጥሬ ገንዘብ፣ ባንክ እና ጉርሻ",
+      "moneyFlow": "የገንዘብ ፍሰት",
+      "moneyFlowSub": "ሽያጭ፣ ወጪ፣ የቀረው"
     }
   },
   "nav": {
@@ -1316,8 +1318,61 @@
         "FOOD": "ምግብ",
         "TRANSPORT": "ትራንስፖርት",
         "BILLS": "ሂሳቦች",
-        "OTHER": "ሌላ"
-      }
+        "OTHER": "ሌላ",
+        "DRINKS": "መጠጥ",
+        "GAS": "ጋዝ እና ነዳጅ",
+        "RENT": "ኪራይ",
+        "SALARY": "ደመወዝ",
+        "REPAIRS": "ጥገና"
+      },
+      "entriesIn": "ወጪዎች",
+      "emptyIn": "በዚህ ጊዜ ውስጥ ወጪ የለም።",
+      "spentIn": "ወጪ · {{count}} ወጪዎች",
+      "filterNew": "አዲስ",
+      "new": "አዲስ",
+      "deleted": "ተሰርዟል · {{reason}}",
+      "changed": "በ{{name}} ተቀይሯል · {{time}} (ቀድሞ {{amount}})",
+      "changedNoAmount": "በ{{name}} ተቀይሯል · {{time}}",
+      "detailTitle": "ወጪ",
+      "notChecked": "አዲስ · ገና አልታየም",
+      "kind": "ዓይነት",
+      "addedBy": "ያስገባው",
+      "when": "መቼ",
+      "looksRight": "ትክክል ነው",
+      "change": "ቀይር",
+      "delete": "ሰርዝ",
+      "deleteHint": "ሲሰረዝ ምክንያት ይጠየቃል። ያስገባው ሰው ይነገረዋል።",
+      "deleteTitle": "ይህ ወጪ ይሰረዝ?",
+      "deleteBody": "ለምን? ያስገባው ሰው ይነገረዋል።",
+      "deleteReasons": {
+        "mistake": "በስህተት ገብቷል",
+        "twice": "ሁለት ጊዜ ገብቷል",
+        "notReal": "እውነተኛ ወጪ አይደለም",
+        "wrongAmount": "የተሳሳተ መጠን"
+      },
+      "keep": "ይቆይ",
+      "changeTitle": "ወጪ ቀይር",
+      "ownerTold": "ባለቤቱ ስለ እያንዳንዱ ወጪ ይነገረዋል።",
+      "saved": "ተቀምጧል",
+      "cashDrawer": "የጥሬ ገንዘብ ሳጥን"
+    },
+    "flow": {
+      "title": "የገንዘብ ፍሰት",
+      "tile": "የገንዘብ ፍሰት",
+      "tileHint": "ሽያጭ፣ ወጪ፣ የቀረው",
+      "left": "ከወጪ በኋላ የቀረው",
+      "sales": "ሽያጭ",
+      "expenses": "ወጪ",
+      "cashInDrawer": "በሳጥን ያለ ጥሬ ገንዘብ",
+      "bank": "ባንክ",
+      "inOut": "ገቢ {{in}} · ወጪ {{out}}",
+      "whereWent": "ገንዘቡ የት ሄደ",
+      "noExpenses": "በዚህ ጊዜ ውስጥ ወጪ የለም።",
+      "newFromStaff_one": "{{count}} አዲስ ወጪ ለማየት",
+      "newFromStaff_other": "{{count}} አዲስ ወጪዎች ለማየት",
+      "seeExpenses": "ወጪዎችን እይ",
+      "report": "ሪፖርት (PDF)",
+      "notAllowed": "ይህን ማየት የሚችለው ባለቤቱ (ወይም ሪፖርት እንዲያይ የተፈቀደለት ማኔጀር) ብቻ ነው።"
     }
   },
   "wrongApp": {
@@ -1378,6 +1433,14 @@
     "orderCancelled": {
       "title": "ትዕዛዝ ተሰርዟል · {{label}}",
       "body": "ትዕዛዝ #{{number}}፦ {{reason}}"
+    },
+    "newExpense": {
+      "title": "አዲስ ወጪ · {{amount}}",
+      "body": "{{name}}፦ {{title}} · {{from}}"
+    },
+    "expenseDeleted": {
+      "title": "ወጪ ተሰርዟል · {{title}}",
+      "body": "{{reason}}"
     }
   },
   "lock": {

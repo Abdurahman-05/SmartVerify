@@ -206,7 +206,9 @@
       "subscription": "Subscription",
       "subscriptionSubNone": "Choose a plan",
       "overview": "Overview",
-      "overviewSub": "Sales, cash, bank and tips"
+      "overviewSub": "Sales, cash, bank and tips",
+      "moneyFlow": "Money flow",
+      "moneyFlowSub": "Sales, expenses, what is left"
     }
   },
   "nav": {
@@ -1316,8 +1318,61 @@
         "FOOD": "Food",
         "TRANSPORT": "Transport",
         "BILLS": "Bills",
-        "OTHER": "Other"
-      }
+        "OTHER": "Other",
+        "DRINKS": "Drinks",
+        "GAS": "Gas & fuel",
+        "RENT": "Rent",
+        "SALARY": "Salary",
+        "REPAIRS": "Repairs"
+      },
+      "entriesIn": "Expenses",
+      "emptyIn": "No expenses in this time.",
+      "spentIn": "Spent · {{count}} expenses",
+      "filterNew": "New",
+      "new": "New",
+      "deleted": "Deleted · {{reason}}",
+      "changed": "Changed by {{name}} · {{time}} (was {{amount}})",
+      "changedNoAmount": "Changed by {{name}} · {{time}}",
+      "detailTitle": "Expense",
+      "notChecked": "New · not checked yet",
+      "kind": "Kind",
+      "addedBy": "Added by",
+      "when": "When",
+      "looksRight": "Looks right",
+      "change": "Change",
+      "delete": "Delete",
+      "deleteHint": "Delete asks for a reason. The person who added it is told.",
+      "deleteTitle": "Delete this expense?",
+      "deleteBody": "Why? The person who added it will be told.",
+      "deleteReasons": {
+        "mistake": "Entered by mistake",
+        "twice": "Entered twice",
+        "notReal": "Not a real expense",
+        "wrongAmount": "Wrong amount"
+      },
+      "keep": "Keep it",
+      "changeTitle": "Change expense",
+      "ownerTold": "The owner is told about every expense.",
+      "saved": "Saved",
+      "cashDrawer": "Cash drawer"
+    },
+    "flow": {
+      "title": "Money flow",
+      "tile": "Money flow",
+      "tileHint": "Sales, expenses, what is left",
+      "left": "Left after expenses",
+      "sales": "Sales",
+      "expenses": "Expenses",
+      "cashInDrawer": "Cash in drawer",
+      "bank": "Bank",
+      "inOut": "In {{in}} · Out {{out}}",
+      "whereWent": "Where the money went",
+      "noExpenses": "No expenses in this time.",
+      "newFromStaff_one": "{{count}} new expense to check",
+      "newFromStaff_other": "{{count}} new expenses to check",
+      "seeExpenses": "See expenses",
+      "report": "Report (PDF)",
+      "notAllowed": "Only the owner (or a manager allowed to see reports) can see this."
     }
   },
   "wrongApp": {
@@ -1378,6 +1433,14 @@
     "orderCancelled": {
       "title": "Order cancelled · {{label}}",
       "body": "Order #{{number}}: {{reason}}"
+    },
+    "newExpense": {
+      "title": "New expense · {{amount}}",
+      "body": "{{name}}: {{title}} · {{from}}"
+    },
+    "expenseDeleted": {
+      "title": "Expense deleted · {{title}}",
+      "body": "{{reason}}"
     }
   },
   "lock": {

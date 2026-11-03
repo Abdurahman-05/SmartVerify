@@ -8,6 +8,7 @@ import {
   Clock,
   Landmark,
   ShieldAlert,
+  Wallet,
   Star,
   type LucideIcon,
 } from 'lucide-react-native';
@@ -44,6 +45,8 @@ const icons: Record<string, LucideIcon> = {
   daily_summary: ChartColumn,
   plan_ending: Clock,
   plan_late: CircleAlert,
+  new_expense: Wallet,
+  expense_deleted: CircleAlert,
 };
 
 const str = (v: unknown) => (typeof v === 'string' || typeof v === 'number' ? String(v) : '');
@@ -123,6 +126,20 @@ function useNotificationText() {
           title: t(`notifications.planLate.${str(d.status) || 'grace'}`),
           body: t('notifications.planLate.body'),
         };
+      case 'new_expense':
+        return {
+          title: t('notifications.newExpense.title', { amount: formatMoney(num(d.amountEtb)) }),
+          body: t('notifications.newExpense.body', {
+            name: str(d.name),
+            title: str(d.title),
+            from: t(d.paidFrom === 'BANK' ? 'extras.bank' : 'extras.cash'),
+          }),
+        };
+      case 'expense_deleted':
+        return {
+          title: t('notifications.expenseDeleted.title', { title: str(d.title) }),
+          body: t('notifications.expenseDeleted.body', { reason: str(d.reason) }),
+        };
       default:
         return { title: t('notifications.title'), body: '' };
     }
@@ -144,6 +161,9 @@ function targetOf(n: AppNotification, role: string | undefined): Href | null {
     case 'plan_ending':
     case 'plan_late':
       return role === 'owner' ? '/subscription' : null;
+    case 'new_expense':
+    case 'expense_deleted':
+      return typeof n.data.spendingId === 'string' ? `/expense/${n.data.spendingId}` : null;
     default:
       return null;
   }

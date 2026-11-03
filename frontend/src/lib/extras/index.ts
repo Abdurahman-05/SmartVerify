@@ -31,3 +31,88 @@ export const addSpending = impl.addSpending;
 /** React Query keys. Buy list and money out start with their own name so one call reloads all. */
 export const buyItemsKey = ['buy-items'] as const;
 export const spendingsKey = ['spendings'] as const;
+
+// ─── Money flow and owner control ────────────────────────────────────────────
+export type {
+  Expense,
+  ExpenseCategory,
+  ExpenseChange,
+  ExpenseRange,
+  ExpensesResult,
+  MoneyFlow,
+  MoneySplit,
+} from '@/lib/api/extras';
+
+/** Every kind, in the order the add sheet shows them. */
+export const expenseCategories: real.ExpenseCategory[] = [
+  'FOOD',
+  'DRINKS',
+  'GAS',
+  'RENT',
+  'SALARY',
+  'REPAIRS',
+  'TRANSPORT',
+  'BILLS',
+  'OTHER',
+];
+
+// The offline mock only keeps plain spendings: they show as reviewed, never changed or deleted.
+const asExpense = (s: Awaited<ReturnType<typeof mock.addSpending>>): real.Expense => ({
+  ...s,
+  isNew: false,
+  changedAt: null,
+  changedBy: null,
+  oldAmount: null,
+  deletedAt: null,
+  deleteReason: null,
+});
+
+async function mockExpenses(): Promise<real.ExpensesResult> {
+  const result = await mock.getSpendings();
+  return { ...result, entries: result.entries.map(asExpense), newCount: 0 };
+}
+
+async function mockExpense(id: string): Promise<real.Expense> {
+  const found = (await mockExpenses()).entries.find((e) => e.id === id);
+  if (!found) throw new Error('NOT_FOUND');
+  return found;
+}
+
+export const getExpenses: typeof real.getExpenses = USE_MOCK_EXTRAS
+  ? () => mockExpenses()
+  : real.getExpenses;
+export const getExpense: typeof real.getExpense = USE_MOCK_EXTRAS ? mockExpense : real.getExpense;
+export const addExpense: typeof real.addExpense = USE_MOCK_EXTRAS
+  ? async (input) =>
+      asExpense(
+        await mock.addSpending({
+          ...input,
+          category:
+            (['FOOD', 'TRANSPORT', 'BILLS'] as const).find((c) => c === input.category) ?? 'OTHER',
+        })
+      )
+  : real.addExpense;
+export const reviewExpense: typeof real.reviewExpense = USE_MOCK_EXTRAS
+  ? mockExpense
+  : real.reviewExpense;
+export const changeExpense: typeof real.changeExpense = USE_MOCK_EXTRAS
+  ? (id) => mockExpense(id)
+  : real.changeExpense;
+export const deleteExpense: typeof real.deleteExpense = USE_MOCK_EXTRAS
+  ? (id) => mockExpense(id)
+  : real.deleteExpense;
+export const getMoneyFlow: typeof real.getMoneyFlow = USE_MOCK_EXTRAS
+  ? async () => {
+      const { totals } = await mock.getSpendings();
+      const out = { total: totals.cash + totals.bank, cash: totals.cash, bank: totals.bank };
+      const none = { total: 0, cash: 0, bank: 0 };
+      const left = { total: -out.total, cash: -out.cash, bank: -out.bank };
+      return { sales: none, expenses: out, left, byCategory: [], newCount: 0 };
+    }
+  : real.getMoneyFlow;
+
+export const expensesKey = (range: real.ExpenseRange) =>
+  ['spendings', range.day ?? range.period] as const;
+export const expenseKey = (id: string) => ['spendings', 'one', id] as const;
+export const moneyFlowKey = (range: real.ExpenseRange) =>
+  ['money-flow', range.day ?? range.period] as const;

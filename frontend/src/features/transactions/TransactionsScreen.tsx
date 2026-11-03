@@ -19,6 +19,7 @@ import { isDay, isPeriod, type Period } from '@/lib/period';
 import { failedChecksKey, getFailedChecks } from '@/lib/verification';
 import { useSession } from '@/store/session';
 
+import { CalendarButton } from './CalendarButton';
 import { CalendarSheet } from './CalendarSheet';
 import { methodKey } from './methods';
 import { PaymentRow } from './PaymentRow';
@@ -196,26 +197,7 @@ export default function TransactionsScreen() {
       <ScreenHeader
         title={t('transactions.title')}
         onBack={() => router.navigate('/home')}
-        right={
-          <Pressable
-            onPress={() => setSheet('period')}
-            accessibilityRole="button"
-            accessibilityLabel={t('period.choose')}
-            className="h-11 w-11 items-center active:opacity-80"
-          >
-            {/* A calendar page in the brand colour: two rings on top, the chosen day's number
-                (today's for a period) in white in the middle. */}
-            <View className="mt-1 h-10 w-10 items-center justify-center rounded-[11px] bg-primary">
-              <Text font="bold" tone="inverse" className="text-[17px] leading-tight">
-                {(dayDate ?? new Date()).getDate()}
-              </Text>
-            </View>
-            <View className="absolute top-0 w-full flex-row justify-center gap-4">
-              <View className="h-2.5 w-[5px] rounded-full border border-surface bg-primary" />
-              <View className="h-2.5 w-[5px] rounded-full border border-surface bg-primary" />
-            </View>
-          </Pressable>
-        }
+        right={<CalendarButton day={dayDate} onPress={() => setSheet('period')} />}
       />
 
       {showFailed ? (

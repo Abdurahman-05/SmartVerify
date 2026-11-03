@@ -12,25 +12,56 @@ import { Text } from '@/components/ui/Text';
 import { Pill } from '@/features/orders/Pill';
 import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly } from '@/lib/format';
-import { addSpending, spendingsKey, type PaidFrom, type SpendingCategory } from '@/lib/extras';
+import {
+  addExpense,
+  changeExpense,
+  expenseCategories,
+  spendingsKey,
+  type Expense,
+  type ExpenseCategory,
+  type PaidFrom,
+} from '@/lib/extras';
+import { useSession } from '@/store/session';
 
 const MAX_AMOUNT_DIGITS = 7;
-export const categories: SpendingCategory[] = ['FOOD', 'TRANSPORT', 'BILLS', 'OTHER'];
 
-/** Bottom sheet: what the money was for, how much, what type, and where it came from. */
-export function AddSpendingSheet({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+/**
+ * Bottom sheet: what the money was for, how much, what kind, and where it came from. With
+ * `editing` the owner corrects that expense instead (the server keeps the change on it).
+ */
+export function AddSpendingSheet({
+  visible,
+  onClose,
+  editing,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  editing?: Expense;
+}) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [title, setTitle] = useState('');
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState<SpendingCategory>('FOOD');
-  const [paidFrom, setPaidFrom] = useState<PaidFrom>('CASH');
+  const isOwner = useSession((st) => st.user?.role === 'owner');
+  const [title, setTitle] = useState(editing?.title ?? '');
+  const [amount, setAmount] = useState(editing ? String(editing.amount) : '');
+  const [category, setCategory] = useState<ExpenseCategory>(editing?.category ?? 'FOOD');
+  const [paidFrom, setPaidFrom] = useState<PaidFrom>(editing?.paidFrom ?? 'CASH');
   const [errors, setErrors] = useState<{ title?: boolean; amount?: boolean }>({});
 
   const save = useMutation({
-    mutationFn: addSpending,
+    mutationFn: (input: {
+      title: string;
+      amount: number;
+      category: ExpenseCategory;
+      paidFrom: PaidFrom;
+    }) => (editing ? changeExpense(editing.id, input) : addExpense(input)),
     onSuccess: () => {
+      // Lists, the one expense and the money flow all start with these keys.
       void queryClient.invalidateQueries({ queryKey: spendingsKey });
+      void queryClient.invalidateQueries({ queryKey: ['money-flow'] });
+      if (editing) {
+        onClose();
+        return;
+      }
       setTitle('');
       setAmount('');
       setCategory('FOOD');
@@ -51,7 +82,7 @@ export function AddSpendingSheet({ visible, onClose }: { visible: boolean; onClo
     <BottomSheet visible={visible} onClose={onClose}>
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ gap: 12 }}>
         <Text font="heading" className="text-[26px]" accessibilityRole="header">
-          {t('extras.money.addTitle')}
+          {t(editing ? 'extras.money.changeTitle' : 'extras.money.addTitle')}
         </Text>
         <Input
           label={t('extras.money.what')}
@@ -81,7 +112,7 @@ export function AddSpendingSheet({ visible, onClose }: { visible: boolean; onClo
             {t('extras.money.type')}
           </Text>
           <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
-            {categories.map((c) => (
+            {expenseCategories.map((c) => (
               <Pill
                 key={c}
                 label={t(`extras.money.categories.${c}`)}
@@ -112,6 +143,11 @@ export function AddSpendingSheet({ visible, onClose }: { visible: boolean; onClo
           </View>
         </View>
         <Button label={t('common.save')} icon={Save} disabled={save.isPending} onPress={submit} />
+        {editing || isOwner ? null : (
+          <Text tone="muted" className="text-center text-sm">
+            {t('extras.money.ownerTold')}
+          </Text>
+        )}
         <Button label={t('common.cancel')} variant="outline" size="md" onPress={onClose} />
       </ScrollView>
 

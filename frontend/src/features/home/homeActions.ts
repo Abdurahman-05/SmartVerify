@@ -7,6 +7,7 @@ import {
   List,
   ReceiptText,
   ShieldCheck,
+  Wallet,
   Star,
   type LucideIcon,
 } from 'lucide-react-native';
@@ -18,6 +19,7 @@ export type HomeActionKey =
   | 'verify'
   | 'newOrder'
   | 'overview'
+  | 'moneyFlow'
   | 'tips'
   | 'transactions'
   | 'reports'
@@ -34,6 +36,7 @@ const actions: Record<HomeActionKey, HomeAction> = {
   verify: { key: 'verify', icon: ShieldCheck, href: '/verify' },
   newOrder: { key: 'newOrder', icon: ReceiptText, href: '/orders' },
   overview: { key: 'overview', icon: LayoutDashboard, href: '/admin' },
+  moneyFlow: { key: 'moneyFlow', icon: Wallet, href: '/money-flow' },
   tips: { key: 'tips', icon: CircleDollarSign, href: '/tips' },
   transactions: { key: 'transactions', icon: List, href: '/transactions' },
   reports: { key: 'reports', icon: ChartColumn, href: '/reports' },
@@ -60,7 +63,8 @@ const restaurantKeys: HomeActionKey[] = [
   'subscription',
 ];
 
-export function getHomeActions(plan: Plan | null, role: Role): HomeAction[] {
+/** moneyFlow: Money out is switched on (Restaurant Plus), so owner and manager get Money flow. */
+export function getHomeActions(plan: Plan | null, role: Role, moneyFlow = false): HomeAction[] {
   // Normal and Normal Multi: no restaurant buttons. No plan yet: everything (not in the Normal app).
   const showRestaurant = plan === 'restaurant' || (plan === null && !isNormalApp);
   // Normal plan in the Restaurant app: waiters keep tips from overpaid receipts.
@@ -71,8 +75,9 @@ export function getHomeActions(plan: Plan | null, role: Role): HomeAction[] {
       : [...normalKeys.slice(0, 2), 'tips' as const, ...normalKeys.slice(2)];
   // The overview (sales, cash, bank, tips) is for owner and manager on Restaurant Plus.
   const manages = role === 'owner' || role === 'manager';
+  const extra: HomeActionKey[] = moneyFlow ? ['overview', 'moneyFlow'] : ['overview'];
   const keys: HomeActionKey[] =
-    plan === 'restaurant' && manages ? [...base.slice(0, 2), 'overview', ...base.slice(2)] : base;
+    plan === 'restaurant' && manages ? [...base.slice(0, 2), ...extra, ...base.slice(2)] : base;
   // Bank accounts and the subscription are the owner's and manager's.
   const visible = manages ? keys : keys.filter((k) => k !== 'bankAccount' && k !== 'subscription');
   return visible.map((key) => {

@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandMark } from '@/components/ui/BrandMark';
 import { Text } from '@/components/ui/Text';
+import { useFeatures } from '@/store/features';
 import { useBrandColors } from '@/store/theme';
 import { billsKey, getBills } from '@/lib/bills';
 import { paymentsKey, syncPayments } from '@/lib/history';
@@ -243,11 +244,12 @@ export default function HomeScreen() {
     enabled: isRestaurant,
   });
   const subtitleFor = useActionSubtitle(user?.plan ?? null, tablesWaiting);
+  const moneyOut = useFeatures((s) => s.featureMoneyOut);
 
   if (!user) return <Redirect href="/sign-in" />;
   if (user.role === 'chef') return <Redirect href="/cook" />;
 
-  const actions = getHomeActions(user.plan, user.role);
+  const actions = getHomeActions(user.plan, user.role, moneyOut);
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-background">

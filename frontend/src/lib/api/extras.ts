@@ -41,3 +41,86 @@ export const getSpendings = () => api<SpendingsResult>('/spendings');
 /** POST /spendings — manager or owner. */
 export const addSpending = (input: NewSpending) =>
   api<Spending>('/spendings', { method: 'POST', body: input });
+
+// ─── Money flow and owner control ────────────────────────────────────────────
+
+/** Every kind of expense the server takes (the mock knows only the first four). */
+export type ExpenseCategory =
+  'FOOD' | 'DRINKS' | 'GAS' | 'RENT' | 'SALARY' | 'REPAIRS' | 'TRANSPORT' | 'BILLS' | 'OTHER';
+
+/** An expense as the server sends it now: with the owner's review, change and delete. */
+export interface Expense extends Omit<Spending, 'category'> {
+  category: ExpenseCategory;
+  /** Added by someone else and not yet looked at by the owner. */
+  isNew: boolean;
+  changedAt: string | null;
+  changedBy: string | null;
+  /** The amount before the owner's last change. */
+  oldAmount: number | null;
+  /** Deleted by the owner: still listed (crossed out), never counted. */
+  deletedAt: string | null;
+  deleteReason: string | null;
+}
+
+export interface ExpensesResult extends Omit<SpendingsResult, 'entries'> {
+  entries: Expense[];
+  newCount: number;
+}
+
+/** today / 7 days / 30 days, or one day (YYYY-MM-DD). */
+export interface ExpenseRange {
+  period: 'today' | '7d' | '30d';
+  day?: string;
+}
+
+export interface MoneySplit {
+  total: number;
+  cash: number;
+  bank: number;
+}
+
+export interface MoneyFlow {
+  sales: MoneySplit;
+  expenses: MoneySplit;
+  /** Sales − expenses (can be below 0). */
+  left: MoneySplit;
+  byCategory: { category: ExpenseCategory; amount: number; share: number }[];
+  newCount: number;
+}
+
+export interface ExpenseChange {
+  title?: string;
+  amount?: number;
+  category?: ExpenseCategory;
+  paidFrom?: Spending['paidFrom'];
+}
+
+/** GET /spendings?period|date — the list, totals and how many are new. */
+export const getExpenses = ({ period, day }: ExpenseRange) =>
+  api<ExpensesResult>('/spendings', { query: { period, date: day } });
+
+/** GET /spendings/:id */
+export const getExpense = (id: string) => api<Expense>(`/spendings/${encodeURIComponent(id)}`);
+
+/** POST /spendings with any kind (the server takes all of them). */
+export const addExpense = (input: Omit<NewSpending, 'category'> & { category: ExpenseCategory }) =>
+  api<Expense>('/spendings', { method: 'POST', body: input });
+
+/** POST /spendings/:id/review — owner: "looks right". */
+export const reviewExpense = (id: string) =>
+  api<Expense>(`/spendings/${encodeURIComponent(id)}/review`, { method: 'POST' });
+
+/** PATCH /spendings/:id — owner: correct it (kept in its history). */
+export const changeExpense = (id: string, change: ExpenseChange) =>
+  api<Expense>(`/spendings/${encodeURIComponent(id)}`, { method: 'PATCH', body: change });
+
+/** POST /spendings/:id/delete — owner, with a reason; the person who added it is told. */
+export const deleteExpense = (id: string, reason: string) =>
+  api<Expense>(`/spendings/${encodeURIComponent(id)}/delete`, {
+    method: 'POST',
+    body: { reason },
+  });
+
+/** GET /money-flow — owner, or a manager allowed to see reports. */
+export const getMoneyFlow = ({ period, day }: ExpenseRange) =>
+  api<MoneyFlow>('/money-flow', { query: { period, date: day } });
