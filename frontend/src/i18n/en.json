@@ -950,6 +950,7 @@
     },
     "empty": "No paid bills in this period yet.",
     "tipFor": "Tip {{amount}} ETB",
+    "split": "Cash {{cash}} ETB · Bank {{bank}} ETB",
     "download": "Download statement (PDF)",
     "statementTitle": "Payments statement",
     "columns": {

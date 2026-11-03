@@ -92,7 +92,7 @@ export function CalendarSheet({
                   selected ? 'border-primary bg-primary' : 'border-border bg-surface'
                 }`}
               >
-                <Text font="bold" className="text-base" tone={selected ? 'inverse' : undefined}>
+                <Text font="semibold" className="text-base" tone={selected ? 'inverse' : undefined}>
                   {t(`period.${p}`)}
                 </Text>
               </Pressable>

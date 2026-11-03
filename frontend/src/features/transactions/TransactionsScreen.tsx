@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { Calendar, Download } from 'lucide-react-native';
+import { Download } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, FlatList, Pressable, ScrollView, View } from 'react-native';
@@ -14,11 +14,10 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { sharePdf } from '@/lib/export';
-import { syncPayments, payMethods, paymentsKey, type PayMethod } from '@/lib/history';
+import { syncPayments, paymentsKey, type PayMethod } from '@/lib/history';
 import { isDay, isPeriod, type Period } from '@/lib/period';
 import { failedChecksKey, getFailedChecks } from '@/lib/verification';
 import { useSession } from '@/store/session';
-import { colors } from '@/theme/tokens';
 
 import { CalendarSheet } from './CalendarSheet';
 import { methodKey } from './methods';
@@ -26,8 +25,16 @@ import { PaymentRow } from './PaymentRow';
 import { FailedCheckRow } from './FailedCheckRow';
 import { buildStatement } from './statement';
 
-const isMethod = (value: unknown): value is PayMethod =>
-  typeof value === 'string' && (payMethods as string[]).includes(value);
+/**
+ * The filters are Cash and Bank only: a cash + bank payment is listed under both (its row shows
+ * the split), so the owner sees all the cash and all the bank money in one place each.
+ */
+type MoneyFilter = Exclude<PayMethod, 'cash+bank'>;
+const moneyFilters: MoneyFilter[] = ['cash', 'bank'];
+const isMethod = (value: unknown): value is MoneyFilter =>
+  typeof value === 'string' && (moneyFilters as string[]).includes(value);
+const hasMoneyIn = (p: { cashEtb: number; bankEtb: number }, filter: MoneyFilter) =>
+  filter === 'cash' ? p.cashEtb > 0 : p.bankEtb > 0;
 
 function MethodChip({
   label,
@@ -107,7 +114,7 @@ export default function TransactionsScreen() {
   }
 
   const all = query.data ?? [];
-  const visible = showFailed ? [] : method ? all.filter((p) => p.method === method) : all;
+  const visible = showFailed ? [] : method ? all.filter((p) => hasMoneyIn(p, method)) : all;
   const failedChecks = failedQuery.data ?? [];
   const salesTotal = all.reduce((sum, p) => sum + p.salesEtb, 0);
   const methodLabel = method ? t(methodKey(method)) : t('history.method.all');
@@ -164,11 +171,11 @@ export default function TransactionsScreen() {
             selected={!method && !showFailed}
             onPress={() => router.setParams({ method: undefined })}
           />
-          {payMethods.map((m) => (
+          {moneyFilters.map((m) => (
             <MethodChip
               key={m}
               label={t(methodKey(m))}
-              count={all.filter((p) => p.method === m).length}
+              count={all.filter((p) => hasMoneyIn(p, m)).length}
               selected={method === m}
               onPress={() => router.setParams({ method: m })}
             />
@@ -194,14 +201,18 @@ export default function TransactionsScreen() {
             onPress={() => setSheet('period')}
             accessibilityRole="button"
             accessibilityLabel={t('period.choose')}
-            className="h-11 w-11 items-center justify-center rounded-full active:bg-border"
+            className="h-11 w-11 items-center active:opacity-80"
           >
-            {/* The calendar icon with the chosen day's number inside (today's for a period). */}
-            <Calendar size={34} color={colors.text} strokeWidth={2} />
-            <View className="absolute inset-x-0 bottom-[7px] items-center">
-              <Text font="bold" className="text-sm leading-none">
+            {/* A calendar page in the brand colour: two rings on top, the chosen day's number
+                (today's for a period) in white in the middle. */}
+            <View className="mt-1 h-10 w-10 items-center justify-center rounded-[11px] bg-primary">
+              <Text font="bold" tone="inverse" className="text-[17px] leading-tight">
                 {(dayDate ?? new Date()).getDate()}
               </Text>
+            </View>
+            <View className="absolute top-0 w-full flex-row justify-center gap-4">
+              <View className="h-2.5 w-[5px] rounded-full border border-surface bg-primary" />
+              <View className="h-2.5 w-[5px] rounded-full border border-surface bg-primary" />
             </View>
           </Pressable>
         }

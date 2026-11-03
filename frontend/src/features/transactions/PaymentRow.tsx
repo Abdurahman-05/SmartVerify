@@ -42,6 +42,15 @@ export function PaymentRow({ payment, showDate, onPress }: PaymentRowProps) {
         <Text tone="muted" className="mt-0.5 text-sm" numberOfLines={1}>
           {method} · {payment.waiterName} · {when}
         </Text>
+        {payment.method === 'cash+bank' ? (
+          // Paid partly each way: how much came in cash and how much by bank.
+          <Text font="semibold" className="mt-0.5 text-sm" numberOfLines={1}>
+            {t('history.split', {
+              cash: formatMoney(payment.cashEtb, false),
+              bank: formatMoney(payment.bankEtb, false),
+            })}
+          </Text>
+        ) : null}
       </View>
       <View className="items-end gap-0.5">
         <MoneyText value={payment.salesEtb} font="bold" tone="link" className="text-lg" />
