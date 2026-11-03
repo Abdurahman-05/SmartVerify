@@ -491,12 +491,12 @@ export async function saveFailedCheck(
 export async function listFailedChecks(
   prisma: PrismaClient,
   auth: { businessId: string; memberId: string; role: string },
-  from: Date
+  createdAt: { gte: Date; lt?: Date }
 ) {
   const rows = await prisma.receiptCheck.findMany({
     where: {
       businessId: auth.businessId,
-      createdAt: { gte: from },
+      createdAt,
       ...(auth.role === 'waiter' && { checkedById: auth.memberId }),
     },
     orderBy: { createdAt: 'desc' },

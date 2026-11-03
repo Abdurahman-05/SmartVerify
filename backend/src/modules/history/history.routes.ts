@@ -6,7 +6,7 @@ import type { AuthContext } from '../../plugins/auth.js';
 import { requireRestaurantPlan, requireRoles } from '../../plugins/auth.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { errorResponseSchema, idParamSchema } from '../../shared/schemas/common.js';
-import { periodSchema, periodStart } from '../../shared/utils/period.js';
+import { dayRange, daySchema, periodSchema, periodStart } from '../../shared/utils/period.js';
 
 const methodSchema = z.enum(['cash', 'bank', 'cash+bank']);
 type Method = z.infer<typeof methodSchema>;
@@ -141,9 +141,11 @@ export const historyRoutes: FastifyPluginAsyncZod = async (app) => {
         description:
           'Payments of paid bills in the period, newest first. Waiters see only their own bills. ' +
           'Payments never change once saved, so `since` (an ISO time) returns only the ones ' +
-          'recorded after it.',
+          'recorded after it. `date` (YYYY-MM-DD) gives that one day (Addis Ababa) instead of ' +
+          'the period.',
         querystring: z.object({
           period: periodSchema,
+          date: daySchema.optional(),
           method: methodSchema.optional(),
           since: z.iso.datetime().optional(),
           limit: z.coerce.number().int().min(1).max(500).default(500),
@@ -152,11 +154,12 @@ export const historyRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => {
-      const { period, method, since, limit } = request.query;
+      const { period, date, method, since, limit } = request.query;
+      const range = date ? dayRange(date) : { gte: periodStart(period) };
       const rows = await prisma.payment.findMany({
         where: {
           ...visiblePayments(request.auth),
-          createdAt: { gte: periodStart(period), ...(since && { gt: new Date(since) }) },
+          createdAt: { ...range, ...(since && { gt: new Date(since) }) },
           ...(method && { method: fromMethod(method) }),
         },
         orderBy: { createdAt: 'desc' },

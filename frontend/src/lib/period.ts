@@ -7,6 +7,15 @@ export const isPeriod = (value: unknown): value is Period =>
 
 const DAYS: Record<Period, number> = { today: 1, '7d': 7, '30d': 30 };
 
+/** A phone-local calendar day as YYYY-MM-DD (what the server takes as `date`). */
+export function localDay(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+export const isDay = (value: unknown): value is string =>
+  typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+
 /** Start of the period (local midnight) and now. */
 export function periodRange(period: Period, now = new Date()) {
   const from = new Date(now);

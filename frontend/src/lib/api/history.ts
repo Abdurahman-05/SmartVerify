@@ -40,10 +40,11 @@ export interface PaymentsReport {
 
 /**
  * GET /payments — paid bills in the period, newest first. With `since` (an ISO time) only the
- * payments recorded after it come back; payments never change once saved.
+ * payments recorded after it come back; payments never change once saved. With `day`
+ * (YYYY-MM-DD) only that one day.
  */
-export const getPayments = (period: Period, since?: string) =>
-  api<PaymentRecord[]>('/payments', { query: { period, since } });
+export const getPayments = (period: Period, since?: string, day?: string) =>
+  api<PaymentRecord[]>('/payments', { query: { period, since, date: day } });
 
 /** GET /payments/:id — null when it does not exist (or is not yours). */
 export async function getPayment(id: string): Promise<PaymentRecordDetail | null> {

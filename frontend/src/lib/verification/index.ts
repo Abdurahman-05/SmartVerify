@@ -16,11 +16,14 @@ export const verifyMpesa = USE_MOCK_VERIFICATION ? mock.verifyMpesa : real.verif
 export const verifyEbirr = USE_MOCK_VERIFICATION ? mock.verifyEbirr : real.verifyEbirr;
 export const verifyDashen = USE_MOCK_VERIFICATION ? mock.verifyDashen : real.verifyDashen;
 export const verifyBoa = USE_MOCK_VERIFICATION ? mock.verifyBoa : real.verifyBoa;
-export const getFailedChecks = USE_MOCK_VERIFICATION ? mock.getFailedChecks : real.getFailedChecks;
+export const getFailedChecks: typeof real.getFailedChecks = USE_MOCK_VERIFICATION
+  ? mock.getFailedChecks
+  : real.getFailedChecks;
 export const readReference = USE_MOCK_VERIFICATION ? mock.readReference : real.readReference;
 export const compareReading = USE_MOCK_VERIFICATION ? mock.compareReading : real.compareReading;
 
-export const failedChecksKey = (period: Period) => ['failed-checks', period] as const;
+export const failedChecksKey = (period: Period, day?: string) =>
+  ['failed-checks', day ?? period] as const;
 
 // The offline mock keeps no history of verified receipts.
 export const getVerifiedChecks: typeof real.getVerifiedChecks = USE_MOCK_VERIFICATION

@@ -56,8 +56,9 @@ export const getVerifyTips = (period: Period) =>
   api<VerifyTips>('/verify/tips', { query: { period } });
 
 /** GET /verify/failed — checks that did not verify in the period, newest first. */
-export const getFailedChecks = (period: Period) =>
-  api<FailedCheck[]>('/verify/failed', { query: { period } });
+/** GET /verify/failed — in the period, or only on `day` (YYYY-MM-DD) when given. */
+export const getFailedChecks = (period: Period, day?: string) =>
+  api<FailedCheck[]>('/verify/failed', { query: { period, date: day } });
 
 /**
  * POST /verify/read-reference — the Transaction ID and text of a receipt picture (base64), read

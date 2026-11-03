@@ -8,7 +8,7 @@ import type {
 import { useBills } from '@/features/bills/store';
 import { usePayments } from '@/features/payments/store';
 import { USE_MOCK_BILLS } from '@/lib/bills';
-import { periodRange, type Period } from '@/lib/period';
+import { localDay, periodRange, type Period } from '@/lib/period';
 import { queryClient } from '@/lib/queryClient';
 
 export type {
@@ -59,9 +59,13 @@ function mockPayments(period: Period): PaymentRecordDetail[] {
     });
 }
 
-export const getPayments: (period: Period) => Promise<PaymentRecord[]> = USE_MOCK_BILLS
-  ? async (period) => mockPayments(period)
-  : real.getPayments;
+export const getPayments: (period: Period, day?: string) => Promise<PaymentRecord[]> =
+  USE_MOCK_BILLS
+    ? async (period, day) =>
+        day
+          ? mockPayments('30d').filter((p) => localDay(new Date(p.createdAt)) === day)
+          : mockPayments(period)
+    : (period, day) => real.getPayments(period, undefined, day);
 
 /** Re-ask a little earlier than the newest saved payment, so none is missed (merged by id). */
 const OVERLAP_MS = 1000;
@@ -70,7 +74,9 @@ const OVERLAP_MS = 1000;
  * Paid bills for a screen: keeps the list already loaded and asks the server only for payments
  * recorded since its newest one. Without a loaded list (or offline mock) it loads everything.
  */
-export async function syncPayments(period: Period): Promise<PaymentRecord[]> {
+export async function syncPayments(period: Period, day?: string): Promise<PaymentRecord[]> {
+  // One chosen day: loaded whole (a past day no longer changes).
+  if (day) return getPayments(period, day);
   const saved = USE_MOCK_BILLS
     ? undefined
     : queryClient.getQueryData<PaymentRecord[]>(paymentsKey(period));
@@ -117,6 +123,7 @@ export const getPaymentsReport: (period: Period) => Promise<PaymentsReport> = US
     }
   : real.getPaymentsReport;
 
-export const paymentsKey = (period: Period) => ['payments', period] as const;
+export const paymentsKey = (period: Period, day?: string) =>
+  ['payments', day ?? period] as const;
 export const paymentKey = (id: string) => ['payment', id] as const;
 export const reportKey = (period: Period) => ['payments-report', period] as const;
