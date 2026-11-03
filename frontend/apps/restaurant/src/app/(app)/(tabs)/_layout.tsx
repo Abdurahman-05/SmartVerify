@@ -17,6 +17,7 @@ import type { ColorValue } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { TabButton } from '@/components/ui/TabButton';
 import { getNotifications, NOTIFICATIONS_POLL_MS, notificationsKey } from '@/lib/notifications';
 import { useFeatures } from '@/store/features';
 import { useBrandColors } from '@/store/theme';
@@ -73,6 +74,7 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: colors.navInactive,
         tabBarLabelStyle: { fontFamily: 'DMSans_700Bold', fontSize: 14 },
         tabBarItemStyle: { paddingTop: 4 },
+        tabBarButton: TabButton,
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
