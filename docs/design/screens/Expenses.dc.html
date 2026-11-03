@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Expenses</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F8F6}
+button,input{font-family:'DM Sans',sans-serif}
+</style>
+</helmet>
+<!-- Owner and manager: every expense in the period. New ones (not yet seen by the owner) are marked. -->
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F8F6; color: #14201B; display: flex; flex-direction: column; overflow: hidden">
+
+<div style="display: flex; align-items: center; gap: 4px; padding: 14px 16px 6px 8px">
+  <button aria-label="Back" style="width: 44px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#14201B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div style="flex: 1; font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700">Expenses</div>
+  <button aria-label="Choose date" style="width: 44px; height: 44px; border: 0; background: transparent; position: relative; padding: 0">
+    <div style="position: absolute; left: 2px; top: 4px; width: 40px; height: 40px; border-radius: 11px; background: #0D4A36; color: #fff; font-weight: 700; font-size: 17px; display: flex; align-items: center; justify-content: center">3</div>
+    <div style="position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: center; gap: 16px"><span style="width: 5px; height: 10px; border-radius: 3px; background: #0D4A36; border: 1px solid #fff"></span><span style="width: 5px; height: 10px; border-radius: 3px; background: #0D4A36; border: 1px solid #fff"></span></div>
+  </button>
+</div>
+
+<!-- Total -->
+<div style="margin: 4px 16px 0; background: #0D4A36; border-radius: 22px; padding: 12px 20px; color: #fff">
+  <div style="font-size: 15px; font-weight: 600">Spent today · 6 expenses</div>
+  <div style="font-family: 'Sora', sans-serif; font-size: 32px; font-weight: 700">5,750 <span style="font-size: 16px">ETB</span></div>
+</div>
+
+<!-- Filters -->
+<div style="display: flex; gap: 8px; padding: 12px 16px 8px; overflow: hidden">
+  <button style="height: 46px; padding: 0 16px; border-radius: 23px; border: 0; background: #0D4A36; color: #fff; font-size: 16px; font-weight: 700">All 6</button>
+  <button style="height: 46px; padding: 0 16px; border-radius: 23px; border: 2px solid #B9C7C1; background: #fff; font-size: 16px; font-weight: 700">Cash 4</button>
+  <button style="height: 46px; padding: 0 16px; border-radius: 23px; border: 2px solid #B9C7C1; background: #fff; font-size: 16px; font-weight: 700">Bank 2</button>
+  <button style="height: 46px; padding: 0 16px; border-radius: 23px; border: 2px solid #F5B301; background: #FFF4D1; color: #5C4400; font-size: 16px; font-weight: 700; white-space: nowrap">New 3</button>
+</div>
+
+<!-- List -->
+<div style="flex: 1; overflow: hidden; padding: 0 16px; display: flex; flex-direction: column; gap: 8px">
+  <!-- row (new) -->
+  <div style="display: flex; align-items: center; gap: 12px; background: #fff; border: 1.5px solid #DDE5E1; border-radius: 18px; padding: 12px">
+    <div style="width: 48px; height: 48px; border-radius: 14px; background: #E6F2EC; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0D4A36" stroke-width="2.2" stroke-linecap="round"><path d="M12 3c4 3 6 6 6 10a6 6 0 0 1-12 0c0-4 2-7 6-10z"/></svg></div>
+    <div style="flex: 1; min-width: 0"><div style="font-weight: 700; font-size: 17px">Tomatoes and onions</div><div style="font-size: 14px; color: #3B4A44">Manager Selam · 10:42</div></div>
+    <div style="text-align: right"><div style="font-weight: 700; font-size: 18px; color: #0D6B47">450</div><div style="display: flex; gap: 4px; justify-content: flex-end; margin-top: 2px"><span style="font-size: 14px; font-weight: 700; background: #FFE9A8; color: #5C4400; border-radius: 8px; padding: 0 6px">New</span><span style="font-size: 14px; font-weight: 700; background: #E6EBE8; border-radius: 8px; padding: 0 6px">Cash</span></div></div>
+  </div>
+  <div style="display: flex; align-items: center; gap: 12px; background: #fff; border: 1.5px solid #DDE5E1; border-radius: 18px; padding: 12px">
+    <div style="width: 48px; height: 48px; border-radius: 14px; background: #E6F2EC; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0D4A36" stroke-width="2.2" stroke-linecap="round"><path d="M8 2h8l-1 8H9zM9 10v12h6V10"/></svg></div>
+    <div style="flex: 1; min-width: 0"><div style="font-weight: 700; font-size: 17px">Soft drinks, 4 crates</div><div style="font-size: 14px; color: #3B4A44">Manager Selam · 09:15</div></div>
+    <div style="text-align: right"><div style="font-weight: 700; font-size: 18px; color: #0D6B47">1,400</div><div style="display: flex; gap: 4px; justify-content: flex-end; margin-top: 2px"><span style="font-size: 14px; font-weight: 700; background: #FFE9A8; color: #5C4400; border-radius: 8px; padding: 0 6px">New</span><span style="font-size: 14px; font-weight: 700; background: #E6EBE8; border-radius: 8px; padding: 0 6px">Bank</span></div></div>
+  </div>
+  <div style="display: flex; align-items: center; gap: 12px; background: #fff; border: 1.5px solid #DDE5E1; border-radius: 18px; padding: 12px">
+    <div style="width: 48px; height: 48px; border-radius: 14px; background: #E6F2EC; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0D4A36" stroke-width="2.2" stroke-linecap="round"><path d="M12 2c3 4 4 6 4 9a4 4 0 0 1-8 0c0-3 1-5 4-9z"/></svg></div>
+    <div style="flex: 1; min-width: 0"><div style="font-weight: 700; font-size: 17px">Gas cylinder</div><div style="font-size: 14px; color: #3B4A44">Owner · 08:30</div></div>
+    <div style="text-align: right"><div style="font-weight: 700; font-size: 18px; color: #0D6B47">850</div><div style="margin-top: 2px"><span style="font-size: 14px; font-weight: 700; background: #E6EBE8; border-radius: 8px; padding: 0 6px">Cash</span></div></div>
+  </div>
+  <!-- deleted row stays visible, crossed out -->
+  <div style="display: flex; align-items: center; gap: 12px; background: #FAF5F3; border: 1.5px dashed #DDE5E1; border-radius: 18px; padding: 12px">
+    <div style="width: 48px; height: 48px; border-radius: 14px; background: #FBE0DD; display: flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8C1D18" stroke-width="2.2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+    <div style="flex: 1; min-width: 0"><div style="font-weight: 700; font-size: 17px; text-decoration: line-through; color: #3B4A44">Taxi</div><div style="font-size: 14px; color: #8C1D18">Deleted by owner · not a real expense</div></div>
+    <div style="font-weight: 700; font-size: 18px; color: #3B4A44; text-decoration: line-through">200</div>
+  </div>
+</div>
+
+<div style="padding: 10px 16px 12px"><button style="width: 100%; height: 60px; border-radius: 18px; border: 0; background: #0D4A36; color: #fff; font-size: 19px; font-weight: 700">+ Add expense</button></div>
+
+<div style="height: 66px; border-top: 1px solid #DDE5E1; background: #fff; display: flex; justify-content: space-around; align-items: center; font-size: 14px; font-weight: 700; color: #4A5A53">
+  <span style="color: #0D4A36">Home</span><span>Verify</span><span>History</span><span>Alerts</span><span>Profile</span>
+</div>
+</div>
+</x-dc>
+</body>
+</html>

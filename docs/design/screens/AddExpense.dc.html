@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Add Expense</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F8F6}
+button,input{font-family:'DM Sans',sans-serif}
+</style>
+</helmet>
+<!-- Bottom sheet over the Expenses list. Amount, what for, category, cash or bank, optional photo. -->
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: rgba(0,0,0,.4); color: #14201B; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden">
+<div style="background: #fff; border-radius: 22px 22px 0 0; padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 14px">
+  <div style="display: flex; align-items: center"><div style="flex: 1; font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700">Add expense</div><button aria-label="Close" style="width: 44px; height: 44px; border: 0; background: transparent; font-size: 24px">×</button></div>
+
+  <!-- Amount -->
+  <div>
+    <div style="font-size: 15px; font-weight: 700; margin-bottom: 6px">How much?</div>
+    <div style="height: 68px; border: 2.5px solid #0D4A36; border-radius: 16px; display: flex; align-items: center; padding: 0 16px; gap: 8px"><span style="font-family: 'Sora', sans-serif; font-size: 32px; font-weight: 700; flex: 1">450</span><span style="font-size: 18px; font-weight: 700; color: #3B4A44">ETB</span></div>
+  </div>
+
+  <!-- What for -->
+  <div>
+    <div style="font-size: 15px; font-weight: 700; margin-bottom: 6px">What was it for?</div>
+    <div style="height: 56px; border: 2px solid #C9D4CF; border-radius: 16px; display: flex; align-items: center; padding: 0 16px; font-size: 17px">Tomatoes and onions</div>
+  </div>
+
+  <!-- Category -->
+  <div>
+    <div style="font-size: 15px; font-weight: 700; margin-bottom: 6px">Kind</div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px">
+      <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 0; background: #0D4A36; color: #fff; font-size: 15px; font-weight: 700">Food</button>
+      <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #B9C7C1; background: #fff; font-size: 15px; font-weight: 700">Drinks</button>
+      <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #B9C7C1; background: #fff; font-size: 15px; font-weight: 700">Gas &amp; fuel</button>
+      <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #B9C7C1; background: #fff; font-size: 15px; font-weight: 700">Rent</button>
+      <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #B9C7C1; background: #fff; font-size: 15px; font-weight: 700">Salary</button>
+      <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #B9C7C1; background: #fff; font-size: 15px; font-weight: 700">Repairs</button>
+      <button style="height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #B9C7C1; background: #fff; font-size: 15px; font-weight: 700">Other</button>
+    </div>
+  </div>
+
+  <!-- Paid from -->
+  <div>
+    <div style="font-size: 15px; font-weight: 700; margin-bottom: 6px">Paid from</div>
+    <div style="display: flex; gap: 10px">
+      <button style="flex: 1; height: 64px; border-radius: 18px; border: 2.5px solid #0D4A36; background: #E6F2EC; font-size: 17px; font-weight: 700; color: #0D4A36">Cash drawer ✓</button>
+      <button style="flex: 1; height: 64px; border-radius: 18px; border: 2px solid #C9D4CF; background: #fff; font-size: 17px; font-weight: 700">Bank</button>
+    </div>
+  </div>
+
+  <!-- Photo -->
+  <button style="height: 56px; border-radius: 16px; border: 2px dashed #B9C7C1; background: #F4F8F6; font-size: 16px; font-weight: 700; color: #3B4A44">📷  Add receipt photo (optional)</button>
+
+  <button style="height: 64px; border-radius: 18px; border: 0; background: #0D4A36; color: #fff; font-size: 19px; font-weight: 700">Save expense</button>
+  <div style="font-size: 14px; color: #3B4A44; text-align: center">The owner is told about every expense.</div>
+</div>
+</div>
+</x-dc>
+</body>
+</html>

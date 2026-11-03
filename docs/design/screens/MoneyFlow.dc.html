@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Money Flow</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F8F6}
+button,input{font-family:'DM Sans',sans-serif}
+</style>
+</helmet>
+<!-- Owner: money in, money out, what is left; cash and bank apart. Restaurant Plus only. -->
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F8F6; color: #14201B; display: flex; flex-direction: column; overflow: hidden">
+
+<!-- Header -->
+<div style="display: flex; align-items: center; gap: 4px; padding: 14px 16px 6px 8px">
+  <button aria-label="Back" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#14201B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div style="flex: 1; font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700">Money flow</div>
+  <!-- Calendar button: brand colour page, white date -->
+  <button aria-label="Choose date" style="width: 44px; height: 44px; border: 0; background: transparent; position: relative; padding: 0">
+    <div style="position: absolute; left: 2px; top: 4px; width: 40px; height: 40px; border-radius: 11px; background: #0D4A36; color: #fff; font-weight: 700; font-size: 17px; display: flex; align-items: center; justify-content: center">3</div>
+    <div style="position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: center; gap: 16px"><span style="width: 5px; height: 10px; border-radius: 3px; background: #0D4A36; border: 1px solid #fff"></span><span style="width: 5px; height: 10px; border-radius: 3px; background: #0D4A36; border: 1px solid #fff"></span></div>
+  </button>
+</div>
+
+<!-- Period chips -->
+<div style="display: flex; gap: 8px; padding: 4px 16px 10px">
+  <button style="height: 46px; padding: 0 18px; border-radius: 23px; border: 0; background: #0D4A36; color: #fff; font-size: 16px; font-weight: 700">Today</button>
+  <button style="height: 46px; padding: 0 18px; border-radius: 23px; border: 2px solid #B9C7C1; background: #fff; color: #14201B; font-size: 16px; font-weight: 700">7 days</button>
+  <button style="height: 46px; padding: 0 18px; border-radius: 23px; border: 2px solid #B9C7C1; background: #fff; color: #14201B; font-size: 16px; font-weight: 700">30 days</button>
+</div>
+
+<div style="flex: 1; overflow: hidden; padding: 0 16px; display: flex; flex-direction: column; gap: 12px">
+
+  <!-- Hero: left after expenses -->
+  <div style="background: #0D4A36; border-radius: 22px; padding: 16px 20px; color: #fff">
+    <div style="font-size: 15px; font-weight: 600; opacity: .9">Left after expenses · today</div>
+    <div style="font-family: 'Sora', sans-serif; font-size: 38px; font-weight: 700; line-height: 1.15; margin-top: 2px">12,450 <span style="font-size: 18px">ETB</span></div>
+    <div style="display: flex; gap: 10px; margin-top: 10px">
+      <div style="flex: 1; background: rgba(255,255,255,.12); border-radius: 14px; padding: 8px 12px"><div style="font-size: 14px; opacity: .85">Sales</div><div style="font-size: 18px; font-weight: 700">18,200</div></div>
+      <div style="flex: 1; background: rgba(255,255,255,.12); border-radius: 14px; padding: 8px 12px"><div style="font-size: 14px; opacity: .85">Expenses</div><div style="font-size: 18px; font-weight: 700">− 5,750</div></div>
+    </div>
+  </div>
+
+  <!-- Cash in drawer / Bank -->
+  <div style="display: flex; gap: 10px">
+    <div style="flex: 1; background: #fff; border: 1.5px solid #DDE5E1; border-radius: 20px; padding: 12px 14px">
+      <div style="display: flex; align-items: center; gap: 8px"><div style="width: 34px; height: 34px; border-radius: 10px; background: #E6F2EC; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D4A36" stroke-width="2.2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg></div><div style="font-weight: 700; font-size: 15px">Cash in drawer</div></div>
+      <div style="font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700; margin-top: 8px">4,100</div>
+      <div style="font-size: 14px; color: #3B4A44; margin-top: 2px">In 7,300 · Out 3,200</div>
+    </div>
+    <div style="flex: 1; background: #fff; border: 1.5px solid #DDE5E1; border-radius: 20px; padding: 12px 14px">
+      <div style="display: flex; align-items: center; gap: 8px"><div style="width: 34px; height: 34px; border-radius: 10px; background: #E6F2EC; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D4A36" stroke-width="2.2" stroke-linecap="round"><path d="M3 21h18M5 10v8M10 10v8M14 10v8M19 10v8M12 3l9 5H3z"/></svg></div><div style="font-weight: 700; font-size: 15px">Bank</div></div>
+      <div style="font-family: 'Sora', sans-serif; font-size: 24px; font-weight: 700; margin-top: 8px">8,350</div>
+      <div style="font-size: 14px; color: #3B4A44; margin-top: 2px">In 10,900 · Out 2,550</div>
+    </div>
+  </div>
+
+  <!-- Needs your look -->
+  <div style="display: flex; align-items: center; gap: 10px; background: #FFF4D1; border: 1.5px solid #F5B301; border-radius: 18px; padding: 10px 14px; min-height: 48px">
+    <span style="width: 10px; height: 10px; border-radius: 5px; background: #F5B301"></span>
+    <div style="flex: 1; font-weight: 700; font-size: 15px; color: #5C4400">3 new expenses from the manager</div>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5C4400" stroke-width="2.2" stroke-linecap="round"><path d="M9 5l7 7-7 7"/></svg>
+  </div>
+
+  <!-- Where the money went -->
+  <div style="background: #fff; border: 1.5px solid #DDE5E1; border-radius: 20px; padding: 12px 14px">
+    <div style="font-weight: 700; font-size: 16px; margin-bottom: 8px">Where the money went</div>
+    <div style="display: flex; flex-direction: column; gap: 9px; font-size: 14px">
+      <div><div style="display: flex; justify-content: space-between"><b>Food</b><span>2,900 · 50%</span></div><div style="height: 8px; border-radius: 4px; background: #E6EBE8; margin-top: 3px"><div style="width: 50%; height: 8px; border-radius: 4px; background: #0D4A36"></div></div></div>
+      <div><div style="display: flex; justify-content: space-between"><b>Drinks</b><span>1,400 · 24%</span></div><div style="height: 8px; border-radius: 4px; background: #E6EBE8; margin-top: 3px"><div style="width: 24%; height: 8px; border-radius: 4px; background: #0D4A36"></div></div></div>
+      <div><div style="display: flex; justify-content: space-between"><b>Gas &amp; fuel</b><span>850 · 15%</span></div><div style="height: 8px; border-radius: 4px; background: #E6EBE8; margin-top: 3px"><div style="width: 15%; height: 8px; border-radius: 4px; background: #0D4A36"></div></div></div>
+      <div><div style="display: flex; justify-content: space-between"><b>Other</b><span>600 · 11%</span></div><div style="height: 8px; border-radius: 4px; background: #E6EBE8; margin-top: 3px"><div style="width: 11%; height: 8px; border-radius: 4px; background: #0D4A36"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom actions -->
+<div style="display: flex; gap: 10px; padding: 10px 16px 12px">
+  <button style="flex: 1; height: 56px; border-radius: 18px; border: 2.5px solid #14201B; background: #fff; font-size: 17px; font-weight: 700">See expenses</button>
+  <button style="flex: 1; height: 56px; border-radius: 18px; border: 0; background: #0D4A36; color: #fff; font-size: 17px; font-weight: 700">Report (PDF)</button>
+</div>
+
+<!-- Tab bar -->
+<div style="height: 66px; border-top: 1px solid #DDE5E1; background: #fff; display: flex; justify-content: space-around; align-items: center; font-size: 14px; font-weight: 700; color: #4A5A53">
+  <span style="color: #0D4A36">Home</span><span>Verify</span><span>History</span><span>Alerts</span><span>Profile</span>
+</div>
+</div>
+</x-dc>
+</body>
+</html>

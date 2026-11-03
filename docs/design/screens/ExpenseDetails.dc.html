@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Expense Details</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F8F6}
+button,input{font-family:'DM Sans',sans-serif}
+</style>
+</helmet>
+<!-- Owner control over one expense: approve, change (kept in history), or delete with a reason. -->
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #F4F8F6; color: #14201B; display: flex; flex-direction: column; overflow: hidden">
+
+<div style="display: flex; align-items: center; gap: 4px; padding: 14px 16px 6px 8px">
+  <button aria-label="Back" style="width: 44px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#14201B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div style="font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700">Expense</div>
+</div>
+
+<div style="flex: 1; padding: 6px 16px; display: flex; flex-direction: column; gap: 12px">
+  <div style="background: #fff; border: 1.5px solid #DDE5E1; border-radius: 22px; padding: 18px 20px">
+    <div style="display: inline-block; font-size: 14px; font-weight: 700; background: #FFE9A8; color: #5C4400; border-radius: 8px; padding: 2px 8px">New · not checked yet</div>
+    <div style="font-family: 'Sora', sans-serif; font-size: 40px; font-weight: 700; margin-top: 8px">450 <span style="font-size: 18px">ETB</span></div>
+    <div style="font-size: 19px; font-weight: 700; margin-top: 2px">Tomatoes and onions</div>
+    <div style="height: 1px; background: #E8EEEB; margin: 14px 0"></div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; row-gap: 12px; font-size: 15px">
+      <div><div style="color: #3B4A44">Kind</div><b>Food</b></div>
+      <div><div style="color: #3B4A44">Paid from</div><b>Cash drawer</b></div>
+      <div><div style="color: #3B4A44">Added by</div><b>Manager Selam</b></div>
+      <div><div style="color: #3B4A44">When</div><b>Today, 10:42</b></div>
+    </div>
+  </div>
+
+  <!-- Receipt photo -->
+  <div style="height: 150px; border-radius: 20px; background: repeating-linear-gradient(45deg,#E6EBE8,#E6EBE8 10px,#F4F8F6 10px,#F4F8F6 20px); border: 1.5px solid #DDE5E1; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #3B4A44">Receipt photo · tap to open</div>
+
+  <!-- History -->
+  <div style="font-size: 14px; color: #3B4A44; padding: 0 4px">Changed by Owner · 11:05 (was 500 ETB)</div>
+</div>
+
+<!-- Owner actions -->
+<div style="padding: 10px 16px 14px; display: flex; flex-direction: column; gap: 10px">
+  <button style="height: 60px; border-radius: 18px; border: 0; background: #0E7A4E; color: #fff; font-size: 19px; font-weight: 700">✓ Looks right</button>
+  <div style="display: flex; gap: 10px">
+    <button style="flex: 1; height: 52px; border-radius: 18px; border: 0; background: #0D4A36; color: #fff; font-size: 17px; font-weight: 700">Change ✎</button>
+    <button style="flex: 1; height: 52px; border-radius: 18px; border: 0; background: #B3261E; color: #fff; font-size: 17px; font-weight: 700">Delete ✕</button>
+  </div>
+  <div style="font-size: 14px; color: #3B4A44; text-align: center">Delete asks for a reason. The manager is told.</div>
+</div>
+</div>
+</x-dc>
+</body>
+</html>
