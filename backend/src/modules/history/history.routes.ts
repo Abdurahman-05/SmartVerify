@@ -80,7 +80,7 @@ const include = {
 type Row = Prisma.PaymentGetPayload<{ include: typeof listInclude }>;
 
 /** A cash payment's tip and change come out of the cash; a bank tip comes out of the bank. */
-function split(row: Pick<Row, 'method' | 'cashEtb' | 'bankEtb' | 'tipEtb' | 'changeEtb'>) {
+export function split(row: Pick<Row, 'method' | 'cashEtb' | 'bankEtb' | 'tipEtb' | 'changeEtb'>) {
   const tipFromCash = row.method === 'cash' ? row.tipEtb : 0;
   return {
     cashEtb: row.cashEtb - row.changeEtb - tipFromCash,

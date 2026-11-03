@@ -87,6 +87,22 @@ export function pushText(
       return am
         ? { title: 'ፕላንዎ አብቅቷል', body: 'ሁሉንም መልሶ ለማብራት ይክፈሉ' }
         : { title: 'Your plan has ended', body: 'Pay to turn everything back on' };
+    case 'new_expense': {
+      const cash = d.paidFrom === 'CASH';
+      return am
+        ? {
+            title: `አዲስ ወጪ · ${money(d.amountEtb).replace('ETB', 'ብር')}`,
+            body: `${str(d.name)}፦ ${str(d.title)} · ${cash ? 'ጥሬ ገንዘብ' : 'ባንክ'}`,
+          }
+        : {
+            title: `New expense · ${money(d.amountEtb)}`,
+            body: `${str(d.name)}: ${str(d.title)} · ${cash ? 'Cash' : 'Bank'}`,
+          };
+    }
+    case 'expense_deleted':
+      return am
+        ? { title: `ወጪ ተሰርዟል · ${str(d.title)}`, body: str(d.reason) }
+        : { title: `Expense deleted · ${str(d.title)}`, body: str(d.reason) };
     default:
       return null;
   }

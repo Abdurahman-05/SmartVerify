@@ -1,3 +1,4 @@
+import type { FastifyBaseLogger } from 'fastify';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 
@@ -5,12 +6,24 @@ import type { Prisma } from '../../generated/prisma/client.js';
 import { requireRestaurantPlan, requireRoles } from '../../plugins/auth.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { errorResponseSchema, idParamSchema } from '../../shared/schemas/common.js';
-import { periodStart } from '../../shared/utils/period.js';
+import { notify } from '../../services/notifications.js';
+import { dayRange, daySchema, periodSchema, periodStart } from '../../shared/utils/period.js';
+import { split } from '../history/history.routes.js';
 
 const whenSchema = z.enum(['TODAY', 'WEEK']);
 const statusSchema = z.enum(['OPEN', 'BOUGHT']);
 const paidFromSchema = z.enum(['CASH', 'BANK']);
-const categorySchema = z.enum(['FOOD', 'TRANSPORT', 'BILLS', 'OTHER']);
+const categorySchema = z.enum([
+  'FOOD',
+  'DRINKS',
+  'GAS',
+  'RENT',
+  'SALARY',
+  'REPAIRS',
+  'TRANSPORT',
+  'BILLS',
+  'OTHER',
+]);
 /** Integer ETB. */
 const amountSchema = z.number().int().min(1).max(100_000_000);
 
@@ -42,6 +55,21 @@ const spendingSchema = z.object({
   buyItemId: z.string().nullable(),
   createdBy: z.string(),
   createdAt: z.string(),
+  /** Added by someone else and not yet looked at by the owner. */
+  isNew: z.boolean(),
+  /** The owner's last change, and the amount before it. */
+  changedAt: z.string().nullable(),
+  changedBy: z.string().nullable(),
+  oldAmount: z.number().int().nullable(),
+  /** Deleted by the owner: still listed, never counted. */
+  deletedAt: z.string().nullable(),
+  deleteReason: z.string().nullable(),
+});
+
+const moneySplitSchema = z.object({
+  total: z.number().int(),
+  cash: z.number().int(),
+  bank: z.number().int(),
 });
 
 const errors = {
@@ -71,10 +99,12 @@ const toBuyItem = (row: Prisma.BuyItemGetPayload<{ include: typeof buyInclude }>
 });
 
 const spendingInclude = {
-  createdBy: { select: { user: { select: { name: true } } } },
+  createdBy: { select: { role: true, user: { select: { name: true } } } },
 } satisfies Prisma.SpendingInclude;
 
-const toSpending = (row: Prisma.SpendingGetPayload<{ include: typeof spendingInclude }>) => ({
+type SpendingRow = Prisma.SpendingGetPayload<{ include: typeof spendingInclude }>;
+
+const toSpending = (row: SpendingRow) => ({
   id: row.id,
   title: row.title,
   amount: row.amount,
@@ -83,7 +113,28 @@ const toSpending = (row: Prisma.SpendingGetPayload<{ include: typeof spendingInc
   buyItemId: row.buyItemId,
   createdBy: row.createdBy.user.name,
   createdAt: row.createdAt.toISOString(),
+  isNew: row.createdBy.role !== 'owner' && !row.reviewedAt && !row.deletedAt,
+  changedAt: row.changedAt?.toISOString() ?? null,
+  changedBy: row.changedBy,
+  oldAmount: row.oldAmount,
+  deletedAt: row.deletedAt?.toISOString() ?? null,
+  deleteReason: row.deleteReason,
 });
+
+/** Expenses that count: not deleted by the owner. */
+const counted = { deletedAt: null } satisfies Prisma.SpendingWhereInput;
+
+/** The date range of a list: one day, from/to, or a period (default today). */
+function spendingRange(q: {
+  date?: string;
+  period?: 'today' | '7d' | '30d';
+  from?: string;
+  to?: string;
+}) {
+  if (q.date) return dayRange(q.date);
+  if (q.from) return { gte: new Date(q.from), ...(q.to && { lte: new Date(q.to) }) };
+  return { gte: periodStart(q.period ?? 'today') };
+}
 
 /**
  * Owner extras (Restaurant Plus): the kitchen buy list and money out. The owner switches each on
@@ -92,6 +143,27 @@ const toSpending = (row: Prisma.SpendingGetPayload<{ include: typeof spendingInc
 export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
   const { prisma } = app;
   const security = [{ bearerAuth: [] }];
+
+  /** Every expense someone else adds is told to the owner (it shows as new until checked). */
+  const tellOwner = async (
+    log: FastifyBaseLogger,
+    auth: { businessId: string; role: string },
+    row: SpendingRow
+  ) => {
+    if (auth.role === 'owner') return;
+    await notify(prisma, log, {
+      businessId: auth.businessId,
+      to: { roles: ['owner'] },
+      type: 'new_expense',
+      data: {
+        spendingId: row.id,
+        name: row.createdBy.user.name,
+        title: row.title,
+        amountEtb: row.amount,
+        paidFrom: row.paidFrom,
+      },
+    });
+  };
 
   /** The two switches, as they are now. Both read false unless the business is on Restaurant Plus. */
   async function features(businessId: string) {
@@ -283,7 +355,8 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
       async (request) => {
         const { auth, body } = request;
         const moneyOut = (await features(auth.businessId)).featureMoneyOut;
-        return prisma.$transaction(async (tx) => {
+        let spent: SpendingRow | null = null;
+        const result = await prisma.$transaction(async (tx) => {
           // Claim it first, so two people marking it bought at once cannot both win.
           const claimed = await tx.buyItem.updateMany({
             where: { id: request.params.id, businessId: auth.businessId, status: 'OPEN' },
@@ -302,7 +375,7 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
           if (!row) throw new AppError('NOT_FOUND');
           if (claimed.count === 0) throw new AppError('CONFLICT');
           if (moneyOut) {
-            await tx.spending.create({
+            spent = await tx.spending.create({
               data: {
                 businessId: auth.businessId,
                 title: row.qty ? `${row.name} (${row.qty})` : row.name,
@@ -312,10 +385,13 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
                 buyItemId: row.id,
                 createdById: auth.memberId,
               },
+              include: spendingInclude,
             });
           }
           return toBuyItem(row);
         });
+        if (spent) await tellOwner(request.log, auth, spent);
+        return result;
       }
     );
   };
@@ -350,6 +426,7 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
           data: { ...body, businessId: auth.businessId, createdById: auth.memberId },
           include: spendingInclude,
         });
+        await tellOwner(request.log, auth, row);
         return reply.status(201).send(toSpending(row));
       }
     );
@@ -368,6 +445,8 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
           querystring: z.object({
             from: z.iso.datetime().optional(),
             to: z.iso.datetime().optional(),
+            period: periodSchema.optional(),
+            date: daySchema.optional(),
           }),
           response: {
             200: z.object({
@@ -378,6 +457,7 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
                 cash: z.number().int(),
                 bank: z.number().int(),
               }),
+              newCount: z.number().int().describe('Not yet looked at by the owner'),
             }),
             400: errorResponseSchema,
             ...errors,
@@ -386,13 +466,11 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
       },
       async (request) => {
         const { businessId } = request.auth;
-        const from = request.query.from ? new Date(request.query.from) : periodStart('today');
-        const to = request.query.to ? new Date(request.query.to) : undefined;
-        const range = { gte: from, ...(to && { lte: to }) };
+        const range = spendingRange(request.query);
         const sum = async (where: Prisma.SpendingWhereInput) =>
           (
             await prisma.spending.aggregate({
-              where: { businessId, ...where },
+              where: { businessId, ...counted, ...where },
               _sum: { amount: true },
             })
           )._sum.amount ?? 0;
@@ -409,7 +487,244 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
           sum({ createdAt: range, paidFrom: 'CASH' }),
           sum({ createdAt: range, paidFrom: 'BANK' }),
         ]);
-        return { entries: rows.map(toSpending), totals: { today, week, cash, bank } };
+        const entries = rows.map(toSpending);
+        return {
+          entries,
+          totals: { today, week, cash, bank },
+          newCount: entries.filter((e) => e.isNew).length,
+        };
+      }
+    );
+
+    /** One expense of this business, or 404. */
+    const findSpending = async (businessId: string, id: string) => {
+      const row = await prisma.spending.findFirst({
+        where: { id, businessId },
+        include: spendingInclude,
+      });
+      if (!row) throw new AppError('NOT_FOUND');
+      return row;
+    };
+
+    money.get(
+      '/spendings/:id',
+      {
+        preHandler: requireRoles('manager', 'owner'),
+        schema: {
+          tags: ['extras'],
+          security,
+          params: idParamSchema,
+          response: { 200: spendingSchema, ...errors, ...notFound },
+        },
+      },
+      async (request) => toSpending(await findSpending(request.auth.businessId, request.params.id))
+    );
+
+    money.post(
+      '/spendings/:id/review',
+      {
+        preHandler: requireRoles('owner'),
+        schema: {
+          tags: ['extras'],
+          security,
+          description: 'Owner: "looks right". It is no longer new.',
+          params: idParamSchema,
+          response: { 200: spendingSchema, ...errors, ...notFound },
+        },
+      },
+      async (request) => {
+        const before = await findSpending(request.auth.businessId, request.params.id);
+        const row = await prisma.spending.update({
+          where: { id: before.id },
+          data: { reviewedAt: new Date() },
+          include: spendingInclude,
+        });
+        return toSpending(row);
+      }
+    );
+
+    money.patch(
+      '/spendings/:id',
+      {
+        preHandler: requireRoles('owner'),
+        schema: {
+          tags: ['extras'],
+          security,
+          description:
+            'Owner: correct an expense. The change is kept on it (who, when, the amount ' +
+            'before), and it counts as looked at. A deleted one cannot be changed (409).',
+          params: idParamSchema,
+          body: z.object({
+            title: z.string().trim().min(1).max(80).optional(),
+            amount: amountSchema.optional(),
+            category: categorySchema.optional(),
+            paidFrom: paidFromSchema.optional(),
+          }),
+          response: { 200: spendingSchema, 409: errorResponseSchema, ...errors, ...notFound },
+        },
+      },
+      async (request) => {
+        const { auth, body } = request;
+        const before = await findSpending(auth.businessId, request.params.id);
+        if (before.deletedAt) throw new AppError('CONFLICT');
+        const owner = await prisma.businessMember.findUniqueOrThrow({
+          where: { id: auth.memberId },
+          select: { user: { select: { name: true } } },
+        });
+        const now = new Date();
+        const amountChanged = body.amount !== undefined && body.amount !== before.amount;
+        const row = await prisma.spending.update({
+          where: { id: before.id },
+          data: {
+            ...body,
+            changedAt: now,
+            changedBy: owner.user.name,
+            reviewedAt: now,
+            ...(amountChanged && { oldAmount: before.amount }),
+          },
+          include: spendingInclude,
+        });
+        return toSpending(row);
+      }
+    );
+
+    money.post(
+      '/spendings/:id/delete',
+      {
+        preHandler: requireRoles('owner'),
+        schema: {
+          tags: ['extras'],
+          security,
+          description:
+            'Owner: delete an expense with a reason. It stays in the list (crossed out) and ' +
+            'leaves every total. The person who added it is told.',
+          params: idParamSchema,
+          body: z.object({ reason: z.string().trim().min(1).max(120) }),
+          response: { 200: spendingSchema, ...errors, ...notFound },
+        },
+      },
+      async (request) => {
+        const { auth, body } = request;
+        const before = await findSpending(auth.businessId, request.params.id);
+        if (before.deletedAt) return toSpending(before);
+        const row = await prisma.spending.update({
+          where: { id: before.id },
+          data: { deletedAt: new Date(), deleteReason: body.reason },
+          include: spendingInclude,
+        });
+        if (row.createdById !== auth.memberId) {
+          await notify(prisma, request.log, {
+            businessId: auth.businessId,
+            to: { memberIds: [row.createdById] },
+            type: 'expense_deleted',
+            data: {
+              spendingId: row.id,
+              title: row.title,
+              amountEtb: row.amount,
+              reason: body.reason,
+            },
+          });
+        }
+        return toSpending(row);
+      }
+    );
+
+    money.get(
+      '/money-flow',
+      {
+        preHandler: requireRoles('owner', 'manager'),
+        schema: {
+          tags: ['extras'],
+          security,
+          description:
+            'Owner (or a manager allowed to see reports): sales, expenses and what is left in ' +
+            'the period or on one `date` (YYYY-MM-DD), each split into cash and bank. Sales are ' +
+            'the money the restaurant kept (tips and change given back left out). Deleted ' +
+            'expenses never count.',
+          querystring: z.object({ period: periodSchema, date: daySchema.optional() }),
+          response: {
+            200: z.object({
+              sales: moneySplitSchema,
+              expenses: moneySplitSchema,
+              left: moneySplitSchema,
+              byCategory: z.array(
+                z.object({
+                  category: categorySchema,
+                  amount: z.number().int(),
+                  share: z.number().int().describe('Percent of all expenses, rounded'),
+                })
+              ),
+              newCount: z.number().int().describe('Expenses not yet looked at by the owner'),
+            }),
+            ...errors,
+          },
+        },
+      },
+      async (request) => {
+        const { auth } = request;
+        if (auth.role === 'manager' && !auth.canSeeReports) throw new AppError('FORBIDDEN');
+        const { period, date } = request.query;
+        const createdAt = date ? dayRange(date) : { gte: periodStart(period) };
+        const { businessId } = auth;
+
+        const [payments, spent, categories, fresh] = await Promise.all([
+          prisma.payment.groupBy({
+            by: ['method'],
+            where: { businessId, createdAt },
+            _sum: { cashEtb: true, bankEtb: true, tipEtb: true, changeEtb: true },
+          }),
+          prisma.spending.groupBy({
+            by: ['paidFrom'],
+            where: { businessId, ...counted, createdAt },
+            _sum: { amount: true },
+          }),
+          prisma.spending.groupBy({
+            by: ['category'],
+            where: { businessId, ...counted, createdAt },
+            _sum: { amount: true },
+          }),
+          prisma.spending.count({
+            where: {
+              businessId,
+              ...counted,
+              reviewedAt: null,
+              createdBy: { role: { not: 'owner' } },
+            },
+          }),
+        ]);
+
+        let salesCash = 0;
+        let salesBank = 0;
+        for (const g of payments) {
+          // split() is linear per payment method, so it works on the group's sums.
+          const parts = split({
+            method: g.method,
+            cashEtb: g._sum.cashEtb ?? 0,
+            bankEtb: g._sum.bankEtb ?? 0,
+            tipEtb: g._sum.tipEtb ?? 0,
+            changeEtb: g._sum.changeEtb ?? 0,
+          });
+          salesCash += parts.cashEtb;
+          salesBank += parts.bankEtb;
+        }
+        const outCash = spent.find((g) => g.paidFrom === 'CASH')?._sum.amount ?? 0;
+        const outBank = spent.find((g) => g.paidFrom === 'BANK')?._sum.amount ?? 0;
+        const outTotal = outCash + outBank;
+        const split3 = (cash: number, bank: number) => ({ total: cash + bank, cash, bank });
+
+        return {
+          sales: split3(salesCash, salesBank),
+          expenses: split3(outCash, outBank),
+          left: split3(salesCash - outCash, salesBank - outBank),
+          byCategory: categories
+            .map((g) => ({ category: g.category, amount: g._sum.amount ?? 0 }))
+            .sort((a, b) => b.amount - a.amount)
+            .map((c) => ({
+              ...c,
+              share: outTotal ? Math.round((c.amount / outTotal) * 100) : 0,
+            })),
+          newCount: fresh,
+        };
       }
     );
   };

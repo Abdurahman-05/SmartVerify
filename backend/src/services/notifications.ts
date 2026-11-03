@@ -15,7 +15,9 @@ export type NotificationType =
   | 'bad_receipt'
   | 'daily_summary'
   | 'plan_ending'
-  | 'plan_late';
+  | 'plan_late'
+  | 'new_expense'
+  | 'expense_deleted';
 
 /** Who is told: every active member with one of these roles, and/or these members. */
 export interface Recipients {

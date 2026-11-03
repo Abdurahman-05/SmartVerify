@@ -875,6 +875,11 @@ enum PaidFrom {
 
 enum SpendingCategory {
   FOOD
+  DRINKS
+  GAS
+  RENT
+  SALARY
+  REPAIRS
   TRANSPORT
   BILLS
   OTHER
@@ -919,6 +924,15 @@ model Spending {
   createdById String
   createdBy   BusinessMember   @relation(fields: [createdById], references: [id], onDelete: Restrict)
   createdAt   DateTime         @default(now())
+  /// The owner looked at it and said it is right.
+  reviewedAt  DateTime?
+  /// The owner's last change: when, who, and the amount before it.
+  changedAt   DateTime?
+  changedBy   String?
+  oldAmount   Int?
+  /// Deleted by the owner: kept (crossed out in the list), left out of every total.
+  deletedAt   DateTime?
+  deleteReason String?
 
   @@index([businessId, createdAt])
 }
