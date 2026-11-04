@@ -2,7 +2,7 @@ import type { FastifyBaseLogger } from 'fastify';
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 
-import type { Prisma } from '../../generated/prisma/client.js';
+import type { Prisma, SpendingCategory } from '../../generated/prisma/client.js';
 import { requireRestaurantPlan, requireRoles } from '../../plugins/auth.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { errorResponseSchema, idParamSchema } from '../../shared/schemas/common.js';
@@ -64,6 +64,11 @@ const spendingSchema = z.object({
   /** Deleted by the owner: still listed, never counted. */
   deletedAt: z.string().nullable(),
   deleteReason: z.string().nullable(),
+  hasReceipt: z.boolean(),
+  /** false: personal use, not the business's. */
+  forBusiness: z.boolean(),
+  /** A business cost: a kind the owner counts, with a receipt, for the business. */
+  isCost: z.boolean(),
 });
 
 const moneySplitSchema = z.object({
@@ -104,7 +109,7 @@ const spendingInclude = {
 
 type SpendingRow = Prisma.SpendingGetPayload<{ include: typeof spendingInclude }>;
 
-const toSpending = (row: SpendingRow) => ({
+const toSpending = (row: SpendingRow, costKinds: readonly string[]) => ({
   id: row.id,
   title: row.title,
   amount: row.amount,
@@ -119,10 +124,22 @@ const toSpending = (row: SpendingRow) => ({
   oldAmount: row.oldAmount,
   deletedAt: row.deletedAt?.toISOString() ?? null,
   deleteReason: row.deleteReason,
+  hasReceipt: row.hasReceipt,
+  forBusiness: row.forBusiness,
+  isCost: row.hasReceipt && row.forBusiness && costKinds.includes(row.category),
 });
 
 /** Expenses that count: not deleted by the owner. */
 const counted = { deletedAt: null } satisfies Prisma.SpendingWhereInput;
+
+/** Counted expenses that are business costs (the kinds the owner counts). */
+const businessCost = (costKinds: SpendingCategory[]) =>
+  ({
+    ...counted,
+    category: { in: costKinds },
+    hasReceipt: true,
+    forBusiness: true,
+  }) satisfies Prisma.SpendingWhereInput;
 
 /** The date range of a list: one day, from/to, or a period (default today). */
 function spendingRange(q: {
@@ -399,9 +416,54 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
 
   // ─── Money out ─────────────────────────────────────────────────────────────
 
+  /** The kinds this business counts as business costs. */
+  const costKindsOf = async (businessId: string) =>
+    (
+      await prisma.business.findUniqueOrThrow({
+        where: { id: businessId },
+        select: { costKinds: true },
+      })
+    ).costKinds;
+
   const moneyOutRoutes: FastifyPluginAsyncZod = async (money) => {
     money.addHook('preHandler', requireRestaurantPlan);
     money.addHook('preHandler', needs('featureMoneyOut'));
+
+    money.get(
+      '/business/cost-kinds',
+      {
+        preHandler: requireRoles('manager', 'owner'),
+        schema: {
+          tags: ['extras'],
+          security,
+          description: 'Expense kinds the owner counts as business costs.',
+          response: { 200: z.object({ kinds: z.array(categorySchema) }), ...errors },
+        },
+      },
+      async (request) => ({ kinds: await costKindsOf(request.auth.businessId) })
+    );
+
+    money.put(
+      '/business/cost-kinds',
+      {
+        preHandler: requireRoles('owner'),
+        schema: {
+          tags: ['extras'],
+          security,
+          description: 'Owner: which expense kinds count as business costs (past ones too).',
+          body: z.object({ kinds: z.array(categorySchema).max(categorySchema.options.length) }),
+          response: { 200: z.object({ kinds: z.array(categorySchema) }), ...errors },
+        },
+      },
+      async (request) => {
+        const kinds = [...new Set(request.body.kinds)];
+        await prisma.business.update({
+          where: { id: request.auth.businessId },
+          data: { costKinds: kinds },
+        });
+        return { kinds };
+      }
+    );
 
     money.post(
       '/spendings',
@@ -416,6 +478,8 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
             amount: amountSchema,
             category: categorySchema,
             paidFrom: paidFromSchema,
+            hasReceipt: z.boolean().default(true),
+            forBusiness: z.boolean().default(true),
           }),
           response: { 201: spendingSchema, 400: errorResponseSchema, ...errors },
         },
@@ -427,7 +491,7 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
           include: spendingInclude,
         });
         await tellOwner(request.log, auth, row);
-        return reply.status(201).send(toSpending(row));
+        return reply.status(201).send(toSpending(row, await costKindsOf(auth.businessId)));
       }
     );
 
@@ -487,7 +551,8 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
           sum({ createdAt: range, paidFrom: 'CASH' }),
           sum({ createdAt: range, paidFrom: 'BANK' }),
         ]);
-        const entries = rows.map(toSpending);
+        const kinds = await costKindsOf(businessId);
+        const entries = rows.map((row) => toSpending(row, kinds));
         return {
           entries,
           totals: { today, week, cash, bank },
@@ -517,7 +582,13 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
           response: { 200: spendingSchema, ...errors, ...notFound },
         },
       },
-      async (request) => toSpending(await findSpending(request.auth.businessId, request.params.id))
+      async (request) => {
+        const { businessId } = request.auth;
+        return toSpending(
+          await findSpending(businessId, request.params.id),
+          await costKindsOf(businessId)
+        );
+      }
     );
 
     money.post(
@@ -539,7 +610,7 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
           data: { reviewedAt: new Date() },
           include: spendingInclude,
         });
-        return toSpending(row);
+        return toSpending(row, await costKindsOf(request.auth.businessId));
       }
     );
 
@@ -559,6 +630,8 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
             amount: amountSchema.optional(),
             category: categorySchema.optional(),
             paidFrom: paidFromSchema.optional(),
+            hasReceipt: z.boolean().optional(),
+            forBusiness: z.boolean().optional(),
           }),
           response: { 200: spendingSchema, 409: errorResponseSchema, ...errors, ...notFound },
         },
@@ -584,7 +657,7 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
           },
           include: spendingInclude,
         });
-        return toSpending(row);
+        return toSpending(row, await costKindsOf(auth.businessId));
       }
     );
 
@@ -606,7 +679,8 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
       async (request) => {
         const { auth, body } = request;
         const before = await findSpending(auth.businessId, request.params.id);
-        if (before.deletedAt) return toSpending(before);
+        const kinds = await costKindsOf(auth.businessId);
+        if (before.deletedAt) return toSpending(before, kinds);
         const row = await prisma.spending.update({
           where: { id: before.id },
           data: { deletedAt: new Date(), deleteReason: body.reason },
@@ -625,7 +699,7 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
             },
           });
         }
-        return toSpending(row);
+        return toSpending(row, kinds);
       }
     );
 
@@ -647,6 +721,9 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
               sales: moneySplitSchema,
               expenses: moneySplitSchema,
               left: moneySplitSchema,
+              costs: moneySplitSchema.describe('Business costs (kinds the owner counts)'),
+              other: moneySplitSchema.describe('Everything else spent'),
+              profit: z.number().int().describe('Sales minus business costs'),
               byCategory: z.array(
                 z.object({
                   category: categorySchema,
@@ -667,7 +744,8 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
         const createdAt = date ? dayRange(date) : { gte: periodStart(period) };
         const { businessId } = auth;
 
-        const [payments, spent, categories, fresh] = await Promise.all([
+        const kinds = await costKindsOf(businessId);
+        const [payments, spent, costs, categories, fresh] = await Promise.all([
           prisma.payment.groupBy({
             by: ['method'],
             where: { businessId, createdAt },
@@ -676,6 +754,11 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
           prisma.spending.groupBy({
             by: ['paidFrom'],
             where: { businessId, ...counted, createdAt },
+            _sum: { amount: true },
+          }),
+          prisma.spending.groupBy({
+            by: ['paidFrom'],
+            where: { businessId, ...businessCost(kinds), createdAt },
             _sum: { amount: true },
           }),
           prisma.spending.groupBy({
@@ -711,11 +794,16 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
         const outBank = spent.find((g) => g.paidFrom === 'BANK')?._sum.amount ?? 0;
         const outTotal = outCash + outBank;
         const split3 = (cash: number, bank: number) => ({ total: cash + bank, cash, bank });
+        const costCash = costs.find((g) => g.paidFrom === 'CASH')?._sum.amount ?? 0;
+        const costBank = costs.find((g) => g.paidFrom === 'BANK')?._sum.amount ?? 0;
 
         return {
           sales: split3(salesCash, salesBank),
           expenses: split3(outCash, outBank),
           left: split3(salesCash - outCash, salesBank - outBank),
+          costs: split3(costCash, costBank),
+          other: split3(outCash - costCash, outBank - costBank),
+          profit: salesCash + salesBank - (costCash + costBank),
           byCategory: categories
             .map((g) => ({ category: g.category, amount: g._sum.amount ?? 0 }))
             .sort((a, b) => b.amount - a.amount)
