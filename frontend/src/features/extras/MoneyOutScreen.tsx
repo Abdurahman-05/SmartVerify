@@ -22,7 +22,7 @@ import { useBrandColors } from '@/store/theme';
 import { AddSpendingSheet } from './AddSpendingSheet';
 import { FeatureGate } from './FeatureGate';
 
-type Filter = 'all' | 'cash' | 'bank' | 'new';
+type Filter = 'all' | 'cash' | 'bank' | 'costs' | 'other' | 'new';
 
 function TotalBox({
   icon: Icon,
@@ -118,6 +118,15 @@ export function ExpenseRow({
         <Text tone="muted" className="text-sm" numberOfLines={1}>
           {[t(`extras.money.categories.${entry.category}`), entry.createdBy, when].join(' · ')}
         </Text>
+        {!deleted ? (
+          <Text
+            font="semibold"
+            className={`text-sm ${entry.isCost ? 'text-success' : 'text-muted'}`}
+            numberOfLines={1}
+          >
+            {t(entry.isCost ? 'extras.money.cost' : 'extras.money.other')}
+          </Text>
+        ) : null}
         {deleted ? (
           <Text className="text-sm text-dangerFg" numberOfLines={1}>
             {t('extras.money.deleted', { reason: entry.deleteReason ?? '' })}
@@ -173,9 +182,13 @@ function MoneyOut() {
       ? e.paidFrom === 'CASH'
       : filter === 'bank'
         ? e.paidFrom === 'BANK'
-        : filter === 'new'
-          ? e.isNew
-          : true
+        : filter === 'costs'
+          ? e.isCost
+          : filter === 'other'
+            ? !e.isCost
+            : filter === 'new'
+              ? e.isNew
+              : true
   );
   const totals = query.data?.totals;
   const spent = (totals?.cash ?? 0) + (totals?.bank ?? 0);
@@ -219,6 +232,16 @@ function MoneyOut() {
           label={t('extras.bank')}
           selected={filter === 'bank'}
           onPress={() => setFilter('bank')}
+        />
+        <FilterChip
+          label={t('extras.money.filterCosts')}
+          selected={filter === 'costs'}
+          onPress={() => setFilter('costs')}
+        />
+        <FilterChip
+          label={t('extras.money.filterOther')}
+          selected={filter === 'other'}
+          onPress={() => setFilter('other')}
         />
         {newCount > 0 ? (
           <FilterChip

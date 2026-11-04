@@ -1358,7 +1358,17 @@
       "changeTitle": "Change expense",
       "ownerTold": "The owner is told about every expense.",
       "saved": "Saved",
-      "cashDrawer": "Cash drawer"
+      "cashDrawer": "Cash drawer",
+      "receipt": "Receipt",
+      "hasReceipt": "Has a receipt",
+      "noReceipt": "No receipt",
+      "usedFor": "Used for",
+      "forBusiness": "The business",
+      "personal": "Personal use",
+      "cost": "Business cost",
+      "other": "Other spending",
+      "filterCosts": "Business costs",
+      "filterOther": "Other"
     },
     "flow": {
       "title": "Money flow",
@@ -1376,7 +1386,17 @@
       "newFromStaff_other": "{{count}} new expenses to check",
       "seeExpenses": "See expenses",
       "report": "Report (PDF)",
-      "notAllowed": "Only the owner (or a manager allowed to see reports) can see this."
+      "notAllowed": "Only the owner (or a manager allowed to see reports) can see this.",
+      "profitTitle": "Profit",
+      "costs": "Business costs",
+      "profit": "Profit",
+      "other": "Other spending",
+      "moneyLeft": "Money left"
+    },
+    "costs": {
+      "title": "Business costs",
+      "hint": "Choose which kinds of spending count as business costs. Money flow shows profit as sales minus these. Spending without a receipt or for personal use never counts.",
+      "failed": "Couldn't save. Try again."
     }
   },
   "wrongApp": {

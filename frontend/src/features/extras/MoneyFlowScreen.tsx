@@ -65,6 +65,28 @@ function SideCard({
   );
 }
 
+/** One line of the profit card; strong lines are results (a line above them). */
+function FlowLine({ label, value, strong }: { label: string; value: number; strong?: boolean }) {
+  return (
+    <View
+      className={`flex-row items-center justify-between py-1 ${
+        strong ? 'mt-0.5 border-t border-divider pt-1.5' : ''
+      }`}
+    >
+      <Text font={strong ? 'bold' : undefined} className="text-[15px]">
+        {label}
+      </Text>
+      <Text
+        font={strong ? 'bold' : 'semibold'}
+        className={`text-[15px] ${strong && value < 0 ? 'text-alert' : ''}`}
+      >
+        {value < 0 ? '− ' : ''}
+        {formatMoney(Math.abs(value))}
+      </Text>
+    </View>
+  );
+}
+
 function Flow() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -172,6 +194,20 @@ function Flow() {
               out={out.bank}
               left={left.bank}
             />
+          </View>
+
+          <View
+            className="rounded-[20px] border-[1.5px] border-border bg-surface px-3.5 py-3"
+            accessible
+          >
+            <Text font="bold" className="pb-1.5 text-base" accessibilityRole="header">
+              {t('extras.flow.profitTitle')}
+            </Text>
+            <FlowLine label={t('extras.flow.sales')} value={sales.total} />
+            <FlowLine label={t('extras.flow.costs')} value={-flow.costs.total} />
+            <FlowLine label={t('extras.flow.profit')} value={flow.profit} strong />
+            <FlowLine label={t('extras.flow.other')} value={-flow.other.total} />
+            <FlowLine label={t('extras.flow.moneyLeft')} value={left.total} strong />
           </View>
 
           {flow.newCount > 0 ? (

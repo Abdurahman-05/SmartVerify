@@ -41,7 +41,18 @@ export type {
   ExpensesResult,
   MoneyFlow,
   MoneySplit,
+  NewExpense,
 } from '@/lib/api/extras';
+
+/** What the server counts as business costs until the owner changes it. */
+export const defaultCostKinds: real.ExpenseCategory[] = [
+  'RENT',
+  'SALARY',
+  'GAS',
+  'REPAIRS',
+  'TRANSPORT',
+  'BILLS',
+];
 
 /** Every kind, in the order the add sheet shows them. */
 export const expenseCategories: real.ExpenseCategory[] = [
@@ -65,6 +76,9 @@ const asExpense = (s: Awaited<ReturnType<typeof mock.addSpending>>): real.Expens
   oldAmount: null,
   deletedAt: null,
   deleteReason: null,
+  hasReceipt: true,
+  forBusiness: true,
+  isCost: defaultCostKinds.includes(s.category),
 });
 
 async function mockExpenses(): Promise<real.ExpensesResult> {
@@ -107,9 +121,27 @@ export const getMoneyFlow: typeof real.getMoneyFlow = USE_MOCK_EXTRAS
       const out = { total: totals.cash + totals.bank, cash: totals.cash, bank: totals.bank };
       const none = { total: 0, cash: 0, bank: 0 };
       const left = { total: -out.total, cash: -out.cash, bank: -out.bank };
-      return { sales: none, expenses: out, left, byCategory: [], newCount: 0 };
+      return {
+        sales: none,
+        expenses: out,
+        left,
+        costs: none,
+        other: out,
+        profit: 0,
+        byCategory: [],
+        newCount: 0,
+      };
     }
   : real.getMoneyFlow;
+
+let mockCostKinds = defaultCostKinds;
+export const getCostKinds: typeof real.getCostKinds = USE_MOCK_EXTRAS
+  ? async () => mockCostKinds
+  : real.getCostKinds;
+export const setCostKinds: typeof real.setCostKinds = USE_MOCK_EXTRAS
+  ? async (kinds) => (mockCostKinds = kinds)
+  : real.setCostKinds;
+export const costKindsKey = ['cost-kinds'] as const;
 
 export const expensesKey = (range: real.ExpenseRange) =>
   ['spendings', range.day ?? range.period] as const;

@@ -115,6 +115,14 @@ function Details() {
           <Text font="bold" className="text-[19px]">
             {e.title}
           </Text>
+          {deleted ? null : (
+            <Text
+              font="semibold"
+              className={`mt-0.5 text-[15px] ${e.isCost ? 'text-success' : 'text-muted'}`}
+            >
+              {t(e.isCost ? 'extras.money.cost' : 'extras.money.other')}
+            </Text>
+          )}
           <View className="my-3.5 h-px bg-divider" />
           <View className="flex-row flex-wrap">
             <Fact
@@ -124,6 +132,14 @@ function Details() {
             <Fact
               label={t('extras.money.paidFrom')}
               value={t(e.paidFrom === 'CASH' ? 'extras.money.cashDrawer' : 'extras.bank')}
+            />
+            <Fact
+              label={t('extras.money.receipt')}
+              value={t(e.hasReceipt ? 'extras.money.hasReceipt' : 'extras.money.noReceipt')}
+            />
+            <Fact
+              label={t('extras.money.usedFor')}
+              value={t(e.forBusiness ? 'extras.money.forBusiness' : 'extras.money.personal')}
             />
             <Fact label={t('extras.money.addedBy')} value={e.createdBy} />
             <Fact

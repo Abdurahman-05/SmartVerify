@@ -15,6 +15,8 @@ import { homeRouteFor, useSession } from '@/store/session';
 import { useFeatures } from '@/store/features';
 import { useBrandColors } from '@/store/theme';
 
+import { CostKindsCard } from './CostKindsCard';
+
 function FeatureRow({
   icon: Icon,
   title,
@@ -87,6 +89,7 @@ export default function ExtraFeaturesScreen() {
           disabled={change.isPending}
           onChange={(value) => change.mutate({ featureMoneyOut: value })}
         />
+        {features.featureMoneyOut ? <CostKindsCard /> : null}
         <View className="flex-row items-start gap-2 px-1 pt-1">
           <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
           <Text tone="muted" className="flex-1 text-sm leading-5">

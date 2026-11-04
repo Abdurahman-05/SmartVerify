@@ -60,6 +60,11 @@ export interface Expense extends Omit<Spending, 'category'> {
   /** Deleted by the owner: still listed (crossed out), never counted. */
   deletedAt: string | null;
   deleteReason: string | null;
+  hasReceipt: boolean;
+  /** false: personal use, not the business's. */
+  forBusiness: boolean;
+  /** A business cost: a kind the owner counts, with a receipt, for the business. */
+  isCost: boolean;
 }
 
 export interface ExpensesResult extends Omit<SpendingsResult, 'entries'> {
@@ -84,6 +89,12 @@ export interface MoneyFlow {
   expenses: MoneySplit;
   /** Sales − expenses (can be below 0). */
   left: MoneySplit;
+  /** Business costs (the kinds the owner counts). */
+  costs: MoneySplit;
+  /** Everything else spent. */
+  other: MoneySplit;
+  /** Sales − business costs. */
+  profit: number;
   byCategory: { category: ExpenseCategory; amount: number; share: number }[];
   newCount: number;
 }
@@ -93,6 +104,14 @@ export interface ExpenseChange {
   amount?: number;
   category?: ExpenseCategory;
   paidFrom?: Spending['paidFrom'];
+  hasReceipt?: boolean;
+  forBusiness?: boolean;
+}
+
+export interface NewExpense extends Omit<NewSpending, 'category'> {
+  category: ExpenseCategory;
+  hasReceipt: boolean;
+  forBusiness: boolean;
 }
 
 /** GET /spendings?period|date — the list, totals and how many are new. */
@@ -103,7 +122,7 @@ export const getExpenses = ({ period, day }: ExpenseRange) =>
 export const getExpense = (id: string) => api<Expense>(`/spendings/${encodeURIComponent(id)}`);
 
 /** POST /spendings with any kind (the server takes all of them). */
-export const addExpense = (input: Omit<NewSpending, 'category'> & { category: ExpenseCategory }) =>
+export const addExpense = (input: NewExpense) =>
   api<Expense>('/spendings', { method: 'POST', body: input });
 
 /** POST /spendings/:id/review — owner: "looks right". */
@@ -120,6 +139,17 @@ export const deleteExpense = (id: string, reason: string) =>
     method: 'POST',
     body: { reason },
   });
+
+/** GET /business/cost-kinds — the kinds the owner counts as business costs. */
+export const getCostKinds = () =>
+  api<{ kinds: ExpenseCategory[] }>('/business/cost-kinds').then((r) => r.kinds);
+
+/** PUT /business/cost-kinds — owner. */
+export const setCostKinds = (kinds: ExpenseCategory[]) =>
+  api<{ kinds: ExpenseCategory[] }>('/business/cost-kinds', {
+    method: 'PUT',
+    body: { kinds },
+  }).then((r) => r.kinds);
 
 /** GET /money-flow — owner, or a manager allowed to see reports. */
 export const getMoneyFlow = ({ period, day }: ExpenseRange) =>

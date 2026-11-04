@@ -19,6 +19,7 @@ import {
   spendingsKey,
   type Expense,
   type ExpenseCategory,
+  type NewExpense,
   type PaidFrom,
 } from '@/lib/extras';
 import { useSession } from '@/store/session';
@@ -45,15 +46,13 @@ export function AddSpendingSheet({
   const [amount, setAmount] = useState(editing ? String(editing.amount) : '');
   const [category, setCategory] = useState<ExpenseCategory>(editing?.category ?? 'FOOD');
   const [paidFrom, setPaidFrom] = useState<PaidFrom>(editing?.paidFrom ?? 'CASH');
+  const [hasReceipt, setHasReceipt] = useState(editing?.hasReceipt ?? true);
+  const [forBusiness, setForBusiness] = useState(editing?.forBusiness ?? true);
   const [errors, setErrors] = useState<{ title?: boolean; amount?: boolean }>({});
 
   const save = useMutation({
-    mutationFn: (input: {
-      title: string;
-      amount: number;
-      category: ExpenseCategory;
-      paidFrom: PaidFrom;
-    }) => (editing ? changeExpense(editing.id, input) : addExpense(input)),
+    mutationFn: (input: NewExpense) =>
+      editing ? changeExpense(editing.id, input) : addExpense(input),
     onSuccess: () => {
       // Lists, the one expense and the money flow all start with these keys.
       void queryClient.invalidateQueries({ queryKey: spendingsKey });
@@ -66,6 +65,8 @@ export function AddSpendingSheet({
       setAmount('');
       setCategory('FOOD');
       setPaidFrom('CASH');
+      setHasReceipt(true);
+      setForBusiness(true);
       onClose();
     },
   });
@@ -75,7 +76,14 @@ export function AddSpendingSheet({
     const next = { title: !title.trim(), amount: Number(amount) < 1 };
     setErrors(next);
     if (next.title || next.amount) return;
-    save.mutate({ title: title.trim(), amount: Number(amount), category, paidFrom });
+    save.mutate({
+      title: title.trim(),
+      amount: Number(amount),
+      category,
+      paidFrom,
+      hasReceipt,
+      forBusiness,
+    });
   };
 
   return (
@@ -139,6 +147,44 @@ export function AddSpendingSheet({
               selected={paidFrom === 'BANK'}
               dark
               onPress={() => setPaidFrom('BANK')}
+            />
+          </View>
+        </View>
+        <View className="gap-1.5">
+          <Text font="bold" className="text-base">
+            {t('extras.money.receipt')}
+          </Text>
+          <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
+            <Pill
+              label={t('extras.money.hasReceipt')}
+              selected={hasReceipt}
+              dark
+              onPress={() => setHasReceipt(true)}
+            />
+            <Pill
+              label={t('extras.money.noReceipt')}
+              selected={!hasReceipt}
+              dark
+              onPress={() => setHasReceipt(false)}
+            />
+          </View>
+        </View>
+        <View className="gap-1.5">
+          <Text font="bold" className="text-base">
+            {t('extras.money.usedFor')}
+          </Text>
+          <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
+            <Pill
+              label={t('extras.money.forBusiness')}
+              selected={forBusiness}
+              dark
+              onPress={() => setForBusiness(true)}
+            />
+            <Pill
+              label={t('extras.money.personal')}
+              selected={!forBusiness}
+              dark
+              onPress={() => setForBusiness(false)}
             />
           </View>
         </View>
