@@ -118,12 +118,6 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="buy-list"
-        // Opened from Home tiles: five tabs are enough.
-        options={{ title: t('extras.buy.tab'), href: null }}
-      />
-      <Tabs.Screen name="money-out" options={{ title: t('extras.money.tab'), href: null }} />
-      <Tabs.Screen
         name="cook"
         options={{ title: t('kitchen.title'), tabBarIcon: KitchenIcon, ...forWaiter(isChef) }}
       />

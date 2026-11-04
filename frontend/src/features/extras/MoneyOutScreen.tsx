@@ -233,7 +233,7 @@ function MoneyOut() {
   ) : null;
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-background">
+    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background">
       <ScreenHeader
         title={t('extras.money.title')}
         subtitle={t('extras.money.subtitle')}

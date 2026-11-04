@@ -134,7 +134,7 @@ function BuyList() {
   }
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-background">
+    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background">
       <ScreenHeader
         title={t('extras.buy.title')}
         subtitle={t('extras.buy.subtitle')}
