@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useFocusEffect, useRouter, type Href } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import {
   Bell,
   ChartColumn,
@@ -33,6 +33,8 @@ import {
 import { useSession } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
+
+import { targetOf } from './target';
 
 const icons: Record<string, LucideIcon> = {
   new_order: ChefHat,
@@ -146,29 +148,6 @@ function useNotificationText() {
   };
 }
 
-/** Where tapping a notification goes. */
-function targetOf(n: AppNotification, role: string | undefined): Href | null {
-  switch (n.type) {
-    case 'new_order':
-    case 'order_added':
-    case 'order_changed':
-      return role === 'chef' ? '/cook' : null;
-    case 'big_payment':
-    case 'bad_receipt':
-      return '/transactions';
-    case 'daily_summary':
-      return '/reports';
-    case 'plan_ending':
-    case 'plan_late':
-      return role === 'owner' ? '/subscription' : null;
-    case 'new_expense':
-    case 'expense_deleted':
-      return typeof n.data.spendingId === 'string' ? `/expense/${n.data.spendingId}` : null;
-    default:
-      return null;
-  }
-}
-
 function Row({ item, onPress }: { item: AppNotification; onPress: (() => void) | null }) {
   const brand = useBrandColors();
   const text = useNotificationText();
@@ -253,7 +232,7 @@ export default function NotificationsScreen() {
           </View>
         }
         renderItem={({ item }) => {
-          const target = targetOf(item, role);
+          const target = targetOf(item.type, item.data, role);
           return <Row item={item} onPress={target ? () => router.push(target) : null} />;
         }}
       />

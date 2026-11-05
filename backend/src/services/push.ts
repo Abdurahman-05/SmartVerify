@@ -34,78 +34,101 @@ export function pushText(
   const am = lang === 'am';
   const label = orderLabel(d, lang);
   const n = str(d.orderNo);
+  const etb = (v: unknown) => (am ? money(v).replace('ETB', 'ብር') : money(v));
+  // One emoji per kind, so each alert is known at a glance on the lock screen.
   switch (type) {
     case 'new_order':
       return am
-        ? { title: `አዲስ ትዕዛዝ · ${label}`, body: `${str(d.items)} ዕቃ · ትዕዛዝ #${n}` }
-        : { title: `New order · ${label}`, body: `${str(d.items)} item(s) · order #${n}` };
+        ? { title: `🍽️ አዲስ ትዕዛዝ · ${label}`, body: `${str(d.items)} ዕቃ · ትዕዛዝ #${n} · ለማብሰል ይንኩ` }
+        : {
+            title: `🍽️ New order · ${label}`,
+            body: `${str(d.items)} item(s) · order #${n} · tap to cook`,
+          };
     case 'order_added':
       return am
-        ? { title: `ተጨማሪ ዕቃዎች · ${label}`, body: `${str(d.items)} ዕቃ · ትዕዛዝ #${n}` }
-        : { title: `More items · ${label}`, body: `${str(d.items)} item(s) · order #${n}` };
+        ? { title: `➕ ተጨማሪ ዕቃዎች · ${label}`, body: `${str(d.items)} ዕቃ ወደ ትዕዛዝ #${n} ተጨምሯል` }
+        : {
+            title: `➕ More items · ${label}`,
+            body: `${str(d.items)} item(s) added to order #${n}`,
+          };
     case 'order_changed':
       return am
-        ? { title: `ትዕዛዝ ተቀይሯል · ${label}`, body: `ትዕዛዝ #${n}፦ ቲኬቱን ይመልከቱ` }
-        : { title: `Order changed · ${label}`, body: `Order #${n}: check the ticket` };
+        ? { title: `✏️ ትዕዛዝ ተቀይሯል · ${label}`, body: `ትዕዛዝ #${n}፦ አዲሱን ቲኬት ይመልከቱ` }
+        : { title: `✏️ Order changed · ${label}`, body: `Order #${n}: check the new ticket` };
     case 'order_cancelled':
       return am
-        ? { title: `ትዕዛዝ ተሰርዟል · ${label}`, body: `ትዕዛዝ #${n}፦ ${str(d.reason)}` }
-        : { title: `Order cancelled · ${label}`, body: `Order #${n}: ${str(d.reason)}` };
+        ? { title: `❌ ትዕዛዝ ተሰርዟል · ${label}`, body: `ትዕዛዝ #${n} · ${str(d.reason)}` }
+        : { title: `❌ Order cancelled · ${label}`, body: `Order #${n} · ${str(d.reason)}` };
     case 'order_ready':
       return am
-        ? { title: `ምግብ ተዘጋጅቷል · ${label}`, body: `ትዕዛዝ #${n} ለማቅረብ ዝግጁ ነው` }
-        : { title: `Food ready · ${label}`, body: `Order #${n} is ready to serve` };
+        ? { title: `✅ ምግብ ዝግጁ ነው · ${label}`, body: `ትዕዛዝ #${n} ለማቅረብ ዝግጁ ነው` }
+        : { title: `✅ Food ready · ${label}`, body: `Order #${n} is ready to serve` };
     case 'big_payment':
       return am
         ? {
-            title: `ትልቅ ክፍያ፦ ${money(d.amountEtb)}`,
-            body: `ከ${str(d.payerName)} · ${str(d.bankCode)}`,
+            title: `💰 ትልቅ ክፍያ · ${etb(d.amountEtb)}`,
+            body: `ከ${str(d.payerName)} · ${str(d.bankCode)} · ተረጋግጧል`,
           }
         : {
-            title: `Big payment: ${money(d.amountEtb)}`,
-            body: `From ${str(d.payerName)} · ${str(d.bankCode)}`,
+            title: `💰 Big payment · ${etb(d.amountEtb)}`,
+            body: `From ${str(d.payerName)} · ${str(d.bankCode)} · verified`,
           };
     case 'bad_receipt':
       return am
-        ? { title: 'አጠራጣሪ ደረሰኝ', body: `በ${str(d.checkedBy)} ተረጋግጧል · ${str(d.bankCode)}` }
+        ? {
+            title: '⚠️ አጠራጣሪ ደረሰኝ',
+            body: `በ${str(d.checkedBy)} የተፈተሸ · ${str(d.bankCode)} · ለማየት ይንኩ`,
+          }
         : {
-            title: 'Suspicious receipt',
-            body: `Checked by ${str(d.checkedBy)} · ${str(d.bankCode)}`,
+            title: '⚠️ Suspicious receipt',
+            body: `Checked by ${str(d.checkedBy)} · ${str(d.bankCode)} · tap to see why`,
           };
     case 'daily_summary':
       return am
-        ? { title: 'የዛሬ ክፍያዎች', body: `${str(d.count)} የተረጋገጡ ክፍያዎች · ${money(d.totalEtb)}` }
-        : { title: "Today's payments", body: `${str(d.count)} verified · ${money(d.totalEtb)}` };
+        ? { title: '📊 የዛሬ ክፍያዎች', body: `${str(d.count)} የተረጋገጡ ክፍያዎች · ድምር ${etb(d.totalEtb)}` }
+        : {
+            title: "📊 Today's payments",
+            body: `${str(d.count)} verified · total ${etb(d.totalEtb)}`,
+          };
     case 'plan_ending':
       return am
-        ? { title: `ፕላንዎ በ${str(d.daysLeft)} ቀን ያበቃል`, body: 'ያለ መቋረጥ ለማረጋገጥ አሁን ይክፈሉ' }
+        ? { title: `⏰ ፕላንዎ በ${str(d.daysLeft)} ቀን ያበቃል`, body: 'ሳይቋረጥ ለመቀጠል አሁን ይክፈሉ' }
         : {
-            title: `Your plan ends in ${str(d.daysLeft)} day(s)`,
-            body: 'Pay now to keep verifying',
+            title: `⏰ Your plan ends in ${str(d.daysLeft)} day(s)`,
+            body: 'Pay now to keep everything running',
           };
     case 'plan_late':
       return am
-        ? { title: 'ፕላንዎ አብቅቷል', body: 'ሁሉንም መልሶ ለማብራት ይክፈሉ' }
-        : { title: 'Your plan has ended', body: 'Pay to turn everything back on' };
+        ? { title: '🔒 ፕላንዎ አብቅቷል', body: 'ሁሉንም መልሶ ለማብራት ይክፈሉ' }
+        : { title: '🔒 Your plan has ended', body: 'Pay to turn everything back on' };
     case 'new_expense': {
       const cash = d.paidFrom === 'CASH';
       return am
         ? {
-            title: `አዲስ ወጪ · ${money(d.amountEtb).replace('ETB', 'ብር')}`,
-            body: `${str(d.name)}፦ ${str(d.title)} · ${cash ? 'ጥሬ ገንዘብ' : 'ባንክ'}`,
+            title: `🧾 አዲስ ወጪ · ${etb(d.amountEtb)}`,
+            body: `${str(d.name)}፦ ${str(d.title)} · ${cash ? 'ጥሬ ገንዘብ' : 'ባንክ'} · ለማየት ይንኩ`,
           }
         : {
-            title: `New expense · ${money(d.amountEtb)}`,
-            body: `${str(d.name)}: ${str(d.title)} · ${cash ? 'Cash' : 'Bank'}`,
+            title: `🧾 New expense · ${etb(d.amountEtb)}`,
+            body: `${str(d.name)}: ${str(d.title)} · ${cash ? 'Cash' : 'Bank'} · tap to check`,
           };
     }
     case 'expense_deleted':
       return am
-        ? { title: `ወጪ ተሰርዟል · ${str(d.title)}`, body: str(d.reason) }
-        : { title: `Expense deleted · ${str(d.title)}`, body: str(d.reason) };
+        ? { title: `🗑️ ወጪ ተሰርዟል · ${str(d.title)}`, body: `${etb(d.amountEtb)} · ${str(d.reason)}` }
+        : {
+            title: `🗑️ Expense deleted · ${str(d.title)}`,
+            body: `${etb(d.amountEtb)} · ${str(d.reason)}`,
+          };
     default:
       return null;
   }
+}
+
+/** Ids and numbers the app needs to open the right screen when a push is tapped. */
+function pickIds(d: Data) {
+  const keep = ['spendingId', 'billId', 'orderId', 'transactionId'] as const;
+  return Object.fromEntries(keep.filter((k) => typeof d[k] === 'string').map((k) => [k, d[k]]));
 }
 
 /**
@@ -137,7 +160,8 @@ export async function sendPush(
               priority: 'high',
               channelId: 'alerts',
               ...text,
-              data: { type: input.type },
+              // The app opens the matching screen from these (never sentences or secrets).
+              data: { type: input.type, ...pickIds(input.data) },
             },
           ]
         : [];

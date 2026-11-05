@@ -187,13 +187,13 @@ describe('push notifications', () => {
   it('lock-screen text in English and Amharic', () => {
     const order = { orderNo: 1002, type: 'dine', table: 2, items: 2 };
     expect(pushText('new_order', order, 'en')).toEqual({
-      title: 'New order · Table 2',
-      body: '2 item(s) · order #1002',
+      title: '🍽️ New order · Table 2',
+      body: '2 item(s) · order #1002 · tap to cook',
     });
-    expect(pushText('order_ready', order, 'am')?.title).toBe('ምግብ ተዘጋጅቷል · ጠረጴዛ 2');
+    expect(pushText('order_ready', order, 'am')?.title).toBe('✅ ምግብ ዝግጁ ነው · ጠረጴዛ 2');
     expect(
       pushText('big_payment', { amountEtb: 6500, payerName: 'Kebede', bankCode: 'CBE' }, 'en')
-    ).toMatchObject({ title: 'Big payment: 6,500 ETB' });
+    ).toMatchObject({ title: '💰 Big payment · 6,500 ETB' });
     expect(pushText('something_else', {}, 'en')).toBeNull();
   });
 });

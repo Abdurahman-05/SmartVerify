@@ -8,6 +8,7 @@ import { notificationsKey } from '@/lib/notifications';
 import { listenToPushes, registerForPush } from '@/lib/push';
 import { belongsToOtherApp } from '@/lib/variant';
 import { useFeatures } from '@/store/features';
+import { targetOf } from '@/features/notifications/target';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
@@ -21,14 +22,21 @@ export default function AppLayout() {
   useEffect(() => {
     if (userId) void registerForPush();
   }, [userId]);
-  // A push arrives: the Alerts badge updates at once. Tapping one opens Alerts.
+  // A push arrives: the Alerts badge updates at once. Tapping one opens what it is about.
   const queryClient = useQueryClient();
   const router = useRouter();
   useEffect(
     () =>
       listenToPushes(
         () => void queryClient.invalidateQueries({ queryKey: notificationsKey }),
-        () => router.push('/notifications')
+        (data) => {
+          // Straight to what the push is about; anything else opens Alerts.
+          const target =
+            typeof data.type === 'string'
+              ? targetOf(data.type, data, useSession.getState().user?.role)
+              : null;
+          router.push(target ?? '/notifications');
+        }
       ),
     [queryClient, router]
   );

@@ -98,11 +98,17 @@ export async function registerForPush(): Promise<void> {
  * Pushes while the app runs: onReceived when one arrives, onTapped when the person taps one.
  * Returns the cleanup. Does nothing where push cannot work.
  */
-export function listenToPushes(onReceived: () => void, onTapped: () => void): () => void {
+export function listenToPushes(
+  onReceived: () => void,
+  onTapped: (data: Record<string, unknown>) => void
+): () => void {
   const Notifications = notifications();
   if (!Notifications) return () => {};
   const received = Notifications.addNotificationReceivedListener(onReceived);
-  const tapped = Notifications.addNotificationResponseReceivedListener(onTapped);
+  // The push carries its type and ids, so the app can open the matching screen.
+  const tapped = Notifications.addNotificationResponseReceivedListener((response) =>
+    onTapped(response.notification.request.content.data ?? {})
+  );
   return () => {
     received.remove();
     tapped.remove();
