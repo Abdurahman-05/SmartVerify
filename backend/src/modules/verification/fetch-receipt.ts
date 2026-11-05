@@ -26,6 +26,8 @@ export interface FetchOptions {
 }
 
 const MAX_REDIRECTS = 3;
+/** First try at opening the relay tunnel (a working one opens in about 1 s). */
+const FIRST_TRY_MS = 4_000;
 
 /** An https agent whose only connection is the given (already encrypted) tunnel. */
 function tunnelAgent(socket: tls.TLSSocket): https.Agent {
@@ -90,11 +92,24 @@ function tunnel(proxy: URL, target: URL, tlsStrict: boolean, ms: number): Promis
 export function fetchReceipt(url: URL, options: FetchOptions): Promise<FetchedReceipt> {
   const deadline = Date.now() + options.timeoutMs;
 
+  // The relay's network often drops the first connection after a quiet spell: give the tunnel
+  // a short first try, then one more with the time that is left.
+  const openTunnel = async (proxy: URL, target: URL, tlsStrict: boolean) => {
+    const left = deadline - Date.now();
+    try {
+      return await tunnel(proxy, target, tlsStrict, Math.min(left, FIRST_TRY_MS));
+    } catch {
+      const rest = deadline - Date.now();
+      if (rest <= 0) throw new ReceiptFetchError('TIMEOUT');
+      return tunnel(proxy, target, tlsStrict, rest);
+    }
+  };
+
   const get = async (target: URL, redirectsLeft: number): Promise<FetchedReceipt> => {
     const left = deadline - Date.now();
     if (left <= 0) throw new ReceiptFetchError('TIMEOUT');
     const socket = options.proxy
-      ? await tunnel(options.proxy, target, options.tlsStrict, left)
+      ? await openTunnel(options.proxy, target, options.tlsStrict)
       : undefined;
     return new Promise((resolve, reject) => {
       const remaining = deadline - Date.now();
