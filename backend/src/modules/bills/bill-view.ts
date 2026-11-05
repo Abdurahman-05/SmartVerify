@@ -30,6 +30,12 @@ export const billListItemSchema = z.object({
 });
 
 export const billDetailSchema = billListItemSchema.extend({
+  canAct: z
+    .boolean()
+    .optional()
+    .describe(
+      'false: a waiter looking at a bill of another waiter (read only: no payment, no changes)'
+    ),
   customerPhone: z.string().nullable(),
   deliveryAreaId: z.string().nullable(),
   address: z.string().nullable(),

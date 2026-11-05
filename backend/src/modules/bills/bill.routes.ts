@@ -27,7 +27,9 @@ export const billRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: {
         tags: ['bills'],
         security: [{ bearerAuth: [] }],
-        description: 'Waiters see only their own bills. Newest first, cursor pagination.',
+        description:
+          'Every open bill of the business (waiters too: they act only on their own). ' +
+          'mine=true: only the bills of the signed-in member. Newest first, cursor pagination.',
         querystring: z.object({
           status: z.enum(['open', 'paid']).optional(),
           type: z.enum(['dine', 'takeaway', 'delivery']).optional(),

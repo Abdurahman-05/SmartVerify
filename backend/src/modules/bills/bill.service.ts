@@ -12,7 +12,10 @@ export interface ListBillsQuery {
   limit: number;
 }
 
-/** Bills the signed-in member may see: always their business; waiters only their own bills. */
+/**
+ * Bills the signed-in member may act on (pay, change): always their business; waiters only their
+ * own bills. Everyone in the business may look at every bill (readOnly in the app).
+ */
 export const visibleBills = (auth: AuthContext): Prisma.BillWhereInput => ({
   businessId: auth.businessId,
   ...(auth.role === 'waiter' && { waiterId: auth.memberId }),
@@ -30,7 +33,8 @@ export function createBillService(prisma: PrismaClient) {
     async list(auth: AuthContext, query: ListBillsQuery) {
       const rows = await prisma.bill.findMany({
         where: {
-          ...visibleBills(auth),
+          // Waiters see the whole floor too; they can only act on their own bills.
+          businessId: auth.businessId,
           ...(query.mine && { waiterId: auth.memberId }),
           ...(query.status && { status: query.status }),
           ...(query.type && { type: query.type }),
@@ -47,7 +51,10 @@ export function createBillService(prisma: PrismaClient) {
       };
     },
 
-    get: (auth: AuthContext, id: string) => loadBillDetail(prisma, { id, ...visibleBills(auth) }),
+    async get(auth: AuthContext, id: string) {
+      const bill = await loadBillDetail(prisma, { id, businessId: auth.businessId });
+      return { ...bill, canAct: auth.role !== 'waiter' || bill.waiterId === auth.memberId };
+    },
 
     /** Owner, manager, or a member allowed to change delivery fees. Only open delivery bills. */
     async changeDeliveryFee(auth: AuthContext, id: string, amount: number) {

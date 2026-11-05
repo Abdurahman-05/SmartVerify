@@ -257,12 +257,16 @@ describe('POST /orders — idempotency and concurrency', () => {
 });
 
 describe('GET /bills', () => {
-  it('waiter sees own bills only; manager sees all; chef FORBIDDEN', async () => {
+  it('waiters see every bill (mine=true: their own); chef FORBIDDEN', async () => {
     const mine = (await order(r.waiter.token, takeaway())).json();
     const theirs = (await order(r.waiter2.token, dine(r.tables[1]!.id))).json();
 
     const waiterList = (await get(r.waiter.token, '/bills')).json();
-    expect(waiterList.items.map((b: { id: string }) => b.id)).toEqual([mine.id]);
+    expect(waiterList.items.map((b: { id: string }) => b.id).sort()).toEqual(
+      [mine.id, theirs.id].sort()
+    );
+    const waiterMine = (await get(r.waiter.token, '/bills?mine=true')).json();
+    expect(waiterMine.items.map((b: { id: string }) => b.id)).toEqual([mine.id]);
 
     const managerList = (await get(r.manager.token, '/bills?status=open')).json();
     expect(managerList.items.map((b: { id: string }) => b.id).sort()).toEqual(
@@ -282,9 +286,16 @@ describe('GET /bills', () => {
     expect((await get(r.chef.token, '/bills')).statusCode).toBe(403);
     expect((await get(r.chef.token, `/bills/${mine.id}`)).statusCode).toBe(403);
 
-    // A waiter cannot open another waiter's bill.
-    expect(errorCode(await get(r.waiter.token, `/bills/${theirs.id}`))).toBe('NOT_FOUND');
-    expect((await get(r.waiter2.token, `/bills/${theirs.id}`)).json().id).toBe(theirs.id);
+    // A waiter can look at another waiter's bill, read only.
+    expect((await get(r.waiter.token, `/bills/${theirs.id}`)).json()).toMatchObject({
+      id: theirs.id,
+      canAct: false,
+    });
+    expect((await get(r.waiter2.token, `/bills/${theirs.id}`)).json()).toMatchObject({
+      id: theirs.id,
+      canAct: true,
+    });
+    expect((await get(r.manager.token, `/bills/${theirs.id}`)).json().canAct).toBe(true);
   });
 
   it('paginates newest first with a cursor', async () => {
