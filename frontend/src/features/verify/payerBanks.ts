@@ -39,6 +39,28 @@ export interface PayerBank {
 const upper = (v: string) => v.replace(/\s/g, '').toUpperCase();
 const digits = (v: string) => v.replace(/\D/g, '');
 
+/**
+ * The Telebirr app's "Payment QR Code" (on a finished payment): base64 of a hex string in which
+ * the transaction number is 10 ASCII bytes after a length byte 0A (seen on a real one:
+ * ...0A444b353051564548574163... = DK50QVEHWA). Null when it is not that.
+ */
+function telebirrAppQr(data: string): string | null {
+  let hex: string;
+  try {
+    hex = atob(data.trim());
+  } catch {
+    return null;
+  }
+  if (!/^[0-9A-F]+$/i.test(hex)) return null;
+  for (let i = 0; i + 22 <= hex.length; i += 2) {
+    if (hex.slice(i, i + 2).toUpperCase() !== '0A') continue;
+    const bytes = hex.slice(i + 2, i + 22).match(/../g) ?? [];
+    const text = bytes.map((b) => String.fromCharCode(parseInt(b, 16))).join('');
+    if (/^[A-Z0-9]{10}$/.test(text) && /[A-Z]/.test(text)) return text;
+  }
+  return null;
+}
+
 const reference: ReceiptField = {
   key: 'reference',
   input: 'text',
@@ -91,10 +113,11 @@ export const payerBanks: PayerBank[] = [
         valid: (v) => /^[A-Z0-9]{10}$/.test(v),
       },
     ],
-    // Telebirr receipt link: .../receipt/DJK3A9X2PQ
+    // Telebirr receipt link (.../receipt/DJK3A9X2PQ) or the Telebirr app's "Payment QR Code".
     parseQr: (data) => {
       const m = /receipt\/([A-Z0-9]{10})\b/i.exec(data);
-      return m ? { transactionNumber: m[1].toUpperCase() } : null;
+      const number = m ? m[1].toUpperCase() : telebirrAppQr(data);
+      return number ? { transactionNumber: number } : null;
     },
   },
   {
