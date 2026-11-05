@@ -42,6 +42,8 @@ const MB_HEADERS = {
 };
 
 const FETCH = { timeoutMs: 10_000, maxBytes: 2 * 1024 * 1024 };
+/** Sites that answer only Ethiopian addresses: fetched through RECEIPT_PROXY_URL when set. */
+const ETHIOPIA_ONLY = new Set(['transactioninfo.ethiotelecom.et', 'm-pesabusiness.safaricom.et']);
 
 interface ReceiptSource {
   url: URL;
@@ -363,7 +365,16 @@ async function checkReceipt(input: {
 
   let fetched;
   try {
-    fetched = await fetchReceipt(source.url, { ...FETCH, tlsStrict, headers: source.headers });
+    const proxy =
+      env.RECEIPT_PROXY_URL && ETHIOPIA_ONLY.has(source.url.hostname)
+        ? new URL(env.RECEIPT_PROXY_URL)
+        : undefined;
+    fetched = await fetchReceipt(source.url, {
+      ...FETCH,
+      tlsStrict,
+      headers: source.headers,
+      proxy,
+    });
   } catch (error) {
     const reason = error instanceof ReceiptFetchError ? error.reason : 'UNREACHABLE';
     if (reason === 'TIMEOUT' || reason === 'UNREACHABLE') {

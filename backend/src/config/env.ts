@@ -52,6 +52,11 @@ const schema = z.object({
    * rate limits see the real client address. 0 = none (local development).
    */
   TRUST_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
+  /**
+   * Ethiopian relay for the receipt sites that answer only Ethiopian addresses (Telebirr,
+   * M-PESA): http://user:password@host:port. Unset = fetch directly.
+   */
+  RECEIPT_PROXY_URL: z.string().url().optional(),
   GEMINI_API_KEY: z.string().min(10).optional(),
   /** Optional key per bank (each from its own Google project, so each has its own rate limit). */
   GEMINI_API_KEY_CBE: z.string().min(10).optional(),
