@@ -27,6 +27,13 @@ export interface FetchOptions {
 
 const MAX_REDIRECTS = 3;
 
+/** An https agent whose only connection is the given (already encrypted) tunnel. */
+function tunnelAgent(socket: tls.TLSSocket): https.Agent {
+  const agent = new https.Agent({ keepAlive: false });
+  agent.createConnection = () => socket;
+  return agent;
+}
+
 /** Opens an encrypted connection to the target through the proxy (HTTP CONNECT). */
 function tunnel(proxy: URL, target: URL, tlsStrict: boolean, ms: number): Promise<tls.TLSSocket> {
   return new Promise((resolve, reject) => {
@@ -52,7 +59,21 @@ function tunnel(proxy: URL, target: URL, tlsStrict: boolean, ms: number): Promis
         socket.destroy();
         return reject(new ReceiptFetchError('UNREACHABLE'));
       }
-      resolve(tls.connect({ socket, servername: target.hostname, rejectUnauthorized: tlsStrict }));
+      // Hand over only a ready connection (Node 22 stalls on one still shaking hands).
+      const secure = tls.connect({
+        socket,
+        servername: target.hostname,
+        rejectUnauthorized: tlsStrict,
+      });
+      const left = setTimeout(() => secure.destroy(new ReceiptFetchError('TIMEOUT')), ms);
+      secure.once('secureConnect', () => {
+        clearTimeout(left);
+        resolve(secure);
+      });
+      secure.once('error', (error) => {
+        clearTimeout(left);
+        reject(error instanceof ReceiptFetchError ? error : new ReceiptFetchError('UNREACHABLE'));
+      });
     });
     req.on('error', (error) => {
       clearTimeout(timer);
@@ -85,7 +106,8 @@ export function fetchReceipt(url: URL, options: FetchOptions): Promise<FetchedRe
       const requestOptions: https.RequestOptions = {
         rejectUnauthorized: options.tlsStrict,
         headers: options.headers,
-        ...(socket ? { agent: false, createConnection: () => socket } : {}),
+        // An agent of its own that hands out the tunnel (works the same on every Node version).
+        ...(socket ? { agent: tunnelAgent(socket) } : {}),
       };
       const req = https.get(target, requestOptions, (res) => {
         const status = res.statusCode ?? 0;
