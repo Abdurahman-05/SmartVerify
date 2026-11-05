@@ -70,8 +70,8 @@ export default function OpenBillsScreen() {
   const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
-  // A waiter only ever gets their own tables (the server decides), so no choice for them;
-  // owner and manager look after every table, so they start on All.
+  // Waiters start on their own tables (they can look at the others); owner and manager look
+  // after every table, so they start on All.
   const isWaiter = useSession((s) => s.user?.role === 'waiter');
   const [scope, setScope] = useState<'mine' | 'all'>(isWaiter ? 'mine' : 'all');
   const labelFor = useBillLabel();
@@ -102,20 +102,18 @@ export default function OpenBillsScreen() {
         onBack={() => (router.canGoBack() ? router.back() : router.replace('/home'))}
       />
 
-      {isWaiter ? null : (
-        <View className="flex-row gap-2 px-4 pb-2.5 pt-1" accessibilityRole="radiogroup">
-          <Pill
-            label={t('bills.allTables')}
-            selected={scope === 'all'}
-            onPress={() => setScope('all')}
-          />
-          <Pill
-            label={t('bills.myTables')}
-            selected={scope === 'mine'}
-            onPress={() => setScope('mine')}
-          />
-        </View>
-      )}
+      <View className="flex-row gap-2 px-4 pb-2.5 pt-1" accessibilityRole="radiogroup">
+        <Pill
+          label={t('bills.myTables')}
+          selected={scope === 'mine'}
+          onPress={() => setScope('mine')}
+        />
+        <Pill
+          label={t('bills.allTables')}
+          selected={scope === 'all'}
+          onPress={() => setScope('all')}
+        />
+      </View>
 
       <FlatList
         data={shown}

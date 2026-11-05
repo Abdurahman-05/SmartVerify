@@ -7,6 +7,7 @@ import { Alert, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useBrandColors } from '@/store/theme';
+import { colors } from '@/theme/tokens';
 import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { MoneyText } from '@/components/ui/MoneyText';
@@ -102,9 +103,15 @@ function BillView({ bill }: { bill: Bill }) {
     onSuccess: refresh,
   });
 
+  // Another waiter's bill: for looking only. The server refuses payment and changes anyway.
+  const canAct = bill.canAct !== false;
   // The server decides too (ORDER_LOCKED); this only hides buttons that would fail.
   const canChange = (order: BillOrder) =>
-    !order.cancelled && order.kitchenStatus === 'new' && bill.status === 'open' && role !== 'chef';
+    !order.cancelled &&
+    order.kitchenStatus === 'new' &&
+    bill.status === 'open' &&
+    role !== 'chef' &&
+    canAct;
   const askCancel = (order: BillOrder) => {
     const reasons = ['customerLeft', 'mistake', 'outOfStock'] as const;
     Alert.alert(
@@ -218,32 +225,43 @@ function BillView({ bill }: { bill: Bill }) {
 
         <View className="min-h-6 flex-1" />
 
-        <View className="gap-2.5 px-4 pb-6">
-          <Button
-            label={t('bills.addMore')}
-            icon={Plus}
-            variant="outline"
-            size="md"
-            disabled={bill.status !== 'open' || !bill.orders}
-            onPress={() => router.push({ pathname: '/bills/[id]/add', params: { id: bill.id } })}
-          />
-          <Button
-            label={t('bills.paidByCash')}
-            icon={Banknote}
-            variant="outline"
-            size="md"
-            disabled={bill.status !== 'open'}
-            onPress={() => router.push({ pathname: '/bills/[id]/cash', params: { id: bill.id } })}
-          />
-          <Button
-            label={t('bills.payByBank')}
-            icon={QrCode}
-            disabled={bill.status !== 'open'}
-            onPress={() =>
-              router.push({ pathname: '/verify-restaurant', params: { billId: bill.id } })
-            }
-          />
-        </View>
+        {canAct ? null : (
+          <View className="mx-4 flex-row items-start gap-2 rounded-[16px] bg-warnBg px-3.5 py-3">
+            <Info size={20} color={colors.warnFg} strokeWidth={2.2} />
+            <Text font="semibold" className="flex-1 text-[15px] leading-5 text-warnFg">
+              {t('bills.othersBill', { name: bill.waiterName })}
+            </Text>
+          </View>
+        )}
+
+        {canAct ? (
+          <View className="gap-2.5 px-4 pb-6">
+            <Button
+              label={t('bills.addMore')}
+              icon={Plus}
+              variant="outline"
+              size="md"
+              disabled={bill.status !== 'open' || !bill.orders}
+              onPress={() => router.push({ pathname: '/bills/[id]/add', params: { id: bill.id } })}
+            />
+            <Button
+              label={t('bills.paidByCash')}
+              icon={Banknote}
+              variant="outline"
+              size="md"
+              disabled={bill.status !== 'open'}
+              onPress={() => router.push({ pathname: '/bills/[id]/cash', params: { id: bill.id } })}
+            />
+            <Button
+              label={t('bills.payByBank')}
+              icon={QrCode}
+              disabled={bill.status !== 'open'}
+              onPress={() =>
+                router.push({ pathname: '/verify-restaurant', params: { billId: bill.id } })
+              }
+            />
+          </View>
+        ) : null}
       </ScrollView>
 
       {editing ? (

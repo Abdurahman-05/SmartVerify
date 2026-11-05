@@ -29,6 +29,7 @@ interface ServerBillDetail extends ServerBillListItem {
   packingFeeEtb: number;
   deliveryFeeEtb: number;
   orders: BillOrder[];
+  canAct?: boolean;
 }
 
 const base = (
@@ -53,7 +54,7 @@ const base = (
 
 /**
  * GET /bills?status=open — open bills, oldest first. `mine` = only the signed-in member's bills
- * (waiters only ever get their own). The list has no item lines; open the bill for those.
+ * (waiters see every bill, but act only on their own). The list has no item lines.
  */
 export async function getBills(options: { mine?: boolean } = {}): Promise<Bill[]> {
   const { items } = await api<{ items: ServerBillListItem[] }>('/bills', {
@@ -84,6 +85,7 @@ export async function getBill(id: string): Promise<Bill | null> {
           }))
         ),
       orders: b.orders,
+      canAct: b.canAct ?? true,
       foodTotal: b.foodTotalEtb,
       packingFee: b.packingFeeEtb,
       deliveryFee: b.deliveryFeeEtb,

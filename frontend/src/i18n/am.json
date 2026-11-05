@@ -559,7 +559,8 @@
         "mistake": "የተሳሳተ ትዕዛዝ",
         "outOfStock": "አልቋል"
       }
-    }
+    },
+    "othersBill": "በ{{name}} የተከፈተ። ክፍያ መቀበል ወይም መቀየር የሚችለው {{name}} (ወይም ባለቤቱ ወይም ማኔጀሩ) ብቻ ነው።"
   },
   "verifyRestaurant": {
     "title": "ክፍያ አረጋግጥ",

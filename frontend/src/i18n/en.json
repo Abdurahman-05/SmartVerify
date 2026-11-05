@@ -559,7 +559,8 @@
         "mistake": "Wrong order",
         "outOfStock": "Out of stock"
       }
-    }
+    },
+    "othersBill": "Opened by {{name}}. Only {{name}} (or the owner or manager) can take payment or change it."
   },
   "verifyRestaurant": {
     "title": "Verify payment",

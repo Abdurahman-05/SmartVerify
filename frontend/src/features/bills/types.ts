@@ -35,6 +35,8 @@ export interface Bill {
   total: number;
   waiterId: string;
   waiterName: string;
+  /** false: another waiter's bill, for looking only (no payment, no changes). */
+  canAct?: boolean;
   status: 'open' | 'paid' | 'cancelled';
   servedStatus: 'kitchen' | 'served';
   createdAt: string;
