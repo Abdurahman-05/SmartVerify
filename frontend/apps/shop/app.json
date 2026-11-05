@@ -13,7 +13,7 @@
     "android": {
       "package": "com.gebtual.shop",
       "adaptiveIcon": {
-        "backgroundColor": "#FFF4E0",
+        "backgroundColor": "#0C4B36",
         "foregroundImage": "../../assets/images/android-icon-foreground.png",
         "backgroundImage": "../../assets/images/android-icon-background.png",
         "monochromeImage": "../../assets/images/android-icon-monochrome.png"
