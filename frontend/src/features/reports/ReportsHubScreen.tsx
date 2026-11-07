@@ -14,28 +14,42 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { CalendarButton } from '@/features/transactions/CalendarButton';
 import { CalendarSheet } from '@/features/transactions/CalendarSheet';
-import { methodKey } from '@/features/transactions/methods';
 import { ApiError } from '@/lib/api/client';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { shareCsv, sharePdf, type ExportTable } from '@/lib/export';
-import { periods } from '@/lib/period';
+import { periods, type Period } from '@/lib/period';
 import {
-  getRestaurantReport,
-  restaurantReportKey,
-  type ReportRange,
-  type RestaurantReport,
+  daysOf,
+  getExpensesReport,
+  getFoodReport,
+  getSalesReport,
+  getStaffReport,
+  reportKey,
+  type ExpensesReport,
+  type FoodReport,
+  type ReportDays,
+  type ReportTab,
+  type SalesReport,
+  type StaffReport,
 } from '@/lib/reports';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
-const tabs = ['sales', 'menu', 'expenses', 'staff'] as const;
-type Tab = (typeof tabs)[number];
+const tabs: ReportTab[] = ['sales', 'food', 'expenses', 'staff'];
+type AnyReport = SalesReport | FoodReport | ExpensesReport | StaffReport;
+const fetchers: Record<ReportTab, (days: ReportDays) => Promise<AnyReport>> = {
+  sales: getSalesReport,
+  food: getFoodReport,
+  expenses: getExpensesReport,
+  staff: getStaffReport,
+};
 
-/** Design colours that are not app tokens yet (reports only). */
+/** The design's soft bar (primary at 35%) and bar track (primary soft). */
 const BAR_SOFT = 'rgba(13,74,54,0.35)';
 const BAR_TRACK = '#E6F2EC';
 
-const etb = (v: number) => `${formatMoney(v, false)} ETB`;
+/** Whole ETB with commas, "ብር" in Amharic. */
+const money = (v: number) => formatMoney(v);
 const pct = (value: number, total: number) => (total > 0 ? Math.round((value / total) * 100) : 0);
 const maxOf = (values: number[]) => Math.max(0, ...values);
 
@@ -85,7 +99,7 @@ function Card({
       </Text>
       {hint ? <View className="pt-0.5">{hint}</View> : null}
       {isEmpty ? (
-        <Text tone="muted" className="pt-2 text-sm">
+        <Text tone="muted" className="pb-2 pt-2 text-[15px]">
           {t('reportsHub.empty')}
         </Text>
       ) : (
@@ -123,7 +137,7 @@ function Row({
 }: {
   title: string;
   sub?: ReactNode;
-  value: ReactNode;
+  value?: ReactNode;
   parts?: { share: number; color: string }[];
   rank?: number;
   onPress?: () => void;
@@ -163,7 +177,11 @@ function Row({
     </View>
   );
   return onPress ? (
-    <Pressable onPress={onPress} accessibilityRole="button" className="active:opacity-70">
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      className="min-h-11 justify-center active:opacity-70"
+    >
       {body}
     </Pressable>
   ) : (
@@ -229,12 +247,13 @@ function Hero({
   amount: number;
   children?: ReactNode;
 }) {
+  const { t } = useTranslation();
   return (
     <View className="rounded-[22px] bg-primary p-5" accessible>
       <Text font="semibold" className="text-base text-primarySoft">
         {label}
       </Text>
-      <View className="flex-row items-end gap-1.5">
+      <View className="flex-row items-end gap-2">
         <Text
           font="heading"
           tone="inverse"
@@ -245,7 +264,7 @@ function Hero({
           {formatMoney(amount, false)}
         </Text>
         <Text font="heading" tone="inverse" className="pb-2 text-xl">
-          ETB
+          {t('common.etb')}
         </Text>
       </View>
       {children}
@@ -253,26 +272,43 @@ function Hero({
   );
 }
 
+function HeroBox({ label, value }: { label: string; value: string }) {
+  return (
+    <View className="flex-1 rounded-[14px] bg-white/[0.14] px-3 py-2">
+      <Text font="semibold" tone="inverse" className="text-sm">
+        {label}
+      </Text>
+      <Text font="heading" tone="inverse" className="text-[17px]">
+        {value}
+      </Text>
+    </View>
+  );
+}
+
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 
-function SalesTab({ r, t }: { r: RestaurantReport; t: TFunction }) {
-  const s = r.sales;
+function SalesTab({ s, t, showDays }: { s: SalesReport; t: TFunction; showDays: boolean }) {
   const change =
-    s.previousEtb > 0 ? Math.round(((s.totalEtb - s.previousEtb) / s.previousEtb) * 100) : null;
+    s.previousTotal > 0 ? Math.round(((s.total - s.previousTotal) / s.previousTotal) * 100) : null;
   // The chart runs from the first to the last hour with sales.
   const active = s.byHour.filter((h) => h.bills > 0);
   const first = active[0]?.hour ?? 0;
   const last = active[active.length - 1]?.hour ?? -1;
   const chart = s.byHour.filter((h) => h.hour >= first && h.hour <= last);
-  const maxHour = maxOf(chart.map((h) => h.totalEtb));
-  const top = [...active].sort((a, b) => b.totalEtb - a.totalEtb).slice(0, 3);
+  const maxHour = maxOf(chart.map((h) => h.amount));
+  const top = [...active].sort((a, b) => b.amount - a.amount).slice(0, 3);
   const topHours = new Set(top.map((h) => h.hour));
-  const maxDay = maxOf(s.byDay.map((d) => d.totalEtb));
+  const maxDay = maxOf(s.byDay.map((d) => d.amount));
   const hourLabel = (h: number) => t('reportsHub.hour', { from: h, to: (h + 1) % 24 });
+  const methods = [
+    { key: 'cash', label: t('reportsHub.cash'), ...s.paidBy.cash },
+    { key: 'bank', label: t('reportsHub.bank'), ...s.paidBy.bank },
+    { key: 'both', label: t('reportsHub.cashBank'), ...s.paidBy.both },
+  ];
 
   return (
     <>
-      <Hero label={t('reportsHub.sales.total')} amount={s.totalEtb}>
+      <Hero label={t('reportsHub.sales.total')} amount={s.total}>
         {change === null ? null : (
           <View className="mt-2.5 h-8 justify-center self-start rounded-full bg-surface px-3">
             <Text
@@ -282,39 +318,25 @@ function SalesTab({ r, t }: { r: RestaurantReport; t: TFunction }) {
             >
               {t(change >= 0 ? 'reportsHub.sales.up' : 'reportsHub.sales.down', {
                 percent: Math.abs(change),
-                amount: formatMoney(s.previousEtb, false),
+                amount: money(s.previousTotal),
               })}
             </Text>
           </View>
         )}
-        <View className="mt-3 flex-row gap-2.5">
-          <View className="flex-1 rounded-[14px] bg-white/[0.14] px-3 py-2">
-            <Text font="semibold" tone="inverse" className="text-sm">
-              {t('reportsHub.sales.bills')}
-            </Text>
-            <Text font="heading" tone="inverse" className="text-[17px]">
-              {s.bills}
-            </Text>
-          </View>
-          <View className="flex-1 rounded-[14px] bg-white/[0.14] px-3 py-2">
-            <Text font="semibold" tone="inverse" className="text-sm">
-              {t('reportsHub.sales.average')}
-            </Text>
-            <Text font="heading" tone="inverse" className="text-[17px]">
-              {etb(s.averageEtb)}
-            </Text>
-          </View>
+        <View className="mt-3.5 flex-row gap-2">
+          <HeroBox label={t('reportsHub.sales.bills')} value={String(s.bills)} />
+          <HeroBox label={t('reportsHub.sales.average')} value={money(s.avgBill)} />
         </View>
       </Hero>
 
       <Card title={t('reportsHub.sales.methods')} isEmpty={s.bills === 0}>
-        {s.methods.map((m) => (
+        {methods.map((m) => (
           <Row
-            key={m.method}
-            title={t(methodKey(m.method))}
-            sub={`${t('reportsHub.billsCount', { count: m.bills })} · ${pct(m.totalEtb, s.totalEtb)}%`}
-            value={etb(m.totalEtb)}
-            parts={[{ share: pct(m.totalEtb, s.totalEtb), color: colors.primary }]}
+            key={m.key}
+            title={m.label}
+            sub={`${t('reportsHub.billsCount', { count: m.bills })} · ${pct(m.amount, s.total)}%`}
+            value={money(m.amount)}
+            parts={[{ share: pct(m.amount, s.total), color: colors.primary }]}
           />
         ))}
       </Card>
@@ -323,14 +345,14 @@ function SalesTab({ r, t }: { r: RestaurantReport; t: TFunction }) {
         <View
           className="mb-1 mt-1.5 h-[140px] flex-row items-end gap-[3px]"
           accessible
-          accessibilityLabel={top.map((h) => `${hourLabel(h.hour)}: ${etb(h.totalEtb)}`).join(', ')}
+          accessibilityLabel={top.map((h) => `${hourLabel(h.hour)}: ${money(h.amount)}`).join(', ')}
         >
           {chart.map((h) => (
             <View key={h.hour} className="h-full flex-1 justify-end">
               <View
                 className="w-full rounded-t-[4px]"
                 style={{
-                  height: `${Math.max(pct(h.totalEtb, maxHour), h.bills ? 6 : 0)}%`,
+                  height: `${Math.max(pct(h.amount, maxHour), h.bills ? 6 : 0)}%`,
                   backgroundColor: topHours.has(h.hour) ? colors.primary : BAR_SOFT,
                 }}
               />
@@ -354,24 +376,33 @@ function SalesTab({ r, t }: { r: RestaurantReport; t: TFunction }) {
             key={h.hour}
             title={hourLabel(h.hour)}
             sub={t('reportsHub.billsCount', { count: h.bills })}
-            value={etb(h.totalEtb)}
+            value={money(h.amount)}
           />
         ))}
       </Card>
 
-      {s.byDay.length > 1 ? (
-        <Card title={t('reportsHub.sales.byDay')} isEmpty={s.bills === 0}>
+      {showDays ? (
+        <Card
+          title={t('reportsHub.sales.byDay')}
+          hint={
+            <Text tone="muted" className="text-sm">
+              {t('reportsHub.sales.byDayHint')}
+            </Text>
+          }
+          isEmpty={s.bills === 0}
+        >
           {s.byDay.map((d) => {
-            const date = new Date(`${d.day}T12:00:00`);
+            const date = new Date(`${d.date}T12:00:00`);
             return (
               <Row
-                key={d.day}
+                key={d.date}
                 title={`${t(`reportsHub.weekday_${date.getDay()}`)} · ${t('period.day', {
                   month: t(`period.month_${date.getMonth()}`),
                   day: date.getDate(),
                 })}`}
-                value={etb(d.totalEtb)}
-                parts={[{ share: pct(d.totalEtb, maxDay), color: colors.primary }]}
+                sub={t('reportsHub.billsCount', { count: d.bills })}
+                value={money(d.amount)}
+                parts={[{ share: pct(d.amount, maxDay), color: colors.primary }]}
               />
             );
           })}
@@ -381,62 +412,60 @@ function SalesTab({ r, t }: { r: RestaurantReport; t: TFunction }) {
   );
 }
 
-function MenuTab({ r, t, am }: { r: RestaurantReport; t: TFunction; am: boolean }) {
-  const m = r.menu;
+function FoodTab({ f, t, am }: { f: FoodReport; t: TFunction; am: boolean }) {
   const [all, setAll] = useState(false);
   const name = (x: { name: string; nameAm: string | null }) => (am && x.nameAm ? x.nameAm : x.name);
-  const ranked = m.items.slice(0, 15);
-  const shown = all ? ranked : ranked.slice(0, 7);
-  const maxQty = maxOf(ranked.map((i) => i.qty));
-  const catTotal = m.categories.reduce((s, c) => s + c.totalEtb, 0);
-  const maxSlow = maxOf(m.slow.map((i) => i.qty));
-  const maxCancelled = maxOf(m.cancelled.items.map((i) => i.qty));
+  const shown = all ? f.bestSellers : f.bestSellers.slice(0, 7);
+  const maxQty = maxOf(f.bestSellers.map((i) => i.qty));
+  const catTotal = f.byCategory.reduce((s, c) => s + c.amount, 0);
+  const maxSlow = maxOf(f.slowSellers.map((i) => i.qty));
+  const maxCancelled = maxOf(f.cancelled.topItems.map((i) => i.qty));
 
   return (
     <>
-      <Card title={t('reportsHub.menu.best')} isEmpty={ranked.length === 0}>
+      <Card title={t('reportsHub.menu.best')} isEmpty={f.bestSellers.length === 0}>
         {shown.map((i, n) => (
           <Row
             key={`${i.name}-${n}`}
             rank={n + 1}
             title={name(i)}
-            sub={etb(i.totalEtb)}
+            sub={money(i.amount)}
             value={t('reportsHub.qty', { count: i.qty })}
             parts={[{ share: pct(i.qty, maxQty), color: colors.primary }]}
           />
         ))}
-        {!all && ranked.length > 7 ? (
+        {!all && f.bestSellers.length > 7 ? (
           <Pressable
             onPress={() => setAll(true)}
             accessibilityRole="button"
             className="min-h-11 flex-row items-center justify-center gap-1"
           >
             <Text font="bold" className="text-[15px] text-primaryText">
-              {t('reportsHub.menu.showAll', { count: ranked.length })}
+              {t('reportsHub.menu.showAll', { count: f.bestSellers.length })}
             </Text>
             <ChevronRight size={18} color={colors.primaryText} strokeWidth={2.4} />
           </Pressable>
         ) : null}
       </Card>
 
-      <Card title={t('reportsHub.menu.categories')} isEmpty={m.categories.length === 0}>
-        {m.categories.map((c) => (
+      <Card title={t('reportsHub.menu.categories')} isEmpty={f.byCategory.length === 0}>
+        {f.byCategory.map((c) => (
           <Row
             key={c.name || 'other'}
             title={c.name ? name(c) : t('reportsHub.menu.noCategory')}
-            sub={`${t('reportsHub.qty', { count: c.qty })} · ${pct(c.totalEtb, catTotal)}%`}
-            value={etb(c.totalEtb)}
-            parts={[{ share: pct(c.totalEtb, catTotal), color: colors.primary }]}
+            sub={`${t('reportsHub.qty', { count: c.qty })} · ${pct(c.amount, catTotal)}%`}
+            value={money(c.amount)}
+            parts={[{ share: pct(c.amount, catTotal), color: colors.primary }]}
           />
         ))}
       </Card>
 
-      <Card title={t('reportsHub.menu.slow')} isEmpty={m.slow.length === 0}>
-        {m.slow.map((i, n) => (
+      <Card title={t('reportsHub.menu.slow')} isEmpty={f.slowSellers.length === 0}>
+        {f.slowSellers.map((i, n) => (
           <Row
             key={`${i.name}-${n}`}
             title={name(i)}
-            sub={i.qty === 0 ? undefined : etb(i.totalEtb)}
+            sub={i.qty === 0 ? undefined : money(i.amount)}
             value={
               i.qty === 0 ? t('reportsHub.menu.notSold') : t('reportsHub.qty', { count: i.qty })
             }
@@ -445,23 +474,23 @@ function MenuTab({ r, t, am }: { r: RestaurantReport; t: TFunction; am: boolean 
         ))}
       </Card>
 
-      <Card title={t('reportsHub.menu.cancelled')} isEmpty={m.cancelled.orders === 0}>
+      <Card title={t('reportsHub.menu.cancelled')} isEmpty={f.cancelled.count === 0}>
         <View className="flex-row gap-2.5">
           <StatBox
             label={t('reportsHub.menu.cancelledLabel')}
-            value={t('reportsHub.ordersCount', { count: m.cancelled.orders })}
+            value={t('reportsHub.ordersCount', { count: f.cancelled.count })}
             tone="bad"
           />
           <StatBox
             label={t('reportsHub.menu.moneyLost')}
-            value={etb(m.cancelled.totalEtb)}
+            value={money(f.cancelled.amount)}
             tone="bad"
           />
         </View>
         <Text font="bold" className="text-sm">
           {t('reportsHub.menu.mostCancelled')}
         </Text>
-        {m.cancelled.items.slice(0, 5).map((i) => (
+        {f.cancelled.topItems.map((i) => (
           <Row
             key={i.name}
             title={i.name}
@@ -472,12 +501,11 @@ function MenuTab({ r, t, am }: { r: RestaurantReport; t: TFunction; am: boolean 
         <Text font="bold" className="text-sm">
           {t('reportsHub.menu.orders')}
         </Text>
-        {m.cancelled.list.map((o) => (
-          <View key={o.number} className="border-t border-divider pt-2.5">
+        {f.cancelled.orders.map((o) => (
+          <View key={o.id} className="border-t border-divider pt-2.5">
             <Row
-              title={`${t('reportsHub.menu.order', { number: o.number })} · ${etb(o.totalEtb)}`}
-              sub={[o.by, o.reason].filter(Boolean).join(' · ')}
-              value=""
+              title={`${t('reportsHub.menu.order', { number: o.number })} · ${money(o.amount)}`}
+              sub={[o.waiter, o.reason].filter(Boolean).join(' · ')}
             />
           </View>
         ))}
@@ -487,24 +515,27 @@ function MenuTab({ r, t, am }: { r: RestaurantReport; t: TFunction; am: boolean 
 }
 
 function ExpensesTab({
-  r,
+  e,
   t,
   go,
 }: {
-  r: RestaurantReport;
+  e: ExpensesReport;
   t: TFunction;
   go: (path: '/money-flow' | '/money-out') => void;
 }) {
-  const e = r.expenses;
-  const maxBought = maxOf(e.bought.map((b) => b.totalEtb));
-  const maxPerson = maxOf(e.byPerson.map((p) => p.totalEtb));
+  const maxBought = maxOf(e.boughtItems.map((b) => b.amount));
+  const maxPerson = maxOf(e.byPerson.map((p) => p.total));
   return (
     <>
-      <Hero label={t('reportsHub.expenses.total')} amount={e.totalEtb}>
+      <Hero label={t('reportsHub.expenses.total')} amount={e.total}>
+        <View className="mt-3 flex-row gap-2">
+          <HeroBox label={t('reportsHub.expenses.profit')} value={money(e.profit)} />
+          <HeroBox label={t('reportsHub.expenses.moneyLeft')} value={money(e.moneyLeft)} />
+        </View>
         <Pressable
           onPress={() => go('/money-flow')}
           accessibilityRole="button"
-          className="mt-3 min-h-12 flex-row items-center rounded-[14px] bg-white/15 px-3.5 active:opacity-80"
+          className="mt-2.5 min-h-12 flex-row items-center rounded-[14px] bg-white/[0.14] px-3.5 active:opacity-80"
         >
           <Text font="bold" tone="inverse" className="flex-1 text-[15px]">
             {t('reportsHub.expenses.openFlow')}
@@ -518,9 +549,9 @@ function ExpensesTab({
           <Row
             key={k.kind}
             title={t(`extras.money.categories.${k.kind}`)}
-            sub={`${t('reportsHub.expensesCount', { count: k.count })} · ${pct(k.totalEtb, e.totalEtb)}%`}
-            value={etb(k.totalEtb)}
-            parts={[{ share: pct(k.totalEtb, e.totalEtb), color: colors.primary }]}
+            sub={`${t('reportsHub.expensesCount', { count: k.count })} · ${pct(k.amount, e.total)}%`}
+            value={money(k.amount)}
+            parts={[{ share: pct(k.amount, e.total), color: colors.primary }]}
           />
         ))}
       </Card>
@@ -532,15 +563,15 @@ function ExpensesTab({
             {t('reportsHub.expenses.fromBuyList')}
           </Text>
         }
-        isEmpty={e.bought.length === 0}
+        isEmpty={e.boughtItems.length === 0}
       >
-        {e.bought.map((b) => (
+        {e.boughtItems.map((b) => (
           <Row
             key={b.name}
             title={b.name}
             sub={t('reportsHub.timesCount', { count: b.times })}
-            value={etb(b.totalEtb)}
-            parts={[{ share: pct(b.totalEtb, maxBought), color: colors.primary }]}
+            value={money(b.amount)}
+            parts={[{ share: pct(b.amount, maxBought), color: colors.primary }]}
           />
         ))}
       </Card>
@@ -555,7 +586,7 @@ function ExpensesTab({
             ]}
           />
         }
-        isEmpty={e.byPerson.length === 0 && e.changed === 0 && e.deleted.length === 0}
+        isEmpty={e.byPerson.length === 0 && e.changedByOwner === 0 && e.deleted.length === 0}
       >
         {e.byPerson.map((p) => (
           <Row
@@ -563,18 +594,18 @@ function ExpensesTab({
             title={p.name}
             sub={t('reportsHub.expenses.split', {
               count: p.count,
-              cash: formatMoney(p.cashEtb, false),
-              bank: formatMoney(p.bankEtb, false),
+              cash: formatMoney(p.cash, false),
+              bank: formatMoney(p.bank, false),
             })}
-            value={etb(p.totalEtb)}
+            value={money(p.total)}
             parts={[
-              { share: pct(p.cashEtb, maxPerson), color: colors.primary },
-              { share: pct(p.bankEtb, maxPerson), color: colors.amber },
+              { share: pct(p.cash, maxPerson), color: colors.primary },
+              { share: pct(p.bank, maxPerson), color: colors.amber },
             ]}
             onPress={() => go('/money-out')}
           />
         ))}
-        {e.changed > 0 ? (
+        {e.changedByOwner > 0 ? (
           <Pressable
             onPress={() => go('/money-out')}
             accessibilityRole="button"
@@ -584,7 +615,7 @@ function ExpensesTab({
               <Pencil size={18} color={colors.primary} strokeWidth={2.2} />
             </View>
             <Text font="bold" className="flex-1 text-[15px]">
-              {t('reportsHub.expenses.changed', { count: e.changed })}
+              {t('reportsHub.expenses.changed', { count: e.changedByOwner })}
             </Text>
             <ChevronRight size={20} color={colors.muted} strokeWidth={2} />
           </Pressable>
@@ -601,7 +632,7 @@ function ExpensesTab({
             </View>
             <View className="flex-1">
               <Text font="bold" className="text-[15px]">
-                {t('reportsHub.expenses.deletedLine', { title: d.title, amount: etb(d.amountEtb) })}
+                {t('reportsHub.expenses.deletedLine', { title: d.title, amount: money(d.amount) })}
               </Text>
               {d.reason ? (
                 <Text tone="muted" className="text-sm">
@@ -617,41 +648,41 @@ function ExpensesTab({
   );
 }
 
-function OkBad({ ok, bad, t }: { ok: number; bad: number; t: TFunction }) {
+function OkBad({ ok, failed, t }: { ok: number; failed: number; t: TFunction }) {
   return (
-    <Text font="bold" className="text-[15px]">
+    <Text font="heading" className="text-[15px]">
       {t('reportsHub.staff.ok', { count: ok })}
-      {bad > 0 ? (
-        <Text font="bold" className="text-[15px]" style={{ color: colors.alert }}>
-          {` · ${t('reportsHub.staff.failed', { count: bad })}`}
+      {failed > 0 ? (
+        <Text font="heading" className="text-[15px]" style={{ color: colors.alert }}>
+          {` · ${t('reportsHub.staff.failed', { count: failed })}`}
         </Text>
       ) : null}
     </Text>
   );
 }
 
-function StaffTab({ r, t }: { r: RestaurantReport; t: TFunction }) {
-  const s = r.staff;
-  const maxSales = maxOf(s.waiters.map((w) => w.salesEtb));
-  const maxTips = maxOf(s.tips.map((x) => x.totalEtb));
-  const maxDish = maxOf(s.kitchen.slowest.map((d) => d.averageMinutes));
-  const checkParts = (ok: number, bad: number) => [
-    { share: pct(ok, ok + bad), color: colors.success },
-    { share: pct(bad, ok + bad), color: colors.alert },
+function StaffTab({ s, t }: { s: StaffReport; t: TFunction }) {
+  const maxSales = maxOf(s.waiterSales.map((w) => w.sales));
+  const maxTips = maxOf(s.tips.map((x) => x.total));
+  const maxDish = maxOf(s.kitchen.slowest.map((d) => d.minutes));
+  const c = s.receiptChecks;
+  const checkParts = (ok: number, failed: number) => [
+    { share: pct(ok, ok + failed), color: colors.success },
+    { share: pct(failed, ok + failed), color: colors.alert },
   ];
   return (
     <>
-      <Card title={t('reportsHub.staff.waiters')} isEmpty={s.waiters.length === 0}>
-        {s.waiters.map((w, n) => (
+      <Card title={t('reportsHub.staff.waiters')} isEmpty={s.waiterSales.length === 0}>
+        {s.waiterSales.map((w, n) => (
           <Row
             key={w.name}
             rank={n + 1}
             title={w.name}
             sub={`${t('reportsHub.billsCount', { count: w.bills })} · ${t('reportsHub.staff.avg', {
-              amount: formatMoney(w.averageEtb, false),
+              amount: money(w.avgBill),
             })}`}
-            value={etb(w.salesEtb)}
-            parts={[{ share: pct(w.salesEtb, maxSales), color: colors.primary }]}
+            value={money(w.sales)}
+            parts={[{ share: pct(w.sales, maxSales), color: colors.primary }]}
           />
         ))}
       </Card>
@@ -673,47 +704,47 @@ function StaffTab({ r, t }: { r: RestaurantReport; t: TFunction }) {
             key={x.name}
             title={x.name}
             sub={t('reportsHub.staff.paidLeft', {
-              paid: formatMoney(x.paidOutEtb, false),
-              left: formatMoney(x.totalEtb - x.paidOutEtb, false),
+              paid: formatMoney(x.paidOut, false),
+              left: formatMoney(x.total - x.paidOut, false),
             })}
-            value={etb(x.totalEtb)}
+            value={money(x.total)}
             parts={[
-              { share: pct(x.paidOutEtb, maxTips), color: colors.primary },
-              { share: pct(x.totalEtb - x.paidOutEtb, maxTips), color: colors.amber },
+              { share: pct(x.paidOut, maxTips), color: colors.primary },
+              { share: pct(x.total - x.paidOut, maxTips), color: colors.amber },
             ]}
           />
         ))}
       </Card>
 
-      <Card title={t('reportsHub.staff.checks')} isEmpty={s.checks.ok + s.checks.bad === 0}>
+      <Card title={t('reportsHub.staff.checks')} isEmpty={c.ok + c.failed === 0}>
         <View className="flex-row gap-2.5">
-          <StatBox label={t('reportsHub.staff.verified')} value={String(s.checks.ok)} tone="good" />
+          <StatBox label={t('reportsHub.staff.verified')} value={String(c.ok)} tone="good" />
           <StatBox
             label={t('reportsHub.staff.failedOrSuspicious')}
-            value={String(s.checks.bad)}
+            value={String(c.failed)}
             tone="bad"
           />
         </View>
         <Text font="bold" className="text-sm">
           {t('reportsHub.staff.byBank')}
         </Text>
-        {s.checks.byBank.map((b) => (
+        {c.byBank.map((b) => (
           <Row
             key={b.bank}
-            title={t(`banks.${b.bank}`, { defaultValue: b.bank })}
-            value={<OkBad ok={b.ok} bad={b.bad} t={t} />}
-            parts={checkParts(b.ok, b.bad)}
+            title={t(`reportsHub.bankNames.${b.bank}`, { defaultValue: b.bank })}
+            value={<OkBad ok={b.ok} failed={b.failed} t={t} />}
+            parts={checkParts(b.ok, b.failed)}
           />
         ))}
         <Text font="bold" className="text-sm">
           {t('reportsHub.staff.byStaff')}
         </Text>
-        {s.checks.byPerson.map((p) => (
+        {c.byStaff.map((p) => (
           <Row
             key={p.name}
             title={p.name}
-            value={<OkBad ok={p.ok} bad={p.bad} t={t} />}
-            parts={checkParts(p.ok, p.bad)}
+            value={<OkBad ok={p.ok} failed={p.failed} t={t} />}
+            parts={checkParts(p.ok, p.failed)}
           />
         ))}
       </Card>
@@ -722,7 +753,7 @@ function StaffTab({ r, t }: { r: RestaurantReport; t: TFunction }) {
         <View className="flex-row gap-2.5">
           <StatBox
             label={t('reportsHub.staff.onAverage')}
-            value={t('reportsHub.staff.min', { minutes: s.kitchen.averageMinutes })}
+            value={t('reportsHub.staff.min', { minutes: s.kitchen.avgMinutes })}
             tone="soft"
           />
           <StatBox
@@ -739,12 +770,12 @@ function StaffTab({ r, t }: { r: RestaurantReport; t: TFunction }) {
             key={d.name}
             title={d.name}
             sub={t('reportsHub.ordersCount', { count: d.orders })}
-            value={t('reportsHub.staff.min', { minutes: d.averageMinutes })}
+            value={t('reportsHub.staff.min', { minutes: d.minutes })}
             parts={[
               {
-                share: pct(d.averageMinutes, maxDish),
+                share: pct(d.minutes, maxDish),
                 // Slower than the kitchen's average shows red.
-                color: d.averageMinutes > s.kitchen.averageMinutes ? colors.alert : colors.primary,
+                color: d.minutes > s.kitchen.avgMinutes ? colors.alert : colors.primary,
               },
             ]}
           />
@@ -754,49 +785,53 @@ function StaffTab({ r, t }: { r: RestaurantReport; t: TFunction }) {
   );
 }
 
-/** The open tab as a table for PDF / CSV. */
-function exportTable(t: TFunction, tab: Tab, r: RestaurantReport, subtitle: string): ExportTable {
-  const money = (v: number) => formatMoney(v, false);
+/** The open tab as a table for PDF / CSV (made on the phone, so Amharic stays readable). */
+function exportTable(t: TFunction, tab: ReportTab, data: AnyReport, subtitle: string): ExportTable {
+  const m = (v: number) => formatMoney(v, false);
   const qty = (count: number) => t('reportsHub.qty', { count });
+  const bills = (count: number) => t('reportsHub.billsCount', { count });
   const rows: string[][] = [];
   if (tab === 'sales') {
-    const s = r.sales;
-    rows.push([
-      t('reportsHub.sales.total'),
-      t('reportsHub.billsCount', { count: s.bills }),
-      money(s.totalEtb),
-    ]);
-    for (const m of s.methods)
-      rows.push([t(methodKey(m.method)), String(m.bills), money(m.totalEtb)]);
+    const s = data as SalesReport;
+    rows.push([t('reportsHub.sales.total'), bills(s.bills), m(s.total)]);
+    rows.push([t('reportsHub.sales.average'), '', m(s.avgBill)]);
+    rows.push([t('reportsHub.cash'), bills(s.paidBy.cash.bills), m(s.paidBy.cash.amount)]);
+    rows.push([t('reportsHub.bank'), bills(s.paidBy.bank.bills), m(s.paidBy.bank.amount)]);
+    rows.push([t('reportsHub.cashBank'), bills(s.paidBy.both.bills), m(s.paidBy.both.amount)]);
     for (const h of s.byHour.filter((x) => x.bills > 0)) {
-      const label = t('reportsHub.hour', { from: h.hour, to: (h.hour + 1) % 24 });
-      rows.push([label, String(h.bills), money(h.totalEtb)]);
+      rows.push([
+        t('reportsHub.hour', { from: h.hour, to: (h.hour + 1) % 24 }),
+        bills(h.bills),
+        m(h.amount),
+      ]);
     }
-    for (const d of s.byDay) rows.push([d.day, String(d.bills), money(d.totalEtb)]);
-  } else if (tab === 'menu') {
-    for (const i of r.menu.items) rows.push([i.name, qty(i.qty), money(i.totalEtb)]);
-    for (const c of r.menu.categories) {
-      rows.push([c.name || t('reportsHub.menu.noCategory'), qty(c.qty), money(c.totalEtb)]);
+    for (const d of s.byDay) rows.push([d.date, bills(d.bills), m(d.amount)]);
+  } else if (tab === 'food') {
+    const f = data as FoodReport;
+    for (const i of f.bestSellers) rows.push([i.name, qty(i.qty), m(i.amount)]);
+    for (const c of f.byCategory) {
+      rows.push([c.name || t('reportsHub.menu.noCategory'), qty(c.qty), m(c.amount)]);
     }
-    for (const o of r.menu.cancelled.list) {
-      const who = [o.by, o.reason].filter(Boolean).join(' · ');
-      rows.push([t('reportsHub.menu.order', { number: o.number }), who, money(o.totalEtb)]);
+    for (const o of f.cancelled.orders) {
+      const who = [o.waiter, o.reason].filter(Boolean).join(' · ');
+      rows.push([t('reportsHub.menu.order', { number: o.number }), who, m(o.amount)]);
     }
   } else if (tab === 'expenses') {
-    for (const k of r.expenses.byKind) {
-      rows.push([t(`extras.money.categories.${k.kind}`), String(k.count), money(k.totalEtb)]);
+    const e = data as ExpensesReport;
+    rows.push([t('reportsHub.expenses.total'), '', m(e.total)]);
+    rows.push([t('reportsHub.expenses.profit'), '', m(e.profit)]);
+    rows.push([t('reportsHub.expenses.moneyLeft'), '', m(e.moneyLeft)]);
+    for (const k of e.byKind) {
+      rows.push([t(`extras.money.categories.${k.kind}`), String(k.count), m(k.amount)]);
     }
-    for (const b of r.expenses.bought) rows.push([b.name, String(b.times), money(b.totalEtb)]);
-    for (const p of r.expenses.byPerson) rows.push([p.name, String(p.count), money(p.totalEtb)]);
+    for (const b of e.boughtItems) rows.push([b.name, String(b.times), m(b.amount)]);
+    for (const p of e.byPerson) rows.push([p.name, String(p.count), m(p.total)]);
   } else {
-    for (const w of r.staff.waiters) {
-      rows.push([w.name, t('reportsHub.billsCount', { count: w.bills }), money(w.salesEtb)]);
-    }
-    for (const x of r.staff.tips) {
-      rows.push([`${t('reportsHub.staff.tips')}: ${x.name}`, String(x.count), money(x.totalEtb)]);
-    }
-    for (const b of r.staff.checks.byBank) {
-      const detail = `${t('reportsHub.staff.ok', { count: b.ok })} · ${t('reportsHub.staff.failed', { count: b.bad })}`;
+    const s = data as StaffReport;
+    for (const w of s.waiterSales) rows.push([w.name, bills(w.bills), m(w.sales)]);
+    for (const x of s.tips) rows.push([`${t('reportsHub.staff.tips')}: ${x.name}`, '', m(x.total)]);
+    for (const b of s.receiptChecks.byBank) {
+      const detail = `${t('reportsHub.staff.ok', { count: b.ok })} · ${t('reportsHub.staff.failed', { count: b.failed })}`;
       rows.push([b.bank, detail, '']);
     }
   }
@@ -813,22 +848,24 @@ function exportTable(t: TFunction, tab: Tab, r: RestaurantReport, subtitle: stri
 }
 
 /**
- * Restaurant reports (owner, or a manager allowed to see reports): sales, food and drink,
- * expenses and buying, staff and checks — for a period or one day. The server makes every sum.
- * Design: docs/design/screens/reports-design.
+ * Restaurant reports (owner, or a manager while the owner allows it): sales, food and drink,
+ * expenses, staff and checks — for today, 7 or 30 days, or one chosen day. Each tab is fetched
+ * only when it opens; the server makes every sum. Design: docs/design/screens/reports-design.
  */
 export default function ReportsHubScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const businessName = useSession((s) => s.user?.businessName ?? '');
-  const [range, setRange] = useState<ReportRange>({ period: 'today' });
-  const [tab, setTab] = useState<Tab>('sales');
+  const [period, setPeriod] = useState<Period>('today');
+  const [day, setDay] = useState<string | undefined>();
+  const [tab, setTab] = useState<ReportTab>('sales');
   const [choosing, setChoosing] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
+  const days = daysOf(period, day);
   const query = useQuery({
-    queryKey: restaurantReportKey(range),
-    queryFn: () => getRestaurantReport(range),
+    queryKey: reportKey(tab, days),
+    queryFn: () => fetchers[tab](days),
   });
   const { refetch } = query;
   useFocusEffect(
@@ -838,10 +875,10 @@ export default function ReportsHubScreen() {
   );
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/home'));
-  const dayDate = range.day ? new Date(`${range.day}T12:00:00`) : null;
+  const dayDate = day ? new Date(`${day}T12:00:00`) : null;
   const rangeLabel = dayDate
     ? t('period.day', { month: t(`period.month_${dayDate.getMonth()}`), day: dayDate.getDate() })
-    : t(`period.${range.period}`);
+    : t(`period.${period}`);
   const report = query.data;
 
   const download = async (kind: 'pdf' | 'csv') => {
@@ -850,7 +887,7 @@ export default function ReportsHubScreen() {
     try {
       const table = exportTable(t, tab, report, `${businessName} · ${rangeLabel}`);
       if (kind === 'pdf') await sharePdf(table);
-      else await shareCsv(`report-${tab}-${range.day ?? range.period}.csv`, table);
+      else await shareCsv(`report-${tab}-${days.from}-${days.to}.csv`, table);
     } catch {
       Alert.alert(t('common.error'), t('transactions.downloadFailed'));
     } finally {
@@ -868,24 +905,36 @@ export default function ReportsHubScreen() {
       <ScreenHeader
         title={t('reportsHub.title')}
         onBack={goBack}
-        right={<CalendarButton day={dayDate} onPress={() => setChoosing(true)} />}
+        right={<CalendarButton day={dayDate ?? new Date()} onPress={() => setChoosing(true)} />}
       />
-      <View className="flex-row gap-2 px-4 pb-3" accessibilityRole="radiogroup">
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className="max-h-[60px] flex-grow-0"
+        contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 14, paddingTop: 4 }}
+        accessibilityRole="radiogroup"
+      >
         {periods.map((p) => (
           <PeriodChip
             key={p}
             label={t(`period.${p}`)}
-            selected={!range.day && range.period === p}
-            onPress={() => setRange({ period: p })}
+            selected={!day && period === p}
+            onPress={() => {
+              setDay(undefined);
+              setPeriod(p);
+            }}
           />
         ))}
-      </View>
+        {dayDate ? (
+          <PeriodChip label={rangeLabel} selected onPress={() => setChoosing(true)} />
+        ) : null}
+      </ScrollView>
 
       <View className="border-y border-border bg-surface">
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 12 }}
+          contentContainerStyle={{ paddingHorizontal: 16, gap: 2 }}
           accessibilityRole="tablist"
         >
           {tabs.map((x) => {
@@ -896,7 +945,7 @@ export default function ReportsHubScreen() {
                 onPress={() => setTab(x)}
                 accessibilityRole="tab"
                 accessibilityState={{ selected }}
-                className={`min-h-12 justify-center border-b-[3px] px-3.5 ${
+                className={`h-12 justify-center border-b-[3px] px-3.5 ${
                   selected ? 'border-primary' : 'border-transparent'
                 }`}
               >
@@ -920,64 +969,63 @@ export default function ReportsHubScreen() {
           {forbidden ? t('extras.flow.notAllowed') : t(errorMessageKey(query.error))}
         </Text>
       ) : (
-        <>
-          <ScrollView contentContainerStyle={{ gap: 12, padding: 16 }}>
-            {dayDate ? (
-              <Text tone="muted" font="semibold" className="text-sm">
-                {rangeLabel}
-              </Text>
-            ) : null}
-            {tab === 'sales' ? <SalesTab r={report} t={t} /> : null}
-            {tab === 'menu' ? (
-              <MenuTab
-                key={`${range.period}-${range.day ?? ''}`}
-                r={report}
-                t={t}
-                am={i18n.language === 'am'}
-              />
-            ) : null}
-            {tab === 'expenses' ? (
-              <ExpensesTab r={report} t={t} go={(path) => router.push(path)} />
-            ) : null}
-            {tab === 'staff' ? <StaffTab r={report} t={t} /> : null}
-          </ScrollView>
-          <View className="flex-row gap-2.5 border-t border-border bg-surface px-4 py-3">
-            <Pressable
-              onPress={() => void download('pdf')}
-              disabled={downloading}
-              accessibilityRole="button"
-              className={`min-h-14 flex-1 flex-row items-center justify-center gap-2 rounded-button bg-primary ${
-                downloading ? 'opacity-50' : 'active:opacity-90'
-              }`}
-            >
-              <Download size={20} color={colors.surface} strokeWidth={2.4} />
-              <Text font="bold" tone="inverse" className="text-base">
-                {t('report.downloadPdf')}
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => void download('csv')}
-              disabled={downloading}
-              accessibilityRole="button"
-              className={`min-h-14 flex-1 items-center justify-center rounded-button border-2 border-primary bg-surface ${
-                downloading ? 'opacity-50' : 'active:opacity-80'
-              }`}
-            >
-              <Text font="bold" className="text-base text-primary">
-                {t('report.downloadCsv')}
-              </Text>
-            </Pressable>
-          </View>
-        </>
+        <ScrollView contentContainerStyle={{ gap: 14, padding: 16 }}>
+          {tab === 'sales' ? (
+            <SalesTab s={report as SalesReport} t={t} showDays={!day && period !== 'today'} />
+          ) : null}
+          {tab === 'food' ? (
+            <FoodTab
+              key={`${days.from}-${days.to}`}
+              f={report as FoodReport}
+              t={t}
+              am={i18n.language === 'am'}
+            />
+          ) : null}
+          {tab === 'expenses' ? (
+            <ExpensesTab e={report as ExpensesReport} t={t} go={(path) => router.push(path)} />
+          ) : null}
+          {tab === 'staff' ? <StaffTab s={report as StaffReport} t={t} /> : null}
+        </ScrollView>
       )}
 
+      <View className="flex-row gap-2.5 border-t border-border bg-surface px-4 py-3">
+        <Pressable
+          onPress={() => void download('pdf')}
+          disabled={downloading || !report}
+          accessibilityRole="button"
+          className={`h-14 flex-1 flex-row items-center justify-center gap-2.5 rounded-button bg-primary ${
+            downloading || !report ? 'opacity-50' : 'active:opacity-90'
+          }`}
+        >
+          <Download size={20} color={colors.surface} strokeWidth={2.4} />
+          <Text font="bold" tone="inverse" className="text-[17px]">
+            {t('report.downloadPdf')}
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => void download('csv')}
+          disabled={downloading || !report}
+          accessibilityRole="button"
+          className={`h-14 flex-1 items-center justify-center rounded-button border-2 border-primary bg-surface ${
+            downloading || !report ? 'opacity-50' : 'active:opacity-80'
+          }`}
+        >
+          <Text font="bold" className="text-[17px] text-primary">
+            {t('report.downloadCsv')}
+          </Text>
+        </Pressable>
+      </View>
+
       <CalendarSheet
-        key={`${choosing}-${range.day}`}
+        key={`${choosing}-${day}`}
         visible={choosing}
-        period={range.period}
-        day={range.day ?? null}
-        onPeriod={(period) => setRange({ period })}
-        onDay={(day) => setRange({ period: range.period, day })}
+        period={period}
+        day={day ?? null}
+        onPeriod={(p) => {
+          setDay(undefined);
+          setPeriod(p);
+        }}
+        onDay={setDay}
         onClose={() => setChoosing(false)}
       />
     </SafeAreaView>

@@ -1,83 +1,89 @@
-import type { Period } from '@/lib/period';
-
 import { api } from './client';
 
-type Kind =
-  'FOOD' | 'DRINKS' | 'GAS' | 'RENT' | 'SALARY' | 'REPAIRS' | 'TRANSPORT' | 'BILLS' | 'OTHER';
-
-/** GET /reports/restaurant: every restaurant report for a period or one day (server sums). */
-export interface RestaurantReport {
+/** Days from..to (YYYY-MM-DD, `to` included). */
+export interface ReportDays {
   from: string;
   to: string;
-  sales: {
-    totalEtb: number;
-    bills: number;
-    averageEtb: number;
-    previousEtb: number;
-    byHour: { hour: number; totalEtb: number; bills: number }[];
-    byDay: { day: string; totalEtb: number; bills: number }[];
-    methods: { method: 'cash' | 'bank' | 'cash+bank'; bills: number; totalEtb: number }[];
-  };
-  menu: {
-    items: {
-      name: string;
-      nameAm: string | null;
-      category: string | null;
-      qty: number;
-      totalEtb: number;
-    }[];
-    slow: { name: string; nameAm: string | null; qty: number; totalEtb: number }[];
-    categories: { name: string; nameAm: string | null; qty: number; totalEtb: number }[];
-    cancelled: {
-      orders: number;
-      totalEtb: number;
-      items: { name: string; qty: number }[];
-      list: {
-        number: number;
-        reason: string | null;
-        by: string | null;
-        totalEtb: number;
-        at: string;
-      }[];
-    };
-  };
-  expenses: {
-    totalEtb: number;
-    byKind: { kind: Kind; totalEtb: number; count: number }[];
-    bought: { name: string; times: number; totalEtb: number }[];
-    byPerson: {
-      name: string;
-      count: number;
-      cashEtb: number;
-      bankEtb: number;
-      totalEtb: number;
-    }[];
-    changed: number;
-    deleted: { title: string; amountEtb: number; reason: string | null }[];
-  };
-  staff: {
-    waiters: { name: string; bills: number; salesEtb: number; averageEtb: number }[];
-    tips: { name: string; count: number; totalEtb: number; paidOutEtb: number }[];
-    checks: {
-      ok: number;
-      bad: number;
-      byBank: { bank: string; ok: number; bad: number }[];
-      byPerson: { name: string; ok: number; bad: number }[];
-    };
-    kitchen: {
-      orders: number;
-      averageMinutes: number;
-      slowest: { name: string; orders: number; averageMinutes: number }[];
-    };
+}
+
+type Span = { from: string; to: string };
+type QtyLine = { name: string; nameAm: string | null; qty: number; amount: number };
+type OkFailed = { ok: number; failed: number };
+export type ExpenseKind =
+  'FOOD' | 'DRINKS' | 'GAS' | 'RENT' | 'SALARY' | 'REPAIRS' | 'TRANSPORT' | 'BILLS' | 'OTHER';
+
+export interface SalesReport extends Span {
+  total: number;
+  bills: number;
+  avgBill: number;
+  previousTotal: number;
+  paidBy: Record<'cash' | 'bank' | 'both', { amount: number; bills: number }>;
+  byHour: { hour: number; amount: number; bills: number }[];
+  byDay: { date: string; amount: number; bills: number }[];
+}
+
+export interface FoodReport extends Span {
+  bestSellers: QtyLine[];
+  byCategory: QtyLine[];
+  slowSellers: QtyLine[];
+  cancelled: {
+    count: number;
+    amount: number;
+    topItems: { name: string; qty: number }[];
+    orders: { id: string; number: number; amount: number; waiter: string; reason: string | null }[];
   };
 }
 
-/** A period, or one calendar day (YYYY-MM-DD) instead. */
-export interface ReportRange {
-  period: Period;
-  day?: string;
+export interface ExpensesReport extends Span {
+  total: number;
+  sales: number;
+  profit: number;
+  moneyLeft: number;
+  byKind: { kind: ExpenseKind; amount: number; count: number }[];
+  boughtItems: { name: string; times: number; amount: number }[];
+  byPerson: { name: string; total: number; count: number; cash: number; bank: number }[];
+  changedByOwner: number;
+  deleted: { title: string; amount: number; reason: string | null }[];
 }
 
-/** GET /reports/restaurant — owner, or a manager allowed to see reports. */
-export const getRestaurantReport = ({ period, day }: ReportRange) =>
-  api<RestaurantReport>('/reports/restaurant', { query: { period, date: day } });
+export interface StaffReport extends Span {
+  waiterSales: { name: string; sales: number; bills: number; avgBill: number }[];
+  tips: { name: string; total: number; paidOut: number }[];
+  receiptChecks: OkFailed & {
+    byBank: (OkFailed & { bank: string })[];
+    byStaff: (OkFailed & { name: string })[];
+  };
+  kitchen: {
+    avgMinutes: number;
+    orders: number;
+    slowest: { name: string; minutes: number; orders: number }[];
+  };
+}
+
+export interface ReportAccess {
+  managerCanSeeReports: boolean;
+  /** Whether the signed-in member may open Reports. */
+  canSeeReports: boolean;
+}
+
+/** GET /reports/sales — owner, or a manager while the owner allows it. */
+export const getSalesReport = (days: ReportDays) =>
+  api<SalesReport>('/reports/sales', { query: { ...days } });
+/** GET /reports/food */
+export const getFoodReport = (days: ReportDays) =>
+  api<FoodReport>('/reports/food', { query: { ...days } });
+/** GET /reports/expenses */
+export const getExpensesReport = (days: ReportDays) =>
+  api<ExpensesReport>('/reports/expenses', { query: { ...days } });
+/** GET /reports/staff */
+export const getStaffReport = (days: ReportDays) =>
+  api<StaffReport>('/reports/staff', { query: { ...days } });
+
+/** GET /business/report-access — any member. */
+export const getReportAccess = () => api<ReportAccess>('/business/report-access');
+/** PUT /business/report-access — owner only. */
+export const setReportAccess = (managerCanSeeReports: boolean) =>
+  api<ReportAccess>('/business/report-access', {
+    method: 'PUT',
+    body: { managerCanSeeReports },
+  });

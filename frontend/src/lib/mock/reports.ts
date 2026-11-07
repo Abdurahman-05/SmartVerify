@@ -1,33 +1,75 @@
-import type { ReportRange, RestaurantReport } from '@/lib/api/reports';
+import type {
+  ExpensesReport,
+  FoodReport,
+  ReportAccess,
+  ReportDays,
+  SalesReport,
+  StaffReport,
+} from '@/lib/api/reports';
 
-/** Offline mock: an empty report (real numbers come from the server). */
-export async function getRestaurantReport(_range: ReportRange): Promise<RestaurantReport> {
-  await new Promise((resolve) => setTimeout(resolve, 200));
-  const now = new Date().toISOString();
+/** Offline mock: empty reports (real numbers come from the server). */
+const wait = () => new Promise((resolve) => setTimeout(resolve, 200));
+const both = { amount: 0, bills: 0 };
+
+export async function getSalesReport(days: ReportDays): Promise<SalesReport> {
+  await wait();
   return {
-    from: now,
-    to: now,
-    sales: {
-      totalEtb: 0,
-      bills: 0,
-      averageEtb: 0,
-      previousEtb: 0,
-      byHour: [],
-      byDay: [],
-      methods: [],
-    },
-    menu: {
-      items: [],
-      slow: [],
-      categories: [],
-      cancelled: { orders: 0, totalEtb: 0, items: [], list: [] },
-    },
-    expenses: { totalEtb: 0, byKind: [], bought: [], byPerson: [], changed: 0, deleted: [] },
-    staff: {
-      waiters: [],
-      tips: [],
-      checks: { ok: 0, bad: 0, byBank: [], byPerson: [] },
-      kitchen: { orders: 0, averageMinutes: 0, slowest: [] },
-    },
+    ...days,
+    total: 0,
+    bills: 0,
+    avgBill: 0,
+    previousTotal: 0,
+    paidBy: { cash: both, bank: both, both },
+    byHour: [],
+    byDay: [],
   };
+}
+
+export async function getFoodReport(days: ReportDays): Promise<FoodReport> {
+  await wait();
+  return {
+    ...days,
+    bestSellers: [],
+    byCategory: [],
+    slowSellers: [],
+    cancelled: { count: 0, amount: 0, topItems: [], orders: [] },
+  };
+}
+
+export async function getExpensesReport(days: ReportDays): Promise<ExpensesReport> {
+  await wait();
+  return {
+    ...days,
+    total: 0,
+    sales: 0,
+    profit: 0,
+    moneyLeft: 0,
+    byKind: [],
+    boughtItems: [],
+    byPerson: [],
+    changedByOwner: 0,
+    deleted: [],
+  };
+}
+
+export async function getStaffReport(days: ReportDays): Promise<StaffReport> {
+  await wait();
+  return {
+    ...days,
+    waiterSales: [],
+    tips: [],
+    receiptChecks: { ok: 0, failed: 0, byBank: [], byStaff: [] },
+    kitchen: { avgMinutes: 0, orders: 0, slowest: [] },
+  };
+}
+
+let access: ReportAccess = { managerCanSeeReports: false, canSeeReports: true };
+export async function getReportAccess(): Promise<ReportAccess> {
+  await wait();
+  return access;
+}
+export async function setReportAccess(managerCanSeeReports: boolean): Promise<ReportAccess> {
+  await wait();
+  access = { ...access, managerCanSeeReports };
+  return access;
 }

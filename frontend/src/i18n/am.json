@@ -1511,7 +1511,8 @@
       "sales": "ሽያጭ",
       "menu": "ምግብና መጠጥ",
       "expenses": "ወጪዎች",
-      "staff": "ሠራተኞችና ፍተሻ"
+      "staff": "ሠራተኞችና ፍተሻ",
+      "food": "ምግብና መጠጥ"
     },
     "billsCount_one": "{{count}} ሂሳብ",
     "billsCount_other": "{{count}} ሂሳቦች",
@@ -1531,11 +1532,12 @@
       "total": "ጠቅላላ ሽያጭ",
       "bills": "ሂሳቦች",
       "average": "አማካይ ሂሳብ",
-      "up": "▲ ካለፈው {{percent}}% ጨምሯል ({{amount}} ብር)",
-      "down": "▼ ካለፈው {{percent}}% ቀንሷል ({{amount}} ብር)",
+      "up": "▲ ካለፈው {{percent}}% ጨምሯል ({{amount}})",
+      "down": "▼ ካለፈው {{percent}}% ቀንሷል ({{amount}})",
       "methods": "ደንበኞች እንዴት ከፈሉ",
       "byHour": "በጣም የተጨናነቁ ሰዓቶች",
-      "byDay": "ሽያጭ በቀን"
+      "byDay": "ሽያጭ በቀን",
+      "byDayHint": "በዚህ ጊዜ ውስጥ ያለ እያንዳንዱ ቀን"
     },
     "menu": {
       "best": "በብዛት የተሸጡ",
@@ -1564,11 +1566,13 @@
       "deleted": "የተሰረዘ",
       "fromBuyList": "ከግዢ ዝርዝሩ",
       "deletedLine": "የተሰረዘ፦ {{title}} · {{amount}}",
-      "reason": "ምክንያት፦ {{reason}}"
+      "reason": "ምክንያት፦ {{reason}}",
+      "profit": "ትርፍ",
+      "moneyLeft": "የቀረ ገንዘብ"
     },
     "staff": {
       "waiters": "የአስተናጋጆች ሽያጭ",
-      "avg": "አማካይ {{amount}} ብር",
+      "avg": "አማካይ {{amount}}",
       "tips": "ጉርሻ",
       "paidOut": "የተከፈለ {{amount}}",
       "checks": "የደረሰኝ ፍተሻ",
@@ -1601,6 +1605,19 @@
     "expensesCount_one": "{{count}} ወጪ",
     "expensesCount_other": "{{count}} ወጪዎች",
     "cash": "ጥሬ ገንዘብ",
-    "bank": "ባንክ"
+    "bank": "ባንክ",
+    "cashBank": "ጥሬ + ባንክ",
+    "bankNames": {
+      "CBE": "ንግድ ባንክ",
+      "TEL": "ቴሌብር",
+      "MPE": "ኤም-ፔሳ",
+      "DAS": "ዳሸን",
+      "BOA": "አቢሲኒያ",
+      "EBR": "ኢብር"
+    },
+    "access": {
+      "title": "ሪፖርቶች ለማኔጀሮች",
+      "body": "ማኔጀሮች ሪፖርቶችን (ሽያጭ፣ ወጪ፣ ሠራተኞች) እንዲያዩ ይፍቀዱ። አስተናጋጆችና ሼፎች በፍጹም አያዩም።"
+    }
   }
 }

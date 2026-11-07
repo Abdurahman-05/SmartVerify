@@ -73,7 +73,10 @@ const restaurantKeys: HomeActionKey[] = [
 export function getHomeActions(
   plan: Plan | null,
   role: Role,
-  extras: { buyList: boolean; moneyOut: boolean } = { buyList: false, moneyOut: false }
+  extras: { buyList: boolean; moneyOut: boolean; reports?: boolean } = {
+    buyList: false,
+    moneyOut: false,
+  }
 ): HomeAction[] {
   // Normal and Normal Multi: no restaurant buttons. No plan yet: everything (not in the Normal app).
   const showRestaurant = plan === 'restaurant' || (plan === null && !isNormalApp);
@@ -93,7 +96,10 @@ export function getHomeActions(
   const keys: HomeActionKey[] =
     plan === 'restaurant' && manages ? [...base.slice(0, 2), ...extra, ...base.slice(2)] : base;
   // Bank accounts and the subscription are the owner's and manager's.
-  const visible = manages ? keys : keys.filter((k) => k !== 'bankAccount' && k !== 'subscription');
+  const managed = manages ? keys : keys.filter((k) => k !== 'bankAccount' && k !== 'subscription');
+  // Restaurant Plus reports: the owner, or a manager while the owner allows it (server decides).
+  const visible =
+    plan === 'restaurant' && !extras.reports ? managed.filter((k) => k !== 'reports') : managed;
   return visible.map((key) => {
     if (key === 'verify' && plan === 'restaurant') return { ...actions.verify, href: '/bills' };
     // Owner and manager see every waiter's tips, not their own.

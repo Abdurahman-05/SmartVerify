@@ -15,6 +15,7 @@ import { useSession, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';
 import { AccessBanner } from '@/features/business/AccessBanner';
 
+import { getReportAccess, reportAccessKey } from '@/lib/reports';
 import { getHomeActions, type HomeAction } from './homeActions';
 
 function HomeHeader({ user }: { user: SessionUser }) {
@@ -245,12 +246,21 @@ export default function HomeScreen() {
   });
   const subtitleFor = useActionSubtitle(user?.plan ?? null, tablesWaiting);
   const moneyOut = useFeatures((s) => s.featureMoneyOut);
+  const { data: reportAccess } = useQuery({
+    queryKey: reportAccessKey,
+    queryFn: getReportAccess,
+    enabled: isRestaurant,
+  });
   const buyList = useFeatures((s) => s.featureBuyList);
 
   if (!user) return <Redirect href="/sign-in" />;
   if (user.role === 'chef') return <Redirect href="/cook" />;
 
-  const actions = getHomeActions(user.plan, user.role, { buyList, moneyOut });
+  const actions = getHomeActions(user.plan, user.role, {
+    buyList,
+    moneyOut,
+    reports: reportAccess?.canSeeReports ?? false,
+  });
 
   return (
     <SafeAreaView edges={['top']} className="flex-1 bg-background">

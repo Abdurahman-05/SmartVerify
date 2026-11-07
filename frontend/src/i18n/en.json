@@ -1511,7 +1511,8 @@
       "sales": "Sales",
       "menu": "Food & drink",
       "expenses": "Expenses",
-      "staff": "Staff & checks"
+      "staff": "Staff & checks",
+      "food": "Food & drink"
     },
     "billsCount_one": "{{count}} bill",
     "billsCount_other": "{{count}} bills",
@@ -1531,11 +1532,12 @@
       "total": "Total sales",
       "bills": "Bills",
       "average": "Average bill",
-      "up": "▲ {{percent}}% more than before ({{amount}} ETB)",
-      "down": "▼ {{percent}}% less than before ({{amount}} ETB)",
+      "up": "▲ {{percent}}% more than before ({{amount}})",
+      "down": "▼ {{percent}}% less than before ({{amount}})",
       "methods": "How customers paid",
       "byHour": "Busiest hours",
-      "byDay": "Sales by day"
+      "byDay": "Sales by day",
+      "byDayHint": "Each day in this period"
     },
     "menu": {
       "best": "Best sellers",
@@ -1564,11 +1566,13 @@
       "deleted": "Deleted",
       "fromBuyList": "From the buy list",
       "deletedLine": "Deleted: {{title}} · {{amount}}",
-      "reason": "Reason: {{reason}}"
+      "reason": "Reason: {{reason}}",
+      "profit": "Profit",
+      "moneyLeft": "Money left"
     },
     "staff": {
       "waiters": "Waiter sales",
-      "avg": "average {{amount}} ETB",
+      "avg": "average {{amount}}",
       "tips": "Tips",
       "paidOut": "paid out {{amount}}",
       "checks": "Receipt checks",
@@ -1601,6 +1605,19 @@
     "expensesCount_one": "{{count}} expense",
     "expensesCount_other": "{{count}} expenses",
     "cash": "Cash",
-    "bank": "Bank"
+    "bank": "Bank",
+    "cashBank": "Cash + Bank",
+    "bankNames": {
+      "CBE": "CBE",
+      "TEL": "Telebirr",
+      "MPE": "M-Pesa",
+      "DAS": "Dashen",
+      "BOA": "Abyssinia",
+      "EBR": "eBirr"
+    },
+    "access": {
+      "title": "Reports for managers",
+      "body": "Let managers open Reports (sales, expenses, staff). Waiters and chefs never see them."
+    }
   }
 }

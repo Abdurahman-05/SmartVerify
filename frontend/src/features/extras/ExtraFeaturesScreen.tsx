@@ -1,6 +1,6 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Redirect, useRouter } from 'expo-router';
-import { Info, NotebookPen, Wallet, type LucideIcon } from 'lucide-react-native';
+import { ChartColumn, Info, NotebookPen, Wallet, type LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/Switch';
 import { Text } from '@/components/ui/Text';
 import { errorMessageKey } from '@/lib/errors';
 import { updateFeatures, type Features } from '@/lib/extras';
+import { getReportAccess, reportAccessKey, setReportAccess } from '@/lib/reports';
 import { homeRouteFor, useSession } from '@/store/session';
 import { useFeatures } from '@/store/features';
 import { useBrandColors } from '@/store/theme';
@@ -65,6 +66,12 @@ export default function ExtraFeaturesScreen() {
     mutationFn: (changes: Partial<Features>) => updateFeatures(changes),
     onSuccess: (updated) => useFeatures.getState().set(updated),
   });
+  const queryClient = useQueryClient();
+  const access = useQuery({ queryKey: reportAccessKey, queryFn: getReportAccess });
+  const changeAccess = useMutation({
+    mutationFn: setReportAccess,
+    onSuccess: (updated) => queryClient.setQueryData(reportAccessKey, updated),
+  });
 
   if (!user || user.role !== 'owner') return <Redirect href={homeRouteFor(user)} />;
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/profile'));
@@ -90,6 +97,14 @@ export default function ExtraFeaturesScreen() {
           onChange={(value) => change.mutate({ featureMoneyOut: value })}
         />
         {features.featureMoneyOut ? <CostKindsCard /> : null}
+        <FeatureRow
+          icon={ChartColumn}
+          title={t('reportsHub.access.title')}
+          hint={t('reportsHub.access.body')}
+          value={access.data?.managerCanSeeReports ?? false}
+          disabled={!access.data || changeAccess.isPending}
+          onChange={(value) => changeAccess.mutate(value)}
+        />
         <View className="flex-row items-start gap-2 px-1 pt-1">
           <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
           <Text tone="muted" className="flex-1 text-sm leading-5">
@@ -99,11 +114,14 @@ export default function ExtraFeaturesScreen() {
       </ScrollView>
 
       <ErrorDialog
-        visible={change.isError}
+        visible={change.isError || changeAccess.isError}
         title={t('extras.saveFailedTitle')}
-        message={t(errorMessageKey(change.error))}
+        message={t(errorMessageKey(change.error ?? changeAccess.error))}
         actionLabel={t('errors.retry')}
-        onClose={change.reset}
+        onClose={() => {
+          change.reset();
+          changeAccess.reset();
+        }}
       />
     </SafeAreaView>
   );

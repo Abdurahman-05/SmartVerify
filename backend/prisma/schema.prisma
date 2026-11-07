@@ -164,6 +164,8 @@ model Business {
   /// Owner-controlled extras (Restaurant Plus). Off only hides them: data is never deleted.
   featureBuyList  Boolean            @default(false)
   featureMoneyOut Boolean            @default(false)
+  /// The owner lets managers open Reports (waiters and chefs never).
+  managerCanSeeReports Boolean       @default(false)
   /// Expense kinds the owner counts as business costs (Money flow: profit = sales − these).
   costKinds       SpendingCategory[] @default([RENT, SALARY, GAS, REPAIRS, TRANSPORT, BILLS])
   /// Owner and managers are told about a verified payment of at least this much.

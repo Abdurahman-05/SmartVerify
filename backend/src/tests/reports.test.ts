@@ -24,11 +24,11 @@ beforeEach(async () => {
   r = await createRestaurant(app);
 });
 
-const get = (token: string, query = '') =>
-  app.inject({ method: 'GET', url: `/api/v1/reports/restaurant${query}`, headers: headers(token) });
+const get = (path: string, token: string) =>
+  app.inject({ method: 'GET', url: `/api/v1${path}`, headers: headers(token) });
 
-/** Orders 2 Tibs + 1 Coffee (960) on a table; pays it when `pay`. */
-async function order(table: number, pay: boolean) {
+/** A paid 960 ETB dine-in bill (2 Tibs + 1 Coffee), in cash. */
+async function paidBill(table: number) {
   const bill = (
     await app.inject({
       method: 'POST',
@@ -44,87 +44,83 @@ async function order(table: number, pay: boolean) {
       },
     })
   ).json() as { id: string };
-  if (pay) {
-    await app.inject({
-      method: 'POST',
-      url: `/api/v1/bills/${bill.id}/payments`,
-      headers: headers(r.waiter.token, newKey()),
-      payload: { method: 'cash', cashEtb: 960 },
+  await app.inject({
+    method: 'POST',
+    url: `/api/v1/bills/${bill.id}/payments`,
+    headers: headers(r.waiter.token, newKey()),
+    payload: { method: 'cash', cashEtb: 960 },
+  });
+}
+
+describe('reports', () => {
+  it('a waiter gets 403', async () => {
+    for (const tab of ['sales', 'food', 'expenses', 'staff']) {
+      expect((await get(`/reports/${tab}`, r.waiter.token)).statusCode).toBe(403);
+    }
+    expect((await get('/reports/export.csv?tab=sales', r.waiter.token)).statusCode).toBe(403);
+  });
+
+  it('a manager only while the owner allows it', async () => {
+    expect((await get('/reports/sales', r.manager.token)).statusCode).toBe(403);
+    const put = await app.inject({
+      method: 'PUT',
+      url: '/api/v1/business/report-access',
+      headers: headers(r.owner.token),
+      payload: { managerCanSeeReports: true },
     });
-  }
-  return bill.id;
-}
+    expect(put.statusCode).toBe(200);
+    expect((await get('/reports/sales', r.manager.token)).statusCode).toBe(200);
+    expect((await get('/business/report-access', r.manager.token)).json()).toEqual({
+      managerCanSeeReports: true,
+      canSeeReports: true,
+    });
+  });
 
-interface Report {
-  sales: {
-    totalEtb: number;
-    bills: number;
-    averageEtb: number;
-    byHour: { totalEtb: number }[];
-    byDay: unknown[];
-    methods: { method: string; bills: number; totalEtb: number }[];
-  };
-  menu: {
-    items: { name: string; qty: number; totalEtb: number }[];
-    slow: { qty: number }[];
-    cancelled: { orders: number };
-  };
-  expenses: { totalEtb: number; byKind: { kind: string; totalEtb: number }[] };
-  staff: { waiters: { name: string; bills: number; salesEtb: number }[] };
-}
+  it('adds up sales, food and waiters; empty lists when nothing happened', async () => {
+    const empty = (await get('/reports/food', r.owner.token)).json() as { bestSellers: unknown[] };
+    expect(empty.bestSellers).toEqual([]);
 
-describe('GET /reports/restaurant', () => {
-  it('adds up sales, food and drink, and waiters', async () => {
-    await order(0, true);
-    await order(1, true);
-    const res = await get(r.owner.token);
-    expect(res.statusCode).toBe(200);
-    const body = res.json() as Report;
-    expect(body.sales).toMatchObject({ totalEtb: 1920, bills: 2, averageEtb: 960 });
-    expect(body.sales.byHour.reduce((s, h) => s + h.totalEtb, 0)).toBe(1920);
-    expect(body.sales.byDay).toHaveLength(1);
-    expect(body.sales.methods).toContainEqual({ method: 'cash', bills: 2, totalEtb: 1920 });
-    expect(body.menu.items[0]).toMatchObject({ qty: 4, totalEtb: 1800 });
-    expect(body.menu.items[1]).toMatchObject({ qty: 2, totalEtb: 120 });
-    expect(body.staff.waiters).toEqual([
-      { name: 'Waiter Dawit', bills: 2, salesEtb: 1920, averageEtb: 960 },
+    await paidBill(0);
+    await paidBill(1);
+    const sales = (await get('/reports/sales', r.owner.token)).json() as {
+      total: number;
+      bills: number;
+      avgBill: number;
+      paidBy: { cash: { amount: number; bills: number } };
+      byDay: unknown[];
+    };
+    expect(sales).toMatchObject({ total: 1920, bills: 2, avgBill: 960 });
+    expect(sales.paidBy.cash).toEqual({ amount: 1920, bills: 2 });
+    expect(sales.byDay).toHaveLength(1);
+
+    const food = (await get('/reports/food', r.owner.token)).json() as {
+      bestSellers: { qty: number; amount: number }[];
+    };
+    expect(food.bestSellers[0]).toMatchObject({ qty: 4, amount: 1800 });
+
+    const staff = (await get('/reports/staff', r.owner.token)).json() as {
+      waiterSales: unknown[];
+    };
+    expect(staff.waiterSales).toEqual([
+      { name: 'Waiter Dawit', sales: 1920, bills: 2, avgBill: 960 },
     ]);
+
+    const csv = await get('/reports/export.csv?tab=sales', r.owner.token);
+    expect(csv.headers['content-type']).toContain('text/csv');
+    expect(csv.body).toContain('1,920');
+    const pdf = await get('/reports/export.pdf?tab=staff', r.owner.token);
+    expect(pdf.body.startsWith('%PDF-1.4')).toBe(true);
   });
 
-  it('counts expenses by kind', async () => {
-    await app.prisma.business.update({
-      where: { id: r.businessId },
-      data: { featureMoneyOut: true },
+  it('profit and money left', async () => {
+    await paidBill(0);
+    await app.prisma.spending.createMany({
+      data: [
+        { title: 'Rent', amount: 300, category: 'RENT' as const, paidFrom: 'CASH' as const },
+        { title: 'Lunch', amount: 100, category: 'OTHER' as const, paidFrom: 'CASH' as const },
+      ].map((s) => ({ ...s, businessId: r.businessId, createdById: r.owner.memberId })),
     });
-    await app.prisma.spending.create({
-      data: {
-        businessId: r.businessId,
-        title: 'Gas',
-        amount: 500,
-        category: 'GAS',
-        paidFrom: 'CASH',
-        createdById: r.owner.memberId,
-      },
-    });
-    const body = (await get(r.owner.token)).json() as Report;
-    expect(body.expenses.totalEtb).toBe(500);
-    expect(body.expenses.byKind).toEqual([{ kind: 'GAS', totalEtb: 500, count: 1 }]);
-  });
-
-  it('only the owner, or a manager allowed to see reports', async () => {
-    expect((await get(r.waiter.token)).statusCode).toBe(403);
-    expect((await get(r.manager.token)).statusCode).toBe(403);
-    await app.prisma.businessMember.update({
-      where: { id: r.manager.memberId },
-      data: { canSeeReports: true },
-    });
-    expect((await get(r.manager.token)).statusCode).toBe(200);
-  });
-
-  it('one chosen day', async () => {
-    await order(0, true);
-    const body = (await get(r.owner.token, '?date=2020-01-01')).json() as Report;
-    expect(body.sales.totalEtb).toBe(0);
-    expect(body.sales.byDay).toHaveLength(1);
+    const body = (await get('/reports/expenses', r.owner.token)).json();
+    expect(body).toMatchObject({ total: 400, sales: 960, profit: 660, moneyLeft: 560 });
   });
 });
