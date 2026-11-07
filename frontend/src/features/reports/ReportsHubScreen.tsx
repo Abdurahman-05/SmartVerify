@@ -32,7 +32,7 @@ const tabs = ['sales', 'menu', 'expenses', 'staff'] as const;
 type Tab = (typeof tabs)[number];
 
 /** Design colours that are not app tokens yet (reports only). */
-const BAR_SOFT = '#ADBFB7';
+const BAR_SOFT = 'rgba(13,74,54,0.35)';
 const BAR_TRACK = '#E6F2EC';
 
 const etb = (v: number) => `${formatMoney(v, false)} ETB`;
@@ -55,8 +55,8 @@ function PeriodChip({
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      className={`h-11 items-center justify-center rounded-full px-5 ${
-        selected ? 'bg-primary' : 'border-[1.5px] border-borderStrong bg-surface'
+      className={`h-11 items-center justify-center rounded-full px-[18px] ${
+        selected ? 'bg-primary' : 'border-2 border-border bg-surface'
       }`}
     >
       <Text font="bold" tone={selected ? 'inverse' : 'default'} className="text-[15px]">
@@ -79,7 +79,7 @@ function Card({
 }) {
   const { t } = useTranslation();
   return (
-    <View className="rounded-[20px] border-[1.5px] border-border bg-surface px-4 pb-3 pt-3.5">
+    <View className="rounded-[22px] border-[1.5px] border-border bg-surface px-4 pb-2 pt-3.5">
       <Text font="heading" className="text-lg" accessibilityRole="header">
         {title}
       </Text>
@@ -89,7 +89,7 @@ function Card({
           {t('reportsHub.empty')}
         </Text>
       ) : (
-        <View className="gap-3 pt-2.5">{children}</View>
+        <View className="gap-4 pb-2 pt-2.5">{children}</View>
       )}
     </View>
   );
@@ -140,7 +140,7 @@ function Row({
       <View className="flex-1">
         <View className="flex-row items-center gap-2">
           <View className="flex-1">
-            <Text font="bold" className="text-base" numberOfLines={2}>
+            <Text font="semibold" className="text-base" numberOfLines={2}>
               {title}
             </Text>
             {sub ? (
@@ -150,7 +150,7 @@ function Row({
             ) : null}
           </View>
           {typeof value === 'string' ? (
-            <Text font="bold" className="text-[15px]">
+            <Text font="heading" className="text-[15px]">
               {value}
             </Text>
           ) : (
@@ -230,21 +230,21 @@ function Hero({
   children?: ReactNode;
 }) {
   return (
-    <View className="rounded-card bg-primary px-5 py-4" accessible>
-      <Text font="semibold" tone="inverse" className="text-[15px] opacity-90">
+    <View className="rounded-[22px] bg-primary p-5" accessible>
+      <Text font="semibold" className="text-base text-primarySoft">
         {label}
       </Text>
       <View className="flex-row items-end gap-1.5">
         <Text
           font="heading"
           tone="inverse"
-          className="text-[40px] leading-[48px]"
+          className="text-[42px] leading-[50px]"
           numberOfLines={1}
           adjustsFontSizeToFit
         >
           {formatMoney(amount, false)}
         </Text>
-        <Text font="bold" tone="inverse" className="pb-1.5 text-lg">
+        <Text font="heading" tone="inverse" className="pb-2 text-xl">
           ETB
         </Text>
       </View>
@@ -274,10 +274,10 @@ function SalesTab({ r, t }: { r: RestaurantReport; t: TFunction }) {
     <>
       <Hero label={t('reportsHub.sales.total')} amount={s.totalEtb}>
         {change === null ? null : (
-          <View className="mt-2 self-start rounded-full bg-surface px-3 py-1">
+          <View className="mt-2.5 h-8 justify-center self-start rounded-full bg-surface px-3">
             <Text
               font="bold"
-              className="text-sm"
+              className="text-[15px]"
               style={{ color: change >= 0 ? colors.success : colors.alert }}
             >
               {t(change >= 0 ? 'reportsHub.sales.up' : 'reportsHub.sales.down', {
@@ -288,19 +288,19 @@ function SalesTab({ r, t }: { r: RestaurantReport; t: TFunction }) {
           </View>
         )}
         <View className="mt-3 flex-row gap-2.5">
-          <View className="flex-1 rounded-[14px] bg-white/15 px-3 py-2">
+          <View className="flex-1 rounded-[14px] bg-white/[0.14] px-3 py-2">
             <Text font="semibold" tone="inverse" className="text-sm">
               {t('reportsHub.sales.bills')}
             </Text>
-            <Text font="heading" tone="inverse" className="text-lg">
+            <Text font="heading" tone="inverse" className="text-[17px]">
               {s.bills}
             </Text>
           </View>
-          <View className="flex-1 rounded-[14px] bg-white/15 px-3 py-2">
+          <View className="flex-1 rounded-[14px] bg-white/[0.14] px-3 py-2">
             <Text font="semibold" tone="inverse" className="text-sm">
               {t('reportsHub.sales.average')}
             </Text>
-            <Text font="heading" tone="inverse" className="text-lg">
+            <Text font="heading" tone="inverse" className="text-[17px]">
               {etb(s.averageEtb)}
             </Text>
           </View>
@@ -321,7 +321,7 @@ function SalesTab({ r, t }: { r: RestaurantReport; t: TFunction }) {
 
       <Card title={t('reportsHub.sales.byHour')} isEmpty={active.length === 0}>
         <View
-          className="h-32 flex-row items-end gap-1"
+          className="mb-1 mt-1.5 h-[140px] flex-row items-end gap-[3px]"
           accessible
           accessibilityLabel={top.map((h) => `${hourLabel(h.hour)}: ${etb(h.totalEtb)}`).join(', ')}
         >
@@ -337,12 +337,12 @@ function SalesTab({ r, t }: { r: RestaurantReport; t: TFunction }) {
             </View>
           ))}
         </View>
-        <View className="-mt-1.5 flex-row gap-1">
+        <View className="-mt-2 flex-row gap-[3px]">
           {chart.map((h) => (
             <Text
               key={h.hour}
               tone="muted"
-              className="flex-1 text-center text-[11px]"
+              className="flex-1 text-center text-sm"
               numberOfLines={1}
             >
               {h.hour}
