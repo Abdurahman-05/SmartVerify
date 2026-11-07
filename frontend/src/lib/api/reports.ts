@@ -26,7 +26,7 @@ export interface RestaurantReport {
       qty: number;
       totalEtb: number;
     }[];
-    slow: { name: string; nameAm: string | null; qty: number }[];
+    slow: { name: string; nameAm: string | null; qty: number; totalEtb: number }[];
     categories: { name: string; nameAm: string | null; qty: number; totalEtb: number }[];
     cancelled: {
       orders: number;

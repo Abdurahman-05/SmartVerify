@@ -1546,21 +1546,29 @@
       "notSold": "Not sold",
       "cancelled": "Cancelled orders",
       "cancelledTotal": "{{count}} cancelled · {{amount}} ETB",
-      "order": "Order #{{number}}"
+      "order": "Order #{{number}}",
+      "showAll": "Show all {{count}}",
+      "cancelledLabel": "Cancelled",
+      "moneyLost": "Money lost",
+      "mostCancelled": "Most cancelled",
+      "orders": "Orders"
     },
     "expenses": {
       "total": "Total expenses",
-      "openFlow": "See profit and money flow →",
+      "openFlow": "See profit and money flow",
       "byKind": "Expenses by kind",
       "bought": "Bought items",
       "byPerson": "Expenses by person",
-      "split": "{{count}} · cash {{cash}} · bank {{bank}}",
-      "changed": "{{count}} expense(s) changed by the owner",
-      "deleted": "Deleted"
+      "split": "{{count}} expenses · Cash {{cash}} · Bank {{bank}}",
+      "changed": "{{count}} expenses changed by the owner",
+      "deleted": "Deleted",
+      "fromBuyList": "From the buy list",
+      "deletedLine": "Deleted: {{title}} · {{amount}}",
+      "reason": "Reason: {{reason}}"
     },
     "staff": {
       "waiters": "Waiter sales",
-      "avg": "avg {{amount}}",
+      "avg": "average {{amount}} ETB",
       "tips": "Tips",
       "paidOut": "paid out {{amount}}",
       "checks": "Receipt checks",
@@ -1568,12 +1576,31 @@
       "okBad": "{{ok}} ok · {{bad}} failed",
       "kitchen": "Kitchen speed",
       "kitchenAverage": "{{minutes}} min on average · {{count}} orders",
-      "minutes": "{{minutes}} min · {{count}} orders"
+      "minutes": "{{minutes}} min · {{count}} orders",
+      "ok": "{{count}} ok",
+      "failed": "{{count}} failed",
+      "verified": "Verified",
+      "failedOrSuspicious": "Failed or suspicious",
+      "byBank": "By bank",
+      "byStaff": "By staff",
+      "onAverage": "On average",
+      "ordersLabel": "Orders",
+      "slowest": "Slowest dishes",
+      "min": "{{minutes}} min",
+      "paidOutLegend": "Paid out",
+      "stillToPay": "Still to pay",
+      "paidLeft": "Paid out {{paid}} · Left {{left}}"
     },
     "export": {
       "what": "Item",
       "detail": "Detail",
       "amount": "Amount (ETB)"
-    }
+    },
+    "ordersCount_one": "{{count}} order",
+    "ordersCount_other": "{{count}} orders",
+    "expensesCount_one": "{{count}} expense",
+    "expensesCount_other": "{{count}} expenses",
+    "cash": "Cash",
+    "bank": "Bank"
   }
 }

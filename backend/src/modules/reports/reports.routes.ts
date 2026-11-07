@@ -50,7 +50,7 @@ const reportSchema = z.object({
         totalEtb: int,
       })
     ),
-    slow: z.array(z.object({ name: z.string(), nameAm, qty: int })),
+    slow: z.array(z.object({ name: z.string(), nameAm, qty: int, totalEtb: int })),
     categories: z.array(z.object({ name: z.string(), nameAm, qty: int, totalEtb: int })),
     cancelled: z.object({
       orders: int,
@@ -328,7 +328,12 @@ export const reportRoutes: FastifyPluginAsyncZod = async (app) => {
       }
       const slow = menuItems
         .filter((m) => m.active)
-        .map((m) => ({ name: m.name, nameAm: m.nameAm, qty: soldQty.get(m.id) ?? 0 }))
+        .map((m) => ({
+          name: m.name,
+          nameAm: m.nameAm,
+          qty: soldQty.get(m.id) ?? 0,
+          totalEtb: items.get(m.id)?.totalEtb ?? 0,
+        }))
         .sort((a, b) => a.qty - b.qty || a.name.localeCompare(b.name))
         .slice(0, 15);
       const cancelledItems = new Map<string, { name: string; qty: number }>();

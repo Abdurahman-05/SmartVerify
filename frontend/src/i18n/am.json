@@ -1546,21 +1546,29 @@
       "notSold": "አልተሸጠም",
       "cancelled": "የተሰረዙ ትዕዛዞች",
       "cancelledTotal": "{{count}} ተሰርዟል · {{amount}} ብር",
-      "order": "ትዕዛዝ #{{number}}"
+      "order": "ትዕዛዝ #{{number}}",
+      "showAll": "ሁሉንም {{count}} አሳይ",
+      "cancelledLabel": "የተሰረዙ",
+      "moneyLost": "የጠፋ ገንዘብ",
+      "mostCancelled": "በብዛት የተሰረዙ",
+      "orders": "ትዕዛዞች"
     },
     "expenses": {
       "total": "ጠቅላላ ወጪ",
-      "openFlow": "ትርፍና የገንዘብ ፍሰት ይመልከቱ →",
+      "openFlow": "ትርፍና የገንዘብ ፍሰት ይመልከቱ",
       "byKind": "ወጪ በዓይነት",
       "bought": "የተገዙ ዕቃዎች",
       "byPerson": "ወጪ በሰው",
-      "split": "{{count}} · ጥሬ {{cash}} · ባንክ {{bank}}",
-      "changed": "{{count}} ወጪ(ዎች) በባለቤቱ ተቀይረዋል",
-      "deleted": "የተሰረዘ"
+      "split": "{{count}} ወጪዎች · ጥሬ {{cash}} · ባንክ {{bank}}",
+      "changed": "{{count}} ወጪዎች በባለቤቱ ተቀይረዋል",
+      "deleted": "የተሰረዘ",
+      "fromBuyList": "ከግዢ ዝርዝሩ",
+      "deletedLine": "የተሰረዘ፦ {{title}} · {{amount}}",
+      "reason": "ምክንያት፦ {{reason}}"
     },
     "staff": {
       "waiters": "የአስተናጋጆች ሽያጭ",
-      "avg": "አማካይ {{amount}}",
+      "avg": "አማካይ {{amount}} ብር",
       "tips": "ጉርሻ",
       "paidOut": "የተከፈለ {{amount}}",
       "checks": "የደረሰኝ ፍተሻ",
@@ -1568,12 +1576,31 @@
       "okBad": "{{ok}} ትክክል · {{bad}} ያልተሳካ",
       "kitchen": "የኩሽና ፍጥነት",
       "kitchenAverage": "በአማካይ {{minutes}} ደቂቃ · {{count}} ትዕዛዞች",
-      "minutes": "{{minutes}} ደቂቃ · {{count}} ትዕዛዞች"
+      "minutes": "{{minutes}} ደቂቃ · {{count}} ትዕዛዞች",
+      "ok": "{{count}} ትክክል",
+      "failed": "{{count}} ያልተሳካ",
+      "verified": "የተረጋገጡ",
+      "failedOrSuspicious": "ያልተሳኩ ወይም አጠራጣሪ",
+      "byBank": "በባንክ",
+      "byStaff": "በሠራተኛ",
+      "onAverage": "በአማካይ",
+      "ordersLabel": "ትዕዛዞች",
+      "slowest": "በጣም የዘገዩ ምግቦች",
+      "min": "{{minutes}} ደቂቃ",
+      "paidOutLegend": "የተከፈለ",
+      "stillToPay": "ገና የሚከፈል",
+      "paidLeft": "የተከፈለ {{paid}} · ቀሪ {{left}}"
     },
     "export": {
       "what": "ዝርዝር",
       "detail": "ማብራሪያ",
       "amount": "መጠን (ብር)"
-    }
+    },
+    "ordersCount_one": "{{count}} ትዕዛዝ",
+    "ordersCount_other": "{{count}} ትዕዛዞች",
+    "expensesCount_one": "{{count}} ወጪ",
+    "expensesCount_other": "{{count}} ወጪዎች",
+    "cash": "ጥሬ ገንዘብ",
+    "bank": "ባንክ"
   }
 }
