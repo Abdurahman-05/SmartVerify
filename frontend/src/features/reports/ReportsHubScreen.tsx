@@ -250,7 +250,7 @@ function Hero({
   const { t } = useTranslation();
   return (
     <View className="rounded-[22px] bg-primary p-5" accessible>
-      <Text font="semibold" className="text-base text-primarySoft">
+      <Text font="semibold" className="text-base" style={{ color: BAR_TRACK }}>
         {label}
       </Text>
       <View className="flex-row items-end gap-2">
@@ -910,7 +910,7 @@ export default function ReportsHubScreen() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        className="max-h-[60px] flex-grow-0"
+        className="flex-grow-0"
         contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 14, paddingTop: 4 }}
         accessibilityRole="radiogroup"
       >
