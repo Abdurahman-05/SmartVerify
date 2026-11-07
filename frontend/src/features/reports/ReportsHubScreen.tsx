@@ -907,30 +907,32 @@ export default function ReportsHubScreen() {
         onBack={goBack}
         right={<CalendarButton day={dayDate ?? new Date()} onPress={() => setChoosing(true)} />}
       />
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="flex-grow-0"
-        contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 14, paddingTop: 4 }}
-        accessibilityRole="radiogroup"
-      >
-        {periods.map((p) => (
-          <PeriodChip
-            key={p}
-            label={t(`period.${p}`)}
-            selected={!day && period === p}
-            onPress={() => {
-              setDay(undefined);
-              setPeriod(p);
-            }}
-          />
-        ))}
-        {dayDate ? (
-          <PeriodChip label={rangeLabel} selected onPress={() => setChoosing(true)} />
-        ) : null}
-      </ScrollView>
+      {/* Fixed height: a horizontal ScrollView alone is measured too short on first load. */}
+      <View className="h-[68px]">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8, paddingHorizontal: 16, alignItems: 'center' }}
+          accessibilityRole="radiogroup"
+        >
+          {periods.map((p) => (
+            <PeriodChip
+              key={p}
+              label={t(`period.${p}`)}
+              selected={!day && period === p}
+              onPress={() => {
+                setDay(undefined);
+                setPeriod(p);
+              }}
+            />
+          ))}
+          {dayDate ? (
+            <PeriodChip label={rangeLabel} selected onPress={() => setChoosing(true)} />
+          ) : null}
+        </ScrollView>
+      </View>
 
-      <View className="border-y border-border bg-surface">
+      <View className="h-[50px] border-y border-border bg-surface">
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
