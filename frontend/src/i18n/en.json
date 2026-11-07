@@ -1503,5 +1503,77 @@
     "byWaiter": "Per waiter",
     "empty": "No tips in this period.",
     "paid": "Paid {{amount}}"
+  },
+  "reportsHub": {
+    "title": "Reports",
+    "empty": "Nothing for this time yet.",
+    "tabs": {
+      "sales": "Sales",
+      "menu": "Food & drink",
+      "expenses": "Expenses",
+      "staff": "Staff & checks"
+    },
+    "billsCount_one": "{{count}} bill",
+    "billsCount_other": "{{count}} bills",
+    "qty_one": "{{count}} sold",
+    "qty_other": "{{count}} sold",
+    "timesCount_one": "{{count}} time",
+    "timesCount_other": "{{count}} times",
+    "hour": "{{from}}:00 – {{to}}:00",
+    "weekday_0": "Sun",
+    "weekday_1": "Mon",
+    "weekday_2": "Tue",
+    "weekday_3": "Wed",
+    "weekday_4": "Thu",
+    "weekday_5": "Fri",
+    "weekday_6": "Sat",
+    "sales": {
+      "total": "Total sales",
+      "bills": "Bills",
+      "average": "Average bill",
+      "up": "▲ {{percent}}% more than before ({{amount}} ETB)",
+      "down": "▼ {{percent}}% less than before ({{amount}} ETB)",
+      "methods": "How customers paid",
+      "byHour": "Busiest hours",
+      "byDay": "Sales by day"
+    },
+    "menu": {
+      "best": "Best sellers",
+      "categories": "Sales by category",
+      "noCategory": "Other",
+      "slow": "Slow sellers",
+      "slowHint": "Items on the menu that sold least.",
+      "notSold": "Not sold",
+      "cancelled": "Cancelled orders",
+      "cancelledTotal": "{{count}} cancelled · {{amount}} ETB",
+      "order": "Order #{{number}}"
+    },
+    "expenses": {
+      "total": "Total expenses",
+      "openFlow": "See profit and money flow →",
+      "byKind": "Expenses by kind",
+      "bought": "Bought items",
+      "byPerson": "Expenses by person",
+      "split": "{{count}} · cash {{cash}} · bank {{bank}}",
+      "changed": "{{count}} expense(s) changed by the owner",
+      "deleted": "Deleted"
+    },
+    "staff": {
+      "waiters": "Waiter sales",
+      "avg": "avg {{amount}}",
+      "tips": "Tips",
+      "paidOut": "paid out {{amount}}",
+      "checks": "Receipt checks",
+      "checksTotal": "{{ok}} verified · {{bad}} failed or suspicious",
+      "okBad": "{{ok}} ok · {{bad}} failed",
+      "kitchen": "Kitchen speed",
+      "kitchenAverage": "{{minutes}} min on average · {{count}} orders",
+      "minutes": "{{minutes}} min · {{count}} orders"
+    },
+    "export": {
+      "what": "Item",
+      "detail": "Detail",
+      "amount": "Amount (ETB)"
+    }
   }
 }

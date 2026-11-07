@@ -1,1 +1,1 @@
-export { default } from '@/features/reports/ReportScreen';
+export { default } from '@/features/reports/ReportsHubScreen';

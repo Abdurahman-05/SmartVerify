@@ -1503,5 +1503,77 @@
     "byWaiter": "በአስተናጋጅ",
     "empty": "በዚህ ጊዜ ቲፕ የለም።",
     "paid": "{{amount}} ተከፍሏል"
+  },
+  "reportsHub": {
+    "title": "ሪፖርቶች",
+    "empty": "ለዚህ ጊዜ ገና ምንም የለም።",
+    "tabs": {
+      "sales": "ሽያጭ",
+      "menu": "ምግብና መጠጥ",
+      "expenses": "ወጪዎች",
+      "staff": "ሠራተኞችና ፍተሻ"
+    },
+    "billsCount_one": "{{count}} ሂሳብ",
+    "billsCount_other": "{{count}} ሂሳቦች",
+    "qty_one": "{{count}} ተሽጧል",
+    "qty_other": "{{count}} ተሽጧል",
+    "timesCount_one": "{{count}} ጊዜ",
+    "timesCount_other": "{{count}} ጊዜ",
+    "hour": "{{from}}:00 – {{to}}:00",
+    "weekday_0": "እሑድ",
+    "weekday_1": "ሰኞ",
+    "weekday_2": "ማክሰኞ",
+    "weekday_3": "ረቡዕ",
+    "weekday_4": "ሐሙስ",
+    "weekday_5": "ዓርብ",
+    "weekday_6": "ቅዳሜ",
+    "sales": {
+      "total": "ጠቅላላ ሽያጭ",
+      "bills": "ሂሳቦች",
+      "average": "አማካይ ሂሳብ",
+      "up": "▲ ካለፈው {{percent}}% ጨምሯል ({{amount}} ብር)",
+      "down": "▼ ካለፈው {{percent}}% ቀንሷል ({{amount}} ብር)",
+      "methods": "ደንበኞች እንዴት ከፈሉ",
+      "byHour": "በጣም የተጨናነቁ ሰዓቶች",
+      "byDay": "ሽያጭ በቀን"
+    },
+    "menu": {
+      "best": "በብዛት የተሸጡ",
+      "categories": "ሽያጭ በምድብ",
+      "noCategory": "ሌላ",
+      "slow": "በዝግታ የሚሸጡ",
+      "slowHint": "በሜኑ ላይ ያሉ በትንሹ የተሸጡ።",
+      "notSold": "አልተሸጠም",
+      "cancelled": "የተሰረዙ ትዕዛዞች",
+      "cancelledTotal": "{{count}} ተሰርዟል · {{amount}} ብር",
+      "order": "ትዕዛዝ #{{number}}"
+    },
+    "expenses": {
+      "total": "ጠቅላላ ወጪ",
+      "openFlow": "ትርፍና የገንዘብ ፍሰት ይመልከቱ →",
+      "byKind": "ወጪ በዓይነት",
+      "bought": "የተገዙ ዕቃዎች",
+      "byPerson": "ወጪ በሰው",
+      "split": "{{count}} · ጥሬ {{cash}} · ባንክ {{bank}}",
+      "changed": "{{count}} ወጪ(ዎች) በባለቤቱ ተቀይረዋል",
+      "deleted": "የተሰረዘ"
+    },
+    "staff": {
+      "waiters": "የአስተናጋጆች ሽያጭ",
+      "avg": "አማካይ {{amount}}",
+      "tips": "ጉርሻ",
+      "paidOut": "የተከፈለ {{amount}}",
+      "checks": "የደረሰኝ ፍተሻ",
+      "checksTotal": "{{ok}} ተረጋግጧል · {{bad}} ያልተሳካ ወይም አጠራጣሪ",
+      "okBad": "{{ok}} ትክክል · {{bad}} ያልተሳካ",
+      "kitchen": "የኩሽና ፍጥነት",
+      "kitchenAverage": "በአማካይ {{minutes}} ደቂቃ · {{count}} ትዕዛዞች",
+      "minutes": "{{minutes}} ደቂቃ · {{count}} ትዕዛዞች"
+    },
+    "export": {
+      "what": "ዝርዝር",
+      "detail": "ማብራሪያ",
+      "amount": "መጠን (ብር)"
+    }
   }
 }

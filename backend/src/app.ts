@@ -22,6 +22,7 @@ import { overviewRoutes } from './modules/overview/overview.routes.js';
 import { paymentRoutes } from './modules/payments/payment.routes.js';
 import { tipRoutes } from './modules/tips/tip.routes.js';
 import { extrasRoutes } from './modules/extras/extras.routes.js';
+import { reportRoutes } from './modules/reports/reports.routes.js';
 import { menuRoutes } from './modules/menu/menu.routes.js';
 import { staffRoutes } from './modules/staff/staff.routes.js';
 import { notificationRoutes } from './modules/notifications/notification.routes.js';
@@ -165,6 +166,7 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
         await secured.register(tipRoutes);
         await secured.register(overviewRoutes);
         await secured.register(historyRoutes);
+        await secured.register(reportRoutes);
       });
     },
     { prefix: '/api/v1' }
