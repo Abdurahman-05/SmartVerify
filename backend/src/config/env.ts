@@ -57,6 +57,12 @@ const schema = z.object({
    * M-PESA): http://user:password@host:port. Unset = fetch directly.
    */
   RECEIPT_PROXY_URL: z.string().url().optional(),
+  /**
+   * HTTPS relay page on Ethiopian hosting (relay.php): GET <url>?url=<receipt url> with the
+   * X-Relay-Key header. Takes the place of RECEIPT_PROXY_URL when both are set.
+   */
+  RECEIPT_RELAY_URL: z.string().url().startsWith('https://').optional(),
+  RECEIPT_RELAY_KEY: z.string().min(32).optional(),
   GEMINI_API_KEY: z.string().min(10).optional(),
   /** Optional key per bank (each from its own Google project, so each has its own rate limit). */
   GEMINI_API_KEY_CBE: z.string().min(10).optional(),

@@ -365,16 +365,26 @@ async function checkReceipt(input: {
 
   let fetched;
   try {
-    const proxy =
-      env.RECEIPT_PROXY_URL && ETHIOPIA_ONLY.has(source.url.hostname)
-        ? new URL(env.RECEIPT_PROXY_URL)
-        : undefined;
-    fetched = await fetchReceipt(source.url, {
-      ...FETCH,
-      tlsStrict,
-      headers: source.headers,
-      proxy,
-    });
+    const ethiopiaOnly = ETHIOPIA_ONLY.has(source.url.hostname);
+    if (ethiopiaOnly && env.RECEIPT_RELAY_URL && env.RECEIPT_RELAY_KEY) {
+      // The relay page fetches the receipt from an Ethiopian address and checks TLS itself.
+      const relay = new URL(env.RECEIPT_RELAY_URL);
+      relay.searchParams.set('url', source.url.toString());
+      fetched = await fetchReceipt(relay, {
+        ...FETCH,
+        tlsStrict: true,
+        headers: { ...source.headers, 'x-relay-key': env.RECEIPT_RELAY_KEY },
+      });
+    } else {
+      const proxy =
+        env.RECEIPT_PROXY_URL && ethiopiaOnly ? new URL(env.RECEIPT_PROXY_URL) : undefined;
+      fetched = await fetchReceipt(source.url, {
+        ...FETCH,
+        tlsStrict,
+        headers: source.headers,
+        proxy,
+      });
+    }
   } catch (error) {
     const reason = error instanceof ReceiptFetchError ? error.reason : 'UNREACHABLE';
     if (reason === 'TIMEOUT' || reason === 'UNREACHABLE') {
