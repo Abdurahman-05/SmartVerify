@@ -15,6 +15,16 @@ export interface ExportTable {
   footer?: string;
 }
 
+/** Runs one step; a failure says which step it was ("pdf", "share", ...). */
+async function step<T>(name: string, run: () => Promise<T> | T): Promise<T> {
+  try {
+    return await run();
+  } catch (error) {
+    const why = error instanceof Error ? error.message : String(error);
+    throw new Error(`${name}: ${why}`);
+  }
+}
+
 export async function sharePdf(table: ExportTable) {
   const head = table.columns.map((c) => `<th>${escapeHtml(c)}</th>`).join('');
   const body = table.rows
@@ -36,12 +46,10 @@ export async function sharePdf(table: ExportTable) {
       ${table.footer ? `<div class="footer">${escapeHtml(table.footer)}</div>` : ''}
     </body></html>`;
 
-  const { uri } = await printToFileAsync({ html });
-  await shareAsync(uri, {
-    mimeType: 'application/pdf',
-    UTI: 'com.adobe.pdf',
-    dialogTitle: table.title,
-  });
+  const { uri } = await step('pdf', () => printToFileAsync({ html }));
+  await step('share', () =>
+    shareAsync(uri, { mimeType: 'application/pdf', UTI: 'com.adobe.pdf', dialogTitle: table.title })
+  );
 }
 
 export async function shareCsv(fileName: string, table: ExportTable) {

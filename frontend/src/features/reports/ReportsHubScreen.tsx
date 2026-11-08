@@ -33,6 +33,7 @@ import {
   type StaffReport,
 } from '@/lib/reports';
 import { useSession } from '@/store/session';
+import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
 const tabs: ReportTab[] = ['sales', 'food', 'expenses', 'staff'];
@@ -43,10 +44,6 @@ const fetchers: Record<ReportTab, (days: ReportDays) => Promise<AnyReport>> = {
   expenses: getExpensesReport,
   staff: getStaffReport,
 };
-
-/** The design's soft bar (primary at 35%) and bar track (primary soft). */
-const BAR_SOFT = 'rgba(13,74,54,0.35)';
-const BAR_TRACK = '#E6F2EC';
 
 /** Whole ETB with commas, "ብር" in Amharic. */
 const money = (v: number) => formatMoney(v);
@@ -111,10 +108,11 @@ function Card({
 
 /** A bar of one or more coloured parts (shares of 100). */
 function Track({ parts }: { parts: { share: number; color: string }[] }) {
+  const brand = useBrandColors();
   return (
     <View
       className="mt-1.5 h-2 flex-row overflow-hidden rounded-full"
-      style={{ backgroundColor: BAR_TRACK }}
+      style={{ backgroundColor: brand.primaryTint }}
     >
       {parts.map((p, i) => (
         <View
@@ -247,10 +245,11 @@ function Hero({
   amount: number;
   children?: ReactNode;
 }) {
+  const brand = useBrandColors();
   const { t } = useTranslation();
   return (
     <View className="rounded-[22px] bg-primary p-5" accessible>
-      <Text font="semibold" className="text-base" style={{ color: BAR_TRACK }}>
+      <Text font="semibold" className="text-base" style={{ color: brand.primaryTint }}>
         {label}
       </Text>
       <View className="flex-row items-end gap-2">
@@ -288,6 +287,7 @@ function HeroBox({ label, value }: { label: string; value: string }) {
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 
 function SalesTab({ s, t, showDays }: { s: SalesReport; t: TFunction; showDays: boolean }) {
+  const brand = useBrandColors();
   const change =
     s.previousTotal > 0 ? Math.round(((s.total - s.previousTotal) / s.previousTotal) * 100) : null;
   // The chart runs from the first to the last hour with sales.
@@ -336,7 +336,7 @@ function SalesTab({ s, t, showDays }: { s: SalesReport; t: TFunction; showDays: 
             title={m.label}
             sub={`${t('reportsHub.billsCount', { count: m.bills })} · ${pct(m.amount, s.total)}%`}
             value={money(m.amount)}
-            parts={[{ share: pct(m.amount, s.total), color: colors.primary }]}
+            parts={[{ share: pct(m.amount, s.total), color: brand.primary }]}
           />
         ))}
       </Card>
@@ -353,7 +353,7 @@ function SalesTab({ s, t, showDays }: { s: SalesReport; t: TFunction; showDays: 
                 className="w-full rounded-t-[4px]"
                 style={{
                   height: `${Math.max(pct(h.amount, maxHour), h.bills ? 6 : 0)}%`,
-                  backgroundColor: topHours.has(h.hour) ? colors.primary : BAR_SOFT,
+                  backgroundColor: topHours.has(h.hour) ? brand.primary : `${brand.primary}59`,
                 }}
               />
             </View>
@@ -402,7 +402,7 @@ function SalesTab({ s, t, showDays }: { s: SalesReport; t: TFunction; showDays: 
                 })}`}
                 sub={t('reportsHub.billsCount', { count: d.bills })}
                 value={money(d.amount)}
-                parts={[{ share: pct(d.amount, maxDay), color: colors.primary }]}
+                parts={[{ share: pct(d.amount, maxDay), color: brand.primary }]}
               />
             );
           })}
@@ -413,6 +413,7 @@ function SalesTab({ s, t, showDays }: { s: SalesReport; t: TFunction; showDays: 
 }
 
 function FoodTab({ f, t, am }: { f: FoodReport; t: TFunction; am: boolean }) {
+  const brand = useBrandColors();
   const [all, setAll] = useState(false);
   const name = (x: { name: string; nameAm: string | null }) => (am && x.nameAm ? x.nameAm : x.name);
   const shown = all ? f.bestSellers : f.bestSellers.slice(0, 7);
@@ -431,7 +432,7 @@ function FoodTab({ f, t, am }: { f: FoodReport; t: TFunction; am: boolean }) {
             title={name(i)}
             sub={money(i.amount)}
             value={t('reportsHub.qty', { count: i.qty })}
-            parts={[{ share: pct(i.qty, maxQty), color: colors.primary }]}
+            parts={[{ share: pct(i.qty, maxQty), color: brand.primary }]}
           />
         ))}
         {!all && f.bestSellers.length > 7 ? (
@@ -443,7 +444,7 @@ function FoodTab({ f, t, am }: { f: FoodReport; t: TFunction; am: boolean }) {
             <Text font="bold" className="text-[15px] text-primaryText">
               {t('reportsHub.menu.showAll', { count: f.bestSellers.length })}
             </Text>
-            <ChevronRight size={18} color={colors.primaryText} strokeWidth={2.4} />
+            <ChevronRight size={18} color={brand.primaryText} strokeWidth={2.4} />
           </Pressable>
         ) : null}
       </Card>
@@ -455,7 +456,7 @@ function FoodTab({ f, t, am }: { f: FoodReport; t: TFunction; am: boolean }) {
             title={c.name ? name(c) : t('reportsHub.menu.noCategory')}
             sub={`${t('reportsHub.qty', { count: c.qty })} · ${pct(c.amount, catTotal)}%`}
             value={money(c.amount)}
-            parts={[{ share: pct(c.amount, catTotal), color: colors.primary }]}
+            parts={[{ share: pct(c.amount, catTotal), color: brand.primary }]}
           />
         ))}
       </Card>
@@ -469,7 +470,7 @@ function FoodTab({ f, t, am }: { f: FoodReport; t: TFunction; am: boolean }) {
             value={
               i.qty === 0 ? t('reportsHub.menu.notSold') : t('reportsHub.qty', { count: i.qty })
             }
-            parts={[{ share: pct(i.qty, Math.max(maxSlow, 1) * 4), color: colors.primary }]}
+            parts={[{ share: pct(i.qty, Math.max(maxSlow, 1) * 4), color: brand.primary }]}
           />
         ))}
       </Card>
@@ -523,6 +524,7 @@ function ExpensesTab({
   t: TFunction;
   go: (path: '/money-flow' | '/money-out') => void;
 }) {
+  const brand = useBrandColors();
   const maxBought = maxOf(e.boughtItems.map((b) => b.amount));
   const maxPerson = maxOf(e.byPerson.map((p) => p.total));
   return (
@@ -551,7 +553,7 @@ function ExpensesTab({
             title={t(`extras.money.categories.${k.kind}`)}
             sub={`${t('reportsHub.expensesCount', { count: k.count })} · ${pct(k.amount, e.total)}%`}
             value={money(k.amount)}
-            parts={[{ share: pct(k.amount, e.total), color: colors.primary }]}
+            parts={[{ share: pct(k.amount, e.total), color: brand.primary }]}
           />
         ))}
       </Card>
@@ -571,7 +573,7 @@ function ExpensesTab({
             title={b.name}
             sub={t('reportsHub.timesCount', { count: b.times })}
             value={money(b.amount)}
-            parts={[{ share: pct(b.amount, maxBought), color: colors.primary }]}
+            parts={[{ share: pct(b.amount, maxBought), color: brand.primary }]}
           />
         ))}
       </Card>
@@ -581,7 +583,7 @@ function ExpensesTab({
         hint={
           <Legend
             items={[
-              { label: t('reportsHub.cash'), color: colors.primary },
+              { label: t('reportsHub.cash'), color: brand.primary },
               { label: t('reportsHub.bank'), color: colors.amber },
             ]}
           />
@@ -599,7 +601,7 @@ function ExpensesTab({
             })}
             value={money(p.total)}
             parts={[
-              { share: pct(p.cash, maxPerson), color: colors.primary },
+              { share: pct(p.cash, maxPerson), color: brand.primary },
               { share: pct(p.bank, maxPerson), color: colors.amber },
             ]}
             onPress={() => go('/money-out')}
@@ -612,7 +614,7 @@ function ExpensesTab({
             className="min-h-12 flex-row items-center gap-3 border-t border-divider pt-2.5"
           >
             <View className="h-9 w-9 items-center justify-center rounded-[10px] bg-primarySoft">
-              <Pencil size={18} color={colors.primary} strokeWidth={2.2} />
+              <Pencil size={18} color={brand.primary} strokeWidth={2.2} />
             </View>
             <Text font="bold" className="flex-1 text-[15px]">
               {t('reportsHub.expenses.changed', { count: e.changedByOwner })}
@@ -662,6 +664,7 @@ function OkBad({ ok, failed, t }: { ok: number; failed: number; t: TFunction }) 
 }
 
 function StaffTab({ s, t }: { s: StaffReport; t: TFunction }) {
+  const brand = useBrandColors();
   const maxSales = maxOf(s.waiterSales.map((w) => w.sales));
   const maxTips = maxOf(s.tips.map((x) => x.total));
   const maxDish = maxOf(s.kitchen.slowest.map((d) => d.minutes));
@@ -682,7 +685,7 @@ function StaffTab({ s, t }: { s: StaffReport; t: TFunction }) {
               amount: money(w.avgBill),
             })}`}
             value={money(w.sales)}
-            parts={[{ share: pct(w.sales, maxSales), color: colors.primary }]}
+            parts={[{ share: pct(w.sales, maxSales), color: brand.primary }]}
           />
         ))}
       </Card>
@@ -692,7 +695,7 @@ function StaffTab({ s, t }: { s: StaffReport; t: TFunction }) {
         hint={
           <Legend
             items={[
-              { label: t('reportsHub.staff.paidOutLegend'), color: colors.primary },
+              { label: t('reportsHub.staff.paidOutLegend'), color: brand.primary },
               { label: t('reportsHub.staff.stillToPay'), color: colors.amber },
             ]}
           />
@@ -709,7 +712,7 @@ function StaffTab({ s, t }: { s: StaffReport; t: TFunction }) {
             })}
             value={money(x.total)}
             parts={[
-              { share: pct(x.paidOut, maxTips), color: colors.primary },
+              { share: pct(x.paidOut, maxTips), color: brand.primary },
               { share: pct(x.total - x.paidOut, maxTips), color: colors.amber },
             ]}
           />
@@ -775,7 +778,7 @@ function StaffTab({ s, t }: { s: StaffReport; t: TFunction }) {
               {
                 share: pct(d.minutes, maxDish),
                 // Slower than the kitchen's average shows red.
-                color: d.minutes > s.kitchen.avgMinutes ? colors.alert : colors.primary,
+                color: d.minutes > s.kitchen.avgMinutes ? colors.alert : brand.primary,
               },
             ]}
           />
@@ -888,8 +891,12 @@ export default function ReportsHubScreen() {
       const table = exportTable(t, tab, report, `${businessName} · ${rangeLabel}`);
       if (kind === 'pdf') await sharePdf(table);
       else await shareCsv(`report-${tab}-${days.from}-${days.to}.csv`, table);
-    } catch {
-      Alert.alert(t('common.error'), t('transactions.downloadFailed'));
+    } catch (error) {
+      // While testing (Expo Go), show why; the APK shows only the friendly text.
+      const reason = error instanceof Error ? error.message : JSON.stringify(error);
+      const why = __DEV__ ? `\n\n${reason}` : '';
+      if (__DEV__) console.warn('report download failed', error);
+      Alert.alert(t('common.error'), `${t('transactions.downloadFailed')}${why}`);
     } finally {
       setDownloading(false);
     }

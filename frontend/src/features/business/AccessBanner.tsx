@@ -8,6 +8,7 @@ import { Pressable, View } from 'react-native';
 import { Text } from '@/components/ui/Text';
 import { getBusinessAccess, getBusinessAnnouncements } from '@/lib/business';
 import { useSession } from '@/store/session';
+import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
 /**
@@ -17,6 +18,7 @@ import { colors } from '@/theme/tokens';
 export function AccessBanner() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
+  const brand = useBrandColors();
   const isOwner = useSession((s) => s.user?.role === 'owner');
   const access = useQuery({ queryKey: ['business-access'], queryFn: getBusinessAccess });
   const news = useQuery({
@@ -96,7 +98,7 @@ export function AccessBanner() {
           key={n.id}
           className="flex-row items-center gap-3 rounded-2xl bg-primarySoft px-4 py-3"
         >
-          <Megaphone size={20} color={colors.primary} strokeWidth={2.2} />
+          <Megaphone size={20} color={brand.primary} strokeWidth={2.2} />
           <Text className="flex-1 text-[15px]">{i18n.language === 'am' ? n.bodyAm : n.bodyEn}</Text>
         </View>
       ))}

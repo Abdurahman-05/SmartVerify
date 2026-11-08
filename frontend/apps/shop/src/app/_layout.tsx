@@ -14,7 +14,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { FirstThemeScreen } from '@/features/theme/FirstThemeScreen';
 import { setUnauthorizedHandler } from '@/lib/api/client';
 import { clearToken } from '@/lib/api/token';
 import { CACHE_MAX_AGE, queryClient, queryPersister } from '@/lib/queryClient';
@@ -36,7 +38,14 @@ export default function RootLayout() {
   });
 
   const themeId = useTheme((s) => s.themeId);
-  const ready = fontsLoaded || fontError !== null;
+  const themeLoaded = useTheme((s) => s.loaded);
+  const themeChosen = useTheme((s) => s.chosen);
+  const ready = (fontsLoaded || fontError !== null) && themeLoaded;
+
+  // The saved colour theme (first start: none yet, so the app asks).
+  useEffect(() => {
+    void useTheme.getState().load();
+  }, []);
 
   // The server rejected the session (expired, signed out, deactivated): forget it and go to sign in.
   useEffect(() => {
@@ -53,6 +62,14 @@ export default function RootLayout() {
   }, [ready]);
 
   if (!ready) return null;
+  if (!themeChosen) {
+    return (
+      <SafeAreaProvider>
+        <StatusBar style="dark" />
+        <FirstThemeScreen />
+      </SafeAreaProvider>
+    );
+  }
 
   return (
     <PersistQueryClientProvider

@@ -1619,5 +1619,12 @@
       "title": "Reports for managers",
       "body": "Let managers open Reports (sales, expenses, staff). Waiters and chefs never see them."
     }
+  },
+  "firstTheme": {
+    "title": "Choose your colours",
+    "subtitle": "Pick the look you like. You can change it any time in Profile.",
+    "default": "default",
+    "later": "Tip: Profile → Color theme changes it later.",
+    "continue": "Continue"
   }
 }

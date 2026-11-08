@@ -9,7 +9,7 @@ export interface BrandColors {
 
 export const THEME_IDS = ['forest', 'ocean', 'royal', 'teal', 'slate', 'rose', 'berry'] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
-export const DEFAULT_THEME: ThemeId = 'forest';
+export const DEFAULT_THEME: ThemeId = 'rose';
 
 // Only the brand colors change. Status pills, tipBg and amber stay the same in every theme.
 export const themes: Record<ThemeId, BrandColors> = {
@@ -25,7 +25,7 @@ export const themes: Record<ThemeId, BrandColors> = {
 export const isThemeId = (id: unknown): id is ThemeId =>
   typeof id === 'string' && (THEME_IDS as readonly string[]).includes(id);
 
-/** Unknown or removed theme ids fall back to forest. */
+/** Unknown or removed theme ids fall back to the default (rose). */
 export const resolveThemeId = (id: unknown): ThemeId => (isThemeId(id) ? id : DEFAULT_THEME);
 
 /** "#0D4A36" -> "13 74 54", the format Tailwind's rgb(var() / alpha) colors expect. */
