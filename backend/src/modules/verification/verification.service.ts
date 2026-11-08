@@ -373,7 +373,11 @@ async function checkReceipt(input: {
       fetched = await fetchReceipt(relay, {
         ...FETCH,
         tlsStrict: true,
-        headers: { ...source.headers, 'x-relay-key': env.RECEIPT_RELAY_KEY },
+        headers: {
+          ...source.headers,
+          'x-relay-key': env.RECEIPT_RELAY_KEY,
+          ...(env.RECEIPT_RELAY_HOST ? { host: env.RECEIPT_RELAY_HOST } : {}),
+        },
       });
     } else {
       const proxy =

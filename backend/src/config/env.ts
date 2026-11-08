@@ -63,6 +63,14 @@ const schema = z.object({
    */
   RECEIPT_RELAY_URL: z.string().url().startsWith('https://').optional(),
   RECEIPT_RELAY_KEY: z.string().min(32).optional(),
+  /**
+   * Site name to ask the relay server for (Host header) when RECEIPT_RELAY_URL uses the shared
+   * server's own name (its valid certificate) instead of our domain. Unset = the URL's host.
+   */
+  RECEIPT_RELAY_HOST: z
+    .string()
+    .regex(/^[a-z0-9.-]+$/)
+    .optional(),
   GEMINI_API_KEY: z.string().min(10).optional(),
   /** Optional key per bank (each from its own Google project, so each has its own rate limit). */
   GEMINI_API_KEY_CBE: z.string().min(10).optional(),

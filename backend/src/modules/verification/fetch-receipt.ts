@@ -120,6 +120,8 @@ export function fetchReceipt(url: URL, options: FetchOptions): Promise<FetchedRe
 
       const requestOptions: https.RequestOptions = {
         rejectUnauthorized: options.tlsStrict,
+        // Check the certificate of the server we dial, even when a Host header names another site.
+        servername: target.hostname,
         headers: options.headers,
         // An agent of its own that hands out the tunnel (works the same on every Node version).
         ...(socket ? { agent: tunnelAgent(socket) } : {}),
