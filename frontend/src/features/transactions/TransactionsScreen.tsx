@@ -15,13 +15,14 @@ import { Text } from '@/components/ui/Text';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { sharePdf } from '@/lib/export';
 import {
+  type PaymentRecord,
   getPaymentsPage,
   getPaymentsSummary,
   paymentsPagesKey,
   paymentsSummaryKey,
   type PayMethod,
 } from '@/lib/history';
-import { isDay, isListPeriod, type ListPeriod } from '@/lib/period';
+import { isDay, isListPeriod, localDay, type ListPeriod } from '@/lib/period';
 import { failedChecksKey, getFailedChecks } from '@/lib/verification';
 import { useSession } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
@@ -45,6 +46,45 @@ const isMethod = (value: unknown): value is MoneyFilter =>
 const PAGE = 30;
 /** The statement (PDF) holds up to this many rows. */
 const STATEMENT_MAX = 500;
+
+/** The list with a day header before each new day (like a phone's call history). */
+type ListRow =
+  | { kind: 'day'; key: string; label: string }
+  | { kind: 'pay'; key: string; payment: PaymentRecord };
+
+function withDayHeaders(
+  payments: PaymentRecord[],
+  t: (key: string, options?: Record<string, unknown>) => string
+): ListRow[] {
+  const now = new Date();
+  const today = localDay(now);
+  const yesterday = localDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
+  const weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+  const label = (when: Date, key: string) => {
+    if (key === today) return t('period.today');
+    if (key === yesterday) return t('period.yesterday');
+    const weekday = t(`period.weekdayFull_${(when.getDay() + 6) % 7}`);
+    if (when >= weekAgo) return weekday;
+    const date = t('period.day', {
+      month: t(`period.month_${when.getMonth()}`),
+      day: when.getDate(),
+    });
+    const year = when.getFullYear() === now.getFullYear() ? '' : ` ${when.getFullYear()}`;
+    return t('period.dayHeader', { weekday, date: date + year });
+  };
+  const rows: ListRow[] = [];
+  let last = '';
+  for (const payment of payments) {
+    const when = new Date(payment.createdAt);
+    const key = localDay(when);
+    if (key !== last) {
+      rows.push({ kind: 'day', key: `day-${key}`, label: label(when, key) });
+      last = key;
+    }
+    rows.push({ kind: 'pay', key: payment.id, payment });
+  }
+  return rows;
+}
 
 function MethodChip({
   label,
@@ -141,6 +181,10 @@ export default function TransactionsScreen() {
   }
 
   const visible = showFailed ? [] : (query.data?.pages.flat() ?? []);
+  // One chosen day has no headers (the title already says the day).
+  const rows: ListRow[] = day
+    ? visible.map((payment) => ({ kind: 'pay', key: payment.id, payment }))
+    : withDayHeaders(visible, t);
   const failedChecks = failedQuery.data ?? [];
   const summary = summaryQuery.data;
   const totalCount = summary?.count ?? 0;
@@ -254,8 +298,8 @@ export default function TransactionsScreen() {
         />
       ) : (
         <FlatList
-          data={visible}
-          keyExtractor={(p) => p.id}
+          data={rows}
+          keyExtractor={(row) => row.key}
           ListHeaderComponent={header}
           contentContainerStyle={{ paddingBottom: 12 }}
           ItemSeparatorComponent={() => <View className="h-2" />}
@@ -270,17 +314,32 @@ export default function TransactionsScreen() {
               />
             ) : undefined
           }
-          renderItem={({ item }) => (
-            <View className="px-4">
-              <PaymentRow
-                payment={item}
-                showDate={!day && period !== 'today'}
-                onPress={() =>
-                  router.push({ pathname: '/transaction/[id]', params: { id: item.id } })
-                }
-              />
-            </View>
-          )}
+          renderItem={({ item }) =>
+            item.kind === 'day' ? (
+              <Text
+                font="bold"
+                tone="muted"
+                className="px-5 pb-0.5 pt-3 text-[15px]"
+                accessibilityRole="header"
+              >
+                {item.label}
+              </Text>
+            ) : (
+              <View className="px-4">
+                <PaymentRow
+                  payment={item.payment}
+                  // The day header above says the date: each row shows its time.
+                  showDate={false}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/transaction/[id]',
+                      params: { id: item.payment.id },
+                    })
+                  }
+                />
+              </View>
+            )
+          }
           ListEmptyComponent={
             <Text tone="muted" className="px-6 pt-10 text-center text-lg">
               {query.isError

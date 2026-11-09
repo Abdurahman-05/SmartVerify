@@ -19,11 +19,11 @@ import { loadSavedUser } from '@/lib/api/token';
 import { loadAppLock, useAppLock } from '@/lib/appLock';
 import { getMe } from '@/lib/auth';
 import { homeRouteFor, useSession } from '@/store/session';
+import { useBrandColors } from '@/store/theme';
 
-const logo = require('../../../assets/images/splash-icon.png') as number;
+// The ገ and the yellow check without a background: the screen behind is the theme colour.
+const logo = require('../../../assets/images/logo-mark.png') as number;
 
-/** Same green as the native splash, so there is no jump between the two. */
-const GREEN = '#0D4A36';
 const DOT = '#F5B301';
 const MIN_SPLASH_MS = 1000;
 
@@ -48,11 +48,13 @@ function Dot({ index }: { index: number }) {
 }
 
 /**
- * Green splash: the logo and three bouncing dots while the saved sign-in is checked (at least
+ * Splash in the chosen theme colour: the logo and three bouncing dots while the saved sign-in is checked (at least
  * 1 s). Signed in → that role's home; no saved sign-in → Sign in.
  */
 export default function SplashScreen() {
   const router = useRouter();
+  // The chosen theme is already loaded (the root layout waits for it).
+  const brand = useBrandColors();
   const [offline, setOffline] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
@@ -117,8 +119,13 @@ export default function SplashScreen() {
 
   return (
     <View
-      style={{ flex: 1, backgroundColor: GREEN, alignItems: 'center', justifyContent: 'center' }}
-      // The green screen is drawn: now the native splash can go without a flash.
+      style={{
+        flex: 1,
+        backgroundColor: brand.primary,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+      // The splash is drawn: now the native splash can go without a flash.
       onLayout={() => void NativeSplash.hideAsync().catch(() => undefined)}
     >
       <StatusBar style="light" />
