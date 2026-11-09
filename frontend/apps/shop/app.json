@@ -19,9 +19,7 @@
         "monochromeImage": "../../assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "android.permission.CAMERA"
-      ]
+      "permissions": ["android.permission.CAMERA"]
     },
     "web": {
       "output": "static",
@@ -32,9 +30,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#F4F8F6",
-          "image": "../../assets/images/splash-icon.png",
-          "imageWidth": 76
+          "backgroundColor": "#0C4B36",
+          "image": "../../assets/images/splash-full.png",
+          "imageWidth": 300
         }
       ],
       "expo-localization",
