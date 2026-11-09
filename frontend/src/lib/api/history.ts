@@ -1,4 +1,4 @@
-import type { Period } from '@/lib/period';
+import type { ListPeriod, Period } from '@/lib/period';
 
 import { api, ApiError } from './client';
 
@@ -43,7 +43,7 @@ export interface PaymentsReport {
  * payments recorded after it come back; payments never change once saved. With `day`
  * (YYYY-MM-DD) only that one day.
  */
-export const getPayments = (period: Period, since?: string, day?: string) =>
+export const getPayments = (period: ListPeriod, since?: string, day?: string) =>
   api<PaymentRecord[]>('/payments', { query: { period, since, date: day } });
 
 /** GET /payments/:id — null when it does not exist (or is not yours). */

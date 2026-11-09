@@ -15,6 +15,14 @@ export function periodStart(period: Period, now = new Date()): Date {
   return new Date(todayStart - extraDays * DAY_MS);
 }
 
+/** History lists also take 'all': every record (newest first, up to the list's limit). */
+export const listPeriodSchema = z.enum(['today', '7d', '30d', 'all']).default('today');
+export type ListPeriod = z.infer<typeof listPeriodSchema>;
+
+/** Lower time bound for a list period; none for 'all'. */
+export const listRange = (period: ListPeriod): { gte?: Date } =>
+  period === 'all' ? {} : { gte: periodStart(period) };
+
 /** One day (YYYY-MM-DD, a calendar day in Addis Ababa). */
 export const daySchema = z.iso.date();
 

@@ -2,7 +2,7 @@ import * as real from '@/lib/api/verification';
 import * as mock from '@/lib/mock/verification';
 
 import type { CbeCheck } from '@/lib/mock/verification';
-import type { Period } from '@/lib/period';
+import type { ListPeriod, Period } from '@/lib/period';
 
 export type { CbeCheck, CbeMismatch, CbeUnable, FailedCheck } from '@/lib/mock/verification';
 export type { ReadResult, VerifiedCheck } from '@/lib/api/verification';
@@ -17,12 +17,12 @@ export const verifyEbirr = USE_MOCK_VERIFICATION ? mock.verifyEbirr : real.verif
 export const verifyDashen = USE_MOCK_VERIFICATION ? mock.verifyDashen : real.verifyDashen;
 export const verifyBoa = USE_MOCK_VERIFICATION ? mock.verifyBoa : real.verifyBoa;
 export const getFailedChecks: typeof real.getFailedChecks = USE_MOCK_VERIFICATION
-  ? mock.getFailedChecks
+  ? (period) => mock.getFailedChecks(period === 'all' ? '30d' : period)
   : real.getFailedChecks;
 export const readReference = USE_MOCK_VERIFICATION ? mock.readReference : real.readReference;
 export const compareReading = USE_MOCK_VERIFICATION ? mock.compareReading : real.compareReading;
 
-export const failedChecksKey = (period: Period, day?: string) =>
+export const failedChecksKey = (period: ListPeriod, day?: string) =>
   ['failed-checks', day ?? period] as const;
 
 // The offline mock keeps no history of verified receipts.

@@ -5,6 +5,11 @@ export const periods: Period[] = ['today', '7d', '30d'];
 export const isPeriod = (value: unknown): value is Period =>
   typeof value === 'string' && (periods as string[]).includes(value);
 
+/** History lists (Transactions) can also show everything. */
+export type ListPeriod = Period | 'all';
+export const isListPeriod = (value: unknown): value is ListPeriod =>
+  value === 'all' || isPeriod(value);
+
 const DAYS: Record<Period, number> = { today: 1, '7d': 7, '30d': 30 };
 
 /** A phone-local calendar day as YYYY-MM-DD (what the server takes as `date`). */

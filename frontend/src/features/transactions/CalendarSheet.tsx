@@ -6,16 +6,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/Text';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
-import { localDay, periods, type Period } from '@/lib/period';
+import { localDay, periods, type ListPeriod } from '@/lib/period';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
-interface CalendarSheetProps {
+interface CalendarSheetProps<P extends ListPeriod> {
   visible: boolean;
-  period: Period;
+  period: P;
+  /** Show "All" before Today (Transactions). */
+  withAll?: boolean;
   /** The chosen day (YYYY-MM-DD), or null when a period is shown. */
   day: string | null;
-  onPeriod: (period: Period) => void;
+  onPeriod: (period: P) => void;
   onDay: (day: string) => void;
   onClose: () => void;
 }
@@ -33,14 +35,16 @@ function monthWeeks(year: number, month: number): (number | null)[][] {
 }
 
 /** Today / 7 days / 30 days, or any one past day from a month calendar. */
-export function CalendarSheet({
+/** P is Period on screens without "All", ListPeriod on Transactions (withAll). */
+export function CalendarSheet<P extends ListPeriod>({
   visible,
   period,
+  withAll = false,
   day,
   onPeriod,
   onDay,
   onClose,
-}: CalendarSheetProps) {
+}: CalendarSheetProps<P>) {
   const { t } = useTranslation();
   const brand = useBrandColors();
   const reducedMotion = useReducedMotion();
@@ -77,7 +81,7 @@ export function CalendarSheet({
         </Text>
 
         <View className="flex-row gap-2">
-          {periods.map((p) => {
+          {((withAll ? ['all', ...periods] : periods) as P[]).map((p) => {
             const selected = !day && p === period;
             return (
               <Pressable

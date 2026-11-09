@@ -230,6 +230,7 @@
     "duplicate": "ተደጋጋሚ"
   },
   "period": {
+    "all": "ሁሉም",
     "today": "ዛሬ",
     "7d": "7 ቀናት",
     "30d": "30 ቀናት",
@@ -944,6 +945,7 @@
   },
   "history": {
     "summary_today": "የዛሬ ሽያጭ · {{count}} ክፍያዎች",
+    "summary_all": "ሁሉም ሽያጭ · {{count}} ክፍያዎች",
     "summary_7d": "ሽያጭ · ያለፉት 7 ቀናት · {{count}} ክፍያዎች",
     "summary_30d": "ሽያጭ · ያለፉት 30 ቀናት · {{count}} ክፍያዎች",
     "chooseMethod": "የተከፈለው በ",

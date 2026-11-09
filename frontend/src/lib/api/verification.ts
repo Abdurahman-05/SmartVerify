@@ -1,4 +1,4 @@
-import type { Period } from '@/lib/period';
+import type { ListPeriod, Period } from '@/lib/period';
 import type { CbeCheck, FailedCheck } from '@/lib/mock/verification';
 
 import { api } from './client';
@@ -57,7 +57,7 @@ export const getVerifyTips = (period: Period) =>
 
 /** GET /verify/failed — checks that did not verify in the period, newest first. */
 /** GET /verify/failed — in the period, or only on `day` (YYYY-MM-DD) when given. */
-export const getFailedChecks = (period: Period, day?: string) =>
+export const getFailedChecks = (period: ListPeriod, day?: string) =>
   api<FailedCheck[]>('/verify/failed', { query: { period, date: day } });
 
 /**

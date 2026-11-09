@@ -4,7 +4,14 @@ import { z } from 'zod';
 import { requireRoles } from '../../plugins/auth.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { errorResponseSchema } from '../../shared/schemas/common.js';
-import { dayRange, daySchema, periodSchema, periodStart } from '../../shared/utils/period.js';
+import {
+  dayRange,
+  daySchema,
+  listPeriodSchema,
+  listRange,
+  periodSchema,
+  periodStart,
+} from '../../shared/utils/period.js';
 import {
   failedCheckSchema,
   verifyCbeBodySchema,
@@ -323,7 +330,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
           'Receipt checks that did not verify in the period (business days in Addis Ababa), ' +
           'newest first, at most 200. Waiters only get their own. `date` (YYYY-MM-DD) gives ' +
           'that one day instead of the period.',
-        querystring: z.object({ period: periodSchema, date: daySchema.optional() }),
+        querystring: z.object({ period: listPeriodSchema, date: daySchema.optional() }),
         response: {
           200: z.array(failedCheckSchema),
           401: errorResponseSchema.describe('UNAUTHORIZED'),
@@ -333,7 +340,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (request) => {
       const { period, date } = request.query;
-      const createdAt = date ? dayRange(date) : { gte: periodStart(period) };
+      const createdAt = date ? dayRange(date) : listRange(period);
       return listFailedChecks(app.prisma, request.auth, createdAt);
     }
   );

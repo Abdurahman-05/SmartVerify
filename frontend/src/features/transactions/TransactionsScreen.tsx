@@ -15,7 +15,7 @@ import { Text } from '@/components/ui/Text';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { sharePdf } from '@/lib/export';
 import { syncPayments, paymentsKey, type PayMethod } from '@/lib/history';
-import { isDay, isPeriod, type Period } from '@/lib/period';
+import { isDay, isListPeriod, type ListPeriod } from '@/lib/period';
 import { failedChecksKey, getFailedChecks } from '@/lib/verification';
 import { useSession } from '@/store/session';
 
@@ -79,7 +79,8 @@ export default function TransactionsScreen() {
   const router = useRouter();
   const businessName = useSession((s) => s.user?.businessName ?? '');
   const params = useLocalSearchParams<{ method?: string; period?: string; day?: string }>();
-  const period: Period = isPeriod(params.period) ? params.period : 'today';
+  // Opens on every transaction (date and time on each row); the calendar narrows it.
+  const period: ListPeriod = isListPeriod(params.period) ? params.period : 'all';
   // One chosen day from the calendar, instead of the period.
   const day = isDay(params.day) ? params.day : null;
   const dayDate = day ? new Date(`${day}T12:00:00`) : null;
@@ -263,6 +264,7 @@ export default function TransactionsScreen() {
         key={`${sheet}-${day}`}
         visible={sheet === 'period'}
         period={period}
+        withAll
         day={day}
         onPeriod={(p) => router.setParams({ period: p, day: '' })}
         onDay={(d) => router.setParams({ day: d })}

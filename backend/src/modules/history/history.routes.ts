@@ -6,7 +6,14 @@ import type { AuthContext } from '../../plugins/auth.js';
 import { requireRestaurantPlan, requireRoles } from '../../plugins/auth.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { errorResponseSchema, idParamSchema } from '../../shared/schemas/common.js';
-import { dayRange, daySchema, periodSchema, periodStart } from '../../shared/utils/period.js';
+import {
+  dayRange,
+  daySchema,
+  listPeriodSchema,
+  listRange,
+  periodSchema,
+  periodStart,
+} from '../../shared/utils/period.js';
 
 const methodSchema = z.enum(['cash', 'bank', 'cash+bank']);
 type Method = z.infer<typeof methodSchema>;
@@ -142,9 +149,9 @@ export const historyRoutes: FastifyPluginAsyncZod = async (app) => {
           'Payments of paid bills in the period, newest first. Waiters see only their own bills. ' +
           'Payments never change once saved, so `since` (an ISO time) returns only the ones ' +
           'recorded after it. `date` (YYYY-MM-DD) gives that one day (Addis Ababa) instead of ' +
-          'the period.',
+          'the period; period `all` gives every payment (newest first, up to `limit`).',
         querystring: z.object({
-          period: periodSchema,
+          period: listPeriodSchema,
           date: daySchema.optional(),
           method: methodSchema.optional(),
           since: z.iso.datetime().optional(),
@@ -155,7 +162,7 @@ export const historyRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (request) => {
       const { period, date, method, since, limit } = request.query;
-      const range = date ? dayRange(date) : { gte: periodStart(period) };
+      const range = date ? dayRange(date) : listRange(period);
       const rows = await prisma.payment.findMany({
         where: {
           ...visiblePayments(request.auth),
