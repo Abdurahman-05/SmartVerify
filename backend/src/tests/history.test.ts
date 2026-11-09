@@ -135,6 +135,30 @@ describe('payment history and report', () => {
     expect(code(await get('/payments?since=yesterday', r.owner.token))).toBe('VALIDATION_ERROR');
   });
 
+  it('all: pages with `before`, cash / bank filter, and a summary of every payment', async () => {
+    await paidBill(r.waiter.token, 0, { method: 'cash', cashEtb: 1000, extraChoice: 'giveback' });
+    await paidBill(r.waiter.token, 1, { method: 'bank', bankReceivedEtb: 960 });
+    await paidBill(r.waiter2.token, 2, { method: 'cash+bank', cashEtb: 200, bankReceivedEtb: 860 });
+
+    const page1 = (await get('/payments?period=all&limit=2', r.owner.token)).json() as Payment[];
+    expect(page1).toHaveLength(2);
+    const oldest = page1[1]!.createdAt;
+    const page2 = (
+      await get(`/payments?period=all&limit=2&before=${oldest}`, r.owner.token)
+    ).json() as Payment[];
+    expect(page2).toHaveLength(1);
+    expect(new Set([...page1, ...page2].map((p) => p.id)).size).toBe(3);
+
+    const cash = (await get('/payments?period=all&money=cash', r.owner.token)).json() as Payment[];
+    expect(cash.map((p) => p.method).sort()).toEqual(['cash', 'cash+bank']);
+
+    const summary = (await get('/payments/summary?period=all', r.owner.token)).json();
+    expect(summary).toEqual({ count: 3, salesEtb: 2880, cashCount: 2, bankCount: 2 });
+    // A waiter's summary counts only their own bills.
+    const mine = (await get('/payments/summary?period=all', r.waiter2.token)).json();
+    expect(mine).toMatchObject({ count: 1, salesEtb: 960 });
+  });
+
   it('payment detail has the bill items and totals', async () => {
     await paidBill(r.waiter.token, 0, { method: 'bank', bankReceivedEtb: 960 });
     const [payment] = (await get('/payments', r.owner.token)).json() as Payment[];

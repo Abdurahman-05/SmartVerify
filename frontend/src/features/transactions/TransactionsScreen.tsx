@@ -1,9 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Download } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, FlatList, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/Button';
@@ -14,10 +14,17 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { sharePdf } from '@/lib/export';
-import { syncPayments, paymentsKey, type PayMethod } from '@/lib/history';
+import {
+  getPaymentsPage,
+  getPaymentsSummary,
+  paymentsPagesKey,
+  paymentsSummaryKey,
+  type PayMethod,
+} from '@/lib/history';
 import { isDay, isListPeriod, type ListPeriod } from '@/lib/period';
 import { failedChecksKey, getFailedChecks } from '@/lib/verification';
 import { useSession } from '@/store/session';
+import { useBrandColors } from '@/store/theme';
 
 import { CalendarButton } from './CalendarButton';
 import { CalendarSheet } from './CalendarSheet';
@@ -34,8 +41,10 @@ type MoneyFilter = Exclude<PayMethod, 'cash+bank'>;
 const moneyFilters: MoneyFilter[] = ['cash', 'bank'];
 const isMethod = (value: unknown): value is MoneyFilter =>
   typeof value === 'string' && (moneyFilters as string[]).includes(value);
-const hasMoneyIn = (p: { cashEtb: number; bankEtb: number }, filter: MoneyFilter) =>
-  filter === 'cash' ? p.cashEtb > 0 : p.bankEtb > 0;
+/** Rows loaded at a time; the next ones load while scrolling down. */
+const PAGE = 30;
+/** The statement (PDF) holds up to this many rows. */
+const STATEMENT_MAX = 500;
 
 function MethodChip({
   label,
@@ -93,21 +102,37 @@ export default function TransactionsScreen() {
   const [sheet, setSheet] = useState<'period' | null>(null);
   const [downloading, setDownloading] = useState(false);
 
-  const query = useQuery({
-    queryKey: paymentsKey(period, day ?? undefined),
-    queryFn: () => syncPayments(period, day ?? undefined),
+  const brand = useBrandColors();
+  const summaryQuery = useQuery({
+    queryKey: paymentsSummaryKey(period, day ?? undefined),
+    queryFn: () => getPaymentsSummary(period, day ?? undefined),
+  });
+  // The list comes a page at a time: the oldest row shown is where the next page starts.
+  const query = useInfiniteQuery({
+    queryKey: paymentsPagesKey(period, day ?? undefined, method ?? undefined),
+    queryFn: ({ pageParam }) =>
+      getPaymentsPage(period, {
+        day: day ?? undefined,
+        money: method ?? undefined,
+        before: pageParam,
+        limit: PAGE,
+      }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last) => (last.length < PAGE ? undefined : last[last.length - 1]?.createdAt),
   });
   const failedQuery = useQuery({
     queryKey: failedChecksKey(period, day ?? undefined),
     queryFn: () => getFailedChecks(period, day ?? undefined),
   });
-  const { refetch } = query;
+  const { refetch, fetchNextPage, hasNextPage, isFetchingNextPage } = query;
+  const { refetch: refetchSummary } = summaryQuery;
   const { refetch: refetchFailed } = failedQuery;
   useFocusEffect(
     useCallback(() => {
       void refetch();
+      void refetchSummary();
       void refetchFailed();
-    }, [refetch, refetchFailed])
+    }, [refetch, refetchSummary, refetchFailed])
   );
 
   if (query.isPending) return <LoadingView screenTitle={t('transactions.title')} />;
@@ -115,23 +140,29 @@ export default function TransactionsScreen() {
     return <NoConnection onRetry={() => void refetch()} />;
   }
 
-  const all = query.data ?? [];
-  const visible = showFailed ? [] : method ? all.filter((p) => hasMoneyIn(p, method)) : all;
+  const visible = showFailed ? [] : (query.data?.pages.flat() ?? []);
   const failedChecks = failedQuery.data ?? [];
-  const salesTotal = all.reduce((sum, p) => sum + p.salesEtb, 0);
+  const summary = summaryQuery.data;
+  const totalCount = summary?.count ?? 0;
+  const salesTotal = summary?.salesEtb ?? 0;
+  const countFor = (m: MoneyFilter) =>
+    (m === 'cash' ? summary?.cashCount : summary?.bankCount) ?? 0;
+  const loadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
+  };
   const methodLabel = method ? t(methodKey(method)) : t('history.method.all');
 
   const download = async () => {
     setDownloading(true);
     try {
+      // The statement covers the whole period, not only the rows scrolled so far.
+      const rows = await getPaymentsPage(period, {
+        day: day ?? undefined,
+        money: method ?? undefined,
+        limit: STATEMENT_MAX,
+      });
       await sharePdf(
-        buildStatement(
-          t,
-          visible,
-          methodLabel,
-          day ? dayLabel : t(`period.${period}`),
-          businessName
-        )
+        buildStatement(t, rows, methodLabel, day ? dayLabel : t(`period.${period}`), businessName)
       );
     } catch {
       Alert.alert(t('common.error'), t('transactions.downloadFailed'));
@@ -145,8 +176,8 @@ export default function TransactionsScreen() {
       <View className="mx-4 rounded-card bg-primary px-5 py-3">
         <Text font="semibold" tone="inverse" className="text-[15px]">
           {day
-            ? t('history.summary_day', { date: dayLabel, count: all.length })
-            : t(`history.summary_${period}`, { count: all.length })}
+            ? t('history.summary_day', { date: dayLabel, count: totalCount })
+            : t(`history.summary_${period}`, { count: totalCount })}
         </Text>
         <MoneyText
           value={salesTotal}
@@ -169,7 +200,7 @@ export default function TransactionsScreen() {
         >
           <MethodChip
             label={t('history.method.all')}
-            count={all.length}
+            count={totalCount}
             selected={!method && !showFailed}
             onPress={() => router.setParams({ method: undefined })}
           />
@@ -177,7 +208,7 @@ export default function TransactionsScreen() {
             <MethodChip
               key={m}
               label={t(methodKey(m))}
-              count={all.filter((p) => hasMoneyIn(p, m)).length}
+              count={countFor(m)}
               selected={method === m}
               onPress={() => router.setParams({ method: m })}
             />
@@ -228,6 +259,17 @@ export default function TransactionsScreen() {
           ListHeaderComponent={header}
           contentContainerStyle={{ paddingBottom: 12 }}
           ItemSeparatorComponent={() => <View className="h-2" />}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isFetchingNextPage ? (
+              <ActivityIndicator
+                color={brand.primary}
+                className="py-4"
+                accessibilityLabel={t('loading.title')}
+              />
+            ) : undefined
+          }
           renderItem={({ item }) => (
             <View className="px-4">
               <PaymentRow

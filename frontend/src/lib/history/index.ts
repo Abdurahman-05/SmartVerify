@@ -1,5 +1,6 @@
 import * as real from '@/lib/api/history';
 import type {
+  MoneyFilter,
   PaymentRecord,
   PaymentRecordDetail,
   PaymentsReport,
@@ -12,6 +13,8 @@ import { localDay, periodRange, type ListPeriod, type Period } from '@/lib/perio
 import { queryClient } from '@/lib/queryClient';
 
 export type {
+  MoneyFilter,
+  PaymentsSummary,
   PaymentRecord,
   PaymentRecordDetail,
   PaymentsReport,
@@ -122,6 +125,39 @@ export const getPaymentsReport: (period: Period) => Promise<PaymentsReport> = US
       };
     }
   : real.getPaymentsReport;
+
+/** Offline mock: the payments of the period or day (the mock keeps only recent ones). */
+const mockList = (period: ListPeriod, day?: string) =>
+  day
+    ? mockPayments('30d').filter((p) => localDay(new Date(p.createdAt)) === day)
+    : mockPayments(period === 'all' ? '30d' : period);
+const hasMoney = (p: PaymentRecord, money: MoneyFilter) =>
+  money === 'cash' ? p.cashEtb > 0 : p.bankEtb > 0;
+
+export const getPaymentsPage: typeof real.getPaymentsPage = USE_MOCK_BILLS
+  ? async (period, { day, money, before, limit }) =>
+      mockList(period, day)
+        .filter((p) => (!money || hasMoney(p, money)) && (!before || p.createdAt < before))
+        .slice(0, limit)
+  : real.getPaymentsPage;
+
+export const getPaymentsSummary: typeof real.getPaymentsSummary = USE_MOCK_BILLS
+  ? async (period, day) => {
+      const list = mockList(period, day);
+      return {
+        count: list.length,
+        salesEtb: list.reduce((s, p) => s + p.salesEtb, 0),
+        cashCount: list.filter((p) => hasMoney(p, 'cash')).length,
+        bankCount: list.filter((p) => hasMoney(p, 'bank')).length,
+      };
+    }
+  : real.getPaymentsSummary;
+
+/** Transactions list, loaded a page at a time while scrolling. */
+export const paymentsPagesKey = (period: ListPeriod, day?: string, money?: MoneyFilter) =>
+  ['payments-pages', day ?? period, money ?? 'all'] as const;
+export const paymentsSummaryKey = (period: ListPeriod, day?: string) =>
+  ['payments-summary', day ?? period] as const;
 
 export const paymentsKey = (period: ListPeriod, day?: string) =>
   ['payments', day ?? period] as const;

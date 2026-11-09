@@ -123,6 +123,11 @@ const visiblePayments = (auth: AuthContext): Prisma.PaymentWhereInput => ({
   ...(auth.role === 'waiter' && { bill: { waiterId: auth.memberId } }),
 });
 
+/** Cash = paid with any cash (cash, cash + bank); bank = paid with any bank money. */
+const moneySchema = z.enum(['cash', 'bank']);
+const moneyMethods = (money: z.infer<typeof moneySchema>): PaymentMethod[] =>
+  money === 'cash' ? ['cash', 'cash_bank'] : ['bank', 'cash_bank'];
+
 const errors = {
   401: errorResponseSchema.describe('UNAUTHORIZED'),
   402: errorResponseSchema.describe('SUBSCRIPTION_REQUIRED (restaurant plan only)'),
@@ -154,26 +159,76 @@ export const historyRoutes: FastifyPluginAsyncZod = async (app) => {
           period: listPeriodSchema,
           date: daySchema.optional(),
           method: methodSchema.optional(),
+          money: moneySchema.optional(),
           since: z.iso.datetime().optional(),
+          before: z.iso
+            .datetime()
+            .optional()
+            .describe('Only payments older than this time: the next page of a scrolling list'),
           limit: z.coerce.number().int().min(1).max(500).default(500),
         }),
         response: { 200: z.array(paymentSchema), ...errors },
       },
     },
     async (request) => {
-      const { period, date, method, since, limit } = request.query;
-      const range = date ? dayRange(date) : listRange(period);
+      const { period, date, method, money, since, before, limit } = request.query;
+      const range: { gte?: Date; lt?: Date } = date ? dayRange(date) : listRange(period);
+      if (before && (!range.lt || new Date(before) < range.lt)) range.lt = new Date(before);
       const rows = await prisma.payment.findMany({
         where: {
           ...visiblePayments(request.auth),
           createdAt: { ...range, ...(since && { gt: new Date(since) }) },
           ...(method && { method: fromMethod(method) }),
+          ...(money && { method: { in: moneyMethods(money) } }),
         },
         orderBy: { createdAt: 'desc' },
         take: limit,
         include: listInclude,
       });
       return rows.map(toPayment);
+    }
+  );
+
+  app.get(
+    '/payments/summary',
+    {
+      preHandler: requireRoles('owner', 'manager', 'waiter'),
+      schema: {
+        tags: ['history'],
+        security,
+        description:
+          'Totals for the Transactions screen (same rows as GET /payments, without loading ' +
+          'them): number of payments, sales, and how many were paid with cash / bank money.',
+        querystring: z.object({ period: listPeriodSchema, date: daySchema.optional() }),
+        response: {
+          200: z.object({
+            count: z.number().int(),
+            salesEtb: z.number().int(),
+            cashCount: z.number().int(),
+            bankCount: z.number().int(),
+          }),
+          ...errors,
+        },
+      },
+    },
+    async (request) => {
+      const { period, date } = request.query;
+      const where: Prisma.PaymentWhereInput = {
+        ...visiblePayments(request.auth),
+        createdAt: date ? dayRange(date) : listRange(period),
+      };
+      const [groups, sales] = await Promise.all([
+        prisma.payment.groupBy({ by: ['method'], where, _count: { _all: true } }),
+        prisma.bill.aggregate({ where: { payment: { is: where } }, _sum: { totalEtb: true } }),
+      ]);
+      const countOf = (methods: PaymentMethod[]) =>
+        groups.filter((g) => methods.includes(g.method)).reduce((n, g) => n + g._count._all, 0);
+      return {
+        count: countOf(['cash', 'bank', 'cash_bank']),
+        salesEtb: sales._sum.totalEtb ?? 0,
+        cashCount: countOf(moneyMethods('cash')),
+        bankCount: countOf(moneyMethods('bank')),
+      };
     }
   );
 

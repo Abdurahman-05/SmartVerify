@@ -46,6 +46,36 @@ export interface PaymentsReport {
 export const getPayments = (period: ListPeriod, since?: string, day?: string) =>
   api<PaymentRecord[]>('/payments', { query: { period, since, date: day } });
 
+/** Cash = paid with any cash (cash, cash + bank); bank = paid with any bank money. */
+export type MoneyFilter = 'cash' | 'bank';
+
+/** Totals for the Transactions screen, without loading every payment. */
+export interface PaymentsSummary {
+  count: number;
+  salesEtb: number;
+  cashCount: number;
+  bankCount: number;
+}
+
+/** GET /payments — one page of a scrolling list: `before` is the oldest time already shown. */
+export const getPaymentsPage = (
+  period: ListPeriod,
+  opts: { day?: string; money?: MoneyFilter; before?: string; limit: number }
+) =>
+  api<PaymentRecord[]>('/payments', {
+    query: {
+      period,
+      date: opts.day,
+      money: opts.money,
+      before: opts.before,
+      limit: String(opts.limit),
+    },
+  });
+
+/** GET /payments/summary — count, sales and cash / bank counts for the period or day. */
+export const getPaymentsSummary = (period: ListPeriod, day?: string) =>
+  api<PaymentsSummary>('/payments/summary', { query: { period, date: day } });
+
 /** GET /payments/:id — null when it does not exist (or is not yours). */
 export async function getPayment(id: string): Promise<PaymentRecordDetail | null> {
   try {
