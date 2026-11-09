@@ -16,6 +16,7 @@ import { useEffect } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { OfflineBanner } from '@/components/ui/OfflineBanner';
 import { FirstThemeScreen } from '@/features/theme/FirstThemeScreen';
 import { setUnauthorizedHandler } from '@/lib/api/client';
 import { clearToken } from '@/lib/api/token';
@@ -96,6 +97,7 @@ export default function RootLayout() {
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(app)" />
         </Stack>
+        <OfflineBanner />
       </View>
     </PersistQueryClientProvider>
   );

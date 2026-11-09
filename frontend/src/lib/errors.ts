@@ -19,6 +19,7 @@ const keyByCode: Partial<Record<ApiErrorCode, string>> = {
   BILL_CLOSED: 'bills.change.locked',
   ITEM_UNAVAILABLE: 'orders.errors.itemUnavailable',
   NETWORK_ERROR: 'errors.noConnection',
+  SERVER_UNAVAILABLE: 'errors.serverDown',
   INVALID_URL: 'verifyBank.check.invalidUrl',
   RECEIPT_USED: 'errors.receiptUsed',
 };
@@ -37,5 +38,7 @@ export function errorMessageKey(error: unknown): string {
   return 'common.somethingWrong';
 }
 
+/** No internet, or our server not answering: screens show the "No connection" state with Retry. */
 export const isNetworkError = (error: unknown) =>
-  error instanceof ApiError && error.code === 'NETWORK_ERROR';
+  error instanceof ApiError &&
+  (error.code === 'NETWORK_ERROR' || error.code === 'SERVER_UNAVAILABLE');

@@ -6,7 +6,7 @@ import { AppState, Platform } from 'react-native';
 
 import { useSession } from '@/store/session';
 
-// Back online: React Query refetches what is on screen (and resumes paused saves) by itself.
+// Back online: React Query refetches what is on screen by itself.
 // A phone does not tell it about the network on its own, expo-network does.
 if (Platform.OS !== 'web') {
   onlineManager.setEventListener((setOnline) => {
@@ -33,7 +33,17 @@ if (Platform.OS !== 'web') {
  */
 export const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { gcTime: 24 * 60 * 60 * 1000, staleTime: 30 * 1000, retry: 1 },
+    // offlineFirst: without internet a list tries once and shows "No connection" (or its saved
+    // data) instead of loading forever; it loads again by itself when the internet is back.
+    queries: {
+      gcTime: 24 * 60 * 60 * 1000,
+      staleTime: 30 * 1000,
+      retry: 1,
+      networkMode: 'offlineFirst',
+    },
+    // An action (pay, order, save) without internet fails at once with "No connection" instead
+    // of waiting silently; the person sees it and tries again (the Idempotency-Key makes it safe).
+    mutations: { networkMode: 'always' },
   },
 });
 

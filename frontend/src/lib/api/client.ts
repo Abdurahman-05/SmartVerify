@@ -1,3 +1,4 @@
+import { onlineManager } from '@tanstack/react-query';
 import Constants from 'expo-constants';
 
 /**
@@ -50,7 +51,9 @@ export type ApiErrorCode =
   | 'ACCOUNT_LOCKED'
   | 'ADMIN_NOT_CONFIGURED'
   | 'INTERNAL_ERROR'
-  | 'NETWORK_ERROR';
+  | 'NETWORK_ERROR'
+  /** The phone has internet but our server does not answer (down, restarting, unreachable). */
+  | 'SERVER_UNAVAILABLE';
 
 export class ApiError extends Error {
   constructor(
@@ -112,7 +115,8 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
-    throw new ApiError('NETWORK_ERROR', 0);
+    // No answer: the phone's own internet is off, or (with internet) our server is not reachable.
+    throw new ApiError(onlineManager.isOnline() ? 'SERVER_UNAVAILABLE' : 'NETWORK_ERROR', 0);
   } finally {
     clearTimeout(timer);
   }
@@ -121,7 +125,9 @@ export async function api<T>(path: string, options: RequestOptions = {}): Promis
   const json = await response.json().catch(() => null);
   if (!response.ok) {
     const error = json?.error;
-    const code: ApiErrorCode = error?.code ?? 'INTERNAL_ERROR';
+    // 502/503/504 without our error body: the server is down or restarting (a proxy answered).
+    const down = !error && response.status >= 502 && response.status <= 504;
+    const code: ApiErrorCode = error?.code ?? (down ? 'SERVER_UNAVAILABLE' : 'INTERNAL_ERROR');
     // WRONG_CREDENTIALS is also a 401, but only UNAUTHORIZED means "this session is no longer valid".
     if (code === 'UNAUTHORIZED' && authToken && options.token === undefined) onUnauthorized?.();
     throw new ApiError(code, response.status, error?.details);
