@@ -109,6 +109,8 @@ export default function SplashScreen() {
   if (offline) {
     return (
       <NoConnection
+        // The first screen: nothing to go back to.
+        fullPage
         onRetry={() => {
           setOffline(false);
           setAttempt((n) => n + 1);
