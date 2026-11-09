@@ -9,7 +9,7 @@ export interface BrandColors {
 
 export const THEME_IDS = ['forest', 'ocean', 'royal', 'teal', 'slate', 'rose', 'berry'] as const;
 export type ThemeId = (typeof THEME_IDS)[number];
-export const DEFAULT_THEME: ThemeId = 'rose';
+export const DEFAULT_THEME: ThemeId = 'forest';
 
 // Only the brand colors change. Status pills, tipBg and amber stay the same in every theme.
 export const themes: Record<ThemeId, BrandColors> = {

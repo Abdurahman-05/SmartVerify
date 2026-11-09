@@ -1,32 +1,22 @@
-import Svg, { Path } from 'react-native-svg';
+import { Image } from 'expo-image';
 import { View } from 'react-native';
 
-import { colors } from '@/theme/tokens';
+const mark = require('../../../assets/images/logo-mark.png') as number;
 
 interface BrandMarkProps {
   size?: number;
 }
 
-/** Shield-check logo in a rounded green tile. */
+/** The ገ logo with its yellow check, on a tile in the chosen theme colour. */
 export function BrandMark({ size = 44 }: BrandMarkProps) {
   return (
     <View
-      className="items-center justify-center bg-primary"
+      className="overflow-hidden bg-primary"
       style={{ width: size, height: size, borderRadius: size * 0.3 }}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
     >
-      <Svg
-        width={size * 0.57}
-        height={size * 0.57}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke={colors.surface}
-        strokeWidth={2.2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <Path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" />
-        <Path d="M8.5 12l2.5 2.5 4.5-5" />
-      </Svg>
+      <Image source={mark} style={{ width: size, height: size }} contentFit="cover" />
     </View>
   );
 }
