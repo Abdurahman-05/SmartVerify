@@ -57,9 +57,17 @@ export default function RootLayout() {
     return () => setUnauthorizedHandler(null);
   }, []);
 
+  // The green JS splash hides the native one once it is drawn. First start shows the theme
+  // picker instead (no JS splash), so hide it here; the timer is only a safety net.
   useEffect(() => {
-    if (ready) SplashScreen.hideAsync();
-  }, [ready]);
+    if (!ready) return;
+    if (!themeChosen) {
+      void SplashScreen.hideAsync();
+      return;
+    }
+    const fallback = setTimeout(() => void SplashScreen.hideAsync(), 4000);
+    return () => clearTimeout(fallback);
+  }, [ready, themeChosen]);
 
   if (!ready) return null;
   if (!themeChosen) {
