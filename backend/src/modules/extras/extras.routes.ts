@@ -321,7 +321,8 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
           tags: ['extras'],
           security,
           description:
-            'Remove an item. A chef: only their own, only while OPEN. The owner: any item.',
+            'Remove an item. A chef: only their own, only while OPEN. The owner: any item; a ' +
+            'bought one keeps its expense.',
           params: idParamSchema,
           response: { 204: z.null(), ...errors, ...notFound },
         },
@@ -339,9 +340,17 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
         ) {
           throw new AppError('FORBIDDEN');
         }
-        // A bought item has a spending row pointing at it: it goes first (the owner's choice).
+        // A bought item's money was really spent: its expense stays (only unlinked). To take it
+        // out of the totals the owner deletes the expense itself, with a reason.
         await prisma.$transaction([
-          ...(item.spending ? [prisma.spending.delete({ where: { id: item.spending.id } })] : []),
+          ...(item.spending
+            ? [
+                prisma.spending.update({
+                  where: { id: item.spending.id },
+                  data: { buyItemId: null },
+                }),
+              ]
+            : []),
           prisma.buyItem.delete({ where: { id: item.id } }),
         ]);
         return reply.status(204).send(null);
@@ -646,16 +655,28 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
         });
         const now = new Date();
         const amountChanged = body.amount !== undefined && body.amount !== before.amount;
-        const row = await prisma.spending.update({
-          where: { id: before.id },
-          data: {
-            ...body,
-            changedAt: now,
-            changedBy: owner.user.name,
-            reviewedAt: now,
-            ...(amountChanged && { oldAmount: before.amount }),
-          },
-          include: spendingInclude,
+        const row = await prisma.$transaction(async (tx) => {
+          // Bought from the buy list: the item shows the same price and money source.
+          if (before.buyItemId && (body.amount !== undefined || body.paidFrom !== undefined)) {
+            await tx.buyItem.update({
+              where: { id: before.buyItemId },
+              data: {
+                ...(body.amount !== undefined && { price: body.amount }),
+                ...(body.paidFrom !== undefined && { paidFrom: body.paidFrom }),
+              },
+            });
+          }
+          return tx.spending.update({
+            where: { id: before.id },
+            data: {
+              ...body,
+              changedAt: now,
+              changedBy: owner.user.name,
+              reviewedAt: now,
+              ...(amountChanged && { oldAmount: before.amount }),
+            },
+            include: spendingInclude,
+          });
         });
         return toSpending(row, await costKindsOf(auth.businessId));
       }
@@ -711,7 +732,7 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
           tags: ['extras'],
           security,
           description:
-            'Owner (or a manager allowed to see reports): sales, expenses and what is left in ' +
+            'Owner (or a manager while the owner allows reports for managers): sales, expenses and what is left in ' +
             'the period or on one `date` (YYYY-MM-DD), each split into cash and bank. Sales are ' +
             'the money the restaurant kept (tips and change given back left out). Deleted ' +
             'expenses never count.',
@@ -739,7 +760,14 @@ export const extrasRoutes: FastifyPluginAsyncZod = async (app) => {
       },
       async (request) => {
         const { auth } = request;
-        if (auth.role === 'manager' && !auth.canSeeReports) throw new AppError('FORBIDDEN');
+        // A manager: only while the owner's "Reports for managers" switch is on (as Reports).
+        if (auth.role === 'manager') {
+          const business = await prisma.business.findUniqueOrThrow({
+            where: { id: auth.businessId },
+            select: { managerCanSeeReports: true },
+          });
+          if (!business.managerCanSeeReports) throw new AppError('FORBIDDEN');
+        }
         const { period, date } = request.query;
         const createdAt = date ? dayRange(date) : { gte: periodStart(period) };
         const { businessId } = auth;

@@ -90,7 +90,9 @@ export function getHomeActions(
   const manages = role === 'owner' || role === 'manager';
   const extra: HomeActionKey[] = [
     'overview',
-    ...(extras.moneyOut ? (['moneyFlow', 'moneyOut'] as const) : []),
+    // Money flow shows sales: the owner, or a manager while reports for managers are allowed.
+    ...(extras.moneyOut && (role === 'owner' || extras.reports) ? (['moneyFlow'] as const) : []),
+    ...(extras.moneyOut ? (['moneyOut'] as const) : []),
     ...(extras.buyList ? (['buyList'] as const) : []),
   ];
   const keys: HomeActionKey[] =
