@@ -1,8 +1,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Image } from 'expo-image';
 import { Redirect, usePathname, useRouter, type Href } from 'expo-router';
 import {
   Activity,
-  Check,
   Clock,
   CreditCard,
   Home,
@@ -51,15 +51,17 @@ const initials = (name: string) =>
     .slice(0, 2)
     .toUpperCase();
 
+const logo = require('../../../assets/images/logo.png') as number;
+
 function BrandMark({ compact }: { compact?: boolean }) {
   const { t } = useTranslation();
   return (
     <View className="flex-row items-center gap-3">
-      <View
-        className={`items-center justify-center rounded-xl bg-primary ${compact ? 'h-9 w-9' : 'h-[42px] w-[42px]'}`}
-      >
-        <Check size={compact ? 20 : 24} color={colors.amber} strokeWidth={3} />
-      </View>
+      <Image
+        source={logo}
+        style={{ width: compact ? 36 : 42, height: compact ? 36 : 42, borderRadius: 10 }}
+        contentFit="cover"
+      />
       <View>
         <Text className={compact ? 'text-base' : 'text-lg'} style={wordmarkStyle}>
           {t('platformAdmin.brand')}

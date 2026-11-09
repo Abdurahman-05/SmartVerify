@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { Check } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +8,8 @@ import { Text } from '@/components/ui/Text';
 import { colors } from '@/theme/tokens';
 import { wordmarkStyle } from '@/theme/wordmark';
 
+const logo = require('../../../assets/images/logo.png') as number;
+
 /** At this width and wider the brand panel sits beside the form. */
 const WIDE = 900;
 
@@ -14,9 +17,7 @@ function Brand() {
   const { t } = useTranslation();
   return (
     <View className="flex-row items-center gap-3">
-      <View className="h-11 w-11 items-center justify-center rounded-xl bg-amber">
-        <Check size={24} color={colors.primary} strokeWidth={3} />
-      </View>
+      <Image source={logo} style={{ width: 44, height: 44, borderRadius: 12 }} contentFit="cover" />
       <View>
         <Text tone="inverse" className="text-xl" style={wordmarkStyle}>
           {t('platformAdmin.brand')}
