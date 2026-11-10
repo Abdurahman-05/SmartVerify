@@ -10,6 +10,7 @@ import { hashPin } from '../services/pin-hasher.js';
  *   npm run seed:demo
  * On production only on purpose (DEMO_IN_PRODUCTION=yes), and then every PIN is random (the
  * easy ones below are for local testing only); the new PINs are printed once.
+ * DEMO_ONLY="Demo Cafe" makes (or resets) only that one, leaving the others' PINs alone.
  * A restaurant (Restaurant Plus: owner, manager, waiter, chef, menu, tables) for the Restaurant
  * app, and two shops for the Shop app (Normal: owner + 2 workers; Normal Multi: owner + 3
  * workers). Each has a receiving account and a paid plan for a year. Running it again resets the
@@ -48,6 +49,16 @@ const DEMOS: Demo[] = [
       { role: 'owner', name: 'Shop Owner', phone: '911000011', pin: '123456' },
       { role: 'waiter', name: 'Shop Worker 1', phone: '911000012', pin: '1234' },
       { role: 'waiter', name: 'Shop Worker 2', phone: '911000013', pin: '1234' },
+    ],
+  },
+  {
+    // Normal Verify in the Restaurant app: payment checks only, any number of waiters.
+    name: 'Demo Cafe',
+    plan: 'restaurant_normal',
+    people: [
+      { role: 'owner', name: 'Cafe Owner', phone: '911000031', pin: '123456' },
+      { role: 'waiter', name: 'Cafe Waiter 1', phone: '911000032', pin: '1234' },
+      { role: 'waiter', name: 'Cafe Waiter 2', phone: '911000033', pin: '1234' },
     ],
   },
   {
@@ -212,9 +223,15 @@ async function main() {
     console.error('Demo accounts on production need DEMO_IN_PRODUCTION=yes.');
     process.exit(1);
   }
+  const only = process.env.DEMO_ONLY;
+  const chosen = only ? DEMOS.filter((d) => d.name === only) : DEMOS;
+  if (chosen.length === 0) {
+    console.error(`No demo named "${only}".`);
+    process.exit(1);
+  }
   // A public server: no guessable PINs (owner 6 digits, staff 4).
   if (production) {
-    for (const demo of DEMOS) {
+    for (const demo of chosen) {
       for (const person of demo.people) {
         const digits = person.role === 'owner' ? 6 : 4;
         person.pin = String(randomInt(10 ** (digits - 1), 10 ** digits));
@@ -224,11 +241,11 @@ async function main() {
   const prisma = createPrismaClient(env.DATABASE_URL);
   try {
     // Made-up receiving accounts, one per business.
-    const accounts = ['1000123456789', '1000123456711', '1000123456722'];
-    for (const [i, demo] of DEMOS.entries()) await seed(prisma, demo, accounts[i]!);
+    const accounts = ['1000123456789', '1000123456711', '1000123456733', '1000123456722'];
+    for (const demo of chosen) await seed(prisma, demo, accounts[DEMOS.indexOf(demo)]!);
 
     say('\nSign in with (phone without +251); each business is paid for a year:');
-    for (const demo of DEMOS) {
+    for (const demo of chosen) {
       say(`\n${demo.name} · ${PLAN_NAMES[demo.plan]}`);
       for (const p of demo.people) {
         const role = p.role === 'waiter' && !demo.restaurant ? 'worker' : p.role;
