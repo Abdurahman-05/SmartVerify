@@ -1,11 +1,15 @@
+import { randomInt } from 'node:crypto';
+
 import { loadEnv } from '../config/env.js';
 import type { Plan, Prisma, PrismaClient, Role } from '../generated/prisma/client.js';
 import { createPrismaClient } from '../plugins/prisma.js';
 import { hashPin } from '../services/pin-hasher.js';
 
 /**
- * Ready demo businesses for testing on the phone (never in production):
+ * Ready demo businesses for testing on the phone:
  *   npm run seed:demo
+ * On production only on purpose (DEMO_IN_PRODUCTION=yes), and then every PIN is random (the
+ * easy ones below are for local testing only); the new PINs are printed once.
  * A restaurant (Restaurant Plus: owner, manager, waiter, chef, menu, tables) for the Restaurant
  * app, and two shops for the Shop app (Normal: owner + 2 workers; Normal Multi: owner + 3
  * workers). Each has a receiving account and a paid plan for a year. Running it again resets the
@@ -195,7 +199,7 @@ async function seed(prisma: PrismaClient, demo: Demo, accountDigits: string) {
         startedAt: now,
         endsAt: new Date(now.getTime() + 365 * 86_400_000),
         paymentMethod: 'manual',
-        note: 'Local demo',
+        note: 'Demo',
       },
     });
   }
@@ -203,9 +207,19 @@ async function seed(prisma: PrismaClient, demo: Demo, accountDigits: string) {
 
 async function main() {
   const env = loadEnv();
-  if (env.NODE_ENV === 'production') {
-    console.error('Demo accounts are for local testing only.');
+  const production = env.NODE_ENV === 'production';
+  if (production && process.env.DEMO_IN_PRODUCTION !== 'yes') {
+    console.error('Demo accounts on production need DEMO_IN_PRODUCTION=yes.');
     process.exit(1);
+  }
+  // A public server: no guessable PINs (owner 6 digits, staff 4).
+  if (production) {
+    for (const demo of DEMOS) {
+      for (const person of demo.people) {
+        const digits = person.role === 'owner' ? 6 : 4;
+        person.pin = String(randomInt(10 ** (digits - 1), 10 ** digits));
+      }
+    }
   }
   const prisma = createPrismaClient(env.DATABASE_URL);
   try {
