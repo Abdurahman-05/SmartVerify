@@ -66,7 +66,9 @@ export async function settlePayment(
   bill: Bill,
   newlyReceived: number,
   idempotencyKey: string,
-  extraChoice: ExtraChoice = 'tip'
+  extraChoice: ExtraChoice = 'tip',
+  /** The bank reference of the receipt the server verified (the server counts its amount). */
+  reference?: string
 ): Promise<PaymentOutcome> {
   const { method, cash: cashInput, bankReceived } = useRestaurantPay.getState();
   const cash = cashFor(method, cashInput);
@@ -75,8 +77,8 @@ export async function settlePayment(
     const res = await payBill(
       bill.id,
       method === 'bank'
-        ? { method, bankReceivedEtb: newlyReceived, extraChoice }
-        : { method, cashEtb: cash, bankReceivedEtb: newlyReceived, extraChoice },
+        ? { method, bankReceivedEtb: newlyReceived, reference, extraChoice }
+        : { method, cashEtb: cash, bankReceivedEtb: newlyReceived, reference, extraChoice },
       idempotencyKey
     );
     const outcome: PaymentOutcome = {

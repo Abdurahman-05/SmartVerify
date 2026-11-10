@@ -602,6 +602,7 @@
     "checking": "Checking payment",
     "checkingSubtitle": "Asking the bank",
     "checkFailed": "We could not reach the bank. Please try again.",
+    "saveFailedTitle": "The payment was not saved",
     "tryAgain": "Try again",
     "resultTitle": "Payment result",
     "fullyPaid": "Fully paid",
@@ -807,7 +808,8 @@
     "rateLimited": "Too many tries. Please wait a few minutes and try again.",
     "subscriptionRequired": "This needs the Restaurant Plus plan.",
     "paymentNotConfigured": "Paid plans are not available yet.",
-    "receiptUsed": "This receipt was already used to pay a plan."
+    "receiptUsed": "This receipt was already used to pay a plan.",
+    "receiptNotVerified": "Bank money is recorded only from a receipt that was checked for this bill. Scan the customer's receipt."
   },
   "menuAdmin": {
     "title": "Menu",

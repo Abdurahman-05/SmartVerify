@@ -25,18 +25,27 @@ import { useVerifyFlow } from './verifyFlow';
 
 type Failure =
   | { kind: 'network' }
-  | { kind: 'error'; messageKey: string }
+  /** saving: the receipt was fine, recording the payment failed. */
+  | { kind: 'error'; messageKey: string; saving?: boolean }
   | { kind: 'mismatch'; reasons: CbeMismatch[]; reference: string; paid: number }
   | { kind: 'unable'; reason: CbeUnable };
+
+/** A receipt the server verified for this bill: its amount and its bank reference. */
+interface Received {
+  amount: number;
+  reference: string;
+}
 
 /** Bank money actually received, or why it cannot be counted (checked by the server). */
 async function checkReceived(
   qrData: string,
   amount: number,
   billId: string
-): Promise<number | Failure> {
+): Promise<Received | Failure> {
   const result = await checkReceipt(qrData, amount, billId);
-  if (result.status === 'verified') return result.amountEtb;
+  if (result.status === 'verified') {
+    return { amount: result.amountEtb, reference: result.reference };
+  }
   if (result.status === 'not_matching') {
     return {
       kind: 'mismatch',
@@ -58,7 +67,7 @@ export default function RestaurantCheckingScreen() {
   const [attempt, setAttempt] = useState(0);
   const [saving, setSaving] = useState(false);
   // More arrived than the bill: the waiter asks the customer before anything is recorded.
-  const [extra, setExtra] = useState<{ received: number } | null>(null);
+  const [extra, setExtra] = useState<Received | null>(null);
   // One key per action: "Try again" after a lost answer does not count the payment twice.
   const [scanKey] = useState(newIdempotencyKey);
   const [saveKey] = useState(newIdempotencyKey);
@@ -66,17 +75,19 @@ export default function RestaurantCheckingScreen() {
   useEffect(() => {
     if (!bill || !account || !qrData) return;
     let cancelled = false;
+    let saving = false;
     checkReceived(qrData, amount, bill.id)
       .then(async (received) => {
-        if (typeof received !== 'number') {
+        if ('kind' in received) {
           if (!cancelled) setFailure(received);
           return;
         }
-        if (received > amount) {
-          if (!cancelled) setExtra({ received });
+        if (received.amount > amount) {
+          if (!cancelled) setExtra(received);
           return;
         }
-        await settlePayment(bill, received, scanKey);
+        saving = true;
+        await settlePayment(bill, received.amount, scanKey, 'tip', received.reference);
         if (!cancelled) router.replace('/verify-restaurant/result');
       })
       .catch((error: unknown) => {
@@ -84,7 +95,7 @@ export default function RestaurantCheckingScreen() {
         setFailure(
           isNetworkError(error)
             ? { kind: 'network' }
-            : { kind: 'error', messageKey: errorMessageKey(error) }
+            : { kind: 'error', messageKey: errorMessageKey(error), saving }
         );
       });
     return () => {
@@ -115,17 +126,17 @@ export default function RestaurantCheckingScreen() {
       });
   };
 
-  const settleWith = (received: number, choice: ExtraChoice) => {
+  const settleWith = (received: Received, choice: ExtraChoice) => {
     setExtra(null);
     setSaving(true);
-    settlePayment(bill, received, scanKey, choice)
+    settlePayment(bill, received.amount, scanKey, choice, received.reference)
       .then(() => router.replace('/verify-restaurant/result'))
       .catch((error: unknown) => {
         setSaving(false);
         setFailure(
           isNetworkError(error)
             ? { kind: 'network' }
-            : { kind: 'error', messageKey: errorMessageKey(error) }
+            : { kind: 'error', messageKey: errorMessageKey(error), saving: true }
         );
       });
   };
@@ -133,7 +144,7 @@ export default function RestaurantCheckingScreen() {
   if (failure?.kind === 'network') return <NoConnection onRetry={retry} />;
 
   if (extra) {
-    const extraEtb = extra.received - amount;
+    const extraEtb = extra.amount - amount;
     return (
       <SafeAreaView className="flex-1 bg-background">
         <BottomSheet visible onClose={() => {}}>
@@ -147,7 +158,7 @@ export default function RestaurantCheckingScreen() {
             <MoneyText value={extraEtb} className="text-4xl" />
             <Text tone="muted" className="text-center text-base">
               {t('verifyBank.extra.body', {
-                received: formatMoney(extra.received),
+                received: formatMoney(extra.amount),
                 bill: formatMoney(amount),
                 name: bill.waiterName,
               })}
@@ -156,14 +167,14 @@ export default function RestaurantCheckingScreen() {
           <Button
             label={t('verifyBank.extra.keepTip')}
             icon={HandCoins}
-            onPress={() => settleWith(extra.received, 'tip')}
+            onPress={() => settleWith(extra, 'tip')}
           />
           <Button
             label={t('verifyBank.extra.giveBack')}
             icon={Banknote}
             variant="outline"
             size="md"
-            onPress={() => settleWith(extra.received, 'giveback')}
+            onPress={() => settleWith(extra, 'giveback')}
           />
         </BottomSheet>
       </SafeAreaView>
@@ -181,7 +192,9 @@ export default function RestaurantCheckingScreen() {
           : t(`verifyBank.check.titles.${first}`)
         : failure.kind === 'unable'
           ? t('verifyBank.check.unable')
-          : t('verifyRestaurant.checkFailed');
+          : failure.saving
+            ? t('verifyRestaurant.saveFailedTitle')
+            : t('verifyRestaurant.checkFailed');
     const body =
       failure.kind === 'mismatch'
         ? failure.reasons.map((r) => t(`verifyBank.check.reasons.${r}`)).join(' ')

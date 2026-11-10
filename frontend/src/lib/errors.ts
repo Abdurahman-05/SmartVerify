@@ -22,6 +22,7 @@ const keyByCode: Partial<Record<ApiErrorCode, string>> = {
   SERVER_UNAVAILABLE: 'errors.serverDown',
   INVALID_URL: 'verifyBank.check.invalidUrl',
   RECEIPT_USED: 'errors.receiptUsed',
+  RECEIPT_NOT_VERIFIED: 'errors.receiptNotVerified',
 };
 
 export function errorMessageKey(error: unknown): string {

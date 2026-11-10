@@ -47,6 +47,7 @@ export type ApiErrorCode =
   | 'ORDER_LOCKED'
   | 'INVALID_URL'
   | 'RECEIPT_USED'
+  | 'RECEIPT_NOT_VERIFIED'
   | 'WRONG_CODE'
   | 'ACCOUNT_LOCKED'
   | 'ADMIN_NOT_CONFIGURED'

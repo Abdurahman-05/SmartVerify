@@ -602,6 +602,7 @@
     "checking": "ክፍያውን በማረጋገጥ ላይ",
     "checkingSubtitle": "ባንኩን በመጠየቅ ላይ",
     "checkFailed": "ባንኩን ማግኘት አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
+    "saveFailedTitle": "ክፍያው አልተመዘገበም",
     "tryAgain": "እንደገና ሞክር",
     "resultTitle": "የክፍያ ውጤት",
     "fullyPaid": "ሙሉ በሙሉ ተከፍሏል",
@@ -807,7 +808,8 @@
     "rateLimited": "በጣም ብዙ ሙከራዎች። እባክዎ ጥቂት ደቂቃዎች ጠብቀው እንደገና ይሞክሩ።",
     "subscriptionRequired": "ይህ የRestaurant Plus እቅድ ያስፈልገዋል።",
     "paymentNotConfigured": "የሚከፈልባቸው እቅዶች ገና አልተዘጋጁም።",
-    "receiptUsed": "ይህ ደረሰኝ ቀደም ብሎ ለዕቅድ ክፍያ ጥቅም ላይ ውሏል።"
+    "receiptUsed": "ይህ ደረሰኝ ቀደም ብሎ ለዕቅድ ክፍያ ጥቅም ላይ ውሏል።",
+    "receiptNotVerified": "የባንክ ገንዘብ የሚመዘገበው ለዚህ ሂሳብ ከተረጋገጠ ደረሰኝ ብቻ ነው። የደንበኛውን ደረሰኝ ይቃኙ።"
   },
   "menuAdmin": {
     "title": "ምናሌ",

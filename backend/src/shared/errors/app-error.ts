@@ -19,6 +19,7 @@ export type ErrorCode =
   | 'ACCOUNT_LIMIT'
   | 'PAYMENT_NOT_CONFIGURED'
   | 'RECEIPT_USED'
+  | 'RECEIPT_NOT_VERIFIED'
   | 'INVALID_URL'
   | 'CONFLICT'
   | 'WRONG_CODE'
@@ -59,6 +60,8 @@ const statusByCode: Record<ErrorCode, number> = {
   PAYMENT_NOT_CONFIGURED: 501,
   /** This receipt already paid for a subscription. */
   RECEIPT_USED: 409,
+  /** Bank money on a bill needs a receipt this server verified for that bill. */
+  RECEIPT_NOT_VERIFIED: 422,
   /** Not a receipt link we accept (wrong scheme, host or receipt id). */
   INVALID_URL: 400,
   /** Already decided or changed by someone else. */

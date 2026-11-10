@@ -9,8 +9,12 @@ export type PayInput =
       method: 'bank' | 'cash+bank';
       /** Cash part (cash+bank only). */
       cashEtb?: number;
-      /** Bank money of THIS scan, as reported by the bank check. */
+      /**
+       * Bank money of THIS scan. With a verified receipt the server uses the receipt's amount;
+       * the app's number counts only where unverified bank money is allowed (local testing).
+       */
       bankReceivedEtb: number;
+      /** The bank reference of the receipt this server verified for the bill. */
       reference?: string;
       /** When more arrived than the bill: the waiter's tip (default) or given back in cash. */
       extraChoice?: 'tip' | 'giveback';
@@ -104,8 +108,31 @@ export function createPaymentService(prisma: PrismaClient, allowUnverifiedBank: 
     async pay(auth: AuthContext, billId: string, input: PayInput, key: string): Promise<PayResult> {
       const earlier = await replay(auth, billId, key);
       if (earlier) return earlier;
-      if (input.method !== 'cash' && !allowUnverifiedBank) {
-        throw new AppError('PAYMENT_NOT_CONFIGURED');
+      // Bank money counts only from a receipt this server verified for this bill: the amount
+      // is the receipt's, never the phone's, and one receipt adds to a bill once.
+      let bankEtb = input.method === 'cash' ? 0 : input.bankReceivedEtb;
+      if (input.method !== 'cash' && bankEtb > 0) {
+        const verified = input.reference
+          ? await prisma.transaction.findFirst({
+              where: {
+                businessId: auth.businessId,
+                billId,
+                reference: input.reference,
+                status: 'verified',
+              },
+              select: { receivedAmount: true },
+            })
+          : null;
+        if (verified) {
+          const used = await prisma.billPaymentScan.findFirst({
+            where: { businessId: auth.businessId, billId, reference: input.reference },
+            select: { id: true },
+          });
+          if (used) throw new AppError('RECEIPT_USED');
+          bankEtb = verified.receivedAmount;
+        } else if (!allowUnverifiedBank) {
+          throw new AppError('RECEIPT_NOT_VERIFIED');
+        }
       }
 
       try {
@@ -177,7 +204,7 @@ export function createPaymentService(prisma: PrismaClient, allowUnverifiedBank: 
               businessId: bill.businessId,
               billId: bill.id,
               memberId: auth.memberId,
-              amountEtb: input.bankReceivedEtb,
+              amountEtb: bankEtb,
               cashEtb: cash,
               reference: input.reference ?? null,
               idempotencyKey: key,
@@ -186,7 +213,7 @@ export function createPaymentService(prisma: PrismaClient, allowUnverifiedBank: 
           // Atomic add: two scans at the same moment both count.
           const { bankReceivedEtb: received } = await tx.bill.update({
             where: { id: bill.id },
-            data: { bankReceivedEtb: { increment: input.bankReceivedEtb } },
+            data: { bankReceivedEtb: { increment: bankEtb } },
             select: { bankReceivedEtb: true },
           });
           const expected = total - cash;

@@ -25,8 +25,8 @@ const payResultSchema = z.object({
 export const paymentRoutes: FastifyPluginAsyncZod = async (app) => {
   app.addHook('preHandler', requireRestaurantPlan);
   const { env } = app;
-  // Until bank verification exists, bank amounts come from the app's (fake) bank check.
-  // That is only accepted outside production unless switched on explicitly.
+  // Bank money without a receipt this server verified (the app's test bank check) is accepted
+  // only outside production, unless switched on explicitly.
   const allowUnverifiedBank =
     env.ALLOW_UNVERIFIED_BANK_PAYMENTS === 'true' ||
     (env.ALLOW_UNVERIFIED_BANK_PAYMENTS === undefined && env.NODE_ENV !== 'production');
@@ -79,7 +79,9 @@ export const paymentRoutes: FastifyPluginAsyncZod = async (app) => {
           403: errorResponseSchema.describe('FORBIDDEN (chef)'),
           404: errorResponseSchema.describe('NOT_FOUND'),
           409: errorResponseSchema.describe('BILL_CLOSED (already paid)'),
-          501: errorResponseSchema.describe('PAYMENT_NOT_CONFIGURED (bank, in production)'),
+          422: errorResponseSchema.describe(
+            'RECEIPT_NOT_VERIFIED: bank money needs the reference of a receipt verified for this bill'
+          ),
         },
       },
     },

@@ -205,11 +205,71 @@ describe('bank and cash + bank (fake bank check)', () => {
             prod
           )
         )
-      ).toBe('PAYMENT_NOT_CONFIGURED');
+      ).toBe('RECEIPT_NOT_VERIFIED');
       expect(
         (await pay(billId, { method: 'cash', cashEtb: 960 }, r.waiter.token, newKey(), prod))
           .statusCode
       ).toBe(200);
+    } finally {
+      await prod.close();
+    }
+  });
+
+  it('production: bank money comes from the receipt the server verified for that bill', async () => {
+    const prod = await createTestApp({ NODE_ENV: 'production' });
+    try {
+      const billId = await openBill();
+      const otherBill = await openBill(r.waiter.token, 1);
+      // What the verify step saves when the server checks a receipt for a bill.
+      const verified = (reference: string, bill: string, amount: number) =>
+        app.prisma.transaction.create({
+          data: {
+            businessId: r.businessId,
+            memberId: r.waiter.memberId,
+            billId: bill,
+            bankCode: 'TEL',
+            reference,
+            expectedAmount: 960,
+            receivedAmount: amount,
+            status: 'verified',
+            verifiedAt: new Date(),
+          },
+        });
+      await verified('DK50QVEHWA', billId, 1000);
+      await verified('DK50OTHER1', otherBill, 960);
+
+      // A receipt verified for another bill does not pay this one.
+      expect(
+        code(
+          await pay(
+            billId,
+            { method: 'bank', bankReceivedEtb: 960, reference: 'DK50OTHER1' },
+            r.waiter.token,
+            newKey(),
+            prod
+          )
+        )
+      ).toBe('RECEIPT_NOT_VERIFIED');
+
+      // The phone says 5; the server counts the receipt's 1000: 40 over becomes the tip.
+      const paid = await pay(
+        billId,
+        { method: 'bank', bankReceivedEtb: 5, reference: 'DK50QVEHWA', extraChoice: 'tip' },
+        r.waiter.token,
+        newKey(),
+        prod
+      );
+      expect(paid.statusCode).toBe(200);
+      expect(paid.json()).toMatchObject({ status: 'over', bankReceivedEtb: 1000, tipEtb: 40 });
+
+      // The same receipt cannot be added to the bill again.
+      const again = await openBill(r.waiter.token, 2);
+      await verified('DK50AGAIN1', again, 500);
+      const half = { method: 'bank', bankReceivedEtb: 500, reference: 'DK50AGAIN1' };
+      expect((await pay(again, half, r.waiter.token, newKey(), prod)).json()).toMatchObject({
+        status: 'short',
+      });
+      expect(code(await pay(again, half, r.waiter.token, newKey(), prod))).toBe('RECEIPT_USED');
     } finally {
       await prod.close();
     }
