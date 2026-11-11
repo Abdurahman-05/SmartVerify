@@ -42,6 +42,9 @@ const MB_HEADERS = {
 };
 
 const FETCH = { timeoutMs: 10_000, maxBytes: 2 * 1024 * 1024 };
+/** Through the Ethiopian relay: a short first try, then one longer one (app waits 25 s). */
+const RELAY_FIRST_TRY_MS = 8_000;
+const RELAY_SECOND_TRY_MS = 12_000;
 /** Sites that answer only Ethiopian addresses: fetched through RECEIPT_PROXY_URL when set. */
 const ETHIOPIA_ONLY = new Set(['transactioninfo.ethiotelecom.et', 'm-pesabusiness.safaricom.et']);
 
@@ -370,15 +373,25 @@ async function checkReceipt(input: {
       // The relay page fetches the receipt from an Ethiopian address and checks TLS itself.
       const relay = new URL(env.RECEIPT_RELAY_URL);
       relay.searchParams.set('url', source.url.toString());
-      fetched = await fetchReceipt(relay, {
-        ...FETCH,
-        tlsStrict: true,
-        headers: {
-          ...source.headers,
-          'x-relay-key': env.RECEIPT_RELAY_KEY,
-          ...(env.RECEIPT_RELAY_HOST ? { host: env.RECEIPT_RELAY_HOST } : {}),
-        },
-      });
+      const viaRelay = (timeoutMs: number) =>
+        fetchReceipt(relay, {
+          ...FETCH,
+          timeoutMs,
+          tlsStrict: true,
+          headers: {
+            ...source.headers,
+            'x-relay-key': env.RECEIPT_RELAY_KEY!,
+            ...(env.RECEIPT_RELAY_HOST ? { host: env.RECEIPT_RELAY_HOST } : {}),
+          },
+        });
+      // telebirr's site sometimes hangs on one request while the next answers in ~3 s: a short
+      // first try, then one more (both well inside the app's 25 s wait).
+      try {
+        fetched = await viaRelay(RELAY_FIRST_TRY_MS);
+      } catch (error) {
+        if (error instanceof ReceiptFetchError && error.reason === 'NOT_FOUND') throw error;
+        fetched = await viaRelay(RELAY_SECOND_TRY_MS);
+      }
     } else {
       const proxy =
         env.RECEIPT_PROXY_URL && ethiopiaOnly ? new URL(env.RECEIPT_PROXY_URL) : undefined;
