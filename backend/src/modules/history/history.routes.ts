@@ -300,7 +300,12 @@ export const historyRoutes: FastifyPluginAsyncZod = async (app) => {
       if (auth.role === 'waiter' && !auth.canSeeReports) throw new AppError('FORBIDDEN');
       const { period } = request.query;
       // The database adds everything up; only one small row per payment method comes back.
-      const where = { businessId: auth.businessId, createdAt: { gte: periodStart(period) } };
+      // A waiter allowed to see reports: their own bills only.
+      const where: Prisma.PaymentWhereInput = {
+        businessId: auth.businessId,
+        createdAt: { gte: periodStart(period) },
+        ...(auth.role === 'waiter' && { bill: { is: { waiterId: auth.memberId } } }),
+      };
       const [groups, billSales] = await Promise.all([
         prisma.payment.groupBy({
           by: ['method'],

@@ -64,6 +64,8 @@ export interface ReportAccess {
   managerCanSeeReports: boolean;
   /** Whether the signed-in member may open Reports. */
   canSeeReports: boolean;
+  /** A waiter: the numbers are their own bills only (no Expenses). */
+  ownOnly?: boolean;
 }
 
 /** GET /reports/sales — owner, or a manager while the owner allows it. */

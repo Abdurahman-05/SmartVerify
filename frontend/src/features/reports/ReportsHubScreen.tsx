@@ -859,6 +859,12 @@ export default function ReportsHubScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const businessName = useSession((s) => s.user?.businessName ?? '');
+  // A waiter (only with the owner's permission) sees their own bills: no Expenses tab, and
+  // Staff becomes "My work". The server counts their bills only either way.
+  const ownOnly = useSession((s) => s.user?.role === 'waiter');
+  const shownTabs = ownOnly ? tabs.filter((x) => x !== 'expenses') : tabs;
+  const tabLabel = (x: ReportTab) =>
+    ownOnly && x === 'staff' ? t('reportsHub.tabs.myWork') : t(`reportsHub.tabs.${x}`);
   const [period, setPeriod] = useState<Period>('today');
   const [day, setDay] = useState<string | undefined>();
   const [tab, setTab] = useState<ReportTab>('sales');
@@ -946,7 +952,7 @@ export default function ReportsHubScreen() {
           contentContainerStyle={{ paddingHorizontal: 16, gap: 2 }}
           accessibilityRole="tablist"
         >
-          {tabs.map((x) => {
+          {shownTabs.map((x) => {
             const selected = tab === x;
             return (
               <Pressable
@@ -963,13 +969,18 @@ export default function ReportsHubScreen() {
                   tone={selected ? 'default' : 'muted'}
                   className={`text-[15px] ${selected ? 'text-primary' : ''}`}
                 >
-                  {t(`reportsHub.tabs.${x}`)}
+                  {tabLabel(x)}
                 </Text>
               </Pressable>
             );
           })}
         </ScrollView>
       </View>
+      {ownOnly ? (
+        <Text tone="muted" className="px-4 pt-2 text-sm">
+          {t('reportsHub.ownOnly')}
+        </Text>
+      ) : null}
 
       {query.isPending ? (
         <LoadingView />

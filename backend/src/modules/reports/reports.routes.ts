@@ -114,6 +114,9 @@ const errors = {
 const accessSchema = z.object({
   managerCanSeeReports: z.boolean(),
   canSeeReports: z.boolean().describe('Whether the caller may open Reports'),
+  ownOnly: z
+    .boolean()
+    .describe('A waiter: Sales, Food and Staff count only their own bills; no Expenses'),
 });
 
 const builders = {
@@ -125,25 +128,31 @@ const builders = {
 
 /**
  * Restaurant reports (read only). The owner sees everything; a manager only while the owner's
- * `managerCanSeeReports` switch is on; waiters and chefs never.
+ * `managerCanSeeReports` switch is on; a waiter the owner lets see reports (canSeeReports on the
+ * staff member) sees Sales, Food and Staff over their own bills only; chefs never.
  */
 export const reportRoutes: FastifyPluginAsyncZod = async (app) => {
   const { prisma } = app;
   const security = [{ bearerAuth: [] }];
 
-  const mayView = async (auth: AuthContext) => {
-    if (auth.role === 'owner') return true;
-    if (auth.role !== 'manager') return false;
+  /** 'all', 'own' (a waiter: their bills only), or null (no reports). */
+  const scopeOf = async (auth: AuthContext): Promise<'all' | 'own' | null> => {
+    if (auth.role === 'owner') return 'all';
+    if (auth.role === 'waiter') return auth.canSeeReports ? 'own' : null;
+    if (auth.role !== 'manager') return null;
     const business = await prisma.business.findUniqueOrThrow({
       where: { id: auth.businessId },
       select: { managerCanSeeReports: true },
     });
-    return business.managerCanSeeReports;
+    return business.managerCanSeeReports ? 'all' : null;
   };
-  const guard = async (auth: AuthContext) => {
-    if (!(await mayView(auth))) throw new AppError('FORBIDDEN');
+  /** The waiter to count for (undefined: everyone); refuses who may not see this tab. */
+  const guard = async (auth: AuthContext, tab: Tab) => {
+    const scope = await scopeOf(auth);
+    if (!scope || (scope === 'own' && tab === 'expenses')) throw new AppError('FORBIDDEN');
+    return scope === 'own' ? auth.memberId : undefined;
   };
-  const preHandler = [requireRoles('owner', 'manager'), requireRestaurantPlan];
+  const preHandler = [requireRoles('owner', 'manager', 'waiter'), requireRestaurantPlan];
   const tabRoute = (tab: Tab, schema: z.ZodType, description: string) =>
     app.get(
       `/reports/${tab}`,
@@ -158,9 +167,9 @@ export const reportRoutes: FastifyPluginAsyncZod = async (app) => {
         },
       },
       async (request) => {
-        await guard(request.auth);
+        const waiterId = await guard(request.auth, tab);
         const { from, to } = request.query;
-        return builders[tab](prisma, request.auth.businessId, reportRange(from, to));
+        return builders[tab](prisma, request.auth.businessId, reportRange(from, to), waiterId);
       }
     );
 
@@ -187,14 +196,17 @@ export const reportRoutes: FastifyPluginAsyncZod = async (app) => {
         },
       },
       async (request, reply) => {
-        await guard(request.auth);
         const { tab, from, to } = request.query;
+        const waiterId = await guard(request.auth, tab);
         const r = reportRange(from, to);
         const business = await prisma.business.findUniqueOrThrow({
           where: { id: request.auth.businessId },
           select: { name: true },
         });
-        const table = tableOf(tab, await builders[tab](prisma, request.auth.businessId, r));
+        const table = tableOf(
+          tab,
+          await builders[tab](prisma, request.auth.businessId, r, waiterId)
+        );
         const days = r.from === r.to ? r.from : `${r.from} to ${r.to}`;
         const file = `report-${tab}-${r.from}${r.from === r.to ? '' : `-${r.to}`}.${format}`;
         reply.header('content-disposition', `attachment; filename="${file}"`);
@@ -225,9 +237,11 @@ export const reportRoutes: FastifyPluginAsyncZod = async (app) => {
         where: { id: request.auth.businessId },
         select: { managerCanSeeReports: true, plan: true },
       });
+      const scope = business.plan === 'restaurant' ? await scopeOf(request.auth) : null;
       return {
         managerCanSeeReports: business.managerCanSeeReports,
-        canSeeReports: business.plan === 'restaurant' && (await mayView(request.auth)),
+        canSeeReports: scope !== null,
+        ownOnly: scope === 'own',
       };
     }
   );
@@ -250,7 +264,7 @@ export const reportRoutes: FastifyPluginAsyncZod = async (app) => {
         where: { id: request.auth.businessId },
         data: { managerCanSeeReports },
       });
-      return { managerCanSeeReports, canSeeReports: true };
+      return { managerCanSeeReports, canSeeReports: true, ownOnly: false };
     }
   );
 };

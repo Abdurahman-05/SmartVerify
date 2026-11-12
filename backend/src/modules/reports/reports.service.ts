@@ -47,22 +47,38 @@ const member = { select: { user: { select: { name: true } } } } as const;
 const byAmount = <T extends { amount: number }>(a: T, b: T) => b.amount - a.amount;
 const range = (r: Range) => ({ gte: r.gte, lt: r.lt });
 
+/**
+ * Every report takes an optional waiterId: a waiter the owner lets see reports gets the same
+ * numbers counted over their own bills only.
+ */
+const ownBills = (waiterId?: string) => (waiterId ? { bill: { is: { waiterId } } } : {});
+
 /** Sales = bill totals of the bills paid in the range (tips are the waiters', not sales). */
-async function salesTotal(prisma: PrismaClient, businessId: string, r: { gte: Date; lt: Date }) {
+async function salesTotal(
+  prisma: PrismaClient,
+  businessId: string,
+  r: { gte: Date; lt: Date },
+  waiterId?: string
+) {
   const sum = await prisma.bill.aggregate({
-    where: { businessId, payment: { is: { createdAt: r } } },
+    where: { businessId, ...(waiterId && { waiterId }), payment: { is: { createdAt: r } } },
     _sum: { totalEtb: true },
   });
   return sum._sum.totalEtb ?? 0;
 }
 
-export async function salesReport(prisma: PrismaClient, businessId: string, r: Range) {
+export async function salesReport(
+  prisma: PrismaClient,
+  businessId: string,
+  r: Range,
+  waiterId?: string
+) {
   const [payments, previousTotal] = await Promise.all([
     prisma.payment.findMany({
-      where: { businessId, createdAt: range(r) },
+      where: { businessId, createdAt: range(r), ...ownBills(waiterId) },
       select: { createdAt: true, method: true, bill: { select: { totalEtb: true } } },
     }),
-    salesTotal(prisma, businessId, previousOf(r)),
+    salesTotal(prisma, businessId, previousOf(r), waiterId),
   ]);
   const byHour = Array.from({ length: 24 }, (_, hour) => ({ hour, amount: 0, bills: 0 }));
   const days = new Map<string, { date: string; amount: number; bills: number }>();
@@ -103,10 +119,16 @@ export async function salesReport(prisma: PrismaClient, businessId: string, r: R
   };
 }
 
-export async function foodReport(prisma: PrismaClient, businessId: string, r: Range) {
+export async function foodReport(
+  prisma: PrismaClient,
+  businessId: string,
+  r: Range,
+  waiterId?: string
+) {
+  const own = waiterId ? { waiterId } : {};
   const [orderItems, menuItems, cancelledOrders] = await Promise.all([
     prisma.orderItem.findMany({
-      where: { order: { businessId, cancelledAt: null, createdAt: range(r) } },
+      where: { order: { businessId, cancelledAt: null, createdAt: range(r), ...own } },
       select: { menuItemId: true, name: true, priceEtb: true, quantity: true },
     }),
     prisma.menuItem.findMany({
@@ -120,7 +142,7 @@ export async function foodReport(prisma: PrismaClient, businessId: string, r: Ra
       },
     }),
     prisma.order.findMany({
-      where: { businessId, cancelledAt: range(r) },
+      where: { businessId, cancelledAt: range(r), ...own },
       orderBy: { cancelledAt: 'desc' },
       select: {
         id: true,
@@ -203,7 +225,13 @@ export async function foodReport(prisma: PrismaClient, businessId: string, r: Ra
   };
 }
 
-export async function expensesReport(prisma: PrismaClient, businessId: string, r: Range) {
+/** Business money: never shown per waiter (the route refuses waiters). */
+export async function expensesReport(
+  prisma: PrismaClient,
+  businessId: string,
+  r: Range,
+  _waiterId?: string
+) {
   const [business, spendings, changedByOwner, deleted, bought, sales] = await Promise.all([
     prisma.business.findUniqueOrThrow({ where: { id: businessId }, select: { costKinds: true } }),
     prisma.spending.findMany({
@@ -293,26 +321,41 @@ export async function expensesReport(prisma: PrismaClient, businessId: string, r
   };
 }
 
-export async function staffReport(prisma: PrismaClient, businessId: string, r: Range) {
+export async function staffReport(
+  prisma: PrismaClient,
+  businessId: string,
+  r: Range,
+  waiterId?: string
+) {
   const [payments, tips, transactions, receiptChecks, kitchen] = await Promise.all([
     prisma.payment.findMany({
-      where: { businessId, createdAt: range(r) },
+      where: { businessId, createdAt: range(r), ...ownBills(waiterId) },
       select: { bill: { select: { totalEtb: true, waiterId: true, waiter: member } } },
     }),
     prisma.tip.findMany({
-      where: { businessId, createdAt: range(r) },
+      where: { businessId, createdAt: range(r), ...(waiterId && { waiterId }) },
       select: { amountEtb: true, paidOut: true, waiterId: true, waiter: member },
     }),
     prisma.transaction.findMany({
-      where: { businessId, createdAt: range(r), status: { not: 'pending' } },
+      where: {
+        businessId,
+        createdAt: range(r),
+        status: { not: 'pending' },
+        ...(waiterId && { memberId: waiterId }),
+      },
       select: { status: true, bankCode: true, memberId: true, member },
     }),
     prisma.receiptCheck.findMany({
-      where: { businessId, createdAt: range(r) },
+      where: { businessId, createdAt: range(r), ...(waiterId && { checkedById: waiterId }) },
       select: { bankCode: true, checkedById: true, checkedBy: member },
     }),
     prisma.kitchenOrder.findMany({
-      where: { businessId, createdAt: range(r), readyAt: { not: null } },
+      where: {
+        businessId,
+        createdAt: range(r),
+        readyAt: { not: null },
+        ...(waiterId && { order: { waiterId } }),
+      },
       select: {
         createdAt: true,
         readyAt: true,

@@ -1531,7 +1531,8 @@
       "menu": "Food & drink",
       "expenses": "Expenses",
       "staff": "Staff & checks",
-      "food": "Food & drink"
+      "food": "Food & drink",
+      "myWork": "My work"
     },
     "billsCount_one": "{{count}} bill",
     "billsCount_other": "{{count}} bills",
@@ -1637,7 +1638,8 @@
     "access": {
       "title": "Reports for managers",
       "body": "Let managers open Reports (sales, expenses, staff). Waiters and chefs never see them."
-    }
+    },
+    "ownOnly": "Only your own bills are counted."
   },
   "firstTheme": {
     "title": "Choose your colours",

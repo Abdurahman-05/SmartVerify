@@ -28,12 +28,12 @@ const get = (path: string, token: string) =>
   app.inject({ method: 'GET', url: `/api/v1${path}`, headers: headers(token) });
 
 /** A paid 960 ETB dine-in bill (2 Tibs + 1 Coffee), in cash. */
-async function paidBill(table: number) {
+async function paidBill(table: number, token = r.waiter.token) {
   const bill = (
     await app.inject({
       method: 'POST',
       url: '/api/v1/orders',
-      headers: headers(r.waiter.token, newKey()),
+      headers: headers(token, newKey()),
       payload: {
         type: 'dine',
         tableId: r.tables[table]!.id,
@@ -47,17 +47,54 @@ async function paidBill(table: number) {
   await app.inject({
     method: 'POST',
     url: `/api/v1/bills/${bill.id}/payments`,
-    headers: headers(r.waiter.token, newKey()),
+    headers: headers(token, newKey()),
     payload: { method: 'cash', cashEtb: 960 },
   });
 }
 
 describe('reports', () => {
-  it('a waiter gets 403', async () => {
+  it('a waiter without permission from the owner gets 403', async () => {
     for (const tab of ['sales', 'food', 'expenses', 'staff']) {
       expect((await get(`/reports/${tab}`, r.waiter.token)).statusCode).toBe(403);
     }
     expect((await get('/reports/export.csv?tab=sales', r.waiter.token)).statusCode).toBe(403);
+    expect((await get('/reports/sales', r.chef.token)).statusCode).toBe(403);
+  });
+
+  it('a waiter with permission sees only their own bills, and no expenses', async () => {
+    await paidBill(0, r.waiter.token);
+    await paidBill(1, r.waiter2.token);
+    await app.prisma.businessMember.update({
+      where: { id: r.waiter.memberId },
+      data: { canSeeReports: true },
+    });
+    expect((await get('/business/report-access', r.waiter.token)).json()).toMatchObject({
+      canSeeReports: true,
+      ownOnly: true,
+    });
+    const sales = (await get('/reports/sales', r.waiter.token)).json() as { total: number };
+    expect(sales.total).toBe(960);
+    const owner = (await get('/reports/sales', r.owner.token)).json() as { total: number };
+    expect(owner.total).toBe(1920);
+    const food = (await get('/reports/food', r.waiter.token)).json() as {
+      bestSellers: { qty: number }[];
+    };
+    expect(food.bestSellers[0]).toMatchObject({ qty: 2 });
+    const staff = (await get('/reports/staff', r.waiter.token)).json() as {
+      waiterSales: { name: string }[];
+    };
+    expect(staff.waiterSales.map((w) => w.name)).toEqual(['Waiter Dawit']);
+    expect((await get('/reports/expenses', r.waiter.token)).statusCode).toBe(403);
+    const csv = await get('/reports/export.csv?tab=sales', r.waiter.token);
+    expect(csv.statusCode).toBe(200);
+    expect(csv.body).toContain('960');
+    expect(csv.body).not.toContain('1,920');
+    expect((await get('/reports/export.csv?tab=expenses', r.waiter.token)).statusCode).toBe(403);
+    // The older payments summary also counts only their own bills.
+    const pay = (await get('/reports/payments?period=today', r.waiter.token)).json() as {
+      count: number;
+    };
+    expect(pay.count).toBe(1);
   });
 
   it('a manager only while the owner allows it', async () => {
@@ -73,6 +110,7 @@ describe('reports', () => {
     expect((await get('/business/report-access', r.manager.token)).json()).toEqual({
       managerCanSeeReports: true,
       canSeeReports: true,
+      ownOnly: false,
     });
   });
 
