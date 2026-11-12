@@ -201,7 +201,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   </Text>
                   {badge > 0 ? (
                     <View className="min-w-6 items-center rounded-[10px] bg-amber px-1.5">
-                      <Text font="bold" className="text-sm">
+                      <Text font="bold" className="text-sm text-[#14201B]">
                         {badge}
                       </Text>
                     </View>
@@ -245,7 +245,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               </Text>
               {badge > 0 ? (
                 <View className="min-w-6 items-center rounded-[10px] bg-amber px-2 py-0.5">
-                  <Text font="bold" className="text-sm">
+                  <Text font="bold" className="text-sm text-[#14201B]">
                     {badge}
                   </Text>
                 </View>
@@ -253,22 +253,27 @@ export function AdminShell({ children }: { children: ReactNode }) {
             </Pressable>
           );
         })}
-        <View className="mt-auto flex-row items-center gap-3 border-t-[1.5px] border-border px-2 pt-4">
-          <View className="h-10 w-10 items-center justify-center rounded-full bg-amber">
-            <Text font="bold" className="text-sm">
-              {admin ? initials(admin.name) : ''}
-            </Text>
+        {/* Who is signed in gets the full width; the two buttons sit on their own row. */}
+        <View className="mt-auto gap-2 border-t-[1.5px] border-border px-2 pt-4">
+          <View className="flex-row items-center gap-3">
+            <View className="h-10 w-10 items-center justify-center rounded-full bg-amber">
+              <Text font="bold" className="text-sm text-[#14201B]">
+                {admin ? initials(admin.name) : ''}
+              </Text>
+            </View>
+            <View className="min-w-0 flex-1">
+              <Text font="bold" className="text-sm" numberOfLines={1}>
+                {admin?.name ?? ''}
+              </Text>
+              <Text tone="muted" className="text-sm" numberOfLines={1}>
+                {admin ? t(`platformAdmin.roles.${admin.role}`) : ''}
+              </Text>
+            </View>
           </View>
-          <View className="min-w-0 flex-1">
-            <Text font="bold" className="text-sm" numberOfLines={1}>
-              {admin?.name ?? ''}
-            </Text>
-            <Text tone="muted" className="text-sm">
-              {admin ? t(`platformAdmin.roles.${admin.role}`) : ''}
-            </Text>
+          <View className="flex-row justify-between">
+            {modeButton}
+            {signOutButton}
           </View>
-          {modeButton}
-          {signOutButton}
         </View>
       </View>
       {page}
