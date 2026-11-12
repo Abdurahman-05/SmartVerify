@@ -11,6 +11,9 @@ import { useSession } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
+/** How often Home asks for new announcements and the plan status while it is on screen. */
+const LIVE_MS = 30_000;
+
 /**
  * Top of the home page: the payment warning (trial ending, overdue, restricted, paused) with
  * "Pay now" for the owner, and announcements from the Smart Verify team.
@@ -20,10 +23,17 @@ export function AccessBanner() {
   const router = useRouter();
   const brand = useBrandColors();
   const isOwner = useSession((s) => s.user?.role === 'owner');
-  const access = useQuery({ queryKey: ['business-access'], queryFn: getBusinessAccess });
+  // The server cannot tell the phone about a new announcement or a plan change: while Home is
+  // on screen the app asks again every 30 s (paused when the app is in the background).
+  const access = useQuery({
+    queryKey: ['business-access'],
+    queryFn: getBusinessAccess,
+    refetchInterval: LIVE_MS,
+  });
   const news = useQuery({
     queryKey: ['business-announcements'],
     queryFn: getBusinessAnnouncements,
+    refetchInterval: LIVE_MS,
   });
   const { refetch: refetchAccess } = access;
   const { refetch: refetchNews } = news;
