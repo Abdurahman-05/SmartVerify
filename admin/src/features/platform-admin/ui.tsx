@@ -167,7 +167,7 @@ export function Tabs<T extends string>({
 
 type Variant = 'primary' | 'outline' | 'danger';
 const buttonStyle: Record<Variant, { box: string; tone: 'inverse' | 'default'; color: string }> = {
-  primary: { box: 'bg-primary', tone: 'inverse', color: colors.surface },
+  primary: { box: 'bg-primary', tone: 'inverse', color: colors.onPrimary },
   outline: { box: 'border-2 border-borderStrong bg-surface', tone: 'default', color: colors.text },
   danger: { box: 'border-2 border-dangerBg bg-surface', tone: 'default', color: colors.dangerFg },
 };

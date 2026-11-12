@@ -7,6 +7,8 @@ import {
   CreditCard,
   Home,
   LogOut,
+  Moon,
+  Sun,
   MessageSquare,
   SlidersHorizontal,
   Tag,
@@ -20,6 +22,7 @@ import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { Text } from '@/components/ui/Text';
 import { adminSignOut, getAdminProfile, getDashboard, hasAdminToken } from '@/lib/admin';
 import { ApiError } from '@/lib/api/client';
+import { useColorMode } from '@/theme/colorMode';
 import { colors } from '@/theme/tokens';
 import { wordmarkStyle } from '@/theme/wordmark';
 
@@ -85,6 +88,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const queryClient = useQueryClient();
+  const { mode, toggle } = useColorMode();
   const { width, height } = useWindowDimensions();
   const wide = width >= WIDE;
   const profile = useQuery({
@@ -123,6 +127,23 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const isActive = (href: Href) =>
     pathname === href || (href !== '/' && pathname.startsWith(`${String(href)}/`));
 
+  const modeButton = (
+    <Pressable
+      onPress={toggle}
+      accessibilityRole="button"
+      accessibilityLabel={t(
+        mode === 'dark' ? 'platformAdmin.nav.dayMode' : 'platformAdmin.nav.nightMode'
+      )}
+      className="h-11 w-11 items-center justify-center rounded-xl active:bg-background"
+    >
+      {mode === 'dark' ? (
+        <Sun size={20} color={colors.muted} strokeWidth={2} />
+      ) : (
+        <Moon size={20} color={colors.muted} strokeWidth={2} />
+      )}
+    </Pressable>
+  );
+
   const signOutButton = (
     <Pressable
       onPress={() => void signOut()}
@@ -148,7 +169,10 @@ export function AdminShell({ children }: { children: ReactNode }) {
         <View className="border-b-[1.5px] border-border bg-surface">
           <View className="flex-row items-center justify-between px-4 pt-3">
             <BrandMark compact />
-            {signOutButton}
+            <View className="flex-row">
+              {modeButton}
+              {signOutButton}
+            </View>
           </View>
           <ScrollView
             horizontal
@@ -211,7 +235,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 active ? 'bg-primary' : 'hover:bg-background active:bg-background'
               }`}
             >
-              <Icon size={20} color={active ? colors.surface : colors.muted} strokeWidth={2} />
+              <Icon size={20} color={active ? colors.onPrimary : colors.muted} strokeWidth={2} />
               <Text
                 font={active ? 'bold' : 'medium'}
                 tone={active ? 'inverse' : 'default'}
@@ -243,6 +267,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
               {admin ? t(`platformAdmin.roles.${admin.role}`) : ''}
             </Text>
           </View>
+          {modeButton}
           {signOutButton}
         </View>
       </View>

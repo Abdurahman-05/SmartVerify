@@ -88,7 +88,9 @@
       "messages": "Messages",
       "activity": "Activity log",
       "soon": "Soon",
-      "signOut": "Sign out"
+      "signOut": "Sign out",
+      "nightMode": "Night mode",
+      "dayMode": "Day mode"
     },
     "roles": {
       "super_admin": "Super admin"

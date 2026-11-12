@@ -27,11 +27,11 @@ const containers: Record<Variant, string> = {
 };
 
 const textColor: Record<Variant, string> = {
-  primary: colors.surface,
+  primary: colors.onPrimary,
   outline: colors.text,
   amber: colors.text,
-  success: colors.surface,
-  danger: colors.surface,
+  success: colors.onPrimary,
+  danger: colors.onPrimary,
   secondary: colors.text,
 };
 

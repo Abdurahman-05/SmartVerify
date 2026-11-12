@@ -12,7 +12,7 @@ const tones = {
   default: 'text-text',
   muted: 'text-muted',
   link: 'text-primaryText',
-  inverse: 'text-surface',
+  inverse: 'text-onPrimary',
 } as const;
 
 export interface TextProps extends RNTextProps {

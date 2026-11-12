@@ -9,3 +9,51 @@
   --color-primary-tint: 230 242 236;
   --color-primary-tile: 221 239 230;
 }
+
+/* Page colors as RGB triplets: day here, night below (the console sets data-theme). */
+:root {
+  --c-background: 244 248 246;
+  --c-surface: 255 255 255;
+  --c-border: 221 229 225;
+  --c-border-mid: 201 212 207;
+  --c-border-strong: 185 199 193;
+  --c-text: 20 32 27;
+  --c-muted: 59 74 68;
+  --c-placeholder: 91 107 100;
+  --c-success-bg: 221 239 230;
+  --c-success-fg: 11 74 50;
+  --c-warn-bg: 255 233 168;
+  --c-warn-fg: 92 68 0;
+  --c-danger-bg: 251 224 221;
+  --c-danger-fg: 140 29 24;
+  --c-tip-bg: 255 244 209;
+  --c-neutral-bg: 230 235 232;
+  --c-nav-inactive: 74 90 83;
+  --c-danger-surface: 250 245 243;
+  --c-divider: 232 238 235;
+}
+:root[data-theme='dark'] {
+  --c-background: 14 21 18;
+  --c-surface: 23 32 28;
+  --c-border: 42 54 49;
+  --c-border-mid: 52 66 60;
+  --c-border-strong: 68 84 77;
+  --c-text: 231 238 234;
+  --c-muted: 174 189 182;
+  --c-placeholder: 141 156 149;
+  --c-success-bg: 18 55 42;
+  --c-success-fg: 155 227 191;
+  --c-warn-bg: 58 48 16;
+  --c-warn-fg: 255 216 102;
+  --c-danger-bg: 59 30 27;
+  --c-danger-fg: 255 180 171;
+  --c-tip-bg: 58 49 21;
+  --c-neutral-bg: 34 45 40;
+  --c-nav-inactive: 174 189 182;
+  --c-danger-surface: 42 27 25;
+  --c-divider: 33 44 39;
+  --color-primary-text: 111 214 168;
+  --color-primary-tint: 22 48 42;
+  --color-primary-tile: 27 58 48;
+  color-scheme: dark;
+}

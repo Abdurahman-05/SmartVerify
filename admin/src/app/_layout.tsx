@@ -12,7 +12,14 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
+import { View } from 'react-native';
 
+import {
+  applyColorMode,
+  ColorModeContext,
+  initialColorMode,
+  type ColorMode,
+} from '@/theme/colorMode';
 import { colors } from '@/theme/tokens';
 
 /** The Smart Verify team's admin console (web only). Nothing here ships in the phone app. */
@@ -33,13 +40,33 @@ export default function RootLayout() {
       })
   );
 
+  // Day or night: set before the first paint, so the page never flashes the other one.
+  const [mode, setMode] = useState<ColorMode>(() => {
+    const first = initialColorMode();
+    applyColorMode(first);
+    return first;
+  });
+  const toggle = () => {
+    const next = mode === 'dark' ? 'light' : 'dark';
+    applyColorMode(next, true);
+    setMode(next);
+  };
+
   if (!fontsLoaded && !fontError) return null;
   return (
     <QueryClientProvider client={queryClient}>
-      <StatusBar style="dark" />
-      <Stack
-        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
-      />
+      <ColorModeContext.Provider value={{ mode, toggle }}>
+        <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
+        {/* Redrawn on a change so every color read in code updates; loaded data stays. */}
+        <View key={mode} style={{ flex: 1 }}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.background },
+            }}
+          />
+        </View>
+      </ColorModeContext.Provider>
     </QueryClientProvider>
   );
 }

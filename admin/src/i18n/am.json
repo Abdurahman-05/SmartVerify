@@ -88,7 +88,9 @@
       "messages": "መልዕክቶች",
       "activity": "የእንቅስቃሴ መዝገብ",
       "soon": "በቅርቡ",
-      "signOut": "ውጣ"
+      "signOut": "ውጣ",
+      "nightMode": "የሌሊት ገጽታ",
+      "dayMode": "የቀን ገጽታ"
     },
     "roles": {
       "super_admin": "ዋና አስተዳዳሪ"

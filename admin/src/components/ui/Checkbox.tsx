@@ -25,7 +25,7 @@ export function Checkbox({ checked, onChange, accessibilityLabel, children }: Ch
           checked ? 'border-primary bg-primary' : 'border-borderStrong bg-surface'
         }`}
       >
-        {checked ? <Check size={18} color={colors.surface} strokeWidth={3} /> : null}
+        {checked ? <Check size={18} color={colors.onPrimary} strokeWidth={3} /> : null}
       </View>
       <View className="flex-1 flex-row flex-wrap">{children}</View>
     </Pressable>
