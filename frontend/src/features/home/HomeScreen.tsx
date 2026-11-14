@@ -14,6 +14,7 @@ import { paymentsKey, syncPayments } from '@/lib/history';
 import { useSession, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';
 import { AccessBanner } from '@/features/business/AccessBanner';
+import { LocationPrompt } from '@/features/business/LocationPrompt';
 
 import { getReportAccess, reportAccessKey } from '@/lib/reports';
 import { getHomeActions, type HomeAction } from './homeActions';
@@ -267,6 +268,7 @@ export default function HomeScreen() {
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
         <HomeHeader user={user} />
         <AccessBanner />
+        <LocationPrompt />
         <HeroCard
           name={user.displayName}
           tablesWaiting={user.plan === 'restaurant' ? tablesWaiting : undefined}

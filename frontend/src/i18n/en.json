@@ -1224,6 +1224,14 @@
       "saved": "Saved",
       "invalidLocation": "We could not read a location from that. Paste a Google Maps link or two numbers.",
       "entry": "Business information"
+    },
+    "locationPrompt": {
+      "message": "Share your shop location so our team can find you for support.",
+      "detect": "Detect my location",
+      "detecting": "Finding location…",
+      "later": "Later",
+      "denied": "Location permission is off. Allow it in your phone settings, or try again.",
+      "unavailable": "Could not find your location. Turn on location and try again."
     }
   },
   "categories": {

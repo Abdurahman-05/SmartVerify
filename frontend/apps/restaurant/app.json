@@ -35,6 +35,12 @@
           "imageWidth": 288
         }
       ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "ገብቷል uses your shop's location so our team can find you for support."
+        }
+      ],
       "expo-localization",
       "expo-font",
       [

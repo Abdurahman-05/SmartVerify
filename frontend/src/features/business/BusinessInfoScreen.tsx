@@ -18,6 +18,8 @@ import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
+import { detectLocation } from './detectLocation';
+
 /** Owner: business type, city, address and map location (only the Smart Verify team sees it). */
 export default function BusinessInfoScreen() {
   const { t } = useTranslation();
@@ -30,6 +32,8 @@ export default function BusinessInfoScreen() {
   const [cityEdit, setCity] = useState<string | null>(null);
   const [addressEdit, setAddress] = useState<string | null>(null);
   const [locationEdit, setLocation] = useState<string | null>(null);
+  const [detecting, setDetecting] = useState(false);
+  const [detectProblem, setDetectProblem] = useState<string | null>(null);
   const p = profile.data;
   const type = typeEdit ?? p?.businessType ?? '';
   const city = cityEdit ?? p?.city ?? '';
@@ -104,6 +108,39 @@ export default function BusinessInfoScreen() {
           autoCorrect={false}
           error={locationError}
         />
+        <Button
+          label={
+            detecting ? t('business.locationPrompt.detecting') : t('business.locationPrompt.detect')
+          }
+          icon={MapPin}
+          variant="outline"
+          size="md"
+          disabled={detecting}
+          onPress={() => {
+            setDetecting(true);
+            setDetectProblem(null);
+            void detectLocation().then((found) => {
+              setDetecting(false);
+              if (found.ok) {
+                save.reset();
+                setLocation(found.location);
+              } else {
+                setDetectProblem(
+                  t(
+                    found.reason === 'denied'
+                      ? 'business.locationPrompt.denied'
+                      : 'business.locationPrompt.unavailable'
+                  )
+                );
+              }
+            });
+          }}
+        />
+        {detectProblem ? (
+          <Text font="semibold" className="text-sm text-dangerFg">
+            {detectProblem}
+          </Text>
+        ) : null}
         <Text tone="muted" className="text-sm">
           {t('business.businessInfo.locationHint')}
         </Text>
