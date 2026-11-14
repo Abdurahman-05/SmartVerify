@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Manager: buy list</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F8F6}
+button,input{font-family:'DM Sans',sans-serif}
+input::placeholder{color:#5B6B64}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F4F8F6;color:#14201B;display:flex;flex-direction:column;overflow:hidden">
+<div style="display:flex;align-items:center;gap:4px;padding:14px 16px 8px 8px"><div style="width:8px"></div><div style="flex-grow:1"><div style="font-family:Sora,sans-serif;font-size:22px;font-weight:700;line-height:1.15">Buy list</div><div style="font-size:14px;color:#3B4A44;margin-top:1px">From the kitchen</div></div><div style="width:44px;height:44px;border-radius:22px;background:#0D4A36;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px">M</div></div>
+<div style="display:flex;gap:8px;padding:0 16px 10px"><button style="height:44px;padding:0 18px;border-radius:22px;font-size:16px;font-weight:700;cursor:pointer;border:0;background:#0D4A36;color:#fff">To buy · 4</button><button style="height:44px;padding:0 18px;border-radius:22px;font-size:16px;font-weight:700;cursor:pointer;border:2px solid #B9C7C1;background:#fff;color:#14201B">Bought · 2</button></div>
+<div style="display:flex;flex-direction:column;gap:10px;padding:0 16px">
+<div style="background:#fff;border:2px solid #0D4A36;border-radius:20px;padding:14px">
+<div style="display:flex;align-items:center;gap:12px"><div style="width:28px;height:28px;border-radius:14px;border:2.5px solid #0D4A36;flex-shrink:0"></div><div style="flex:1"><div style="font-size:18px;font-weight:700">Napkins · 3 boxes</div><div style="font-size:14px;color:#3B4A44">Almaz (chef) · 08:40</div></div><span style="height:28px;padding:0 10px;border-radius:14px;background:#FFF3CC;color:#6B4B00;font-size:13px;font-weight:700;display:inline-flex;align-items:center">Today</span></div>
+<div style="margin-top:14px;padding-top:14px;border-top:1.5px solid #EAF0EC;display:flex;flex-direction:column;gap:12px">
+<div><label for="pr" style="font-size:15px;font-weight:700">How much did it cost?</label><div style="position:relative;margin-top:6px"><input id="pr" value="480" style="width:100%;height:56px;border:2px solid #B9C7C1;border-radius:14px;padding:0 60px 0 16px;box-sizing:border-box;font-family:Sora,sans-serif;font-size:24px;font-weight:700;background:#fff;color:#14201B"><span style="position:absolute;right:16px;top:17px;font-weight:700;color:#3B4A44">ETB</span></div></div>
+<div style="display:flex;gap:8px"><button style="flex:1;height:48px;border-radius:14px;border:0;background:#0D4A36;color:#fff;font-size:16px;font-weight:700;cursor:pointer">Paid cash</button><button style="flex:1;height:48px;border-radius:14px;border:2px solid #B9C7C1;background:#fff;color:#14201B;font-size:16px;font-weight:700;cursor:pointer">Paid by bank</button></div>
+<button style="width:100%;height:56px;border:0;border-radius:18px;background:#0D4A36;color:#fff;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Mark as bought</button>
+<div style="font-size:13px;color:#3B4A44;text-align:center">It is saved in Purchases automatically.</div>
+</div></div>
+<div style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #DDE5E1;border-radius:18px;padding:12px 14px;min-height:64px"><div style="width:28px;height:28px;border-radius:14px;border:2.5px solid #B9C7C1;flex-shrink:0"></div><div style="flex:1"><div style="font-size:17px;font-weight:700">Cooking oil · 2 jerrycans</div><div style="font-size:14px;color:#3B4A44">Almaz (chef) · 08:41</div></div><span style="height:28px;padding:0 10px;border-radius:14px;background:#FFF3CC;color:#6B4B00;font-size:13px;font-weight:700;display:inline-flex;align-items:center">Today</span></div>
+<div style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #DDE5E1;border-radius:18px;padding:12px 14px;min-height:64px"><div style="width:28px;height:28px;border-radius:14px;border:2.5px solid #B9C7C1;flex-shrink:0"></div><div style="flex:1"><div style="font-size:17px;font-weight:700">Dish soap · 1 pack</div><div style="font-size:14px;color:#3B4A44">Almaz (chef) · 08:41</div></div><span style="height:28px;padding:0 10px;border-radius:14px;background:#EEF2F0;color:#3B4A44;font-size:13px;font-weight:700;display:inline-flex;align-items:center">This week</span></div>
+<div style="display:flex;align-items:center;gap:12px;background:#fff;border:1.5px solid #DDE5E1;border-radius:18px;padding:12px 14px;min-height:64px"><div style="width:28px;height:28px;border-radius:14px;border:2.5px solid #B9C7C1;flex-shrink:0"></div><div style="flex:1"><div style="font-size:17px;font-weight:700">Charcoal · 2 sacks</div><div style="font-size:14px;color:#3B4A44">Almaz (chef) · Yesterday</div></div><span style="height:28px;padding:0 10px;border-radius:14px;background:#EEF2F0;color:#3B4A44;font-size:13px;font-weight:700;display:inline-flex;align-items:center">This week</span></div>
+</div>
+<div style="flex-grow:1"></div>
+<div style="display:flex;justify-content:space-around;padding:10px 0 16px;background:#fff;border-top:1px solid #DDE5E1"><div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#4A5A53;font-size:13px;font-weight:700"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4A5A53" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h4"/></svg>Bills</div><div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#0D4A36;font-size:13px;font-weight:700"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0D4A36" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h3l2.5 11h10l2-8H7"/></svg>Buy list</div><div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#4A5A53;font-size:13px;font-weight:700"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4A5A53" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 15.5l7-7M10 8.5h5.5V14"/></svg>Money out</div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

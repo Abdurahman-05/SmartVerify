@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Money flow 4: expense details</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Noto+Sans+Ethiopic:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F8F6;color:#14201B}
+button,input{font-family:inherit}
+.h{font-family:'Sora',sans-serif}
+.am,.am *{font-family:'Noto Sans Ethiopic','DM Sans',sans-serif}
+.am .h{font-family:'Noto Sans Ethiopic','Sora',sans-serif}
+.card{background:#fff;border:1.5px solid #DDE5E1;border-radius:22px}
+.ib{width:44px;height:44px;border:0;border-radius:22px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;color:#14201B}
+.btn{height:56px;width:100%;border-radius:18px;border:0;font-size:17px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;white-space:nowrap}
+.chip{height:44px;padding:0 18px;border-radius:22px;font-size:15px;font-weight:700;border:2px solid #DDE5E1;background:#fff;color:#14201B;cursor:pointer;white-space:nowrap}
+.chip.on{background:#0D4A36;border-color:#0D4A36;color:#fff}
+.tag{height:26px;padding:0 10px;border-radius:13px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;white-space:nowrap}
+.tile{width:44px;height:44px;border-radius:14px;background:#E6F2EC;color:#0D4A36;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.muted{color:#3B4A44}
+@keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk{background:linear-gradient(90deg,#DDE5E1 25%,#F4F8F6 50%,#DDE5E1 75%);background-size:200% 100%;animation:sk 1.5s linear infinite}
+@media (prefers-reduced-motion: reduce){.sk{animation:none}}
+</style>
+</helmet>
+<div class="" style="width:390px;height:844px;background:#F4F8F6;color:#14201B;display:flex;flex-direction:column;overflow:hidden;position:relative;"><div style="display:flex;align-items:center;gap:4px;padding:14px 12px 8px 8px"><button class="ib" aria-label="Back"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;color:currentColor"><path d="M15 5l-7 7 7 7"/></svg></button><div class="h" style="flex:1;font-size:22px;font-weight:700;line-height:1.2">Spending details</div><div style="width:44px"></div></div><div style="flex:1;min-height:0;padding:2px 16px 12px;display:flex;flex-direction:column;gap:10px;overflow:hidden;position:relative"><div class="card" style="padding:16px;display:flex;align-items:center;gap:14px"><div class="tile" style="width:56px;height:56px;border-radius:18px"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;color:currentColor"><path d="M7 3v8a2 2 0 0 0 2 2v8M11 3v8M17 3c-2 2-3 5-3 8h3v10"/></svg></div><div style="flex:1;min-width:0"><div class="h" style="font-size:34px;font-weight:700;line-height:1.1;white-space:nowrap">420 <span style="font-size:18px;color:#3B4A44">ETB</span></div><div style="font-size:17px;font-weight:700;margin-top:3px">Tomatoes and onions</div></div></div><div class="card" style="padding:4px 16px 2px"><div style="display:flex;justify-content:space-between;align-items:center;min-height:46px;gap:10px;border-top:1.5px solid #EEF3F0"><span style="font-size:15px;color:#3B4A44">Type</span><span style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px"><span class="tag" style="background:#E6F2EC;color:#0D4A36">Purchase</span></span></div><div style="display:flex;justify-content:space-between;align-items:center;min-height:46px;gap:10px;border-top:1.5px solid #EEF3F0"><span style="font-size:15px;color:#3B4A44">Category</span><span style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D4A36" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;color:#0D4A36"><path d="M7 3v8a2 2 0 0 0 2 2v8M11 3v8M17 3c-2 2-3 5-3 8h3v10"/></svg>Food</span></div><div style="display:flex;justify-content:space-between;align-items:center;min-height:46px;gap:10px;border-top:1.5px solid #EEF3F0"><span style="font-size:15px;color:#3B4A44">Paid from</span><span style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px"><span class="tag" style="background:#E6F2EC;color:#0D4A36">Cash</span></span></div><div style="display:flex;justify-content:space-between;align-items:center;min-height:46px;gap:10px;border-top:1.5px solid #EEF3F0"><span style="font-size:15px;color:#3B4A44">Added by</span><span style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px">Manager Selam</span></div><div style="display:flex;justify-content:space-between;align-items:center;min-height:46px;gap:10px;border-top:1.5px solid #EEF3F0"><span style="font-size:15px;color:#3B4A44">Date and time</span><span style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px">3 Nov · 10:42</span></div></div><div class="card" style="overflow:hidden"><div style="padding:10px 16px 8px;font-size:15px;font-weight:700">Receipt photo</div><svg width="100%" height="96" viewBox="0 0 300 96" aria-label="Receipt photo" role="img"><rect width="300" height="96" fill="#E6F2EC"/><g transform="rotate(-4 150 48)"><rect x="95" y="6" width="110" height="96" rx="6" fill="#fff" stroke="#DDE5E1" stroke-width="2"/><g fill="#DDE5E1"><rect x="108" y="18" width="60" height="6" rx="3"/><rect x="108" y="32" width="84" height="5" rx="2.5"/><rect x="108" y="44" width="76" height="5" rx="2.5"/><rect x="108" y="56" width="84" height="5" rx="2.5"/></g><rect x="150" y="72" width="42" height="8" rx="4" fill="#0D4A36"/></g></svg></div><div style="display:flex;align-items:center;gap:10px;font-size:15px;color:#3B4A44;padding:0 4px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B4A44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;color:#3B4A44"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Changed by Owner · 11:05 (was 450 ETB)</div><div style="flex:1"></div><button class="btn" style="background:#0E7A4E;color:#fff"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;color:#fff"><path d="M5 12.5l4.5 4.5L19 7"/></svg>Looks right</button><div style="display:flex;gap:12px"><button class="btn" style="background:#fff;color:#0D4A36;border:2px solid #0D4A36"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D4A36" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;color:#0D4A36"><path d="M4 20l1-5L16 4l4 4L9 19z"/></svg>Change</button><button class="btn" style="background:#FBE0DD;color:#B3261E;border:2px solid #B3261E"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#B3261E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;color:#B3261E"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13M10 11v6M14 11v6"/></svg>Delete</button></div></div><div style="background:#F4F8F6;height:28px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span style="width:110px;height:5px;border-radius:3px;background:#14201B;opacity:.25"></span></div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

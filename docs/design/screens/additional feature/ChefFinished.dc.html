@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chef: finished items</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F8F6}
+button,input{font-family:'DM Sans',sans-serif}
+input::placeholder{color:#5B6B64}
+.u{height:44px;padding:0 16px;border-radius:22px;font-size:16px;font-weight:700;border:2px solid #B9C7C1;background:#fff;color:#14201B;cursor:pointer}
+.u.on{background:#0D4A36;border-color:#0D4A36;color:#fff}
+.st{width:44px;height:44px;border-radius:12px;border:2px solid #B9C7C1;background:#fff;font-size:24px;font-weight:700;color:#14201B;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F4F8F6;color:#14201B;display:flex;flex-direction:column;overflow:hidden">
+<div style="display:flex;align-items:center;gap:4px;padding:14px 16px 6px 8px"><button aria-label="Back" style="width:44px;height:44px;border:0;border-radius:22px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#14201B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><div style="flex-grow:1"><div style="font-family:Sora,sans-serif;font-size:22px;font-weight:700;line-height:1.15">Finished items</div><div style="font-size:14px;color:#3B4A44;margin-top:1px">Tell the manager what to buy</div></div></div>
+<div style="margin:6px 16px 0;background:#fff;border:1.5px solid #DDE5E1;border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:14px">
+<div><label for="it" style="font-size:15px;font-weight:700">What is finished?</label><input id="it" placeholder="Anything: oil, napkins, gas, soap" style="width:100%;height:56px;margin-top:6px;border:2px solid #B9C7C1;border-radius:14px;padding:0 16px;box-sizing:border-box;font-size:18px;background:#fff;color:#14201B" value="Napkins"></div>
+<div><label for="qt" style="font-size:15px;font-weight:700">How much? <span style="font-weight:500;color:#3B4A44">(optional, any words)</span></label><input id="qt" placeholder="For example: 2 boxes, 5 kg, 1 pack" value="3 boxes" style="width:100%;height:56px;margin-top:6px;border:2px solid #B9C7C1;border-radius:14px;padding:0 16px;box-sizing:border-box;font-size:18px;background:#fff;color:#14201B"></div>
+<div><div style="font-size:15px;font-weight:700;margin-bottom:6px">Needed</div><div style="display:flex;gap:8px"><button class="u on" style="flex:1">Today</button><button class="u" style="flex:1">This week</button></div></div>
+<button style="width:100%;height:56px;border:0;border-radius:18px;background:#0D4A36;color:#fff;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add to list</button>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px 6px"><div style="font-family:Sora,sans-serif;font-size:17px;font-weight:700">Your list</div><div style="font-size:14px;font-weight:700;color:#3B4A44">3 items</div></div>
+<div style="display:flex;flex-direction:column;gap:8px;padding:0 16px">
+<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #DDE5E1;border-radius:16px;padding:8px 8px 8px 14px;min-height:60px"><div style="flex:1"><div style="font-size:17px;font-weight:700">Napkins</div><div style="font-size:14px;color:#3B4A44">3 boxes</div></div><span style="height:28px;padding:0 10px;border-radius:14px;background:#FFF3CC;color:#6B4B00;font-size:13px;font-weight:700;display:inline-flex;align-items:center">Today</span><button aria-label="Remove Napkins" style="width:44px;height:44px;border:0;border-radius:22px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A5A53" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #DDE5E1;border-radius:16px;padding:8px 8px 8px 14px;min-height:60px"><div style="flex:1"><div style="font-size:17px;font-weight:700">Dish soap</div><div style="font-size:14px;color:#3B4A44">1 pack</div></div><span style="height:28px;padding:0 10px;border-radius:14px;background:#EEF2F0;color:#3B4A44;font-size:13px;font-weight:700;display:inline-flex;align-items:center">This week</span><button aria-label="Remove Dish soap" style="width:44px;height:44px;border:0;border-radius:22px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A5A53" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+<div style="display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #DDE5E1;border-radius:16px;padding:8px 8px 8px 14px;min-height:60px"><div style="flex:1"><div style="font-size:17px;font-weight:700">Cooking oil</div><div style="font-size:14px;color:#3B4A44">2 jerrycans</div></div><span style="height:28px;padding:0 10px;border-radius:14px;background:#FFF3CC;color:#6B4B00;font-size:13px;font-weight:700;display:inline-flex;align-items:center">Today</span><button aria-label="Remove Cooking oil" style="width:44px;height:44px;border:0;border-radius:22px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4A5A53" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+</div>
+<div style="flex-grow:1"></div>
+<div style="padding:10px 16px 20px;background:#fff;border-top:1px solid #DDE5E1"><button style="width:100%;height:64px;border:0;border-radius:20px;background:#0D4A36;color:#fff;font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l16-8-6 16-3-7z"/></svg>Send to manager</button></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
