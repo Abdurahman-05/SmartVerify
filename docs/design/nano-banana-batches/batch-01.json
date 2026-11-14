@@ -1,0 +1,572 @@
+[
+  {
+    "file": "margherita-pizza.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Margherita Pizza",
+      "description": "A whole wood-fired margherita pizza on a wooden board, blistered golden crust, bright tomato sauce, melted fresh mozzarella pools, fresh basil leaves, a drizzle of olive oil."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "vegetable-pizza.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Vegetable Pizza",
+      "description": "A whole vegetable pizza on a wooden board, melted cheese topped with green and red bell peppers, onions, olives, mushrooms and tomato slices, golden crust."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "chicken-pizza.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Chicken Pizza",
+      "description": "A whole pizza topped with juicy grilled chicken pieces, melted mozzarella, red onion, green pepper and a light herb sprinkle, golden crust."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "beef-pepperoni-pizza.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Beef Pepperoni Pizza",
+      "description": "A whole pizza covered with crispy-edged beef pepperoni slices on bubbling melted mozzarella, one slice slightly pulled out with a cheese stretch."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "special-pizza.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Special Pizza",
+      "description": "A loaded house special pizza with beef, chicken, peppers, mushrooms, olives and extra melted cheese, golden thick crust, one slice lifted with a long cheese pull."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "mixed-pizza.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Mixed Pizza",
+      "description": "A whole pizza split into colorful sections of chicken, beef, vegetables and cheese toppings, golden crust."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "beef-burger.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Beef Burger",
+      "description": "A tall beef burger with a toasted sesame brioche bun, thick juicy chargrilled beef patty, crisp lettuce, tomato, onion and sauce dripping slightly."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "cheese-burger.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Cheese Burger",
+      "description": "A juicy beef cheeseburger with melted cheddar cheese draping over the patty, pickles, lettuce, tomato, toasted sesame bun."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "double-burger.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Double Burger",
+      "description": "A towering double beef burger with two thick patties, two layers of melted cheddar, lettuce, tomato, onion, toasted brioche bun."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "chicken-burger.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Chicken Burger",
+      "description": "A crispy golden fried chicken fillet burger with lettuce, tomato, creamy mayo, toasted sesame bun."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "club-sandwich.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Club Sandwich",
+      "description": "A triple-decker club sandwich cut into triangles held with toothpicks, layers of chicken, egg, lettuce, tomato and cheese, toasted bread, a few fries beside it."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "chicken-sandwich.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Chicken Sandwich",
+      "description": "A toasted sandwich cut diagonally, filled with grilled chicken strips, lettuce, tomato and creamy sauce."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "tuna-sandwich.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Tuna Sandwich",
+      "description": "A toasted sandwich cut diagonally, filled with creamy tuna, lettuce, tomato and cucumber slices."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "beef-hot-dog.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Hot Dog (beef)",
+      "description": "A grilled beef sausage in a soft toasted bun with zigzags of ketchup and mustard and crispy onions."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "french-fries.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "French Fries",
+      "description": "A generous portion of golden crispy French fries in a paper cone, lightly salted, small dish of ketchup beside it."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "fried-chicken.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Fried Chicken",
+      "description": "Three pieces of crunchy golden southern-style fried chicken with craggy crispy coating on a paper-lined basket."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "chicken-wings.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Chicken Wings",
+      "description": "A plate of glossy saucy chicken wings with a sticky spicy glaze, sprinkled with sesame seeds and chopped parsley."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "chicken-nuggets.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Chicken Nuggets",
+      "description": "A pile of golden crispy chicken nuggets in a small basket with a dipping sauce cup."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "onion-rings.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Onion Rings",
+      "description": "A stack of thick golden battered onion rings, crispy and airy, with a small dip."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "coleslaw.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Coleslaw",
+      "description": "A small bowl of fresh creamy coleslaw with shredded white and purple cabbage and carrot."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "garlic-bread.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Garlic Bread",
+      "description": "Slices of toasted baguette garlic bread with melted butter, chopped parsley and golden edges."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "spaghetti-bolognese.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Spaghetti Bolognese",
+      "description": "A white bowl of spaghetti twirled high, topped with rich beef bolognese sauce, grated parmesan and a basil leaf."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "chicken-alfredo.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Chicken Alfredo",
+      "description": "A bowl of fettuccine in creamy white alfredo sauce with sliced grilled chicken, parmesan and parsley."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "lasagna.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Lasagna",
+      "description": "A thick square portion of beef lasagna showing distinct layers of pasta, meat sauce and melted bubbling cheese, golden top."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "burger-chips-drink.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Burger + Chips + Drink",
+      "description": "A combo meal: a juicy beef burger, a portion of golden fries and a cold cola in a glass with ice, arranged together on a tray."
+    },
+    "composition": {
+      "framing": "several dishes arranged together, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "pizza-drink-combo.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Pizza + Drink Combo",
+      "description": "A combo: a personal pizza with a slice pulled out and a cold glass of soda with ice beside it."
+    },
+    "composition": {
+      "framing": "several dishes arranged together, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "family-pizza-combo.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Family Pizza Combo",
+      "description": "A family combo spread: two large pizzas, garlic bread, fries and a large bottle of soda, viewed slightly from above."
+    },
+    "composition": {
+      "framing": "several dishes arranged together, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "chicken-meal-combo.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Chicken Meal Combo",
+      "description": "A combo meal: crispy fried chicken pieces, golden fries, coleslaw and a cold drink with ice."
+    },
+    "composition": {
+      "framing": "several dishes arranged together, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "doro-wat.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Doro Wat",
+      "description": "Rich deep-red spicy berbere chicken stew with a tender chicken drumstick and a peeled hard-boiled egg, glossy niter kibbeh sheen, spooned on injera. Authentic Ethiopian presentation: served on a round woven mesob tray or a dark clay plate with folded soft spongy injera rolls on the side.."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "special-doro-wat.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Special Doro Wat",
+      "description": "A generous special doro wat with two chicken pieces, two boiled eggs, deep red berbere sauce, a scoop of ayib cheese and gomen on injera. Authentic Ethiopian presentation: served on a round woven mesob tray or a dark clay plate with folded soft spongy injera rolls on the side.."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  }
+]

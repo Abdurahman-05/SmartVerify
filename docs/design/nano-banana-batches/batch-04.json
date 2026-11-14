@@ -1,0 +1,572 @@
+[
+  {
+    "file": "kik-alicha.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Kik Alicha",
+      "description": "Mild yellow split pea stew with turmeric on injera. Authentic Ethiopian presentation: served on a round woven mesob tray or a dark clay plate with folded soft spongy injera rolls on the side.."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "dinich-wat.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Dinich Wat",
+      "description": "Potato stew in red berbere sauce on injera. Authentic Ethiopian presentation: served on a round woven mesob tray or a dark clay plate with folded soft spongy injera rolls on the side.."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "tikil-gomen.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Tikil Gomen",
+      "description": "Cabbage, carrots and potatoes cooked with turmeric on injera. Authentic Ethiopian presentation: served on a round woven mesob tray or a dark clay plate with folded soft spongy injera rolls on the side.."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "fasting-firfir.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Fasting Firfir",
+      "description": "Vegan firfir: torn injera tossed in red berbere sauce with oil, in a bowl with green chili."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "fasting-pasta.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Fasting Pasta",
+      "description": "Vegan pasta in tomato sauce with vegetables."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "fasting-genfo.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Fasting Genfo",
+      "description": "Barley genfo porridge with a well of red berbere oil in the center, vegan."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "fasting-platter-2.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Fasting Platter for 2",
+      "description": "A large vegan beyaynetu platter for two with many colorful fasting dishes on injera. Authentic Ethiopian presentation: served on a round woven mesob tray or a dark clay plate with folded soft spongy injera rolls on the side.."
+    },
+    "composition": {
+      "framing": "several dishes arranged together, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "fasting-family-platter.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Fasting Family Platter",
+      "description": "A very large vegan family platter with many colorful fasting stews and salads on a big injera, many injera rolls. Authentic Ethiopian presentation: served on a round woven mesob tray or a dark clay plate with folded soft spongy injera rolls on the side.."
+    },
+    "composition": {
+      "framing": "several dishes arranged together, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "chicken-mandi.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Chicken Mandi",
+      "description": "A half chicken roasted golden with smoky spices on a mound of fragrant long-grain yellow mandi rice, toasted almonds, raisins and fried onions, on a large round metal platter."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "lamb-mandi.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Lamb Mandi",
+      "description": "A tender slow-cooked lamb shank falling off the bone on smoky yellow mandi rice with toasted almonds and fried onions, on a round metal platter."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "beef-mandi.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Beef Mandi",
+      "description": "Tender roasted beef pieces on aromatic mandi rice with nuts and fried onions on a metal platter."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "fish-mandi.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Fish Mandi",
+      "description": "A whole spiced grilled fish on yellow mandi rice with lemon slices and herbs on a metal platter."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "chicken-kabsa.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Chicken Kabsa",
+      "description": "Saudi chicken kabsa: spiced orange rice with carrots, raisins and toasted almonds topped with a roasted chicken quarter."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "lamb-kabsa.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Lamb Kabsa",
+      "description": "Lamb kabsa: tender lamb pieces on spiced orange rice with raisins, almonds and chopped parsley."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "lamb-haneeth.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Lamb Haneeth",
+      "description": "Slow-roasted tender haneeth lamb with crispy edges on fragrant rice, garnished with fried onions."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "chicken-haneeth.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Chicken Haneeth",
+      "description": "Slow-roasted spiced chicken haneeth with crispy skin on fragrant rice."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "arabic-rice.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Arabic Rice",
+      "description": "A bowl of fragrant Arabic rice with vermicelli, toasted nuts and herbs."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "mixed-grill.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Mixed Grill",
+      "description": "A platter of mixed grilled meats: beef kebab, chicken kebab, shish tawook and grilled tomato and onion on Arabic bread."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "chicken-kebab.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Chicken Kebab",
+      "description": "Chargrilled minced chicken kebab skewers with grill marks, grilled tomato and onion, on Arabic bread."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "beef-kebab.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Beef Kebab",
+      "description": "Chargrilled minced beef kofta kebab skewers with grill marks, parsley, onion and grilled tomato."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "chicken-shawarma.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Chicken Shawarma",
+      "description": "A chicken shawarma wrap cut in half showing sliced spiced chicken, garlic toum, pickles and fries inside, wrapped in paper."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "beef-shawarma.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Beef Shawarma",
+      "description": "A beef shawarma wrap cut in half showing thin spiced beef slices, tahini, onion, parsley and tomato."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "chicken-shish-tawook.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Chicken Shish Tawook",
+      "description": "Marinated chicken cubes on skewers, golden and charred, with garlic sauce and grilled vegetables."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "falafel-wrap.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Falafel Wrap",
+      "description": "A falafel wrap cut in half showing crispy green falafel, tahini, tomato, lettuce and pickles."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "hummus.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Hummus",
+      "description": "A shallow bowl of creamy hummus swirled, with olive oil pool, chickpeas, paprika and parsley, pita bread beside it."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "mutabbal.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Mutabbal",
+      "description": "A bowl of smoky creamy mutabbal eggplant dip with olive oil, pomegranate seeds and parsley."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "fattoush-salad.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Fattoush Salad",
+      "description": "A bowl of fattoush salad with lettuce, tomato, cucumber, radish, mint, crispy toasted pita chips and sumac."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "tabbouleh.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Tabbouleh",
+      "description": "A bowl of fresh green tabbouleh with finely chopped parsley, tomato, bulgur and lemon."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "falafel.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Falafel",
+      "description": "A plate of crispy golden falafel balls, one broken open showing the green inside, with tahini sauce."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "arabic-lentil-soup.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Arabic Lentil Soup",
+      "description": "A bowl of smooth golden Arabic lentil soup with lemon wedge and crispy bread croutons."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  }
+]

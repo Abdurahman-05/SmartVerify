@@ -1,0 +1,553 @@
+[
+  {
+    "file": "pancake.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Pancake",
+      "description": "A stack of fluffy golden pancakes with honey dripping down and a pat of butter on top."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "french-toast.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "French Toast",
+      "description": "Golden French toast slices dusted with powdered sugar, with honey drizzle and fruit."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "bread-egg.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Bread with Egg",
+      "description": "A plate of fried eggs with toasted bread slices."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "omelette-sandwich.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Omelette Sandwich",
+      "description": "A toasted roll sandwich filled with a folded vegetable omelette, cut in half."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "ful-bread.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Ful with Bread",
+      "description": "A bowl of ful topped with olive oil, tomato, onion and chili with fresh bread rolls."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "fruit-salad.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Fruit Salad",
+      "description": "A glass bowl of colorful fresh fruit salad with mango, papaya, banana, watermelon and avocado."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "coffee-sambusa.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Coffee + Sambusa",
+      "description": "A combo of an Ethiopian macchiato glass next to two golden sambusas on a small plate."
+    },
+    "composition": {
+      "framing": "several dishes arranged together, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "breakfast-set.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Breakfast Set",
+      "description": "A breakfast set on a tray: omelette, bread, butter, fruit salad and a cup of tea."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "coca-cola.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Coca-Cola",
+      "description": "A classic glass bottle of cola with water droplets and a glass of cola with ice beside it, no visible brand logo."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "pepsi.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Pepsi",
+      "description": "A cold can of cola with condensation and a glass of cola with ice cubes, no visible brand logo."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "fanta.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Fanta",
+      "description": "A cold bottle of bright orange soda with condensation and a glass with ice, no visible brand logo."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "sprite.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Sprite",
+      "description": "A cold bottle of clear lemon-lime soda with condensation and a glass with ice and a lime slice, no visible brand logo."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "mirinda.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Mirinda",
+      "description": "A cold bottle of orange fizzy drink with bubbles and condensation, no visible brand logo."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "energy-drink.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Energy Drink",
+      "description": "A cold slim energy drink can with condensation and a glass with ice, no visible brand logo."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "avocado-juice.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Avocado Juice",
+      "description": "A tall glass of thick creamy green Ethiopian avocado juice with a drizzle of syrup, half avocado beside it."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "mango-juice.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Mango Juice",
+      "description": "A tall glass of thick bright orange mango juice with condensation, fresh mango slices beside it."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "papaya-juice.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Papaya Juice",
+      "description": "A tall glass of smooth orange papaya juice with a papaya slice on the rim."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "orange-juice.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Orange Juice",
+      "description": "A tall glass of fresh orange juice with ice and an orange slice, halved oranges beside it."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "mixed-fruit-juice.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Mixed Fruit Juice",
+      "description": "A tall glass of fruit juice with visible fruit pieces."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "spris-juice.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Spris Juice",
+      "description": "A tall glass of Ethiopian spris juice with distinct layered stripes of green avocado, orange mango and red-orange papaya, a drizzle of lime."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "lemonade.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Lemonade",
+      "description": "A tall glass of fresh lemonade with ice, mint leaves and lemon slices, condensation."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "ambo-sparkling-water.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Ambo Sparkling Water",
+      "description": "A green glass bottle of sparkling mineral water with bubbles in a glass beside it, no visible brand label."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "mineral-water.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Mineral Water",
+      "description": "A clear bottle of still mineral water with water droplets, no visible brand label."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "water-small.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Water (small)",
+      "description": "A small clear 0.5 liter bottle of water with condensation, no brand label."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "water-large.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Water (large)",
+      "description": "A large clear 1.5 liter bottle of water with condensation, no brand label."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "vanilla-milkshake.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Vanilla Milkshake",
+      "description": "A tall glass of creamy vanilla milkshake topped with whipped cream and a straw."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "chocolate-milkshake.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Chocolate Milkshake",
+      "description": "A tall glass of thick chocolate milkshake with chocolate drizzle down the inside, whipped cream and chocolate shavings."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "strawberry-milkshake.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Strawberry Milkshake",
+      "description": "A tall glass of pink strawberry milkshake with whipped cream and fresh strawberries on top."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  },
+  {
+    "file": "banana-milkshake.png",
+    "task": "Generate one photorealistic food photo for a restaurant menu app.",
+    "subject": {
+      "dish": "Banana Milkshake",
+      "description": "A tall glass of creamy banana milkshake with whipped cream and banana slices."
+    },
+    "composition": {
+      "framing": "single serving, centered",
+      "angle": "three-quarter view, 45 degrees",
+      "fill": "food fills about 80% of the frame",
+      "aspect_ratio": "1:1 square"
+    },
+    "lighting": "soft warm studio light from the upper left, gentle soft shadow",
+    "background": "plain warm cream (#F7F1E8) with a subtle vignette, nothing else in frame",
+    "style": "professional premium food-delivery photography, hyper-realistic, ultra-sharp, shallow depth of field, rich natural colors, glossy appetizing textures",
+    "details": "visible steam if hot, fresh condensation if cold",
+    "avoid": "any text, letters, logos, brand labels, watermarks, hands, people, cartoon or illustration look"
+  }
+]
