@@ -36,7 +36,6 @@
     "forgotPin": "PIN ረሱ?",
     "rememberMe": "አስታውሰኝ",
     "signIn": "ግባ",
-    "signInFingerprint": "በጣት አሻራ ግባ",
     "noAccount": "መለያ የለዎትም?",
     "signUp": "ይመዝገቡ",
     "createAccount": "መለያ ክፈት",
@@ -62,7 +61,8 @@
       "phoneTaken": "ይህ ስልክ ቁጥር አስቀድሞ መለያ አለው።",
       "signInFailedTitle": "መግባት አልተቻለም",
       "createFailedTitle": "መለያ መፍጠር አልተቻለም"
-    }
+    },
+    "continue": "ቀጥል"
   },
   "plan": {
     "title": "እቅድዎን ይምረጡ",
@@ -86,7 +86,9 @@
       "tips": "የተለየ ቲፕ",
       "ledger": "የዕለት መዝገብ",
       "chef": "የሼፍ ትዕዛዞች"
-    }
+    },
+    "perMonthShort": "ብር/ወር",
+    "bestForRestaurants": "ለምግብ ቤቶች ምርጥ"
   },
   "verify": {
     "enterAmount": "መጠን ያስገቡ",
@@ -212,7 +214,9 @@
       "buyListSub": "ኩሽናው የሚያስፈልገው",
       "moneyOut": "ወጪዎች",
       "moneyOutSub": "የወጣ ገንዘብ አስገባ እና እይ"
-    }
+    },
+    "paymentsCount_one": "{{count}} ክፍያ",
+    "paymentsCount_other": "{{count}} ክፍያዎች"
   },
   "nav": {
     "home": "መነሻ",
@@ -629,7 +633,9 @@
     "changeCash": "የጥሬ ገንዘብ መጠን ቀይር",
     "giveBackTitle": "በጥሬ ገንዘብ ይመልሱ",
     "giveBackNote": "ይህን ከካሽ መሳቢያው ለደንበኛው ይመልሱ",
-    "giveBackExplain": "ደንበኛው ተጨማሪውን እንዲመለስለት መርጧል፤ ስለዚህ ቲፕ አይደለም። ከካሽ መሳቢያው ይስጡ።"
+    "giveBackExplain": "ደንበኛው ተጨማሪውን እንዲመለስለት መርጧል፤ ስለዚህ ቲፕ አይደለም። ከካሽ መሳቢያው ይስጡ።",
+    "waitingFor": "የሚጠበቀው",
+    "usuallySeconds": "ይህ ብዙውን ጊዜ ጥቂት ሰከንዶች ይወስዳል።"
   },
   "cash": {
     "title": "የጥሬ ገንዘብ ክፍያ",
@@ -718,7 +724,9 @@
     "menu": "ምናሌ",
     "tables": "ጠረጴዛዎች",
     "fees": "ክፍያዎች እና ማድረሻ",
-    "changePin": "PIN ቀይር"
+    "changePin": "PIN ቀይር",
+    "groupBusiness": "ንግድ",
+    "groupApp": "መተግበሪያ"
   },
   "help": {
     "title": "እገዛ",
@@ -784,6 +792,7 @@
     }
   },
   "themes": {
+    "orange": "ብርቱካናማ",
     "forest": "ደን",
     "ocean": "ውቅያኖስ",
     "royal": "ንጉሣዊ",
@@ -1419,7 +1428,9 @@
       "costs": "የንግድ ወጪዎች",
       "profit": "ትርፍ",
       "other": "ሌላ ወጪ",
-      "moneyLeft": "የቀረ ገንዘብ"
+      "moneyLeft": "የቀረ ገንዘብ",
+      "latest": "የቅርብ ጊዜ ወጪዎች",
+      "seeAll": "ሁሉንም ይመልከቱ"
     },
     "costs": {
       "title": "የንግድ ወጪዎች",
@@ -1493,7 +1504,8 @@
     "expenseDeleted": {
       "title": "ወጪ ተሰርዟል · {{title}}",
       "body": "{{reason}}"
-    }
+    },
+    "unread": "አዲስ"
   },
   "lock": {
     "createTitle": "የይለፍ ኮድ ይፍጠሩ",
@@ -1654,6 +1666,12 @@
     "subtitle": "የሚወዱትን መልክ ይምረጡ። በፕሮፋይል ውስጥ በማንኛውም ጊዜ መቀየር ይችላሉ።",
     "default": "ነባሪ",
     "later": "ምክር፦ ፕሮፋይል → የቀለም ገጽታ ላይ በኋላ መቀየር ይቻላል።",
-    "continue": "ቀጥል"
+    "continue": "ቀጥል",
+    "preview": "ቅድመ እይታ",
+    "open": "ክፈት"
+  },
+  "splash": {
+    "ready": "ለእርስዎ እያዘጋጀን",
+    "moment": "ትንሽ ይጠብቁ…"
   }
 }

@@ -36,7 +36,6 @@
     "forgotPin": "Forgot PIN?",
     "rememberMe": "Remember me",
     "signIn": "Sign in",
-    "signInFingerprint": "Sign in with fingerprint",
     "noAccount": "Don't have an account?",
     "signUp": "Sign up",
     "createAccount": "Create account",
@@ -62,7 +61,8 @@
       "phoneTaken": "This phone number already has an account.",
       "signInFailedTitle": "Couldn't sign in",
       "createFailedTitle": "Couldn't create account"
-    }
+    },
+    "continue": "Continue"
   },
   "plan": {
     "title": "Choose your plan",
@@ -86,7 +86,9 @@
       "tips": "Separate tips",
       "ledger": "Daily ledger",
       "chef": "Chef orders"
-    }
+    },
+    "perMonthShort": "ETB/mo",
+    "bestForRestaurants": "Best for restaurants"
   },
   "verify": {
     "enterAmount": "Enter Amount",
@@ -212,7 +214,9 @@
       "buyListSub": "What the kitchen needs",
       "moneyOut": "Expenses",
       "moneyOutSub": "Add and see money paid out"
-    }
+    },
+    "paymentsCount_one": "{{count}} payment",
+    "paymentsCount_other": "{{count}} payments"
   },
   "nav": {
     "home": "Home",
@@ -629,7 +633,9 @@
     "changeCash": "Change cash amount",
     "giveBackTitle": "Give back in cash",
     "giveBackNote": "Return this to the customer from the cash drawer",
-    "giveBackExplain": "The customer chose to get the extra back, so it is not a tip. Give it from the cash drawer."
+    "giveBackExplain": "The customer chose to get the extra back, so it is not a tip. Give it from the cash drawer.",
+    "waitingFor": "Waiting for",
+    "usuallySeconds": "This usually takes a few seconds."
   },
   "cash": {
     "title": "Cash payment",
@@ -718,7 +724,9 @@
     "menu": "Menu",
     "tables": "Tables",
     "fees": "Fees & delivery",
-    "changePin": "Change PIN"
+    "changePin": "Change PIN",
+    "groupBusiness": "Business",
+    "groupApp": "App"
   },
   "help": {
     "title": "Help",
@@ -784,6 +792,7 @@
     }
   },
   "themes": {
+    "orange": "Orange",
     "forest": "Forest",
     "ocean": "Ocean",
     "royal": "Royal",
@@ -1419,7 +1428,9 @@
       "costs": "Business costs",
       "profit": "Profit",
       "other": "Other spending",
-      "moneyLeft": "Money left"
+      "moneyLeft": "Money left",
+      "latest": "Latest money out",
+      "seeAll": "See all"
     },
     "costs": {
       "title": "Business costs",
@@ -1493,7 +1504,8 @@
     "expenseDeleted": {
       "title": "Expense deleted · {{title}}",
       "body": "{{reason}}"
-    }
+    },
+    "unread": "New"
   },
   "lock": {
     "createTitle": "Create your passcode",
@@ -1654,6 +1666,12 @@
     "subtitle": "Pick the look you like. You can change it any time in Profile.",
     "default": "default",
     "later": "Tip: Profile → Color theme changes it later.",
-    "continue": "Continue"
+    "continue": "Continue",
+    "preview": "Preview",
+    "open": "Open"
+  },
+  "splash": {
+    "ready": "Getting things ready",
+    "moment": "Just a moment…"
   }
 }

@@ -1,12 +1,16 @@
 import { onlineManager } from '@tanstack/react-query';
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as NativeSplash from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import Animated, {
+  Easing,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
   withDelay,
   withRepeat,
@@ -14,47 +18,115 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { AuthBackground } from '@/components/ui/AuthBackground';
 import { NoConnection } from '@/components/ui/NoConnection';
+import { Text } from '@/components/ui/Text';
 import { loadSavedUser } from '@/lib/api/token';
 import { loadAppLock, useAppLock } from '@/lib/appLock';
 import { getMe } from '@/lib/auth';
 import { homeRouteFor, useSession } from '@/store/session';
-import { useBrandColors } from '@/store/theme';
 
-// The ገ and the yellow check without a background: the screen behind is the theme colour.
-const logo = require('../../../assets/images/logo-mark.png') as number;
+import { AUTH } from './AuthParts';
 
-const DOT = '#F5B301';
+// The ገ with its ✓ badge (the image includes the badge).
+const glyph = require('../../../assets/images/auth/logo-glyph.png') as number;
+
+const LOGO = 112;
+const RING_INSET = 14;
+const AMBER = '#F59E0B';
+const DOT_COLORS = [AUTH.p, AUTH.p2, AMBER];
 const MIN_SPLASH_MS = 1000;
 
-/** One yellow dot going up and down; each dot starts a little after the one before. */
-function Dot({ index }: { index: number }) {
+/** Logo circle that pulses 1 → 1.05 → 1 every 1.6 s, with a spinning ring around it. */
+function LogoLoader({ still }: { still: boolean }) {
+  const scale = useSharedValue(1);
+  const turn = useSharedValue(0);
+  useEffect(() => {
+    if (still) return;
+    scale.value = withRepeat(
+      withSequence(
+        withTiming(1.05, { duration: 800, easing: Easing.inOut(Easing.ease) }),
+        withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) })
+      ),
+      -1
+    );
+    turn.value = withRepeat(withTiming(360, { duration: 1100, easing: Easing.linear }), -1);
+  }, [still, scale, turn]);
+  const pulse = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const spin = useAnimatedStyle(() => ({ transform: [{ rotate: `${turn.value}deg` }] }));
+  const ring = LOGO + RING_INSET * 2;
+  return (
+    <View style={{ width: LOGO, height: LOGO, alignItems: 'center', justifyContent: 'center' }}>
+      <Animated.View
+        style={[
+          {
+            position: 'absolute',
+            top: -RING_INSET,
+            left: -RING_INSET,
+            width: ring,
+            height: ring,
+            borderRadius: ring / 2,
+            borderWidth: 5,
+            borderColor: 'rgba(234,88,12,0.15)',
+            borderTopColor: AUTH.p,
+            borderRightColor: AMBER,
+          },
+          spin,
+        ]}
+      />
+      <Animated.View style={pulse}>
+        <LinearGradient
+          colors={[AUTH.p2, AUTH.p, AUTH.pt]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={{
+            width: LOGO,
+            height: LOGO,
+            borderRadius: LOGO / 2,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Image source={glyph} style={{ width: 82, height: 82 }} contentFit="contain" />
+        </LinearGradient>
+      </Animated.View>
+    </View>
+  );
+}
+
+/** One 12 px dot bouncing up 12 px every 1 s; each starts 150 ms after the one before. */
+function Dot({ index, still }: { index: number; still: boolean }) {
   const y = useSharedValue(0);
   useEffect(() => {
+    if (still) return;
     y.value = withDelay(
       index * 150,
       withRepeat(
-        withSequence(withTiming(-14, { duration: 500 }), withTiming(0, { duration: 500 })),
+        withSequence(withTiming(-12, { duration: 500 }), withTiming(0, { duration: 500 })),
         -1
       )
     );
-  }, [index, y]);
+  }, [index, still, y]);
   const style = useAnimatedStyle(() => ({ transform: [{ translateY: y.value }] }));
   return (
     <Animated.View
-      style={[{ width: 14, height: 14, borderRadius: 7, backgroundColor: DOT }, style]}
+      style={[
+        { width: 12, height: 12, borderRadius: 6, backgroundColor: DOT_COLORS[index] },
+        style,
+      ]}
     />
   );
 }
 
 /**
- * Splash in the chosen theme colour: the logo and three bouncing dots while the saved sign-in is checked (at least
- * 1 s). Signed in → that role's home; no saved sign-in → Sign in.
+ * Splash on the auth background: the logo loader, "Getting things ready" and three bouncing dots
+ * while the saved sign-in is checked (at least 1 s). Signed in → that role's home; no saved
+ * sign-in → Sign in. With reduce motion on, nothing moves.
  */
 export default function SplashScreen() {
   const router = useRouter();
-  // The chosen theme is already loaded (the root layout waits for it).
-  const brand = useBrandColors();
+  const { t } = useTranslation();
+  const still = useReducedMotion();
   const [offline, setOffline] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
@@ -119,26 +191,40 @@ export default function SplashScreen() {
     );
   }
 
+  const words = t('splash.ready').split(' ');
+  const titleHead = words.length > 1 ? `${words.slice(0, -1).join(' ')} ` : '';
+
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: brand.primary,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-      // The splash is drawn: now the native splash can go without a flash.
-      onLayout={() => void NativeSplash.hideAsync().catch(() => undefined)}
-    >
-      <StatusBar style="light" />
-      <Image source={logo} style={{ width: 220, height: 220 }} contentFit="contain" />
+    <AuthBackground>
       <View
-        style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10, marginTop: 28, height: 28 }}
+        style={{ flex: 1, alignItems: 'center', paddingTop: 300, gap: 26 }}
+        // The splash is drawn: now the native splash can go without a flash.
+        onLayout={() => void NativeSplash.hideAsync().catch(() => undefined)}
       >
-        <Dot index={0} />
-        <Dot index={1} />
-        <Dot index={2} />
+        <StatusBar style="dark" />
+        <LogoLoader still={still} />
+        <View style={{ alignItems: 'center', gap: 4 }}>
+          <Text
+            font="heading"
+            className="text-center text-[22px]"
+            style={{ color: AUTH.text }}
+            accessibilityRole="header"
+          >
+            {titleHead}
+            <Text font="heading" className="text-[22px]" style={{ color: AUTH.p }}>
+              {words[words.length - 1]}
+            </Text>
+          </Text>
+          <Text className="text-center text-[15px]" style={{ color: '#5E5559' }}>
+            {t('splash.moment')}
+          </Text>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 12, height: 26 }}>
+          {DOT_COLORS.map((color, i) => (
+            <Dot key={color} index={i} still={still} />
+          ))}
+        </View>
       </View>
-    </View>
+    </AuthBackground>
   );
 }
