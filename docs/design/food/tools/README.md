@@ -18,9 +18,10 @@ shows its photo when it was added from a starter pack (its `catalogKey` matches)
 ## Status (15 Nov 2026)
 
 - Batch 01: done except the dishes not generated yet (run the script to see what is left).
-- Batch 02: done up to Family Meat Platter, all on the test menu. Left: Special Kitfo Combo,
-  Doro Wat + Injera Combo, Shiro Tegabino, Shiro (and the rest of the file).
-- Batches 03–06: not started.
+- Batch 02: done, all on the test menu.
+- Batch 03: Misir Wat, Atkilt Wat, Gomen Besiga, Fish Goulash, Fish Cutlet, Fried Fish, Egg Firfir
+  done and on the test menu. The rest not started (run the script to see what is left).
+- Batches 04–06: not started.
 
 ## Steps (from the repo root)
 
