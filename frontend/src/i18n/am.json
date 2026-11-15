@@ -42,6 +42,8 @@
     "step": "ደረጃ {{current}} ከ {{total}}",
     "fullName": "ሙሉ ስም",
     "fullNamePlaceholder": "ሙሉ ስምዎ",
+    "email": "ኢሜይል",
+    "emailPlaceholder": "you@example.com",
     "businessName": "የድርጅት ስም",
     "businessNamePlaceholder": "ለምሳሌ፦ ቦሌ ፍሬሽ ማርት",
     "newPin": "PIN ({{count}} አሃዝ)",
@@ -60,7 +62,9 @@
       "wrongCredentials": "የተሳሳተ ስልክ ቁጥር ወይም PIN።",
       "phoneTaken": "ይህ ስልክ ቁጥር አስቀድሞ መለያ አለው።",
       "signInFailedTitle": "መግባት አልተቻለም",
-      "createFailedTitle": "መለያ መፍጠር አልተቻለም"
+      "createFailedTitle": "መለያ መፍጠር አልተቻለም",
+      "email": "ትክክለኛ ኢሜይል ያስገቡ",
+      "emailTaken": "ይህ ኢሜይል አስቀድሞ መለያ አለው።"
     },
     "continue": "ቀጥል"
   },

@@ -42,6 +42,8 @@
     "step": "Step {{current}} of {{total}}",
     "fullName": "Full name",
     "fullNamePlaceholder": "Your full name",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
     "businessName": "Business name",
     "businessNamePlaceholder": "e.g. Bole Fresh Mart PLC",
     "newPin": "PIN ({{count}} digits)",
@@ -60,7 +62,9 @@
       "wrongCredentials": "Wrong phone number or PIN.",
       "phoneTaken": "This phone number already has an account.",
       "signInFailedTitle": "Couldn't sign in",
-      "createFailedTitle": "Couldn't create account"
+      "createFailedTitle": "Couldn't create account",
+      "email": "Enter a valid email",
+      "emailTaken": "This email already has an account."
     },
     "continue": "Continue"
   },

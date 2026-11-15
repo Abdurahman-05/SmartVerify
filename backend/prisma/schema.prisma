@@ -123,6 +123,8 @@ model User {
   name           String
   /// 9 digits without +251.
   phone          String   @unique
+  /// Owners give it at sign-up (lower case). Staff have none.
+  email          String?  @unique
   /// Argon2id hash. Never returned by the API.
   pinHash        String
   /// True for a temporary staff PIN set by the owner/manager.

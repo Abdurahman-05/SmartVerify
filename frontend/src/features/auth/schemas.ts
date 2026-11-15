@@ -18,6 +18,11 @@ export const signInSchema = z.object({
 export const createAccountSchema = z.object({
   fullName: z.string().trim().min(2, 'auth.errors.fullName'),
   businessName: z.string().trim().min(2, 'auth.errors.businessName'),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.email('auth.errors.email').max(254, 'auth.errors.email')),
   phone,
   pin,
   acceptTerms: z.boolean().refine((v) => v, 'auth.errors.terms'),

@@ -35,10 +35,15 @@ export const publicAuthRoutes: FastifyPluginAsyncZod = async (app) => {
         body: z.object({
           fullName: z.string().trim().min(2).max(80),
           businessName: z.string().trim().min(2).max(120),
+          email: z.string().trim().toLowerCase().pipe(z.email().max(254)),
           phone: phoneSchema,
           pin: ownerPinSchema,
         }),
-        response: { 201: authResponse, 409: errorResponseSchema, 429: errorResponseSchema },
+        response: {
+          201: authResponse,
+          409: errorResponseSchema.describe('PHONE_TAKEN, EMAIL_TAKEN'),
+          429: errorResponseSchema,
+        },
       },
     },
     async (request, reply) => reply.status(201).send(await auth.register(request.body))

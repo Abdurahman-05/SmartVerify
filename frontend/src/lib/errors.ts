@@ -5,6 +5,7 @@ import { WrongCredentialsError } from '@/lib/mock/auth';
 const keyByCode: Partial<Record<ApiErrorCode, string>> = {
   WRONG_CREDENTIALS: 'auth.errors.wrongCredentials',
   PHONE_TAKEN: 'auth.errors.phoneTaken',
+  EMAIL_TAKEN: 'auth.errors.emailTaken',
   STAFF_LIMIT: 'staff.errors.limit',
   VALIDATION_ERROR: 'errors.validation',
   RATE_LIMITED: 'errors.rateLimited',

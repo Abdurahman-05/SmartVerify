@@ -15,6 +15,8 @@ const SESSION_REMEMBER_TTL_MS = 30 * 86_400_000;
 export interface RegisterInput {
   fullName: string;
   businessName: string;
+  /** Lower case (the route trims and lower-cases it). */
+  email: string;
   phone: string;
   pin: string;
 }
@@ -25,8 +27,12 @@ export interface SignInInput {
   rememberMe: boolean;
 }
 
-const isUniqueViolation = (error: unknown) =>
+const isUniqueViolation = (error: unknown): error is Prisma.PrismaClientKnownRequestError =>
   error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
+
+/** The column(s) of a unique violation, as text (e.g. "email"). */
+const uniqueTarget = (error: Prisma.PrismaClientKnownRequestError) =>
+  JSON.stringify(error.meta ?? {});
 
 export function createAuthService(app: FastifyInstance) {
   const { prisma } = app;
@@ -52,11 +58,14 @@ export function createAuthService(app: FastifyInstance) {
       if (await prisma.user.findUnique({ where: { phone: input.phone } })) {
         throw new AppError('PHONE_TAKEN');
       }
+      if (await prisma.user.findUnique({ where: { email: input.email } })) {
+        throw new AppError('EMAIL_TAKEN');
+      }
       const pinHash = await hashPin(input.pin);
       try {
         const member = await prisma.$transaction(async (tx) => {
           const user = await tx.user.create({
-            data: { name: input.fullName, phone: input.phone, pinHash },
+            data: { name: input.fullName, phone: input.phone, email: input.email, pinHash },
           });
           const business = await tx.business.create({
             data: { name: input.businessName, ownerId: user.id },
@@ -67,8 +76,10 @@ export function createAuthService(app: FastifyInstance) {
         });
         return openSession(member.userId, member.id, true);
       } catch (error) {
-        // Two sign-ups with the same phone at the same moment.
-        if (isUniqueViolation(error)) throw new AppError('PHONE_TAKEN');
+        // Two sign-ups with the same phone or email at the same moment.
+        if (isUniqueViolation(error)) {
+          throw new AppError(uniqueTarget(error).includes('email') ? 'EMAIL_TAKEN' : 'PHONE_TAKEN');
+        }
         throw error;
       }
     },

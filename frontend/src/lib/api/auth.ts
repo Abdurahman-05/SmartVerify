@@ -4,6 +4,9 @@ import type { SessionUser } from '@/store/session';
 import { api, ApiError } from './client';
 import { clearToken, loadToken, saveToken } from './token';
 
+/** Sign-up input: the mock's fields plus the owner's email (the backend stores it). */
+export type RegisterInput = CreateAccountInput & { email: string };
+
 interface AuthResponse {
   token: string;
   expiresAt: string;
@@ -18,7 +21,7 @@ export async function signIn(input: SignInInput): Promise<SessionUser> {
 }
 
 /** POST /auth/register. Creates the owner and business (no plan yet). The new session is remembered. */
-export async function createAccount(input: CreateAccountInput): Promise<SessionUser> {
+export async function createAccount(input: RegisterInput): Promise<SessionUser> {
   const res = await api<AuthResponse>('/auth/register', { method: 'POST', body: input });
   await saveToken(res.token, true);
   return res.user;

@@ -6,6 +6,7 @@ export type ErrorCode =
   | 'FORBIDDEN'
   | 'NOT_FOUND'
   | 'PHONE_TAKEN'
+  | 'EMAIL_TAKEN'
   | 'STAFF_LIMIT'
   | 'SUBSCRIPTION_REQUIRED'
   | 'TABLE_BUSY'
@@ -36,6 +37,8 @@ const statusByCode: Record<ErrorCode, number> = {
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   PHONE_TAKEN: 409,
+  /** Another account already uses this email. */
+  EMAIL_TAKEN: 409,
   /** Normal plan: the business already has the most workers allowed (details.limit). */
   STAFF_LIMIT: 409,
   /** Dine-in table already has an open bill. */
