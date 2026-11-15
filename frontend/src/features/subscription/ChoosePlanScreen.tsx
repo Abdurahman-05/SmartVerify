@@ -1,14 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { Check } from 'lucide-react-native';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
-import { BrandMark } from '@/components/ui/BrandMark';
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
@@ -26,49 +24,50 @@ import {
   restaurantMonthlyEtb,
   type BillingPeriod,
 } from './plans';
+import { Pill } from '@/features/orders/Pill';
+import { GlassCard, PrimaryButton, ScreenBg } from '@/ui/glass';
 
-interface PeriodOptionProps {
-  label: string;
-  priceEtb: number;
-  note: string;
-  badge?: string;
-  selected: boolean;
-  onPress: () => void;
+/** Design `.rd`: 24 px ring; the chosen one gets a thick brand ring. */
+function Radio({ on }: { on: boolean }) {
+  return (
+    <View
+      className={`h-6 w-6 rounded-full ${on ? 'border-[7px] border-primary' : 'border-2 border-borderStrong'}`}
+    />
+  );
 }
 
-function PeriodOption({ label, priceEtb, note, badge, selected, onPress }: PeriodOptionProps) {
-  const { t } = useTranslation();
+interface PlanCardProps {
+  name: string;
+  priceEtb: number;
+  unit: string;
+  selected: boolean;
+  onPress: () => void;
+  children: ReactNode;
+}
+
+/** One plan to pick (design `.g.pl`): radio, name and price, then details indented under it. */
+function PlanCard({ name, priceEtb, unit, selected, onPress, children }: PlanCardProps) {
   return (
-    <Pressable
+    <GlassCard
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      className={`relative flex-1 rounded-input px-3 py-2.5 ${
-        selected
-          ? 'border-[2.5px] border-primary bg-primarySoft'
-          : 'border-2 border-borderMid bg-surface'
-      }`}
+      className={`gap-1.5 px-4 py-3.5 ${selected ? 'border-2 border-primary' : ''}`}
     >
-      {badge ? (
-        <View className="absolute -top-3 right-2.5 rounded-xl bg-amber px-2.5 py-0.5">
-          <Text font="bold" className="text-sm">
-            {badge}
-          </Text>
-        </View>
-      ) : null}
-      <Text font="bold" tone="muted" className="text-sm">
-        {label}
-      </Text>
-      <Text font="heading" className="text-[22px]">
-        <MoneyText value={priceEtb} showCurrency={false} className="text-[22px]" />{' '}
-        <Text font="heading" className="text-sm">
-          {t('common.etb')}
+      <View className="flex-row items-center gap-2.5">
+        <Radio on={selected} />
+        <Text font="bold" className="flex-1 text-[17px]">
+          {name}
         </Text>
-      </Text>
-      <Text font="bold" tone="link" className="text-sm">
-        {note}
-      </Text>
-    </Pressable>
+        <Text font="heading" className="text-xl">
+          <MoneyText value={priceEtb} showCurrency={false} className="text-xl" />{' '}
+          <Text font="semibold" tone="muted" className="text-[13px]">
+            {unit}
+          </Text>
+        </Text>
+      </View>
+      <View className="ml-[34px] gap-1">{children}</View>
+    </GlassCard>
   );
 }
 
@@ -78,6 +77,7 @@ export default function ChoosePlanScreen() {
   const router = useRouter();
   const setPlan = useSession((s) => s.setPlan);
   const [period, setPeriod] = useState<BillingPeriod>('quarterly');
+  const [chosen, setChosen] = useState<Plan>(isNormalApp ? normalPlan : 'restaurant');
 
   // The plan is saved on the server first, so it survives a restart and staff get it too.
   const mutation = useMutation({
@@ -95,106 +95,107 @@ export default function ChoosePlanScreen() {
 
   if (mutation.isPending) return <LoadingView />;
 
-  return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <View className="items-center gap-1.5 px-5 pb-1.5 pt-5">
-          <BrandMark size={46} />
-          <Text font="heading" className="text-center text-[27px]" accessibilityRole="header">
-            {t('plan.title')}
-          </Text>
-          <Text tone="muted" className="text-center text-base">
-            {t('plan.subtitle')}
-          </Text>
-        </View>
+  const normalPrice = normalPricing[period].priceEtb;
 
-        <View className="mx-4 mt-2 rounded-card border-[1.5px] border-border bg-surface p-3.5">
-          <Text font="heading" className="text-xl">
-            {t(`plans.${normalPlan}`)}
-          </Text>
-          <Text tone="muted" className="mt-0.5 text-[15px]">
-            {t('plan.normalFeatures')}
-          </Text>
-          <View className="mt-4 flex-row gap-2.5" accessibilityRole="radiogroup">
-            <PeriodOption
+  return (
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, gap: 12, padding: 16, paddingTop: 24 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View>
+            <Text font="heading" className="text-2xl leading-[29px]" accessibilityRole="header">
+              {t('plan.title')}
+            </Text>
+            <Text tone="muted" className="text-sm">
+              {t('auth.step', { current: 3, total: 3 })} · {t('plan.subtitle')}
+            </Text>
+          </View>
+
+          <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
+            <Pill
               label={t('plan.oneMonth')}
-              priceEtb={normalPricing.monthly.priceEtb}
-              note={t('plan.mostFlexible')}
               selected={period === 'monthly'}
               onPress={() => setPeriod('monthly')}
             />
-            <PeriodOption
-              label={t('plan.threeMonths')}
-              priceEtb={normalPricing.quarterly.priceEtb}
-              note={t('plan.save', { amount: formatMoney(normalQuarterlySavingEtb, false) })}
-              badge={t('plan.bestValue')}
+            <Pill
+              label={`${t('plan.threeMonths')} · ${t('plan.save', {
+                amount: formatMoney(normalQuarterlySavingEtb, false),
+              })}`}
               selected={period === 'quarterly'}
               onPress={() => setPeriod('quarterly')}
             />
           </View>
-          <View className="mt-3">
-            <Button label={t('plan.exploreNormal')} size="md" onPress={() => explore(normalPlan)} />
-          </View>
-        </View>
 
-        {isNormalApp ? null : (
-          <View className="mx-4 mt-3 rounded-card border-[2.5px] border-primary bg-surface p-3.5">
-            <View className="flex-row flex-wrap items-center justify-between gap-x-2">
-              <Text font="heading" className="text-xl">
-                {t('plans.restaurant')}
-              </Text>
-              <Text font="heading" className="text-xl">
-                <MoneyText value={restaurantMonthlyEtb} showCurrency={false} />{' '}
-                <Text font="heading" className="text-sm">
-                  {t('plan.perMonth')}
+          {isNormalApp ? null : (
+            <PlanCard
+              name={t('plans.restaurant')}
+              priceEtb={restaurantMonthlyEtb}
+              unit={t('plan.perMonthShort')}
+              selected={chosen === 'restaurant'}
+              onPress={() => setChosen('restaurant')}
+            >
+              <View className="h-6 justify-center self-start rounded-[12px] bg-amber px-[9px]">
+                <Text font="bold" className="text-[13px]">
+                  {t('plan.bestForRestaurants')}
                 </Text>
-              </Text>
-            </View>
-            <Text tone="muted" className="mt-0.5 text-[15px]">
-              {t('plan.restaurantSubtitle')}
-            </Text>
-            <View className="mt-3 flex-row flex-wrap gap-y-2">
-              {restaurantFeatureKeys.map((key) => (
-                <View key={key} className="w-1/2 flex-row items-center gap-1.5 pr-2">
-                  <Check size={18} color={brand.primaryText} strokeWidth={3} />
-                  <Text font="semibold" className="flex-1 text-[15px]">
-                    {t(`plan.features.${key}`)}
-                  </Text>
-                </View>
-              ))}
-            </View>
-            <View className="mt-3">
-              <Button
-                label={t('plan.exploreRestaurant')}
-                size="md"
-                onPress={() => explore('restaurant')}
-              />
-            </View>
-          </View>
-        )}
+              </View>
+              <View className="gap-1">
+                {restaurantFeatureKeys.map((key) => (
+                  <View key={key} className="flex-row items-center gap-2">
+                    <Check size={16} color={brand.primaryText} strokeWidth={3} />
+                    <Text className="flex-1 text-sm text-[#3E3539]">
+                      {t(`plan.features.${key}`)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </PlanCard>
+          )}
 
-        <View className="min-h-6 flex-1" />
+          <PlanCard
+            name={t(`plans.${normalPlan}`)}
+            priceEtb={normalPrice}
+            unit={
+              period === 'monthly'
+                ? t('plan.perMonth')
+                : `${t('common.etb')} / ${t('plan.threeMonths')}`
+            }
+            selected={chosen === normalPlan}
+            onPress={() => setChosen(normalPlan)}
+          >
+            <Text className="text-sm text-[#3E3539]">{t('plan.normalFeatures')}</Text>
+          </PlanCard>
 
-        <View className="px-4">
-          <Button
-            label={t('plan.exploreFirst')}
-            variant="outline"
-            size="md"
-            onPress={() => explore()}
+          <View className="min-h-4 flex-1" />
+
+          <PrimaryButton
+            label={chosen === 'restaurant' ? t('plan.exploreRestaurant') : t('plan.exploreNormal')}
+            onPress={() => explore(chosen)}
           />
-          <Text font="semibold" tone="muted" className="pb-[18px] pt-2 text-center text-sm">
+          <Pressable
+            onPress={() => explore()}
+            accessibilityRole="button"
+            className="min-h-11 items-center justify-center active:opacity-70"
+          >
+            <Text font="bold" tone="link" className="text-[15px]">
+              {t('plan.exploreFirst')}
+            </Text>
+          </Pressable>
+          <Text tone="muted" className="-mt-2 text-center text-[13px]">
             {t('plan.noPayment')}
           </Text>
-        </View>
-      </ScrollView>
+        </ScrollView>
 
-      <ErrorDialog
-        visible={mutation.isError}
-        title={t('subscription.errorTitle')}
-        message={t(errorMessageKey(mutation.error))}
-        actionLabel={t('errors.retry')}
-        onClose={mutation.reset}
-      />
-    </SafeAreaView>
+        <ErrorDialog
+          visible={mutation.isError}
+          title={t('subscription.errorTitle')}
+          message={t(errorMessageKey(mutation.error))}
+          actionLabel={t('errors.retry')}
+          onClose={mutation.reset}
+        />
+      </SafeAreaView>
+    </ScreenBg>
   );
 }
