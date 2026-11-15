@@ -1,0 +1,166 @@
+import { BlurView } from 'expo-blur';
+import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Lock } from 'lucide-react-native';
+import type { ReactNode } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
+
+import { Text } from '@/components/ui/Text';
+
+// Sign in / Sign up design (assets/images/auth/reference-signin.png): always orange.
+export const AUTH = {
+  p: '#EA580C',
+  p2: '#F97316',
+  pt: '#C2410C',
+  text: '#1E1A1C',
+  soft: '#4A4246',
+};
+
+const glyph = require('../../../assets/images/auth/logo-glyph.png') as number;
+
+/** 84 px orange gradient tile with the ገ glyph (the glyph image includes the ✓ badge). */
+export function AuthLogo() {
+  return (
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={styles.logoShadow}
+    >
+      <LinearGradient
+        colors={[AUTH.p2, AUTH.p, AUTH.pt]}
+        locations={[0, 0.6, 1]}
+        start={{ x: 0.67, y: 0 }}
+        end={{ x: 0.33, y: 1 }}
+        style={styles.logo}
+      >
+        <Image source={glyph} style={{ width: 70, height: 70 }} contentFit="contain" />
+      </LinearGradient>
+    </View>
+  );
+}
+
+/** Sora 28 title on a frosted pill; the last word in orange ("Welcome" + "back"). */
+export function AuthTitle({ text }: { text: string }) {
+  const words = text.split(' ');
+  const head = words.length > 1 ? `${words.slice(0, -1).join(' ')} ` : '';
+  return (
+    <View style={[styles.pill, { marginTop: 14, borderRadius: 16, paddingHorizontal: 14 }]}>
+      <Text
+        font="heading"
+        className="text-center text-[28px] leading-8"
+        style={{ color: AUTH.text }}
+        accessibilityRole="header"
+      >
+        {head}
+        <Text font="heading" className="text-[28px]" style={{ color: AUTH.p }}>
+          {words[words.length - 1]}
+        </Text>
+      </Text>
+    </View>
+  );
+}
+
+/** 16 px subtitle on a frosted pill. */
+export function AuthSubtitle({ text }: { text: string }) {
+  return (
+    <View style={[styles.pill, { marginTop: 4, borderRadius: 12, paddingHorizontal: 12 }]}>
+      <Text className="text-center text-base" style={{ color: AUTH.soft }}>
+        {text}
+      </Text>
+    </View>
+  );
+}
+
+/** Frosted white card: radius 26, padding 16, gap 10, blurred picture behind. */
+export function AuthCard({ children }: { children: ReactNode }) {
+  return (
+    <View style={styles.card}>
+      <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, styles.cardClip]} />
+      {children}
+    </View>
+  );
+}
+
+/** "Don't have an account? Sign up" on a white pill, then the secure line. */
+export function AuthFooter({
+  prefix,
+  link,
+  onPress,
+  secure,
+}: {
+  prefix: string;
+  link: string;
+  onPress: () => void;
+  secure: string;
+}) {
+  return (
+    <View className="items-center">
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="link"
+        className="mt-3.5 min-h-11 justify-center"
+      >
+        <View className="flex-row flex-wrap items-center justify-center rounded-[14px] bg-white/70 px-3 py-1">
+          <Text className="text-base" style={{ color: AUTH.text }}>
+            {prefix}{' '}
+          </Text>
+          <Text font="bold" className="text-base" style={{ color: AUTH.pt }}>
+            {link}
+          </Text>
+        </View>
+      </Pressable>
+      <View className="mt-1.5 flex-row items-center gap-1.5">
+        <Lock size={15} color={AUTH.soft} strokeWidth={2.6} />
+        <Text font="bold" className="text-[13px] tracking-[0.65px]" style={{ color: AUTH.soft }}>
+          {secure}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  logoShadow: {
+    borderRadius: 26,
+    boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.35), 0 14px 28px rgba(234,88,12,0.35)',
+  },
+  logo: {
+    width: 84,
+    height: 84,
+    borderRadius: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pill: { backgroundColor: 'rgba(255,255,255,0.72)', paddingVertical: 2 },
+  card: {
+    width: '100%',
+    marginTop: 18,
+    padding: 16,
+    gap: 10,
+    borderRadius: 26,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.95)',
+    backgroundColor: 'rgba(255,255,255,0.6)',
+    boxShadow: 'inset 0 1px 0 #FFFFFF, 0 14px 34px rgba(234,88,12,0.12)',
+  },
+  cardClip: { borderRadius: 26, overflow: 'hidden' },
+});
+
+/** Filled phone (design label icon). */
+export function PhoneFilled({ size = 18, color = AUTH.p }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      <Path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z" />
+    </Svg>
+  );
+}
+
+/** Filled shield with a keyhole (design PIN label icon). */
+export function ShieldFilled({ size = 18, color = AUTH.p }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      <Path d="M12 2 4 5v6c0 5.2 3.4 9.4 8 11 4.6-1.6 8-5.8 8-11V5zm0 6a2 2 0 0 1 1 3.73V15h-2v-3.27A2 2 0 0 1 12 8z" />
+    </Svg>
+  );
+}

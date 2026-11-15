@@ -1,17 +1,18 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { ArrowRight, Fingerprint } from 'lucide-react-native';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Keyboard, Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
-import { Button } from '@/components/ui/Button';
+import { AuthBackground } from '@/components/ui/AuthBackground';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
+import { FormScreen } from '@/components/ui/FormScreen';
 import { Input } from '@/components/ui/Input';
+import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
 import { useFullFieldFeedback } from '@/hooks/useFullFieldFeedback';
@@ -20,9 +21,18 @@ import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
 import { belongsToOtherApp, isNormalApp } from '@/lib/variant';
 import { homeRouteFor, useSession } from '@/store/session';
+import { PrimaryButton } from '@/ui/glass';
 
-import { AuthHeader } from './AuthHeader';
-import { FormScreen } from '@/components/ui/FormScreen';
+import {
+  AUTH,
+  AuthCard,
+  AuthFooter,
+  AuthLogo,
+  AuthSubtitle,
+  AuthTitle,
+  PhoneFilled,
+  ShieldFilled,
+} from './AuthParts';
 import { PinVisibilityButton } from './PinVisibilityButton';
 import { PIN_LENGTH, signInSchema, type SignInValues } from './schemas';
 
@@ -66,137 +76,131 @@ export default function SignInScreen() {
   const errorText = (message?: string) => (message ? t(message, { count: PIN_LENGTH }) : undefined);
 
   return (
-    <FormScreen>
-      <AuthHeader />
+    <AuthBackground>
+      <FormScreen plain>
+        <View className="absolute left-5 top-4 z-10">
+          <LanguageToggle />
+        </View>
+        {/* Design: assets/images/auth/reference-signin.png */}
+        <View
+          className="flex-1 items-center pb-6"
+          style={{ paddingTop: 56, paddingHorizontal: 22 }}
+        >
+          <AuthLogo />
+          <AuthTitle text={t('auth.welcomeBack')} />
+          <AuthSubtitle text={t('auth.signInSubtitle')} />
 
-      <View className="px-5 pt-6">
-        <Text font="heading" className="text-[30px]" accessibilityRole="header">
-          {t('auth.welcomeBack')}
-        </Text>
-        <Text tone="muted" className="mt-1 text-[17px]">
-          {t('auth.signInSubtitle')}
-        </Text>
-      </View>
-
-      <View className="gap-[18px] px-5 pt-6">
-        <Controller
-          control={control}
-          name="phone"
-          render={({ field }) => (
-            <Animated.View style={phoneFull.style}>
-              <Input
-                label={t('auth.phone')}
-                prefix="+251"
-                placeholder={t('auth.phonePlaceholder')}
-                value={formatPhone(field.value)}
-                onChangeText={(text) => field.onChange(phoneFull.limit(text, field.value))}
-                onBlur={field.onBlur}
-                keyboardType="number-pad"
-                textContentType="telephoneNumber"
-                autoComplete="tel"
-                // "912 345 678" is 11 characters; one more lets an extra digit reach `limit`.
-                maxLength={12}
-                error={errorText(errors.phone?.message)}
-              />
-            </Animated.View>
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="pin"
-          render={({ field }) => (
-            <Input
-              label={t('auth.pin')}
-              labelRight={
-                <Pressable
-                  onPress={() => router.push('/forgot-pin')}
-                  accessibilityRole="link"
-                  hitSlop={10}
-                  className="min-h-11 justify-center"
-                >
-                  <Text font="bold" tone="link" className="text-base">
-                    {t('auth.forgotPin')}
-                  </Text>
-                </Pressable>
-              }
-              placeholder={t('auth.pinPlaceholder')}
-              value={field.value}
-              onChangeText={(text) => field.onChange(digitsOnly(text, PIN_LENGTH))}
-              onBlur={field.onBlur}
-              keyboardType="number-pad"
-              secureTextEntry={!showPin}
-              maxLength={PIN_LENGTH}
-              rightAccessory={
-                <PinVisibilityButton visible={showPin} onToggle={() => setShowPin((v) => !v)} />
-              }
-              error={errorText(errors.pin?.message)}
+          <AuthCard>
+            <Controller
+              control={control}
+              name="phone"
+              render={({ field }) => (
+                <Animated.View style={phoneFull.style}>
+                  <Input
+                    label={t('auth.phone')}
+                    labelIcon={PhoneFilled}
+                    labelIconColor={AUTH.p}
+                    round
+                    prefix="+251"
+                    placeholder={t('auth.phonePlaceholder')}
+                    value={formatPhone(field.value)}
+                    onChangeText={(text) => field.onChange(phoneFull.limit(text, field.value))}
+                    onBlur={field.onBlur}
+                    keyboardType="number-pad"
+                    textContentType="telephoneNumber"
+                    autoComplete="tel"
+                    // "912 345 678" is 11 characters; one more lets an extra digit reach `limit`.
+                    maxLength={12}
+                    error={errorText(errors.phone?.message)}
+                  />
+                </Animated.View>
+              )}
             />
-          )}
+
+            <Controller
+              control={control}
+              name="pin"
+              render={({ field }) => (
+                <Input
+                  label={t('auth.pin')}
+                  labelIcon={ShieldFilled}
+                  labelIconColor={AUTH.p}
+                  round
+                  placeholder={t('auth.pinPlaceholder')}
+                  value={field.value}
+                  onChangeText={(text) => field.onChange(digitsOnly(text, PIN_LENGTH))}
+                  onBlur={field.onBlur}
+                  keyboardType="number-pad"
+                  secureTextEntry={!showPin}
+                  maxLength={PIN_LENGTH}
+                  rightAccessory={
+                    <PinVisibilityButton visible={showPin} onToggle={() => setShowPin((v) => !v)} />
+                  }
+                  error={errorText(errors.pin?.message)}
+                />
+              )}
+            />
+
+            <View className="flex-row items-center justify-between gap-2">
+              <View className="flex-1">
+                <Controller
+                  control={control}
+                  name="rememberMe"
+                  render={({ field }) => (
+                    <Checkbox
+                      checked={field.value}
+                      onChange={field.onChange}
+                      accessibilityLabel={t('auth.rememberMe')}
+                    >
+                      <Text className="text-[15px]" style={{ color: AUTH.text }}>
+                        {t('auth.rememberMe')}
+                      </Text>
+                    </Checkbox>
+                  )}
+                />
+              </View>
+              <Pressable
+                onPress={() => router.push('/forgot-pin')}
+                accessibilityRole="link"
+                hitSlop={10}
+                className="min-h-11 justify-center"
+              >
+                <Text font="bold" className="text-[15px]" style={{ color: AUTH.pt }}>
+                  {t('auth.forgotPin')}
+                </Text>
+              </Pressable>
+            </View>
+
+            <PrimaryButton
+              accent
+              label={t('auth.signIn')}
+              onPress={() => {
+                Keyboard.dismiss();
+                void handleSubmit((values) => mutation.mutate(values))();
+              }}
+            />
+          </AuthCard>
+
+          <AuthFooter
+            prefix={t('auth.noAccount')}
+            link={t('auth.signUp')}
+            onPress={() => router.push('/create-account')}
+            secure={t('brand.secure')}
+          />
+        </View>
+
+        <ErrorDialog
+          visible={mutation.isError}
+          title={t('auth.errors.signInFailedTitle')}
+          message={
+            mutation.error instanceof WrongAppError
+              ? t(isNormalApp ? 'wrongApp.body' : 'wrongApp.shopBody')
+              : t(errorMessageKey(mutation.error))
+          }
+          actionLabel={t('errors.retry')}
+          onClose={mutation.reset}
         />
-
-        <Controller
-          control={control}
-          name="rememberMe"
-          render={({ field }) => (
-            <Checkbox
-              checked={field.value}
-              onChange={field.onChange}
-              accessibilityLabel={t('auth.rememberMe')}
-            >
-              <Text font="semibold" className="text-base">
-                {t('auth.rememberMe')}
-              </Text>
-            </Checkbox>
-          )}
-        />
-      </View>
-
-      <View className="min-h-6 flex-1" />
-
-      <ErrorDialog
-        visible={mutation.isError}
-        title={t('auth.errors.signInFailedTitle')}
-        message={
-          mutation.error instanceof WrongAppError
-            ? t(isNormalApp ? 'wrongApp.body' : 'wrongApp.shopBody')
-            : t(errorMessageKey(mutation.error))
-        }
-        actionLabel={t('errors.retry')}
-        onClose={mutation.reset}
-      />
-
-      <View className="gap-3 px-5">
-        <Button
-          label={t('auth.signIn')}
-          icon={ArrowRight}
-          onPress={() => {
-            Keyboard.dismiss();
-            void handleSubmit((values) => mutation.mutate(values))();
-          }}
-        />
-        <Text font="bold" tone="muted" className="text-center text-[15px]">
-          {t('common.or')}
-        </Text>
-        <Button
-          label={t('auth.signInFingerprint')}
-          icon={Fingerprint}
-          variant="outline"
-          disabled
-          onPress={() => {}}
-        />
-      </View>
-
-      <Pressable
-        onPress={() => router.push('/create-account')}
-        accessibilityRole="link"
-        className="min-h-11 flex-row flex-wrap items-center justify-center pb-7 pt-4"
-      >
-        <Text className="text-[17px]">{t('auth.noAccount')} </Text>
-        <Text font="bold" tone="link" className="text-[17px]">
-          {t('auth.signUp')}
-        </Text>
-      </Pressable>
-    </FormScreen>
+      </FormScreen>
+    </AuthBackground>
   );
 }
