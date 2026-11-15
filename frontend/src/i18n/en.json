@@ -1666,13 +1666,11 @@
     "ownOnly": "Only your own bills are counted."
   },
   "firstTheme": {
-    "title": "Choose your colours",
-    "subtitle": "Pick the look you like. You can change it any time in Profile.",
     "default": "default",
     "later": "Tip: Profile → Color theme changes it later.",
-    "continue": "Continue",
-    "preview": "Preview",
-    "open": "Open"
+    "chooseTitle": "Choose color",
+    "changeLater": "change it later in Profile",
+    "useColor": "Use this color"
   },
   "splash": {
     "ready": "Getting things ready",

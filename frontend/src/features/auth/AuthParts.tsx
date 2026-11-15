@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Lock } from 'lucide-react-native';
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { Text } from '@/components/ui/Text';
@@ -40,8 +40,8 @@ export function AuthLogo() {
   );
 }
 
-/** Sora 28 title on a frosted pill; the last word in orange ("Welcome" + "back"). */
-export function AuthTitle({ text }: { text: string }) {
+/** Sora 28 title on a frosted pill; the last word in orange ("Welcome" + "back"), or in `accent`. */
+export function AuthTitle({ text, accent = AUTH.p }: { text: string; accent?: string }) {
   const words = text.split(' ');
   const head = words.length > 1 ? `${words.slice(0, -1).join(' ')} ` : '';
   return (
@@ -53,7 +53,7 @@ export function AuthTitle({ text }: { text: string }) {
         accessibilityRole="header"
       >
         {head}
-        <Text font="heading" className="text-[28px]" style={{ color: AUTH.p }}>
+        <Text font="heading" className="text-[28px]" style={{ color: accent }}>
           {words[words.length - 1]}
         </Text>
       </Text>
@@ -78,6 +78,18 @@ export function AuthCard({ children }: { children: ReactNode }) {
     <View style={styles.card}>
       <BlurView intensity={30} tint="light" style={[StyleSheet.absoluteFill, styles.cardClip]} />
       {children}
+    </View>
+  );
+}
+
+/** Lock + "SECURE PAYMENT VERIFICATION", 13 bold. */
+export function SecureLine({ text, style }: { text: string; style?: ViewStyle }) {
+  return (
+    <View className="flex-row items-center gap-1.5" style={style}>
+      <Lock size={15} color={AUTH.soft} strokeWidth={2.6} />
+      <Text font="bold" className="text-[13px] tracking-[0.65px]" style={{ color: AUTH.soft }}>
+        {text}
+      </Text>
     </View>
   );
 }
@@ -110,12 +122,7 @@ export function AuthFooter({
           </Text>
         </View>
       </Pressable>
-      <View className="mt-1.5 flex-row items-center gap-1.5">
-        <Lock size={15} color={AUTH.soft} strokeWidth={2.6} />
-        <Text font="bold" className="text-[13px] tracking-[0.65px]" style={{ color: AUTH.soft }}>
-          {secure}
-        </Text>
-      </View>
+      <SecureLine text={secure} style={{ marginTop: 6 }} />
     </View>
   );
 }

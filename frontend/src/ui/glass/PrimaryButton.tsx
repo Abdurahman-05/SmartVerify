@@ -17,6 +17,8 @@ export interface GlassButtonProps {
   trailing?: ReactNode;
   /** Primary: Sign in / Sign up design button (54 px pill, fixed orange gradient). Secondary: brand outline. */
   accent?: boolean;
+  /** With `accent`: gradient colours (top to bottom) instead of the fixed orange. */
+  gradient?: readonly [string, string];
 }
 
 export const buttonHeights = { xl: 60, lg: 58, md: 48 } as const;
@@ -30,6 +32,7 @@ export function PrimaryButton({
   size = 'lg',
   trailing,
   accent = false,
+  gradient = ['#F97316', '#EA580C'],
 }: GlassButtonProps) {
   const brand = useBrandColors();
   const height = accent ? 54 : buttonHeights[size];
@@ -43,14 +46,14 @@ export function PrimaryButton({
       className={`w-full ${disabled ? 'opacity-50' : 'active:opacity-85'}`}
       style={[
         styles.button,
-        { height, borderRadius: radius, backgroundColor: accent ? '#EA580C' : brand.primary },
+        { height, borderRadius: radius, backgroundColor: accent ? gradient[1] : brand.primary },
         accent ? styles.accentShadow : null,
       ]}
     >
       {accent ? (
         <LinearGradient
           pointerEvents="none"
-          colors={['#F97316', '#EA580C']}
+          colors={gradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
           style={[StyleSheet.absoluteFill, { borderRadius: radius }]}
