@@ -69,20 +69,15 @@
     "continue": "ቀጥል"
   },
   "plan": {
-    "title": "እቅድዎን ይምረጡ",
-    "subtitle": "የሚያስፈልግዎትን ይምረጡ። መጀመሪያ መቃኘት ይችላሉ።",
     "normalFeatures": "ክፍያ ማረጋገጥ · ግብይቶች · ሪፖርቶች",
     "oneMonth": "1 ወር",
     "threeMonths": "3 ወር",
     "mostFlexible": "በጣም ተለዋዋጭ",
     "bestValue": "ምርጥ ዋጋ",
     "save": "{{amount}} ብር ይቆጥቡ",
-    "exploreNormal": "Normal ይቃኙ",
     "restaurantSubtitle": "ለምግብ ቤቶች የተሟላ የንግድ መፍትሄ",
     "perMonth": "ብር / በወር",
-    "exploreRestaurant": "Restaurant Plus ይቃኙ",
-    "exploreFirst": "መጀመሪያ መተግበሪያውን ይቃኙ",
-    "noPayment": "አሁን ክፍያ አያስፈልግም። ወዲያውኑ መቃኘት ይጀምሩ።",
+    "exploreFirst": "መጀመሪያ ይመልከቱ፣ በኋላ ይክፈሉ",
     "features": {
       "cashBank": "ጥሬ ገንዘብ + ባንክ",
       "bankOnly": "ባንክ ብቻ",
@@ -92,7 +87,10 @@
       "chef": "የሼፍ ትዕዛዞች"
     },
     "perMonthShort": "ብር/ወር",
-    "bestForRestaurants": "ለምግብ ቤቶች ምርጥ"
+    "chooseTitle": "እቅድ ይምረጡ",
+    "changeLater": "በኋላ መቀየር ይችላሉ",
+    "continuePrice": "ቀጥል · {{price}} ብር",
+    "restaurantLine": "ትዕዛዝ፣ ሂሳብ፣ ወጥ ቤት፣ ጥሬ ገንዘብና ቲፕ፣ ሪፖርት"
   },
   "verify": {
     "enterAmount": "መጠን ያስገቡ",

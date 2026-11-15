@@ -69,20 +69,15 @@
     "continue": "Continue"
   },
   "plan": {
-    "title": "Choose your plan",
-    "subtitle": "Pick what you need. You can look around first.",
     "normalFeatures": "Verify Payment · Transactions · Reports",
     "oneMonth": "1 month",
     "threeMonths": "3 months",
     "mostFlexible": "Most flexible",
     "bestValue": "Best value",
     "save": "Save {{amount}} ETB",
-    "exploreNormal": "Explore Normal",
     "restaurantSubtitle": "Complete business suite for restaurants",
     "perMonth": "ETB / month",
-    "exploreRestaurant": "Explore Restaurant Plus",
-    "exploreFirst": "Explore app first",
-    "noPayment": "No payment needed now. Start exploring right away.",
+    "exploreFirst": "Explore first, pay later",
     "features": {
       "cashBank": "Cash + Bank",
       "bankOnly": "Bank only",
@@ -92,7 +87,10 @@
       "chef": "Chef orders"
     },
     "perMonthShort": "ETB/mo",
-    "bestForRestaurants": "Best for restaurants"
+    "chooseTitle": "Choose plan",
+    "changeLater": "change it later",
+    "continuePrice": "Continue · {{price}} ETB",
+    "restaurantLine": "Orders, bills, kitchen, cash & tips, reports"
   },
   "verify": {
     "enterAmount": "Enter Amount",
