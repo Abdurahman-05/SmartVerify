@@ -1,25 +1,28 @@
 import { useMutation } from '@tanstack/react-query';
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
-import { Banknote, Info, Lock } from 'lucide-react-native';
+import { Banknote, Check, ChevronLeft, Lock } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { TextInput, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
-import { FormScreen } from '@/components/ui/FormScreen';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { useGlass } from '@/components/ui/glassTokens';
+import { HeroCard, HeroChip } from '@/components/ui/HeroCard';
+import { IconTile } from '@/components/ui/IconTile';
 import { LoadingView } from '@/components/ui/LoadingView';
-import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { formatMoney } from '@/components/ui/MoneyText';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
+import { StickyFooter } from '@/components/ui/StickyFooter';
 import { Text } from '@/components/ui/Text';
-import { useBrandColors } from '@/store/theme';
+import { TopBar } from '@/components/ui/TopBar';
 import { usePayments } from '@/features/payments/store';
 import { billLabel } from '@/features/verify/billLabel';
-import { calcCash, type ExtraChoice } from '@/features/verify/calcPayment';
 import { newIdempotencyKey } from '@/lib/api/idempotency';
 import { payBill, USE_MOCK_BILLS } from '@/lib/bills';
 import { errorMessageKey } from '@/lib/errors';
-import { parseAmountInput } from '@/lib/format';
 import { refreshAfterPayment } from '@/lib/queryClient';
 import { colors } from '@/theme/tokens';
 
@@ -27,74 +30,43 @@ import { useBills } from './store';
 import type { Bill } from './types';
 import { usePaymentBill } from './usePaymentBill';
 
-/** Records the cash payment (on the server with the backend), plus a local copy for the receipt. */
-async function saveCashPayment(bill: Bill, cash: number, extraChoice: ExtraChoice, key: string) {
-  let tip = calcCash({ total: bill.total, cash, extraChoice }).tip;
+// Design: docs/design/owner/verify-handoff/screens/17-cash-payment.png
+
+/**
+ * Records the cash payment: always exactly the bill total from the order (no typing, no tip,
+ * no change). On the server with the backend, plus a local copy for the receipt.
+ */
+async function saveCashPayment(bill: Bill, key: string) {
   if (USE_MOCK_BILLS) {
     useBills.getState().markPaid(bill.id);
   } else {
-    // The server checks the cash covers the total and decides tip / change.
-    tip = (await payBill(bill.id, { method: 'cash', cashEtb: cash, extraChoice }, key)).tipEtb;
+    await payBill(bill.id, { method: 'cash', cashEtb: bill.total, extraChoice: 'giveback' }, key);
     refreshAfterPayment();
   }
   usePayments.getState().addPayment({
     id: `pay-${Date.now()}`,
     billId: bill.id,
     method: 'cash',
-    cash,
+    cash: bill.total,
     bank: 0,
-    tip,
+    tip: 0,
     waiterId: bill.waiterId,
     waiterName: bill.waiterName,
     createdAt: new Date().toISOString(),
   });
 }
 
-function SummaryRow({
-  label,
-  value,
-  highlight,
-}: {
-  label: string;
-  value: number;
-  highlight?: boolean;
-}) {
-  const style = highlight ? { color: colors.tipOnDark } : undefined;
-  return (
-    <View className="flex-row items-baseline justify-between gap-3" accessible>
-      <Text
-        font={highlight ? 'bold' : 'semibold'}
-        tone="inverse"
-        className="flex-1 text-[17px]"
-        style={style}
-      >
-        {label}
-      </Text>
-      <MoneyText
-        value={value}
-        font={highlight ? 'bold' : 'semibold'}
-        tone="inverse"
-        className="text-[17px]"
-        style={style}
-      />
-    </View>
-  );
-}
-
 export default function CashPaymentScreen() {
-  const brand = useBrandColors();
   const { t } = useTranslation();
+  const g = useGlass();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { bill, pending } = usePaymentBill(id);
-  const [cash, setCash] = useState(0);
-  // Cash: extra money is always the customer's change (no tip question).
-  const extraChoice: ExtraChoice = 'giveback';
   const [submitted, setSubmitted] = useState(false);
   // One key per cash payment: confirming again after a lost answer pays once.
   const [payKey] = useState(newIdempotencyKey);
   const mutation = useMutation({
-    mutationFn: (b: Bill) => saveCashPayment(b, cash, extraChoice, payKey),
+    mutationFn: (b: Bill) => saveCashPayment(b, payKey),
     onSuccess: (_result, b) =>
       router.replace({ pathname: '/bills/[id]/cash-saved', params: { id: b.id } }),
     onError: () => setSubmitted(false),
@@ -105,133 +77,128 @@ export default function CashPaymentScreen() {
   if (bill.status === 'paid' && !submitted)
     return <Redirect href={{ pathname: '/bills/[id]', params: { id: bill.id } }} />;
 
-  const calc = calcCash({ total: bill.total, cash, extraChoice });
   const itemCount = bill.items.reduce((sum, l) => sum + l.quantity, 0);
+  const total = formatMoney(bill.total);
 
   const confirm = () => {
-    if (!calc.valid) return;
     setSubmitted(true);
     mutation.mutate(bill);
   };
 
   return (
-    <FormScreen>
-      <ScreenHeader
-        title={t('cash.title')}
-        subtitle={billLabel(t, bill)}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/bills'))}
-      />
-
-      <View className="gap-[18px] px-4 pt-2">
-        <View className="gap-1.5">
-          <Text font="semibold" tone="muted" className="text-sm">
-            {t('cash.billFromOrder', { count: itemCount })}
-          </Text>
-          <View
-            accessible
-            accessibilityLabel={t('cash.totalLocked', { amount: formatMoney(bill.total) })}
-            className="h-16 flex-row items-center gap-3 rounded-input border-2 border-borderStrong bg-neutralBg px-[18px]"
-          >
-            <Text font="bold" tone="muted" className="text-[17px]">
-              {t('common.etb')}
-            </Text>
-            <MoneyText
-              value={bill.total}
-              showCurrency={false}
-              className="flex-1 text-right text-[28px]"
-            />
-            <Lock size={22} color={colors.muted} strokeWidth={2.2} />
-          </View>
+    <ScreenBackground>
+      <SafeAreaView edges={['top']} className="flex-1">
+        <View className="px-4 pb-3 pt-2">
+          <TopBar
+            title={t('cash.title')}
+            subtitle={`${billLabel(t, bill)} · ${t('cash.orderNo', { number: bill.orderNo })}`}
+            left={{
+              icon: ChevronLeft,
+              onPress: () => (router.canGoBack() ? router.back() : router.replace('/bills')),
+              label: t('common.back'),
+            }}
+          />
         </View>
 
-        <View className="gap-1.5">
-          <Text font="bold" className="text-[17px]">
-            {t('cash.cashGave')}
-          </Text>
-          <View
-            className={`h-16 flex-row items-center gap-3 rounded-input border-2 bg-surface px-[18px] ${
-              cash > 0 && !calc.valid ? 'border-dangerFg' : 'border-borderStrong'
-            }`}
-          >
-            <Banknote size={22} color={colors.muted} strokeWidth={2.2} />
-            <Text font="bold" tone="muted" className="text-[17px]">
-              {t('common.etb')}
-            </Text>
-            <TextInput
-              value={cash ? formatMoney(cash, false) : ''}
-              onChangeText={(text) => setCash(parseAmountInput(text))}
-              keyboardType="number-pad"
-              placeholder="0"
-              placeholderTextColor={colors.placeholder}
-              accessibilityLabel={t('cash.cashLabel')}
-              className="h-full flex-1 text-right font-heading text-[28px] text-text"
-            />
-          </View>
-        </View>
-
-        {calc.valid ? (
-          <View className="gap-1 rounded-[20px] bg-primary px-[18px] py-3">
-            {calc.tip > 0 ? (
-              <>
-                <SummaryRow label={t('cash.toRestaurant')} value={bill.total} />
-                <SummaryRow
-                  label={t('cash.tipFor', { name: bill.waiterName })}
-                  value={calc.tip}
-                  highlight
-                />
-              </>
-            ) : (
-              <>
-                <SummaryRow label={t('cash.totalBill')} value={bill.total} />
-                <SummaryRow label={t('cash.cashReceived')} value={cash} />
-              </>
-            )}
-            {calc.change > 0 ? (
-              <View className="mt-1.5 border-t-2 border-white/35 pt-2" accessible>
-                <Text font="semibold" tone="inverse" className="text-base">
-                  {t('cash.giveBackToCustomer')}
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 120, gap: 12 }}>
+          <HeroCard style={{ alignItems: 'center' }}>
+            <View
+              accessible
+              accessibilityLabel={t('cash.totalLocked', { amount: total })}
+              className="items-center"
+            >
+              <Text
+                font="bold"
+                tone="inverse"
+                className="text-[13px] uppercase tracking-[0.8px] opacity-90"
+              >
+                {t('cash.toReceive')}
+              </Text>
+              <Text font="heading" tone="inverse" className="text-[44px] leading-[52px]">
+                {formatMoney(bill.total, false)}{' '}
+                <Text font="heading" tone="inverse" className="text-lg">
+                  {t('common.etb')}
                 </Text>
-                <MoneyText value={calc.change} tone="inverse" className="text-4xl" />
-              </View>
-            ) : null}
+              </Text>
+            </View>
+            <HeroChip
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
+                paddingVertical: 5,
+                marginTop: 4,
+              }}
+            >
+              <Lock size={14} color="#FFFFFF" strokeWidth={2.4} />
+              <Text font="bold" tone="inverse" className="text-[13px]">
+                {t('cash.fromOrder')}
+              </Text>
+            </HeroChip>
+          </HeroCard>
+
+          <View className="flex-row items-center justify-between gap-3">
+            <Text font="bold" className="text-base" accessibilityRole="header">
+              {t('bills.items', { count: itemCount })}
+            </Text>
+            <Text className="text-sm" style={{ color: colors.muted }} numberOfLines={1}>
+              {t('cash.waiter', { name: bill.waiterName })}
+            </Text>
           </View>
-        ) : null}
+          <GlassCard style={{ paddingHorizontal: 14, paddingVertical: 4 }}>
+            {bill.items.map((item, i) => (
+              <View
+                key={item.itemId}
+                accessible
+                className={`flex-row items-center gap-3 py-3 ${i ? 'border-t border-black/[0.07]' : ''}`}
+              >
+                <View
+                  className="h-8 w-8 items-center justify-center rounded-[10px]"
+                  style={{ backgroundColor: g.primaryDeep }}
+                >
+                  <Text font="bold" tone="inverse" className="text-[15px]">
+                    {item.quantity}
+                  </Text>
+                </View>
+                <Text font="bold" className="flex-1 text-base">
+                  {item.name}
+                </Text>
+                <Text font="heading" className="text-base">
+                  {formatMoney(item.priceEtb * item.quantity, false)}
+                </Text>
+              </View>
+            ))}
+          </GlassCard>
 
-        <View className="flex-row items-start gap-2">
-          <Info size={20} color={brand.primaryText} strokeWidth={2.2} />
-          <Text font="semibold" tone="muted" className="flex-1 text-[15px] leading-5">
-            {t('cash.note')}
-          </Text>
-        </View>
-      </View>
+          <GlassCard style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
+            <IconTile icon={Banknote} tone="green" size={44} radius={14} iconSize={22} />
+            <View className="flex-1">
+              <Text font="bold" className="text-base">
+                {t('cash.take', { amount: total })}
+              </Text>
+              <Text className="text-sm" style={{ color: colors.muted }}>
+                {t('cash.ledgerNote')}
+              </Text>
+            </View>
+          </GlassCard>
+        </ScrollView>
 
-      <View className="min-h-6 flex-1" />
+        <StickyFooter>
+          <PrimaryButton
+            label={t('cash.confirmTotal', { amount: total })}
+            icon={Check}
+            onPress={confirm}
+          />
+        </StickyFooter>
 
-      <View className="gap-2 px-4 pb-6 pt-2">
-        {cash > 0 && !calc.valid ? (
-          <Text
-            font="semibold"
-            className="text-center text-base text-dangerFg"
-            accessibilityLiveRegion="polite"
-          >
-            {t('cash.missing', { amount: formatMoney(calc.missing) })}
-          </Text>
-        ) : null}
-        <Button
-          label={t('cash.confirm')}
-          icon={Banknote}
-          disabled={!calc.valid}
-          onPress={confirm}
+        <ErrorDialog
+          visible={mutation.isError}
+          title={t('common.error')}
+          message={t(errorMessageKey(mutation.error))}
+          actionLabel={t('errors.retry')}
+          onClose={mutation.reset}
         />
-      </View>
-
-      <ErrorDialog
-        visible={mutation.isError}
-        title={t('common.error')}
-        message={t(errorMessageKey(mutation.error))}
-        actionLabel={t('errors.retry')}
-        onClose={mutation.reset}
-      />
-    </FormScreen>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
