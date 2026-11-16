@@ -1,56 +1,72 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
-import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
+import { useState, type ReactNode } from 'react';
+import {
+  StyleSheet,
+  useWindowDimensions,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
+import Svg, { Defs, RadialGradient, Rect, Stop } from 'react-native-svg';
 
-import { alpha, useGlass } from './glassTokens';
+import { shade } from '@/ui/glass/glassColors';
 
-const YELLOW = '#FACC15';
-const PINK = '#F43F5E';
+import { useGlass } from './glassTokens';
 
-/** Soft round glow: the colour fades to nothing at the edge. */
-function Glow({
-  id,
-  x,
-  y,
-  r,
-  color,
-  a,
-}: {
-  id: string;
-  x: string;
-  y: string;
-  r: number;
-  color: string;
-  a: number;
-}) {
-  return (
-    <>
-      <Defs>
-        <RadialGradient id={id}>
-          <Stop offset="0" stopColor={color} stopOpacity={a} />
-          <Stop offset="1" stopColor={color} stopOpacity={0} />
-        </RadialGradient>
-      </Defs>
-      <Circle cx={x} cy={y} r={r} fill={`url(#${id})`} />
-    </>
-  );
+interface ScreenBackgroundProps {
+  children?: ReactNode;
+  style?: StyleProp<ViewStyle>;
+  /** Colours instead of the theme: the result screens' mint or soft red (glows from the tile). */
+  palette?: { tint: string; tile: string };
 }
 
-/** Screen background: tint → tile gradient with theme blobs and soft glows behind the content. */
-export function ScreenBackground({ children }: { children?: ReactNode }) {
-  const g = useGlass();
+/**
+ * Screen background: the theme tint → tile gradient (top to bottom) with three soft round glows
+ * in theme colours at low alpha. No corner shapes, nothing with a hard edge.
+ */
+export function ScreenBackground({ children, style, palette }: ScreenBackgroundProps) {
+  const saved = useGlass();
+  const deep = palette ? shade(palette.tile, -0.35) : saved.primary;
+  const c = palette
+    ? { ...palette, primary: deep, primary2: deep, primaryText: shade(palette.tile, -0.5) }
+    : saved;
+  const win = useWindowDimensions();
+  // The view's real size (on Android it also runs under the system buttons).
+  const [size, setSize] = useState({ w: win.width, h: win.height });
+  const { w, h } = size;
+  const glows = [
+    { id: 'glowTop', x: w * 0.9, y: h * 0.06, r: w * 0.75, color: c.primary2, alpha: 0.16 },
+    { id: 'glowMid', x: w * 0.05, y: h * 0.55, r: w * 0.7, color: c.primary, alpha: 0.1 },
+    { id: 'glowLow', x: w * 0.75, y: h * 0.95, r: w * 0.8, color: c.primaryText, alpha: 0.1 },
+  ];
   return (
-    <View style={{ flex: 1, backgroundColor: g.tint }}>
-      <LinearGradient colors={[g.tint, g.tile]} style={StyleSheet.absoluteFill} />
-      <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
-        <Glow id="glowMain" x="88%" y="46%" r={150} color={g.primary2} a={0.55} />
-        <Glow id="glowYellow" x="10%" y="66%" r={140} color={YELLOW} a={0.5} />
-        <Glow id="glowPink" x="70%" y="88%" r={150} color={PINK} a={0.28} />
-        <Circle cx="108%" cy="-4%" r={150} fill={alpha(g.tile, 0.9)} />
-        <Circle cx="108%" cy="-4%" r={92} fill={g.primary2} />
-        <Circle cx="-12%" cy="104%" r={170} fill={alpha(g.tile, 0.9)} />
-        <Circle cx="-12%" cy="104%" r={110} fill={g.primary2} />
+    <View
+      style={[{ flex: 1, backgroundColor: c.tint }, style]}
+      onLayout={(e) => {
+        const { width, height } = e.nativeEvent.layout;
+        if (Math.abs(width - w) > 1 || Math.abs(height - h) > 1) setSize({ w: width, h: height });
+      }}
+    >
+      <LinearGradient colors={[c.tint, c.tile]} style={StyleSheet.absoluteFill} />
+      <Svg pointerEvents="none" width={w} height={h} style={StyleSheet.absoluteFill}>
+        <Defs>
+          {glows.map((g) => (
+            <RadialGradient
+              key={g.id}
+              id={g.id}
+              cx={g.x}
+              cy={g.y}
+              r={g.r}
+              gradientUnits="userSpaceOnUse"
+            >
+              <Stop offset="0" stopColor={g.color} stopOpacity={g.alpha} />
+              <Stop offset="1" stopColor={g.color} stopOpacity={0} />
+            </RadialGradient>
+          ))}
+        </Defs>
+        {glows.map((g) => (
+          <Rect key={g.id} x={0} y={0} width={w} height={h} fill={`url(#${g.id})`} />
+        ))}
       </Svg>
       {children}
     </View>

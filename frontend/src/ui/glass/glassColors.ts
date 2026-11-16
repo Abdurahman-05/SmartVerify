@@ -2,7 +2,6 @@
 export const glass = {
   card: 'rgba(255,255,255,0.62)',
   cardBorder: 'rgba(255,255,255,0.95)',
-  amberBlob: '#FFE7AE',
   text: '#1E1A1C',
   shadow: 'rgba(30,20,25,1)',
 } as const;

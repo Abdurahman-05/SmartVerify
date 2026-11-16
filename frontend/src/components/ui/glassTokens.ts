@@ -1,5 +1,5 @@
 import { useBrandColors } from '@/store/theme';
-import { shade } from '@/ui/glass';
+import { shade } from '@/ui/glass/glassColors';
 
 /** "#EA580C", 0.3 -> "rgba(234,88,12,0.3)". */
 export function alpha(hex: string, a: number): string {
