@@ -1,11 +1,14 @@
-import { CupSoda, Soup, Utensils, type LucideIcon } from 'lucide-react-native';
+import { Image } from 'expo-image';
+import { CupSoda, Minus, Plus, Soup, Utensils, type LucideIcon } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
-import { MoneyText } from '@/components/ui/MoneyText';
+import { formatMoney } from '@/components/ui/MoneyText';
 import { Text } from '@/components/ui/Text';
-import { useBrandColors } from '@/store/theme';
-import type { MenuCategory, MenuItem } from '@/lib/mock/restaurant';
+import { menuPhotoFor } from '@/lib/menuPhotos';
+import type { MenuCategory } from '@/lib/mock/restaurant';
+import type { MenuItem } from '@/lib/restaurant';
+import { useGlass } from '@/components/ui/glassTokens';
 
 export const categoryIcon: Record<MenuCategory, LucideIcon> = {
   food: Soup,
@@ -19,16 +22,17 @@ interface MenuItemRowProps {
   number: number;
   quantity: number;
   onChange: (quantity: number) => void;
+  /** First row of the card: no divider above it. */
+  first?: boolean;
 }
 
-function RoundButton({
-  label,
-  filled,
+/** One step button of the brand stepper (− / +), 40 × 44. */
+function StepButton({
+  icon: Icon,
   accessibilityLabel,
   onPress,
 }: {
-  label: string;
-  filled: boolean;
+  icon: LucideIcon;
   accessibilityLabel: string;
   onPress: () => void;
 }) {
@@ -38,69 +42,74 @@ function RoundButton({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       hitSlop={4}
-      className={`h-12 w-12 items-center justify-center rounded-full ${
-        filled
-          ? 'bg-primary active:opacity-80'
-          : 'border-2 border-primary bg-surface active:bg-background'
-      }`}
+      className="h-11 w-10 items-center justify-center active:opacity-70"
     >
-      <Text
-        font="bold"
-        tone={filled ? 'inverse' : 'default'}
-        className={`text-[28px] leading-8 ${filled ? '' : 'text-primary'}`}
-      >
-        {label}
-      </Text>
+      <Icon size={18} color="#FFFFFF" strokeWidth={2.6} />
     </Pressable>
   );
 }
 
-export function MenuItemRow({ item, number, quantity, onChange }: MenuItemRowProps) {
-  const brand = useBrandColors();
+/**
+ * A menu row inside the New order card (design `.mi`): 48 px photo or icon tile, name, price,
+ * and "+ ADD" — or a brand stepper (− quantity +) once it is in the order.
+ */
+export function MenuItemRow({ item, number, quantity, onChange, first }: MenuItemRowProps) {
+  const g = useGlass();
   const { t } = useTranslation();
   const Icon = categoryIcon[item.category];
+  const photo = menuPhotoFor(item.catalogKey);
   const inOrder = quantity > 0;
 
   return (
     <View
-      className={`flex-row items-center gap-3 rounded-[18px] py-2 pl-2 pr-2.5 ${
-        inOrder
-          ? 'border-[2.5px] border-primary bg-primarySoft'
-          : 'border-[1.5px] border-border bg-surface'
-      }`}
+      className={`flex-row items-center gap-3 py-2 ${first ? '' : 'border-t border-black/[0.07]'}`}
     >
-      <View className="h-16 w-16 items-center justify-center rounded-[14px] bg-primaryTile">
-        <Icon size={28} color={brand.primary} strokeWidth={1.8} />
-        <View className="absolute -left-1 -top-1 h-6 min-w-6 items-center justify-center rounded-full bg-primary px-1.5">
-          <Text font="bold" tone="inverse" className="text-sm leading-4">
-            {number}
-          </Text>
-        </View>
+      <View
+        className="h-12 w-12 items-center justify-center overflow-hidden rounded-full"
+        style={{ backgroundColor: g.tile }}
+      >
+        {photo ? (
+          <Image
+            source={photo}
+            style={{ width: 48, height: 48 }}
+            contentFit="cover"
+            accessibilityIgnoresInvertColors
+          />
+        ) : (
+          <Icon size={24} color={g.primaryDeep} strokeWidth={1.8} />
+        )}
       </View>
       <View className="min-w-0 flex-1">
-        <Text font="bold" className="text-[17px] leading-tight">
+        <Text font="bold" className="text-base leading-5" numberOfLines={2}>
+          <Text font="bold" tone="muted" className="text-[13px]">
+            {number}.{' '}
+          </Text>
           {item.name}
         </Text>
-        <MoneyText value={item.priceEtb} font="bold" tone="link" className="mt-[3px] text-[17px]" />
+        <Text tone="muted" className="text-sm">
+          {formatMoney(item.priceEtb)}
+        </Text>
       </View>
       {inOrder ? (
-        <View className="flex-row items-center gap-0.5">
-          <RoundButton
-            label="−"
-            filled={false}
+        <View
+          className="h-11 flex-row items-center rounded-full"
+          style={{ backgroundColor: g.primaryDeep }}
+        >
+          <StepButton
+            icon={Minus}
             accessibilityLabel={t('orders.removeOne', { name: item.name })}
             onPress={() => onChange(quantity - 1)}
           />
           <Text
-            font="bold"
-            className="min-w-[30px] text-center text-[22px]"
+            font="heading"
+            tone="inverse"
+            className="min-w-[22px] text-center text-base"
             accessibilityLiveRegion="polite"
           >
             {quantity}
           </Text>
-          <RoundButton
-            label="+"
-            filled
+          <StepButton
+            icon={Plus}
             accessibilityLabel={t('orders.addOne', { name: item.name })}
             onPress={() => onChange(quantity + 1)}
           />
@@ -110,9 +119,11 @@ export function MenuItemRow({ item, number, quantity, onChange }: MenuItemRowPro
           onPress={() => onChange(1)}
           accessibilityRole="button"
           accessibilityLabel={t('orders.addItem', { name: item.name })}
-          className="h-12 justify-center rounded-3xl bg-primary px-5 active:opacity-80"
+          className="h-11 flex-row items-center gap-1 rounded-full border-2 px-3.5 active:opacity-80"
+          style={{ borderColor: g.primary }}
         >
-          <Text font="bold" tone="inverse" className="text-[17px]">
+          <Plus size={16} color={g.primaryDeep} strokeWidth={2.6} />
+          <Text font="bold" className="text-sm" style={{ color: g.primaryDeep }}>
             {t('orders.add')}
           </Text>
         </Pressable>

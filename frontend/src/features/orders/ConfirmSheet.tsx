@@ -3,9 +3,9 @@ import { View } from 'react-native';
 
 import { MoneyText } from '@/components/ui/MoneyText';
 import { BottomSheet } from '@/components/ui/BottomSheet';
-import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import type { OrderLine } from '@/lib/mock/restaurant';
+import { PrimaryButton, SecondaryButton } from '@/ui/glass';
 
 interface ConfirmSheetProps {
   visible: boolean;
@@ -54,8 +54,8 @@ export function ConfirmSheet({
           <MoneyText value={total} font="bold" className="text-[22px]" />
         </View>
       </View>
-      <Button label={t('orders.yesSend', { number: tableNumber })} onPress={onConfirm} />
-      <Button label={t('orders.noChange')} variant="outline" size="md" onPress={onChangeTable} />
+      <PrimaryButton label={t('orders.yesSend', { number: tableNumber })} onPress={onConfirm} />
+      <SecondaryButton label={t('orders.noChange')} size="md" onPress={onChangeTable} />
     </BottomSheet>
   );
 }

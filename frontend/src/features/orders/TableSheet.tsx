@@ -3,13 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { BottomSheet } from '@/components/ui/BottomSheet';
-import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { areaLabel } from '@/lib/areaLabel';
 import type { Table } from '@/lib/restaurant';
 import { tableCategoryKey } from '@/lib/tableCategories';
 
 import { Pill } from './Pill';
+import { SecondaryButton } from '@/ui/glass';
 
 interface TableSheetProps {
   visible: boolean;
@@ -108,7 +108,7 @@ export function TableSheet({ visible, tables, currentId, onSelect, onClose }: Ta
           );
         })}
       </View>
-      <Button label={t('orders.cancel')} variant="outline" size="md" onPress={onClose} />
+      <SecondaryButton label={t('orders.cancel')} size="md" onPress={onClose} />
     </BottomSheet>
   );
 }

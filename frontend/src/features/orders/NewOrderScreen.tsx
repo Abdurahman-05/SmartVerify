@@ -1,16 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import {
-  X,
-  Search,
-  ArrowLeftRight,
-  Bike,
-  ChevronDown,
-  MapPin,
-  ShoppingBag,
-  UtensilsCrossed,
-  type LucideIcon,
-} from 'lucide-react-native';
+import { X, Search, ChevronDown, MapPin, Send } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -29,7 +19,8 @@ import { LoadingView } from '@/components/ui/LoadingView';
 import { NoConnection } from '@/components/ui/NoConnection';
 import { OptionSheet } from '@/components/ui/OptionSheet';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { Button } from '@/components/ui/Button';
+import { Segmented } from '@/components/ui/Segmented';
+import { useGlass } from '@/components/ui/glassTokens';
 import { Text } from '@/components/ui/Text';
 import { newIdempotencyKey } from '@/lib/api/idempotency';
 import { ApiError } from '@/lib/api/client';
@@ -61,53 +52,17 @@ import { MenuItemRow } from './MenuItemRow';
 import { Pill } from './Pill';
 import { deliverySchema, fieldErrors, takeawaySchema } from './schemas';
 import { TableSheet } from './TableSheet';
+import { GlassCard, HeroCard, PrimaryButton, ScreenBg } from '@/ui/glass';
 
-const orderTypes: { type: OrderType; icon: LucideIcon }[] = [
-  { type: 'dineIn', icon: UtensilsCrossed },
-  { type: 'takeaway', icon: ShoppingBag },
-  { type: 'delivery', icon: Bike },
-];
+const orderTypes: OrderType[] = ['dineIn', 'takeaway', 'delivery'];
 const kitchenNotes: OrderNote[] = ['noOnion', 'lessSpicy', 'rush', 'takeaway'];
 
 type Sheet = 'table' | 'confirm' | 'area' | null;
 
-function TypeButton({
-  label,
-  icon: Icon,
-  selected,
-  onPress,
-}: {
-  label: string;
-  icon: LucideIcon;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  const brand = useBrandColors();
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="radio"
-      accessibilityState={{ selected }}
-      className={`h-14 flex-1 flex-row items-center justify-center gap-1.5 rounded-[18px] px-1 ${
-        selected ? 'bg-primary' : 'border-2 border-borderStrong bg-surface active:bg-background'
-      }`}
-    >
-      <Icon size={22} color={selected ? colors.surface : brand.primary} strokeWidth={2.2} />
-      <Text
-        font="bold"
-        tone={selected ? 'inverse' : 'default'}
-        className="text-base"
-        numberOfLines={1}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 /** addTo: a bill id — the items go on that open bill (no table or customer to choose). */
 export default function NewOrderScreen({ addTo }: { addTo?: string } = {}) {
   const brand = useBrandColors();
+  const g = useGlass();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -185,15 +140,17 @@ export default function NewOrderScreen({ addTo }: { addTo?: string } = {}) {
   // Any other answer (not Restaurant Plus, signed out…): say so, never spin forever.
   if (loadError && (!menu || !tables || !fees)) {
     return (
-      <SafeAreaView className="flex-1 justify-center gap-4 bg-background px-6">
-        <Text font="heading" className="text-center text-xl">
-          {t('orders.loadFailed')}
-        </Text>
-        <Text tone="muted" className="text-center text-base">
-          {t(errorMessageKey(loadError))}
-        </Text>
-        <Button label={t('errors.retry')} onPress={retryLoad} />
-      </SafeAreaView>
+      <ScreenBg>
+        <SafeAreaView className="flex-1 justify-center gap-4 px-6">
+          <Text font="heading" className="text-center text-xl">
+            {t('orders.loadFailed')}
+          </Text>
+          <Text tone="muted" className="text-center text-base">
+            {t(errorMessageKey(loadError))}
+          </Text>
+          <PrimaryButton label={t('errors.retry')} onPress={retryLoad} />
+        </SafeAreaView>
+      </ScreenBg>
     );
   }
   if (!menu || !tables || !fees) return <LoadingView screenTitle={t('orders.title')} />;
@@ -287,348 +244,374 @@ export default function NewOrderScreen({ addTo }: { addTo?: string } = {}) {
           : t('orders.pickTable');
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        className="flex-1"
-      >
-        <ScreenHeader
-          title={addTo ? t('bills.addMore') : t('orders.title')}
-          subtitle={t('orders.waiter', { name: waiterName })}
-          onBack={() => (router.canGoBack() ? router.back() : router.replace('/home'))}
-        />
-
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingBottom: 8 }}
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1"
         >
-          <View
-            className={`flex-row gap-2 px-4 pb-2.5 pt-1 ${addTo ? 'hidden' : ''}`}
-            accessibilityRole="radiogroup"
-          >
-            {orderTypes.map(({ type: value, icon }) => (
-              <TypeButton
-                key={value}
-                label={t(`orders.type.${value}`)}
-                icon={icon}
-                selected={type === value}
-                onPress={() => switchType(value)}
-              />
-            ))}
-          </View>
-
-          {type === 'dineIn' && !addTo ? (
-            <View className="mx-4 flex-row items-center justify-between gap-2 rounded-[20px] bg-primary py-3 pl-[18px] pr-3">
-              <View className="flex-1">
-                <Text font="semibold" tone="inverse" className="text-sm opacity-90">
-                  {table
-                    ? t('orders.orderingFor', {
-                        area: areaLabel(t, i18n.language, table.area, table.categoryNameAm),
-                      })
-                    : t('orders.noTable')}
-                </Text>
-                <Text
-                  font="heading"
-                  tone="inverse"
-                  className="mt-0.5 text-[30px] leading-tight"
-                  numberOfLines={1}
-                >
-                  {table ? t('orders.table', { number: table.number }) : t('orders.chooseTable')}
+          <ScreenHeader
+            title={addTo ? t('bills.addMore') : t('orders.title')}
+            subtitle={t('orders.waiter', { name: waiterName })}
+            onBack={addTo ? () => router.back() : undefined}
+            right={
+              <View
+                className="h-14 w-14 items-center justify-center rounded-full"
+                style={{ backgroundColor: g.primaryDeep }}
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+              >
+                <Text font="heading" tone="inverse" className="text-xl">
+                  {waiterName.trim().charAt(0).toUpperCase()}
                 </Text>
               </View>
-              <Pressable
-                onPress={() => setSheet('table')}
-                accessibilityRole="button"
-                accessibilityLabel={t('orders.chooseTable')}
-                className="h-[52px] flex-row items-center gap-1.5 rounded-[26px] bg-amber px-3.5 active:opacity-80"
-              >
-                <ArrowLeftRight size={20} color={colors.text} strokeWidth={2.4} />
-                <Text font="bold" className="text-base">
-                  {t('orders.change')}
-                </Text>
-              </Pressable>
-            </View>
-          ) : null}
-
-          {type === 'takeaway' && !addTo ? (
-            <View className="mx-4 gap-2.5 rounded-[20px] border-[1.5px] border-border bg-surface px-3.5 py-3">
-              <Field
-                label={t('orders.customerName')}
-                placeholder={t('orders.customerNamePlaceholder')}
-                value={takeaway.customerName}
-                onChangeText={(customerName) => setTakeaway((v) => ({ ...v, customerName }))}
-                autoCapitalize="words"
-                error={err('customerName')}
-              />
-              <Field
-                label={t('orders.customerPhoneOptional')}
-                placeholder={t('orders.phonePlaceholder')}
-                value={takeaway.customerPhone}
-                onChangeText={(text) =>
-                  setTakeaway((v) => ({ ...v, customerPhone: digitsOnly(text, 10) }))
-                }
-                keyboardType="phone-pad"
-                maxLength={10}
-                error={err('customerPhone')}
-              />
-            </View>
-          ) : null}
-
-          {type === 'delivery' && !area && !addTo ? (
-            <View className="mx-4 gap-1 rounded-[20px] border-[1.5px] border-border bg-surface px-3.5 py-3">
-              <Text font="bold" className="text-base">
-                {t('orders.noAreas')}
-              </Text>
-              <Text tone="muted" className="text-sm">
-                {t('orders.noAreasHint')}
-              </Text>
-            </View>
-          ) : null}
-
-          {type === 'delivery' && area && !addTo ? (
-            <View className="mx-4 gap-2.5 rounded-[20px] border-[1.5px] border-border bg-surface px-3.5 py-3">
-              <View className="flex-row items-start gap-2.5">
-                <View className="min-w-0 flex-1 gap-1">
-                  <Text font="bold" className="text-[15px]">
-                    {t('orders.deliveryArea')}
-                  </Text>
-                  <Pressable
-                    onPress={() => setSheet('area')}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${t('orders.deliveryArea')}: ${area.name}`}
-                    className="h-[50px] flex-row items-center gap-2 rounded-[14px] border-2 border-primary bg-surface px-3 active:bg-background"
-                  >
-                    <MapPin size={22} color={brand.primary} strokeWidth={2.2} />
-                    <Text font="bold" className="flex-1 text-[17px]" numberOfLines={1}>
-                      {area.name}
-                    </Text>
-                    <ChevronDown size={22} color={colors.text} strokeWidth={2} />
-                  </Pressable>
-                </View>
-                <View className="w-32">
-                  <Field
-                    label={t('orders.fee')}
-                    value={deliveryFee}
-                    onChangeText={(text) =>
-                      setDelivery((v) => ({ ...v, fee: digitsOnly(text, 4) }))
-                    }
-                    keyboardType="number-pad"
-                    maxLength={4}
-                    emphasis
-                    error={err('fee')}
-                  />
-                </View>
-              </View>
-              <Text font="semibold" tone="muted" className="-mt-1 text-sm">
-                {t('orders.feeNote', { area: area.name, fee: area.usualFeeEtb })}
-              </Text>
-              <Field
-                label={t('orders.address')}
-                placeholder={t('orders.addressPlaceholder')}
-                value={delivery.address}
-                onChangeText={(address) => setDelivery((v) => ({ ...v, address }))}
-                error={err('address')}
-              />
-              <Field
-                label={t('orders.customerPhone')}
-                placeholder={t('orders.phonePlaceholder')}
-                value={delivery.customerPhone}
-                onChangeText={(text) =>
-                  setDelivery((v) => ({ ...v, customerPhone: digitsOnly(text, 10) }))
-                }
-                keyboardType="phone-pad"
-                maxLength={10}
-                error={err('customerPhone')}
-              />
-            </View>
-          ) : null}
-
-          <View className="mx-4 mt-3 h-12 flex-row items-center gap-2 rounded-input border-[1.5px] border-border bg-surface px-3">
-            <Search size={20} color={colors.muted} strokeWidth={2.2} />
-            <TextInput
-              value={search}
-              onChangeText={setSearch}
-              placeholder={t('orders.search')}
-              placeholderTextColor={colors.placeholder}
-              accessibilityLabel={t('orders.search')}
-              returnKeyType="search"
-              autoCorrect={false}
-              className="h-full flex-1 font-body text-base text-text"
-            />
-            {search ? (
-              <Pressable
-                onPress={() => setSearch('')}
-                accessibilityRole="button"
-                accessibilityLabel={t('orders.clearSearch')}
-                hitSlop={8}
-                className="h-11 w-11 items-center justify-center rounded-full active:bg-border"
-              >
-                <X size={20} color={colors.muted} strokeWidth={2.2} />
-              </Pressable>
-            ) : null}
-          </View>
+            }
+          />
 
           <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-              gap: 8,
-              paddingHorizontal: 16,
-              paddingTop: 10,
-              paddingBottom: 10,
-            }}
-            accessibilityRole="radiogroup"
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingBottom: 8 }}
           >
-            <Pill
-              label={t('orders.category.all')}
-              selected={chosenCategory === 'all'}
-              onPress={() => setCategory('all')}
-            />
-            {categoryChips.map((c) => (
-              <Pill
-                key={c.id}
-                label={i18n.language === 'am' && c.nameAm ? c.nameAm : c.name}
-                selected={chosenCategory === c.id}
-                onPress={() => setCategory(c.id)}
-              />
-            ))}
-          </ScrollView>
-
-          {menu.length === 0 ? (
-            <View className="mx-4 gap-1 rounded-[20px] border-[1.5px] border-border bg-surface px-3.5 py-3">
-              <Text font="bold" className="text-base">
-                {t('orders.emptyMenu')}
-              </Text>
-              <Text tone="muted" className="text-sm">
-                {t('orders.emptyMenuHint')}
-              </Text>
-            </View>
-          ) : null}
-
-          <View className="gap-2 px-4">
-            {menu.length > 0 && shownMenu.length === 0 ? (
-              <Text tone="muted" className="py-4 text-center text-base">
-                {t('orders.noMatch')}
-              </Text>
-            ) : null}
-            {shownMenu.map(({ item, number }) => (
-              <MenuItemRow
-                key={item.id}
-                item={item}
-                number={number}
-                quantity={cart[item.id] ?? 0}
-                onChange={(q) => setQuantity(item.id, q)}
-              />
-            ))}
-          </View>
-
-          {type === 'dineIn' ? (
-            <View className="px-4 pb-1.5 pt-2.5">
-              <Text font="bold" className="mb-1.5 text-[15px]">
-                {t('orders.tellKitchen')}
-              </Text>
-              <View className="flex-row flex-wrap gap-2">
-                {kitchenNotes.map((note) => (
-                  <Pill
-                    key={note}
-                    role="checkbox"
-                    label={t(`orders.note.${note}`)}
-                    selected={notes.includes(note)}
-                    onPress={() => toggleNote(note)}
-                  />
-                ))}
+            {addTo ? null : (
+              <View className="px-4 pb-2.5 pt-1">
+                <Segmented
+                  options={orderTypes.map((value) => ({
+                    value,
+                    label: t(`orders.type.${value}`),
+                  }))}
+                  value={type}
+                  onChange={switchType}
+                />
               </View>
-            </View>
-          ) : null}
-        </ScrollView>
+            )}
 
-        <View className="px-4 pb-2.5 pt-1.5">
-          {itemCount === 0 ? (
-            <Text font="semibold" tone="muted" className="pb-2 text-center text-[15px]">
-              {t('orders.emptyCart')}
-            </Text>
-          ) : null}
-          <Pressable
-            onPress={onSend}
-            disabled={itemCount === 0}
-            accessibilityRole="button"
-            accessibilityState={{ disabled: itemCount === 0 }}
-            accessibilityLabel={`${t('orders.items', { count: itemCount })}, ${formatMoney(total)}. ${sendLabel}`}
-            className={`h-[68px] flex-row items-center justify-between rounded-[20px] bg-primary px-5 ${
-              itemCount === 0 ? 'opacity-50' : 'active:opacity-80'
-            }`}
-          >
-            <View>
-              <Text font="semibold" tone="inverse" className="text-sm opacity-90">
-                {t('orders.items', { count: itemCount })}
-              </Text>
-              <MoneyText value={total} tone="inverse" className="text-[22px]" />
-            </View>
-            <View className="items-end">
-              {type === 'dineIn' && table ? (
-                <Text font="semibold" tone="inverse" className="text-sm opacity-90">
-                  {t('orders.sendTo')}
+            {type === 'dineIn' && !addTo ? (
+              <GlassCard className="mx-4 flex-row items-center gap-3 py-2.5 pl-3.5 pr-1.5">
+                <View
+                  className="h-12 w-12 items-center justify-center rounded-[14px]"
+                  style={{ backgroundColor: g.primaryDeep }}
+                >
+                  <Text font="bold" tone="inverse" className="text-[10px] uppercase opacity-85">
+                    {t('bills.tableTile')}
+                  </Text>
+                  <Text font="heading" tone="inverse" className="text-xl leading-6">
+                    {table ? table.number : '–'}
+                  </Text>
+                </View>
+                <View className="min-w-0 flex-1">
+                  <Text tone="muted" className="text-sm" numberOfLines={1}>
+                    {table
+                      ? t('orders.orderingFor', {
+                          area: areaLabel(t, i18n.language, table.area, table.categoryNameAm),
+                        })
+                      : t('orders.noTable')}
+                  </Text>
+                  <Text font="bold" className="text-base" numberOfLines={1}>
+                    {table
+                      ? t('orders.tableName', { number: table.number })
+                      : t('orders.chooseTable')}
+                  </Text>
+                </View>
+                <Pressable
+                  onPress={() => setSheet('table')}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('orders.chooseTable')}
+                  className="h-11 justify-center px-3 active:opacity-70"
+                >
+                  <Text font="bold" className="text-sm" style={{ color: g.primaryDeep }}>
+                    {t('orders.change')}
+                  </Text>
+                </Pressable>
+              </GlassCard>
+            ) : null}
+
+            {type === 'takeaway' && !addTo ? (
+              <GlassCard className="mx-4 gap-2.5 px-3.5 py-3">
+                <Field
+                  label={t('orders.customerName')}
+                  placeholder={t('orders.customerNamePlaceholder')}
+                  value={takeaway.customerName}
+                  onChangeText={(customerName) => setTakeaway((v) => ({ ...v, customerName }))}
+                  autoCapitalize="words"
+                  error={err('customerName')}
+                />
+                <Field
+                  label={t('orders.customerPhoneOptional')}
+                  placeholder={t('orders.phonePlaceholder')}
+                  value={takeaway.customerPhone}
+                  onChangeText={(text) =>
+                    setTakeaway((v) => ({ ...v, customerPhone: digitsOnly(text, 10) }))
+                  }
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  error={err('customerPhone')}
+                />
+              </GlassCard>
+            ) : null}
+
+            {type === 'delivery' && !area && !addTo ? (
+              <GlassCard className="mx-4 gap-1 px-3.5 py-3">
+                <Text font="bold" className="text-base">
+                  {t('orders.noAreas')}
+                </Text>
+                <Text tone="muted" className="text-sm">
+                  {t('orders.noAreasHint')}
+                </Text>
+              </GlassCard>
+            ) : null}
+
+            {type === 'delivery' && area && !addTo ? (
+              <GlassCard className="mx-4 gap-2.5 px-3.5 py-3">
+                <View className="flex-row items-start gap-2.5">
+                  <View className="min-w-0 flex-1 gap-1">
+                    <Text font="bold" className="text-[15px]">
+                      {t('orders.deliveryArea')}
+                    </Text>
+                    <Pressable
+                      onPress={() => setSheet('area')}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${t('orders.deliveryArea')}: ${area.name}`}
+                      className="h-[50px] flex-row items-center gap-2 rounded-[14px] border-2 border-primary bg-surface px-3 active:bg-background"
+                    >
+                      <MapPin size={22} color={brand.primary} strokeWidth={2.2} />
+                      <Text font="bold" className="flex-1 text-[17px]" numberOfLines={1}>
+                        {area.name}
+                      </Text>
+                      <ChevronDown size={22} color={colors.text} strokeWidth={2} />
+                    </Pressable>
+                  </View>
+                  <View className="w-32">
+                    <Field
+                      label={t('orders.fee')}
+                      value={deliveryFee}
+                      onChangeText={(text) =>
+                        setDelivery((v) => ({ ...v, fee: digitsOnly(text, 4) }))
+                      }
+                      keyboardType="number-pad"
+                      maxLength={4}
+                      emphasis
+                      error={err('fee')}
+                    />
+                  </View>
+                </View>
+                <Text font="semibold" tone="muted" className="-mt-1 text-sm">
+                  {t('orders.feeNote', { area: area.name, fee: area.usualFeeEtb })}
+                </Text>
+                <Field
+                  label={t('orders.address')}
+                  placeholder={t('orders.addressPlaceholder')}
+                  value={delivery.address}
+                  onChangeText={(address) => setDelivery((v) => ({ ...v, address }))}
+                  error={err('address')}
+                />
+                <Field
+                  label={t('orders.customerPhone')}
+                  placeholder={t('orders.phonePlaceholder')}
+                  value={delivery.customerPhone}
+                  onChangeText={(text) =>
+                    setDelivery((v) => ({ ...v, customerPhone: digitsOnly(text, 10) }))
+                  }
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  error={err('customerPhone')}
+                />
+              </GlassCard>
+            ) : null}
+
+            <GlassCard className="mx-4 mt-3 h-12 flex-row items-center gap-2 px-3">
+              <Search size={20} color={colors.muted} strokeWidth={2.2} />
+              <TextInput
+                value={search}
+                onChangeText={setSearch}
+                placeholder={t('orders.search')}
+                placeholderTextColor={colors.placeholder}
+                accessibilityLabel={t('orders.search')}
+                returnKeyType="search"
+                autoCorrect={false}
+                className="h-full flex-1 font-body text-base text-text"
+              />
+              {search ? (
+                <Pressable
+                  onPress={() => setSearch('')}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('orders.clearSearch')}
+                  hitSlop={8}
+                  className="h-11 w-11 items-center justify-center rounded-full active:bg-border"
+                >
+                  <X size={20} color={colors.muted} strokeWidth={2.2} />
+                </Pressable>
+              ) : null}
+            </GlassCard>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
+                gap: 8,
+                paddingHorizontal: 16,
+                paddingTop: 10,
+                paddingBottom: 10,
+              }}
+              accessibilityRole="radiogroup"
+            >
+              <Pill
+                label={t('orders.category.all')}
+                selected={chosenCategory === 'all'}
+                onPress={() => setCategory('all')}
+              />
+              {categoryChips.map((c) => (
+                <Pill
+                  key={c.id}
+                  label={i18n.language === 'am' && c.nameAm ? c.nameAm : c.name}
+                  selected={chosenCategory === c.id}
+                  onPress={() => setCategory(c.id)}
+                />
+              ))}
+            </ScrollView>
+
+            {menu.length === 0 ? (
+              <GlassCard className="mx-4 gap-1 px-3.5 py-3">
+                <Text font="bold" className="text-base">
+                  {t('orders.emptyMenu')}
+                </Text>
+                <Text tone="muted" className="text-sm">
+                  {t('orders.emptyMenuHint')}
+                </Text>
+              </GlassCard>
+            ) : null}
+
+            <GlassCard className={`mx-4 px-3.5 py-0.5 ${shownMenu.length ? '' : 'hidden'}`}>
+              {shownMenu.map(({ item, number }, i) => (
+                <MenuItemRow
+                  key={item.id}
+                  item={item}
+                  number={number}
+                  first={i === 0}
+                  quantity={cart[item.id] ?? 0}
+                  onChange={(q) => setQuantity(item.id, q)}
+                />
+              ))}
+            </GlassCard>
+            <View className="px-4">
+              {menu.length > 0 && shownMenu.length === 0 ? (
+                <Text tone="muted" className="py-4 text-center text-base">
+                  {t('orders.noMatch')}
                 </Text>
               ) : null}
-              <Text font="bold" tone="inverse" className="text-lg">
-                {sendLabel}
-              </Text>
             </View>
-          </Pressable>
-        </View>
-      </KeyboardAvoidingView>
 
-      <ErrorDialog
-        visible={mutation.isError}
-        title={t('orders.sendFailedTitle')}
-        message={t(errorMessageKey(mutation.error))}
-        actionLabel={t('errors.retry')}
-        onClose={mutation.reset}
-      />
-      <ErrorDialog
-        visible={addMutation.isError}
-        title={t('orders.sendFailedTitle')}
-        message={t(errorMessageKey(addMutation.error))}
-        actionLabel={t('errors.retry')}
-        onClose={addMutation.reset}
-      />
-      <TableSheet
-        visible={sheet === 'table'}
-        tables={tables}
-        currentId={table?.id ?? null}
-        onSelect={setTable}
-        onClose={() => setSheet(null)}
-      />
-      {table ? (
-        <ConfirmSheet
-          visible={sheet === 'confirm'}
-          tableNumber={table.number}
-          lines={lines}
-          total={total}
-          onConfirm={() => {
-            setSheet(null);
-            submit({
-              type: 'dineIn',
-              tableId: table.id,
-              tableNumber: table.number,
-              area: table.area,
-            });
-          }}
-          onChangeTable={() => setSheet('table')}
+            {type === 'dineIn' ? (
+              <View className="px-4 pb-1.5 pt-3">
+                <View className="flex-row flex-wrap items-center gap-2">
+                  <Text font="bold" tone="muted" className="text-base">
+                    {t('orders.noteLabel')}:
+                  </Text>
+                  {kitchenNotes.map((note) => (
+                    <Pill
+                      key={note}
+                      role="checkbox"
+                      label={t(`orders.note.${note}`)}
+                      selected={notes.includes(note)}
+                      onPress={() => toggleNote(note)}
+                    />
+                  ))}
+                </View>
+              </View>
+            ) : null}
+          </ScrollView>
+
+          <View className="px-4 pb-2.5 pt-1.5">
+            {itemCount === 0 ? (
+              <Text font="semibold" tone="muted" className="pb-2 text-center text-[15px]">
+                {t('orders.emptyCart')}
+              </Text>
+            ) : null}
+            <HeroCard
+              style={{ borderRadius: 32 }}
+              className={`flex-row items-center gap-2.5 py-2.5 pl-4 pr-2.5 ${itemCount === 0 ? 'opacity-50' : ''}`}
+            >
+              <View className="flex-1">
+                <Text tone="inverse" className="text-[13px] opacity-90">
+                  {t('orders.items', { count: itemCount })}
+                </Text>
+                <MoneyText value={total} tone="inverse" font="heading" className="text-xl" />
+              </View>
+              <Pressable
+                onPress={onSend}
+                disabled={itemCount === 0}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: itemCount === 0 }}
+                accessibilityLabel={`${t('orders.items', { count: itemCount })}, ${formatMoney(total)}. ${sendLabel}`}
+                className="h-12 max-w-[62%] flex-row items-center gap-2 rounded-full bg-white px-4 active:opacity-80"
+              >
+                <Text
+                  font="bold"
+                  className="shrink text-[15px]"
+                  style={{ color: g.primaryDeep }}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.8}
+                >
+                  {sendLabel}
+                </Text>
+                <Send size={18} color={g.primaryDeep} strokeWidth={2.4} />
+              </Pressable>
+            </HeroCard>
+          </View>
+        </KeyboardAvoidingView>
+
+        <ErrorDialog
+          visible={mutation.isError}
+          title={t('orders.sendFailedTitle')}
+          message={t(errorMessageKey(mutation.error))}
+          actionLabel={t('errors.retry')}
+          onClose={mutation.reset}
+        />
+        <ErrorDialog
+          visible={addMutation.isError}
+          title={t('orders.sendFailedTitle')}
+          message={t(errorMessageKey(addMutation.error))}
+          actionLabel={t('errors.retry')}
+          onClose={addMutation.reset}
+        />
+        <TableSheet
+          visible={sheet === 'table'}
+          tables={tables}
+          currentId={table?.id ?? null}
+          onSelect={setTable}
           onClose={() => setSheet(null)}
         />
-      ) : null}
-      <OptionSheet
-        visible={sheet === 'area'}
-        title={t('orders.chooseArea')}
-        options={deliveryAreas.map((a) => ({
-          value: a.id,
-          label: `${a.name} · ${a.usualFeeEtb} ${t('common.etb')}`,
-        }))}
-        selected={area?.id ?? ''}
-        onSelect={(areaId) => setDelivery((v) => ({ ...v, areaId, fee: null }))}
-        onClose={() => setSheet(null)}
-      />
-    </SafeAreaView>
+        {table ? (
+          <ConfirmSheet
+            visible={sheet === 'confirm'}
+            tableNumber={table.number}
+            lines={lines}
+            total={total}
+            onConfirm={() => {
+              setSheet(null);
+              submit({
+                type: 'dineIn',
+                tableId: table.id,
+                tableNumber: table.number,
+                area: table.area,
+              });
+            }}
+            onChangeTable={() => setSheet('table')}
+            onClose={() => setSheet(null)}
+          />
+        ) : null}
+        <OptionSheet
+          visible={sheet === 'area'}
+          title={t('orders.chooseArea')}
+          options={deliveryAreas.map((a) => ({
+            value: a.id,
+            label: `${a.name} · ${a.usualFeeEtb} ${t('common.etb')}`,
+          }))}
+          selected={area?.id ?? ''}
+          onSelect={(areaId) => setDelivery((v) => ({ ...v, areaId, fee: null }))}
+          onClose={() => setSheet(null)}
+        />
+      </SafeAreaView>
+    </ScreenBg>
   );
 }
