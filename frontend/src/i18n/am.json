@@ -180,7 +180,6 @@
   "home": {
     "exploring": "በመቃኘት ላይ",
     "welcome": "እንኳን ደህና መጡ፣ {{name}}!",
-    "heroSubtitle": "እያንዳንዱን ክፍያ በእርግጠኝነት ያረጋግጡ።",
     "verifyPayment": "ክፍያ አረጋግጥ",
     "tablesWaiting": "{{count}} ጠረጴዛዎች እየጠበቁ",
     "whatToDo": "ምን ማድረግ ይፈልጋሉ?",

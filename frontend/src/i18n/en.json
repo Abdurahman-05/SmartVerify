@@ -180,7 +180,6 @@
   "home": {
     "exploring": "Exploring",
     "welcome": "Welcome back, {{name}}!",
-    "heroSubtitle": "Verify every payment with confidence.",
     "verifyPayment": "Verify payment",
     "tablesWaiting": "{{count}} tables waiting",
     "whatToDo": "What do you want to do?",

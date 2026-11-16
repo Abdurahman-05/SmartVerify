@@ -27,7 +27,7 @@ import { failedChecksKey, getFailedChecks } from '@/lib/verification';
 import { getHomeActions, type HomeAction } from './homeActions';
 
 // Design: docs/design/owner/screens/01-owner-home.png and 02-manager-home.png
-const heroFood = require('../../../assets/images/home/hero-food.png') as number;
+const heroPizza = require('../../../assets/images/home/hero-pizza.png') as number;
 const TAG_YELLOW = '#FACC15';
 
 function HomeHeader({ user }: { user: SessionUser }) {
@@ -115,51 +115,49 @@ function TodayHero({
 }) {
   const { t } = useTranslation();
   const planLine = user.plan ? t(`plans.${user.plan}`) : t('home.exploring');
-  // Managers run the floor: open tables instead of the plan name.
+  // Every plan shows today's live numbers (0 until the first payment).
+  const day = today ?? { salesEtb: 0, payments: 0, pending: 0, duplicate: 0, tablesOpen: 0 };
+  // Restaurant managers run the floor: open tables instead of the plan name.
   const secondLine =
-    today && user.role === 'manager' ? t('home.tablesOpen', { count: today.tablesOpen }) : planLine;
+    user.plan === 'restaurant' && user.role === 'manager'
+      ? t('home.tablesOpen', { count: day.tablesOpen })
+      : planLine;
   return (
-    <HeroCard style={{ marginHorizontal: 16 }}>
-      <Image
-        source={heroFood}
-        contentFit="contain"
-        style={{ position: 'absolute', top: -6, right: -10, width: 170, height: 132 }}
-        accessible={false}
-      />
-      <View className="flex-row items-center gap-1.5">
-        {today ? (
+    <View style={{ marginHorizontal: 16 }}>
+      <HeroCard>
+        <View className="flex-row items-center gap-1.5">
           <View
-            className="h-3 w-3 rounded-full border-2 border-white/40"
+            className="h-3.5 w-3.5 rounded-full border-2 border-white/50"
             style={{ backgroundColor: TAG_YELLOW }}
           />
-        ) : null}
-        <Text font="bold" tone="inverse" className="text-[13px] uppercase opacity-90">
-          {today ? `${t('home.today')} · ${t('home.live')}` : planLine}
-        </Text>
-      </View>
-      {today ? (
-        <>
-          <Text font="heading" tone="inverse" className="mt-0.5 text-[32px] leading-[38px]">
-            {formatMoney(today.salesEtb, false)}{' '}
-            <Text font="heading" tone="inverse" className="text-base">
-              {t('common.etb')}
-            </Text>
+          <Text font="bold" tone="inverse" className="text-[13px] uppercase opacity-90">
+            {`${t('home.today')} · ${t('home.live')}`}
           </Text>
-          <Text tone="inverse" className="text-sm opacity-90" numberOfLines={1}>
-            {t('home.paymentsCount', { count: today.payments })} · {secondLine}
+        </View>
+        <Text font="heading" tone="inverse" className="mt-0.5 pr-28 text-[32px] leading-[38px]">
+          {formatMoney(day.salesEtb, false)}{' '}
+          <Text font="heading" tone="inverse" className="text-base">
+            {t('common.etb')}
           </Text>
-          <View className="mt-3 flex-row gap-2">
-            <HeroStat value={today.payments} label={t('status.verified')} />
-            <HeroStat value={today.pending} label={t('status.pending')} warn />
-            <HeroStat value={today.duplicate} label={t('status.duplicate')} />
-          </View>
-        </>
-      ) : (
-        <Text tone="inverse" className="mt-0.5 pr-36 text-sm opacity-90">
-          {t('home.heroSubtitle')}
         </Text>
-      )}
-    </HeroCard>
+        <Text tone="inverse" className="pr-24 text-sm opacity-90" numberOfLines={1}>
+          {t('home.paymentsCount', { count: day.payments })} · {secondLine}
+        </Text>
+        <View className="mt-3 flex-row gap-2">
+          <HeroStat value={day.payments} label={t('status.verified')} />
+          <HeroStat value={day.pending} label={t('status.pending')} warn />
+          <HeroStat value={day.duplicate} label={t('status.duplicate')} />
+        </View>
+      </HeroCard>
+      {/* Transparent pizza on the top corner, a little over the card's edge. */}
+      <Image
+        source={heroPizza}
+        contentFit="contain"
+        pointerEvents="none"
+        accessible={false}
+        style={{ position: 'absolute', top: -14, right: -4, width: 132, height: 136 }}
+      />
+    </View>
   );
 }
 
@@ -203,6 +201,8 @@ export default function HomeScreen() {
   const user = useSession((s) => s.user);
   // Open dine-in bills from the server (waiters: their own tables), refreshed with the bills.
   const isRestaurant = user?.plan === 'restaurant' && user.role !== 'chef';
+  // Today's live numbers are shown on every plan.
+  const signedIn = !!user && user.role !== 'chef';
   const { data: openList } = useQuery({
     queryKey: billsKey('all'),
     queryFn: () => getBills(),
@@ -212,18 +212,18 @@ export default function HomeScreen() {
   const { data: paidToday } = useQuery({
     queryKey: paymentsKey('today'),
     queryFn: () => syncPayments('today'),
-    enabled: isRestaurant,
+    enabled: signedIn,
   });
   // Checks that did not verify today: not confirmed yet (pending) and already-used receipts.
   const { data: failed } = useQuery({
     queryKey: failedChecksKey('today'),
     queryFn: () => getFailedChecks('today'),
-    enabled: isRestaurant,
+    enabled: signedIn,
   });
   const { data: summary } = useQuery({
     queryKey: paymentsSummaryKey('today'),
     queryFn: () => getPaymentsSummary('today'),
-    enabled: isRestaurant,
+    enabled: signedIn,
   });
   const manages = user?.role === 'owner' || user?.role === 'manager';
   const subtitleFor = useActionSubtitle(
@@ -263,7 +263,7 @@ export default function HomeScreen() {
           <TodayHero
             user={user}
             today={
-              isRestaurant && summary && openList
+              summary
                 ? {
                     salesEtb: summary.salesEtb,
                     payments: summary.count || (paidToday?.length ?? 0),
