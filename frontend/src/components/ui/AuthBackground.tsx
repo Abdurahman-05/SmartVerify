@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
-import { Image, useWindowDimensions, View } from 'react-native';
+import { Image, useWindowDimensions } from 'react-native';
+
+import { ScreenBackground } from './ScreenBackground';
 
 // Food pictures in three corners of the Sign in / Sign up / splash background (no curl shapes),
 // sized on a 720 px wide design.
@@ -9,11 +11,14 @@ const bottomRight = require('../../../assets/images/auth/corner-bottom-right.png
 
 const DESIGN_WIDTH = 720;
 
-/** White auth background with the pizza, chicken and shake pictures; children render on top. */
+/**
+ * Auth background: the same theme tint → tile gradient and soft glows as every screen, with the
+ * pizza, chicken and shake pictures (transparent PNGs) on top; children render above them.
+ */
 export function AuthBackground({ children }: { children?: ReactNode }) {
   const s = useWindowDimensions().width / DESIGN_WIDTH;
   return (
-    <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
+    <ScreenBackground>
       <Image
         source={topRight}
         pointerEvents="none"
@@ -33,6 +38,6 @@ export function AuthBackground({ children }: { children?: ReactNode }) {
         style={{ position: 'absolute', bottom: 0, right: 0, width: 280 * s, height: 350 * s }}
       />
       {children}
-    </View>
+    </ScreenBackground>
   );
 }
