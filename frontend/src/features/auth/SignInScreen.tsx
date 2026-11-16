@@ -25,6 +25,7 @@ import { PrimaryButton } from '@/ui/glass';
 
 import {
   AUTH,
+  useAuthColors,
   AuthCard,
   AuthFooter,
   AuthLogo,
@@ -40,6 +41,7 @@ import { PIN_LENGTH, signInSchema, type SignInValues } from './schemas';
 class WrongAppError extends Error {}
 
 export default function SignInScreen() {
+  const auth = useAuthColors();
   const { t } = useTranslation();
   const router = useRouter();
   const startSession = useSession((s) => s.signIn);
@@ -99,7 +101,7 @@ export default function SignInScreen() {
                   <Input
                     label={t('auth.phone')}
                     labelIcon={PhoneFilled}
-                    labelIconColor={AUTH.p}
+                    labelIconColor={auth.p}
                     round
                     prefix="+251"
                     placeholder={t('auth.phonePlaceholder')}
@@ -124,7 +126,7 @@ export default function SignInScreen() {
                 <Input
                   label={t('auth.pin')}
                   labelIcon={ShieldFilled}
-                  labelIconColor={AUTH.p}
+                  labelIconColor={auth.p}
                   round
                   placeholder={t('auth.pinPlaceholder')}
                   value={field.value}
@@ -165,7 +167,7 @@ export default function SignInScreen() {
                 hitSlop={10}
                 className="min-h-11 justify-center"
               >
-                <Text font="bold" className="text-[15px]" style={{ color: AUTH.pt }}>
+                <Text font="bold" className="text-[15px]" style={{ color: auth.pt }}>
                   {t('auth.forgotPin')}
                 </Text>
               </Pressable>

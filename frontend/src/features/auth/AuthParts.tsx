@@ -7,28 +7,37 @@ import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import { Text } from '@/components/ui/Text';
+import { useBrandColors } from '@/store/theme';
+import { shade } from '@/ui/glass';
 
-// Sign in / Sign up design (assets/images/auth/reference-signin.png): always orange.
+// Sign in / Sign up design (assets/images/auth/reference-signin.png). Text colours are fixed.
 export const AUTH = {
-  p: '#EA580C',
-  p2: '#F97316',
-  pt: '#C2410C',
   text: '#1E1A1C',
   soft: '#4A4246',
 };
 
+/** The chosen theme's colours for the auth screens (orange by default). */
+export function useAuthColors() {
+  const brand = useBrandColors();
+  return { p: brand.primary, p2: shade(brand.primary, 0.16), pt: brand.primaryText };
+}
+
 const glyph = require('../../../assets/images/auth/logo-glyph.png') as number;
 
-/** 84 px orange gradient tile with the ገ glyph (the glyph image includes the ✓ badge). */
+/** 84 px theme gradient tile with the ገ glyph (the glyph image includes the ✓ badge). */
 export function AuthLogo() {
+  const c = useAuthColors();
   return (
     <View
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={styles.logoShadow}
+      style={[
+        styles.logoShadow,
+        { boxShadow: `inset 0 2px 0 rgba(255,255,255,0.35), 0 14px 28px ${c.p}59` },
+      ]}
     >
       <LinearGradient
-        colors={[AUTH.p2, AUTH.p, AUTH.pt]}
+        colors={[c.p2, c.p, c.pt]}
         locations={[0, 0.6, 1]}
         start={{ x: 0.67, y: 0 }}
         end={{ x: 0.33, y: 1 }}
@@ -40,8 +49,9 @@ export function AuthLogo() {
   );
 }
 
-/** Sora 28 title on a frosted pill; the last word in orange ("Welcome" + "back"), or in `accent`. */
-export function AuthTitle({ text, accent = AUTH.p }: { text: string; accent?: string }) {
+/** Sora 28 title on a frosted pill; the last word in the theme colour, or in `accent`. */
+export function AuthTitle({ text, accent }: { text: string; accent?: string }) {
+  const c = useAuthColors();
   const words = text.split(' ');
   const head = words.length > 1 ? `${words.slice(0, -1).join(' ')} ` : '';
   return (
@@ -53,7 +63,7 @@ export function AuthTitle({ text, accent = AUTH.p }: { text: string; accent?: st
         accessibilityRole="header"
       >
         {head}
-        <Text font="heading" className="text-[28px]" style={{ color: accent }}>
+        <Text font="heading" className="text-[28px]" style={{ color: accent ?? c.p }}>
           {words[words.length - 1]}
         </Text>
       </Text>
@@ -106,6 +116,7 @@ export function AuthFooter({
   onPress: () => void;
   secure: string;
 }) {
+  const c = useAuthColors();
   return (
     <View className="items-center">
       <Pressable
@@ -117,7 +128,7 @@ export function AuthFooter({
           <Text className="text-base" style={{ color: AUTH.text }}>
             {prefix}{' '}
           </Text>
-          <Text font="bold" className="text-base" style={{ color: AUTH.pt }}>
+          <Text font="bold" className="text-base" style={{ color: c.pt }}>
             {link}
           </Text>
         </View>
@@ -128,10 +139,7 @@ export function AuthFooter({
 }
 
 const styles = StyleSheet.create({
-  logoShadow: {
-    borderRadius: 26,
-    boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.35), 0 14px 28px rgba(234,88,12,0.35)',
-  },
+  logoShadow: { borderRadius: 26 },
   logo: {
     width: 84,
     height: 84,
@@ -149,24 +157,26 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.95)',
     backgroundColor: 'rgba(255,255,255,0.6)',
-    boxShadow: 'inset 0 1px 0 #FFFFFF, 0 14px 34px rgba(234,88,12,0.12)',
+    boxShadow: 'inset 0 1px 0 #FFFFFF, 0 14px 34px rgba(30,20,25,0.10)',
   },
   cardClip: { borderRadius: 26, overflow: 'hidden' },
 });
 
 /** Filled phone (design label icon). */
-export function PhoneFilled({ size = 18, color = AUTH.p }: { size?: number; color?: string }) {
+export function PhoneFilled({ size = 18, color }: { size?: number; color?: string }) {
+  const c = useAuthColors();
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color ?? c.p}>
       <Path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z" />
     </Svg>
   );
 }
 
 /** Filled shield with a keyhole (design PIN label icon). */
-export function ShieldFilled({ size = 18, color = AUTH.p }: { size?: number; color?: string }) {
+export function ShieldFilled({ size = 18, color }: { size?: number; color?: string }) {
+  const c = useAuthColors();
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color ?? c.p}>
       <Path d="M12 2 4 5v6c0 5.2 3.4 9.4 8 11 4.6-1.6 8-5.8 8-11V5zm0 6a2 2 0 0 1 1 3.73V15h-2v-3.27A2 2 0 0 1 12 8z" />
     </Svg>
   );

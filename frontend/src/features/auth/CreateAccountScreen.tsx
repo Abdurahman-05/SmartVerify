@@ -23,7 +23,7 @@ import { homeRouteFor, useSession } from '@/store/session';
 
 import { FormScreen } from '@/components/ui/FormScreen';
 import {
-  AUTH,
+  useAuthColors,
   AuthCard,
   AuthFooter,
   AuthLogo,
@@ -38,6 +38,7 @@ import { colors } from '@/theme/tokens';
 import { GlassCard, PrimaryButton } from '@/ui/glass';
 
 export default function CreateAccountScreen() {
+  const auth = useAuthColors();
   const { t } = useTranslation();
   const router = useRouter();
   const startSession = useSession((s) => s.signIn);
@@ -118,7 +119,7 @@ export default function CreateAccountScreen() {
               <View
                 key={n}
                 className={`h-1.5 flex-1 rounded-[3px] ${n <= step ? '' : 'bg-black/10'}`}
-                style={n <= step ? { backgroundColor: AUTH.p } : null}
+                style={n <= step ? { backgroundColor: auth.p } : null}
               />
             ))}
           </View>
@@ -133,7 +134,7 @@ export default function CreateAccountScreen() {
                     <Input
                       label={t('auth.fullName')}
                       labelIcon={User}
-                      labelIconColor={AUTH.p}
+                      labelIconColor={auth.p}
                       round
                       placeholder={t('auth.fullNamePlaceholder')}
                       value={field.value}
@@ -154,7 +155,7 @@ export default function CreateAccountScreen() {
                     <Input
                       label={t('auth.email')}
                       labelIcon={Mail}
-                      labelIconColor={AUTH.p}
+                      labelIconColor={auth.p}
                       round
                       placeholder={t('auth.emailPlaceholder')}
                       value={field.value}
@@ -177,7 +178,7 @@ export default function CreateAccountScreen() {
                     <Input
                       label={t('auth.newPin', { count: PIN_LENGTH })}
                       labelIcon={ShieldFilled}
-                      labelIconColor={AUTH.p}
+                      labelIconColor={auth.p}
                       round
                       placeholder={t('auth.newPinPlaceholder', { count: PIN_LENGTH })}
                       value={field.value}
@@ -206,7 +207,7 @@ export default function CreateAccountScreen() {
                     <Input
                       label={t('auth.businessName')}
                       labelIcon={Store}
-                      labelIconColor={AUTH.p}
+                      labelIconColor={auth.p}
                       round
                       placeholder={t('auth.businessNamePlaceholder')}
                       value={field.value}
@@ -227,7 +228,7 @@ export default function CreateAccountScreen() {
                       <Input
                         label={t('auth.phone')}
                         labelIcon={PhoneFilled}
-                        labelIconColor={AUTH.p}
+                        labelIconColor={auth.p}
                         round
                         prefix="+251"
                         placeholder={t('auth.phonePlaceholder')}
@@ -257,7 +258,7 @@ export default function CreateAccountScreen() {
                       >
                         <Text className="text-[15px]">
                           {t('auth.agreePrefix')}
-                          <Text font="bold" className="text-[15px]" style={{ color: AUTH.pt }}>
+                          <Text font="bold" className="text-[15px]" style={{ color: auth.pt }}>
                             {t('auth.agreeLink')}
                           </Text>
                           {t('auth.agreeSuffix')}

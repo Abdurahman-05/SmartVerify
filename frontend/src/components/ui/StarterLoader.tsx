@@ -13,24 +13,21 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { alpha, useGlass } from './glassTokens';
 import { Text } from './Text';
 
 // The ገ with its ✓ badge (the image includes the badge).
 const glyph = require('../../../assets/images/auth/logo-glyph.png') as number;
 
-// Brand orange of the starter screen (same in every theme, like the app icon).
-const P = '#EA580C';
-const P2 = '#F97316';
-const PT = '#C2410C';
-const AMBER = '#F59E0B';
+// Colours follow the chosen theme (orange by default).
 const TEXT = '#1E1A1C';
 const SUB = '#5E5559';
-const DOT_COLORS = [P, P2, AMBER];
 const LOGO = 112;
 const RING_INSET = 14;
 
 /** Logo circle that pulses 1 → 1.05 → 1 every 1.6 s, with a spinning ring around it. */
 function LogoLoader({ still }: { still: boolean }) {
+  const g = useGlass();
   const scale = useSharedValue(1);
   const turn = useSharedValue(0);
   useEffect(() => {
@@ -59,16 +56,16 @@ function LogoLoader({ still }: { still: boolean }) {
             height: ring,
             borderRadius: ring / 2,
             borderWidth: 5,
-            borderColor: 'rgba(234,88,12,0.15)',
-            borderTopColor: P,
-            borderRightColor: AMBER,
+            borderColor: alpha(g.primary, 0.15),
+            borderTopColor: g.primary,
+            borderRightColor: g.primary2,
           },
           spin,
         ]}
       />
       <Animated.View style={pulse}>
         <LinearGradient
-          colors={[P2, P, PT]}
+          colors={[g.primary2, g.primary, g.primaryText]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={{
@@ -87,7 +84,7 @@ function LogoLoader({ still }: { still: boolean }) {
 }
 
 /** One 12 px dot bouncing up 12 px every 1 s; each starts 150 ms after the one before. */
-function Dot({ index, still }: { index: number; still: boolean }) {
+function Dot({ index, still, color }: { index: number; still: boolean; color: string }) {
   const y = useSharedValue(0);
   useEffect(() => {
     if (still) return;
@@ -102,10 +99,7 @@ function Dot({ index, still }: { index: number; still: boolean }) {
   const style = useAnimatedStyle(() => ({ transform: [{ translateY: y.value }] }));
   return (
     <Animated.View
-      style={[
-        { width: 12, height: 12, borderRadius: 6, backgroundColor: DOT_COLORS[index] },
-        style,
-      ]}
+      style={[{ width: 12, height: 12, borderRadius: 6, backgroundColor: color }, style]}
     />
   );
 }
@@ -116,6 +110,8 @@ function Dot({ index, still }: { index: number; still: boolean }) {
  */
 export function StarterLoader({ title, subtitle }: { title: string; subtitle: string }) {
   const still = useReducedMotion();
+  const g = useGlass();
+  const dots = [g.primary, g.primary2, g.primaryText];
   const words = title.split(' ');
   const head = words.length > 1 ? `${words.slice(0, -1).join(' ')} ` : '';
   return (
@@ -128,7 +124,7 @@ export function StarterLoader({ title, subtitle }: { title: string; subtitle: st
       <View style={{ alignItems: 'center', gap: 4, paddingHorizontal: 24 }}>
         <Text font="heading" className="text-center text-[22px]" style={{ color: TEXT }}>
           {head}
-          <Text font="heading" className="text-[22px]" style={{ color: P }}>
+          <Text font="heading" className="text-[22px]" style={{ color: g.primary }}>
             {words[words.length - 1]}
           </Text>
         </Text>
@@ -137,8 +133,8 @@ export function StarterLoader({ title, subtitle }: { title: string; subtitle: st
         </Text>
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 12, height: 26 }}>
-        {DOT_COLORS.map((color, i) => (
-          <Dot key={color} index={i} still={still} />
+        {dots.map((color, i) => (
+          <Dot key={i} index={i} still={still} color={color} />
         ))}
       </View>
     </View>

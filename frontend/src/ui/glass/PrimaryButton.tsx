@@ -6,6 +6,8 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
 
+import { shade } from './glassColors';
+
 export interface GlassButtonProps {
   label: string;
   onPress: () => void;
@@ -15,9 +17,9 @@ export interface GlassButtonProps {
   size?: 'xl' | 'lg' | 'md';
   /** Extra content after the label (e.g. a small pill). */
   trailing?: ReactNode;
-  /** Primary: Sign in / Sign up design button (54 px pill, fixed orange gradient). Secondary: brand outline. */
+  /** Sign in / Sign up design button: 54 px pill in the theme gradient. */
   accent?: boolean;
-  /** With `accent`: gradient colours (top to bottom) instead of the fixed orange. */
+  /** With `accent`: gradient colours (top to bottom) instead of the theme gradient. */
   gradient?: readonly [string, string];
 }
 
@@ -32,9 +34,10 @@ export function PrimaryButton({
   size = 'lg',
   trailing,
   accent = false,
-  gradient = ['#F97316', '#EA580C'],
+  gradient: customGradient,
 }: GlassButtonProps) {
   const brand = useBrandColors();
+  const gradient = customGradient ?? ([shade(brand.primary, 0.16), brand.primary] as const);
   const height = accent ? 54 : buttonHeights[size];
   const radius = accent ? height / 2 : 16;
   return (
@@ -47,7 +50,12 @@ export function PrimaryButton({
       style={[
         styles.button,
         { height, borderRadius: radius, backgroundColor: accent ? gradient[1] : brand.primary },
-        accent ? styles.accentShadow : null,
+        accent
+          ? {
+              // Theme-coloured glow (8-digit hex: 0x52 = 32 % alpha).
+              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.35), 0 12px 24px ${brand.primary}52`,
+            }
+          : null,
       ]}
     >
       {accent ? (
@@ -79,7 +87,4 @@ export function PrimaryButton({
 
 const styles = StyleSheet.create({
   button: { borderRadius: 16, boxShadow: '0 10px 22px rgba(30,20,25,0.18)' },
-  accentShadow: {
-    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35), 0 12px 24px rgba(234,88,12,0.32)',
-  },
 });
