@@ -1,128 +1,93 @@
 import { Redirect, useRouter } from 'expo-router';
-import { Banknote, Check, HandCoins, Info, QrCode, Receipt, Share2 } from 'lucide-react-native';
-import { useState, type ReactNode } from 'react';
+import { Check, Info, ScanLine, Share2 } from 'lucide-react-native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/Button';
-import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { Text } from '@/components/ui/Text';
-import { useBrandColors } from '@/store/theme';
+import { GhostButton } from '@/components/ui/GhostButton';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { useGlass } from '@/components/ui/glassTokens';
 import { LoadingView } from '@/components/ui/LoadingView';
+import { formatMoney } from '@/components/ui/MoneyText';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { ResultBadge } from '@/components/ui/ResultBadge';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
+import { StickyFooter } from '@/components/ui/StickyFooter';
+import { Text } from '@/components/ui/Text';
 import { usePaymentBill } from '@/features/bills/usePaymentBill';
 import type { Bill } from '@/features/bills/types';
+import { maskedNumberKey } from '@/features/bank-accounts/telebirr';
+import { formatTime } from '@/lib/format';
 import { colors } from '@/theme/tokens';
+import { resultPalette } from '@/ui/glass';
 
 import { billLabel } from './billLabel';
+import { findPayerBank } from './payerBanks';
 import { useRestaurantPay, type PaymentOutcome } from './restaurantFlow';
 import { useReceiptFlow } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
 
-function Hero({ short, children }: { short: boolean; children: ReactNode }) {
-  const brand = useBrandColors();
-  return (
-    <View
-      accessible
-      className={`mx-4 mt-1.5 items-center gap-1 rounded-card px-5 py-[18px] ${short ? 'bg-warnBg' : 'bg-primary'}`}
-    >
-      <View
-        className={`h-[52px] w-[52px] items-center justify-center rounded-full ${short ? 'bg-text' : 'bg-surface'}`}
-      >
-        {short ? (
-          <Text font="heading" tone="inverse" className="text-[28px]">
-            !
-          </Text>
-        ) : (
-          <Check size={28} color={brand.primary} strokeWidth={3} />
-        )}
-      </View>
-      {children}
-    </View>
-  );
-}
+// Design: docs/design/owner/verify-handoff/screens/15-result-ok.png, 16-result-not-paid.png
 
-function Row({
-  label,
-  value,
-  tone,
-  last,
-}: {
+interface RowData {
   label: string;
-  value: number;
-  tone?: 'link' | 'danger';
-  last?: boolean;
-}) {
+  value: string;
+  tone?: 'tip';
+}
+
+/** One glass list of label / value rows with hairlines between them. */
+function KeyValueCard({ rows }: { rows: RowData[] }) {
+  const g = useGlass();
   return (
-    <View
-      accessible
-      className={`flex-row items-center justify-between gap-3 py-3.5 ${last ? '' : 'border-b-[1.5px] border-divider'}`}
-    >
-      <Text tone="muted" className="flex-1 text-base">
-        {label}
-      </Text>
-      <MoneyText
-        value={value}
-        font="bold"
-        tone={tone === 'link' ? 'link' : 'default'}
-        style={tone === 'danger' ? { color: colors.dangerFg } : undefined}
-        className="text-lg"
-      />
-    </View>
+    <GlassCard style={{ paddingHorizontal: 16, paddingVertical: 4 }}>
+      {rows.map((row, i) => (
+        <View
+          key={row.label}
+          accessible
+          className={`flex-row items-center justify-between gap-3 py-3 ${i ? 'border-t border-black/[0.07]' : ''}`}
+        >
+          <Text className="text-base" style={{ color: colors.muted }}>
+            {row.label}
+          </Text>
+          <Text
+            font="bold"
+            className="shrink text-right text-base"
+            style={{ color: row.tone === 'tip' ? g.primaryText : colors.text }}
+            numberOfLines={1}
+          >
+            {row.value}
+          </Text>
+        </View>
+      ))}
+    </GlassCard>
   );
 }
 
-function MoneyCard({
-  icon: Icon,
-  title,
-  note,
-  value,
-  tip,
+/** Receipt details captured when the screen opened (the flow is cleared on Done). */
+interface Snapshot {
+  bankShort: string | null;
+  accountShort: string | null;
+  accountCode: string | null;
+  accountLast4: string | null;
+  reference: string | null;
+  at: string;
+}
+
+function ResultView({
+  outcome,
+  bill,
+  snap,
 }: {
-  icon: typeof Receipt;
-  title: string;
-  note: string;
-  value: number;
-  tip?: boolean;
+  outcome: PaymentOutcome;
+  bill: Bill;
+  snap: Snapshot;
 }) {
-  const brand = useBrandColors();
-  return (
-    <View
-      accessible
-      className={`flex-row items-center gap-3 rounded-[18px] p-3 ${
-        tip ? 'border-[2.5px] border-amber bg-tipBg' : 'border-[1.5px] border-border bg-surface'
-      }`}
-    >
-      <View
-        className={`h-12 w-12 items-center justify-center rounded-[14px] ${tip ? 'bg-amber' : 'bg-primaryTile'}`}
-      >
-        <Icon size={24} color={tip ? colors.text : brand.primary} strokeWidth={2.2} />
-      </View>
-      <View className="flex-1">
-        <Text font="bold" className="text-[17px]">
-          {title}
-        </Text>
-        <Text tone="muted" className="text-sm">
-          {note}
-        </Text>
-      </View>
-      <Text font="bold" className="text-xl">
-        {tip ? '+' : ''}
-        <MoneyText value={value} font="bold" className="text-xl" />
-      </Text>
-    </View>
-  );
-}
-
-function ResultView({ outcome, bill }: { outcome: PaymentOutcome; bill: Bill }) {
-  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const short = outcome.status === 'short';
   const isCashBank = outcome.method === 'cash+bank';
-  const methodLabel = t(`verifyRestaurant.method.${outcome.method}`);
-  const subtitle = isCashBank ? methodLabel : `${methodLabel} · ${billLabel(t, bill)}`;
+  const m = (v: number) => formatMoney(v, false);
 
   const done = () => {
     useRestaurantPay.getState().reset();
@@ -141,75 +106,131 @@ function ResultView({ outcome, bill }: { outcome: PaymentOutcome; bill: Bill }) 
       ? router.back()
       : router.replace({ pathname: '/verify-restaurant', params: { billId: bill.id } });
 
-  return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader title={t('verifyRestaurant.resultTitle')} subtitle={subtitle} />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        {short ? (
-          <Hero short>
-            <Text font="bold" className="mt-1 text-[17px]">
-              {t('verifyRestaurant.notFullyPaid')}
-            </Text>
-            <Text font="semibold" className="text-[15px]">
-              {t('verifyRestaurant.stillNeeds')}
-            </Text>
-            <MoneyText value={outcome.remaining} className="text-4xl" />
-          </Hero>
-        ) : outcome.status === 'over' ? (
-          <Hero short={false}>
-            <Text font="bold" tone="inverse" className="mt-1 text-[17px]">
-              {t('verifyRestaurant.verified')}
-            </Text>
-            <MoneyText value={outcome.received} tone="inverse" className="text-4xl" />
-            <Text font="semibold" tone="inverse" className="text-[15px]">
-              {t('verifyRestaurant.fromBank')}
-            </Text>
-          </Hero>
-        ) : (
-          <Hero short={false}>
-            <Text font="bold" tone="inverse" className="mt-1 text-[17px]">
-              {t('verifyRestaurant.fullyPaid')}
-            </Text>
-            <MoneyText value={outcome.total} tone="inverse" className="text-4xl" />
-            <Text font="semibold" tone="inverse" className="text-[15px]">
-              {isCashBank ? t('verifyRestaurant.cashBankMatch') : t('verifyRestaurant.bankMatch')}
-            </Text>
-          </Hero>
-        )}
+  const amountRows: RowData[] = [
+    { label: t('verifyRestaurant.rowTotal'), value: `${m(outcome.total)} ${t('common.etb')}` },
+    ...(outcome.cash > 0 ? [{ label: t('verifyRestaurant.rowCash'), value: m(outcome.cash) }] : []),
+    { label: t('verifyRestaurant.rowBankReceived'), value: m(outcome.received) },
+    ...(!short && outcome.tip > 0
+      ? [
+          {
+            label: t('verifyRestaurant.tipFor', { name: bill.waiterName }),
+            value: m(outcome.tip),
+            tone: 'tip' as const,
+          },
+        ]
+      : []),
+    ...(!short && outcome.change > 0
+      ? [
+          {
+            label: t('verifyRestaurant.giveBackTitle'),
+            value: m(outcome.change),
+            tone: 'tip' as const,
+          },
+        ]
+      : []),
+  ];
+  const account =
+    snap.accountShort && snap.accountCode && snap.accountLast4
+      ? `${snap.accountShort} ${t(maskedNumberKey(snap.accountCode), { last4: snap.accountLast4 })}`
+      : null;
+  const bankValue = [snap.bankShort, account].filter(Boolean).join(' → ');
+  const detailRows: RowData[] = [
+    ...(bankValue ? [{ label: t('verifyRestaurant.rowBank'), value: bankValue }] : []),
+    ...(snap.reference ? [{ label: t('verify.result.reference'), value: snap.reference }] : []),
+    {
+      label: t('verifyRestaurant.rowTime'),
+      value: t('verifyRestaurant.todayAt', { time: formatTime(snap.at) }),
+    },
+  ];
 
-        {outcome.status === 'over' ? (
-          <>
-            <Text font="heading" className="px-4 pb-1.5 pt-3.5 text-lg" accessibilityRole="header">
-              {t('verifyRestaurant.whereMoneyGoes')}
-            </Text>
-            <View className="mx-4 gap-2.5">
-              <MoneyCard
-                icon={Receipt}
-                title={t('verifyRestaurant.restaurantBill')}
-                note={t('verifyRestaurant.fromOrder')}
-                value={outcome.total}
-              />
-              {outcome.change > 0 ? (
-                <MoneyCard
-                  icon={Banknote}
-                  title={t('verifyRestaurant.giveBackTitle')}
-                  note={t('verifyRestaurant.giveBackNote')}
-                  value={outcome.change}
-                  tip
-                />
-              ) : (
-                <MoneyCard
-                  icon={HandCoins}
-                  title={t('verifyRestaurant.tipFor', { name: bill.waiterName })}
-                  note={t('verifyRestaurant.tipNote')}
-                  value={outcome.tip}
-                  tip
-                />
-              )}
+  return (
+    <ScreenBackground palette={short ? resultPalette.bad : resultPalette.ok}>
+      <SafeAreaView edges={['top']} className="flex-1">
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingTop: 24,
+            paddingBottom: 190,
+            gap: 12,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View accessible accessibilityLiveRegion="assertive" className="items-center gap-1">
+            <ResultBadge success={!short} />
+            {short ? (
+              <>
+                <Text
+                  font="heading"
+                  className="mt-1 text-center text-[30px] leading-9"
+                  style={{ color: colors.dangerFg }}
+                  accessibilityRole="header"
+                >
+                  {t('verifyRestaurant.notFullyPaid')}
+                </Text>
+                <Text
+                  className="max-w-[320px] text-center text-base leading-[22px]"
+                  style={{ color: colors.muted }}
+                >
+                  {t('verifyRestaurant.notPaidHelp')}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text
+                  font="heading"
+                  className="text-[34px] leading-[42px]"
+                  style={{ color: colors.successFg }}
+                  accessibilityRole="header"
+                >
+                  {t('brand.name')}
+                </Text>
+                <Text font="bold" className="text-center text-[17px]">
+                  {`${outcome.status === 'over' ? t('verifyRestaurant.verified') : t('verifyRestaurant.fullyPaid')} · ${billLabel(t, bill)}`}
+                </Text>
+                <View
+                  className="mt-1.5 flex-row items-center gap-1.5 rounded-[16px] px-3 py-1.5"
+                  style={{ backgroundColor: colors.successBg }}
+                >
+                  <Check size={15} color={colors.successFg} strokeWidth={2.8} />
+                  <Text font="bold" className="text-sm" style={{ color: colors.successFg }}>
+                    {isCashBank
+                      ? t('verifyRestaurant.cashBankMatch')
+                      : t('verifyRestaurant.bankMatch')}
+                  </Text>
+                </View>
+              </>
+            )}
+          </View>
+
+          {short ? (
+            <View
+              accessible
+              className="items-center rounded-[26px] px-4 py-5"
+              style={{
+                backgroundColor: colors.alert,
+                boxShadow: '0 12px 26px rgba(185,28,28,0.28)',
+              }}
+            >
+              <Text
+                font="bold"
+                tone="inverse"
+                className="text-[13px] uppercase tracking-[0.8px] opacity-90"
+              >
+                {t('verifyRestaurant.stillMissing')}
+              </Text>
+              <Text font="heading" tone="inverse" className="text-[44px] leading-[52px]">
+                {`${m(outcome.remaining)} ${t('common.etb')}`}
+              </Text>
             </View>
-            <View className="mx-4 mt-3 flex-row items-start gap-2">
-              <Info size={20} color={brand.primaryText} strokeWidth={2.2} />
-              <Text font="semibold" tone="muted" className="flex-1 text-[15px] leading-5">
+          ) : null}
+
+          <KeyValueCard rows={amountRows} />
+          {short ? null : <KeyValueCard rows={detailRows} />}
+
+          {outcome.status === 'over' ? (
+            <View className="flex-row items-start gap-2 px-1">
+              <Info size={18} color={colors.muted} strokeWidth={2.2} />
+              <Text tone="muted" className="flex-1 text-sm leading-5">
                 {t(
                   outcome.change > 0
                     ? 'verifyRestaurant.giveBackExplain'
@@ -217,72 +238,67 @@ function ResultView({ outcome, bill }: { outcome: PaymentOutcome; bill: Bill }) 
                 )}
               </Text>
             </View>
-          </>
-        ) : (
-          <View className="mx-4 mt-3 rounded-card border-[1.5px] border-border bg-surface px-[18px] py-0.5">
-            <Row label={t('verifyRestaurant.rowTotal')} value={outcome.total} />
-            {outcome.cash > 0 ? (
-              <Row label={t('verifyRestaurant.rowCash')} value={outcome.cash} />
-            ) : null}
-            {short ? (
-              <Row label={t('verifyRestaurant.rowBankExpected')} value={outcome.expectedBank} />
-            ) : null}
-            <Row
-              label={t('verifyRestaurant.rowBankReceived')}
-              value={outcome.received}
-              tone={short ? undefined : 'link'}
-            />
-            <Row
-              label={t('verifyRestaurant.rowStillToPay')}
-              value={outcome.remaining}
-              tone={short ? 'danger' : 'link'}
-              last
-            />
-          </View>
-        )}
+          ) : null}
 
-        <View className="min-h-6 flex-1" />
+          {short && isCashBank ? (
+            <Pressable
+              onPress={changeCash}
+              accessibilityRole="button"
+              className="min-h-11 items-center justify-center active:opacity-70"
+            >
+              <Text font="bold" tone="link" className="text-[15px]">
+                {t('verifyRestaurant.changeCash')}
+              </Text>
+            </Pressable>
+          ) : null}
+        </ScrollView>
 
-        <View className="gap-2.5 px-4 pb-6">
+        <StickyFooter>
           {short ? (
             <>
-              <Button
-                label={t('verifyRestaurant.changeCash')}
-                variant="outline"
-                size="md"
-                onPress={changeCash}
-              />
-              <Button
-                label={t('verifyRestaurant.scanAgain', { amount: formatMoney(outcome.remaining) })}
-                icon={QrCode}
+              <PrimaryButton
+                label={t('verifyRestaurant.paysMore', { amount: formatMoney(outcome.remaining) })}
+                icon={ScanLine}
                 onPress={scanAgain}
               />
+              {/* The bank money is already saved on the bill; it stays open for the rest. */}
+              <GhostButton label={t('verifyRestaurant.saveNotFully')} onPress={done} />
             </>
           ) : (
             <>
+              <PrimaryButton label={t('verifyRestaurant.done')} onPress={done} />
               {/* TODO: share a receipt once the receipt format is decided. */}
-              <Button
+              <GhostButton
                 label={t('verifyRestaurant.shareReceipt')}
                 icon={Share2}
-                variant="outline"
-                size="md"
                 onPress={() => {}}
               />
-              <Button label={t('verifyRestaurant.done')} onPress={done} />
             </>
           )}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </StickyFooter>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
 
 export default function RestaurantResultScreen() {
   // Snapshot so resetting the flow on "Done" doesn't blank the screen mid-transition.
   const [outcome] = useState(() => useRestaurantPay.getState().outcome);
+  const [snap] = useState<Snapshot>(() => {
+    const { bankCode, found } = useReceiptFlow.getState();
+    const account = useVerifyFlow.getState().account;
+    return {
+      bankShort: findPayerBank(bankCode)?.shortName ?? null,
+      accountShort: account?.shortName ?? null,
+      accountCode: account?.bankCode ?? null,
+      accountLast4: account?.last4 ?? null,
+      reference: found.reference ?? found.transactionNumber ?? null,
+      at: new Date().toISOString(),
+    };
+  });
   const { bill, pending } = usePaymentBill(outcome?.billId);
 
   if (pending) return <LoadingView />;
   if (!outcome || !bill) return <Redirect href="/bills" />;
-  return <ResultView outcome={outcome} bill={bill} />;
+  return <ResultView outcome={outcome} bill={bill} snap={snap} />;
 }
