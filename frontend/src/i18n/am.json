@@ -1188,7 +1188,9 @@
       "giveBack": "በጥሬ ገንዘብ መልስ"
     },
     "photoGivesAll_one": "ግልጽ ፎቶ ያንሱ ወይም ስክሪንሾት ይምረጡ፦ ለእርስዎ ይነበባል።",
-    "photoGivesAll_other": "ግልጽ ፎቶ ያንሱ ወይም ስክሪንሾት ይምረጡ፦ ለእርስዎ ይነበባሉ።"
+    "photoGivesAll_other": "ግልጽ ፎቶ ያንሱ ወይም ስክሪንሾት ይምረጡ፦ ለእርስዎ ይነበባሉ።",
+    "orTypeIt": "ወይም ይጻፉት",
+    "useTyped": "በዚህ ቀጥል"
   },
   "devCompare": {
     "title": "ንባብ ማወዳደሪያ",

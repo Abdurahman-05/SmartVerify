@@ -1,55 +1,87 @@
 import { Redirect, useRouter } from 'expo-router';
-import { Image as ImageIcon, Info, QrCode } from 'lucide-react-native';
+import { ArrowRight, ChevronLeft, Image as ImageIcon, ScanLine } from 'lucide-react-native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BankBadge } from '@/components/ui/BankBadge';
-import { Button } from '@/components/ui/Button';
+import { GhostButton } from '@/components/ui/GhostButton';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { useGlass } from '@/components/ui/glassTokens';
+import { HeroCard, HeroChip } from '@/components/ui/HeroCard';
 import { formatMoney } from '@/components/ui/MoneyText';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { Text } from '@/components/ui/Text';
-import { useBrandColors } from '@/store/theme';
+import { TopBar } from '@/components/ui/TopBar';
+import { colors } from '@/theme/tokens';
 
 import { findPayerBank, onReceipt, type ReceiptField } from './payerBanks';
 import { useReceiptFlow } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
 import { VerifySteps } from './VerifySteps';
 
-/** A grey line standing for receipt text we do not need. */
-function Line({ width }: { width: `${number}%` }) {
-  return <View className="h-[9px] rounded-full bg-border" style={{ width }} />;
-}
+// Design: docs/design/owner/verify-handoff/screens/13-receipt.png
 
-function Highlight({ n, field }: { n: number; field: ReceiptField }) {
+/** One thing to find on the receipt, as a see-through chip in the hero. */
+function FieldChip({ n, field }: { n: number; field: ReceiptField }) {
   const { t } = useTranslation();
-  const sample = field.sample;
   return (
-    <View className="flex-row items-center gap-3 rounded-[14px] border-[2.5px] border-amber bg-tipBg px-3 py-2">
-      <View className="h-8 w-8 items-center justify-center rounded-full bg-primary">
-        <Text font="heading" tone="inverse" className="text-[17px]">
-          {n}
-        </Text>
-      </View>
-      <View className="min-w-0 flex-1">
-        <Text font="bold" className="text-sm text-warnFg">
-          {t(`verifyBank.fields.${field.key}`)}
-        </Text>
-        <Text font="heading" className="text-lg" numberOfLines={1}>
-          {sample}
-        </Text>
-      </View>
-    </View>
+    <HeroChip style={{ flex: 1, minWidth: 0 }}>
+      <Text font="bold" tone="inverse" className="text-[13px] opacity-90">
+        {n}
+      </Text>
+      <Text font="bold" tone="inverse" className="text-base leading-5">
+        {t(`verifyBank.fields.${field.key}`)}
+      </Text>
+      <Text tone="inverse" className="text-[13px] opacity-85" numberOfLines={1}>
+        {field.sample}
+      </Text>
+    </HeroChip>
   );
 }
 
-/** Step 2: what to find on this bank's receipt (VerifyNeedsCBE / VerifyNeedsTelebirr). */
+/** White pill inside the hero: the main way to read the receipt. */
+function WhitePill({
+  label,
+  icon: Icon,
+  onPress,
+}: {
+  label: string;
+  icon: typeof ScanLine;
+  onPress: () => void;
+}) {
+  const g = useGlass();
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      className="mt-3 h-14 flex-row items-center justify-center gap-2.5 rounded-[28px] bg-white active:opacity-85"
+    >
+      <Icon size={22} color={g.primaryText} strokeWidth={2.2} />
+      <Text font="bold" className="text-[17px]" style={{ color: g.primaryText }}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+/** Step 2: what to find on this bank's receipt, and the ways to read it (or type it). */
 export default function ReceiptGuideScreen() {
   const { t } = useTranslation();
+  const g = useGlass();
   const router = useRouter();
-  const brand = useBrandColors();
   const amount = useVerifyFlow((s) => s.amount);
   const bank = findPayerBank(useReceiptFlow((s) => s.bankCode));
+  const setFound = useReceiptFlow((s) => s.setFound);
+  const [typed, setTyped] = useState('');
 
   if (!bank || amount <= 0) return <Redirect href="/verify-bank" />;
 
@@ -57,93 +89,156 @@ export default function ReceiptGuideScreen() {
   // Typed fields (not on the receipt) are asked for later, on the confirm page.
   const fields = onReceipt(bank);
   const count = fields.length;
+  const first = fields[0];
+  // Typing the first thing (e.g. the transaction ID) goes to the confirm page, which asks for
+  // anything still missing.
+  const submitTyped = () => {
+    const value = typed.trim();
+    if (!first || !value) return;
+    setFound({ [first.key]: value });
+    router.push('/verify-bank/found');
+  };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader
-        title={t('verifyBank.title')}
-        subtitle={t('verifyBank.findThings', { count })}
-        onBack={goBack}
-      />
-      <VerifySteps current={2} />
-
-      <ScrollView contentContainerStyle={{ gap: 12, padding: 16 }}>
-        <View className="flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface p-3">
-          <BankBadge code={bank.code} size={44} />
-          <View className="min-w-0 flex-1">
-            <Text font="semibold" tone="muted" className="text-sm">
-              {t('verifyBank.customersBank')}
-            </Text>
-            <Text font="bold" className="text-lg" numberOfLines={1}>
-              {bank.name}
-            </Text>
-          </View>
-          <Pressable
-            onPress={goBack}
-            accessibilityRole="button"
-            accessibilityLabel={t('verifyBank.changeBank')}
-            className="h-11 justify-center rounded-[22px] border-2 border-borderStrong bg-surface px-3.5 active:bg-background"
-          >
-            <Text font="bold" tone="link" className="text-[15px]">
-              {t('verifyBank.change')}
-            </Text>
-          </Pressable>
-        </View>
-
-        {/* A drawn receipt with the things to find marked 1, 2… */}
-        <View
-          className="gap-3 rounded-[20px] border-2 border-borderStrong bg-surface p-4"
-          accessible
-          accessibilityLabel={fields.map((f) => t(`verifyBank.fields.${f.key}`)).join(', ')}
+    <ScreenBackground>
+      <SafeAreaView edges={['top']} className="flex-1">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1"
         >
-          <View className="flex-row items-center gap-2.5">
-            <BankBadge code={bank.code} size={40} />
-            <View className="flex-1">
-              <Line width="50%" />
-            </View>
-            <Text font="bold" tone="muted" className="text-sm uppercase tracking-widest">
-              {t('verifyBank.receipt')}
-            </Text>
+          <View className="px-4 pb-3 pt-2">
+            <TopBar
+              title={t('verifyBank.title')}
+              subtitle={`${t('verifyBank.payByBank')} · ${formatMoney(amount)}`}
+              left={{ icon: ChevronLeft, onPress: goBack, label: t('common.back') }}
+            />
           </View>
-          <View className="flex-row items-center justify-between">
-            <Line width="30%" />
-            <Text font="bold" tone="muted" className="text-base">
-              {formatMoney(amount)}
-            </Text>
-          </View>
-          {fields.map((field, i) => (
-            <View key={field.key} className="gap-3">
-              {i === 0 && count === 1 ? <Line width="70%" /> : null}
-              <Highlight n={i + 1} field={field} />
-              <Line width={i === 0 && count > 1 ? '65%' : '55%'} />
-            </View>
-          ))}
-        </View>
+          <VerifySteps current={2} />
 
-        <View className="flex-row items-center gap-2 px-1">
-          <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
-          <Text tone="muted" className="flex-1 text-[15px]">
-            {t(bank.hasQr ? 'verifyBank.qrGivesAll' : 'verifyBank.photoGivesAll', { count })}
-          </Text>
-        </View>
-      </ScrollView>
+          <ScrollView
+            contentContainerStyle={{ gap: 12, padding: 16, paddingBottom: 40 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <GlassCard style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 }}>
+              <BankBadge code={bank.code} size={44} />
+              <View className="min-w-0 flex-1">
+                <Text className="text-sm" style={{ color: colors.muted }}>
+                  {t('verifyBank.customersBank')}
+                </Text>
+                <Text font="bold" className="text-base" numberOfLines={2}>
+                  {bank.name}
+                </Text>
+              </View>
+              <Pressable
+                onPress={goBack}
+                accessibilityRole="button"
+                accessibilityLabel={t('verifyBank.changeBank')}
+                hitSlop={6}
+                className="h-11 justify-center px-2 active:opacity-70"
+              >
+                <Text font="bold" className="text-[15px]" style={{ color: g.primaryText }}>
+                  {t('verifyBank.change')}
+                </Text>
+              </Pressable>
+            </GlassCard>
 
-      <View className="gap-2.5 px-4 pb-6 pt-2">
-        {bank.hasQr ? (
-          <Button
-            label={t('verifyBank.scanQr')}
-            icon={QrCode}
-            onPress={() => router.push('/verify-bank/scan')}
-          />
-        ) : null}
-        <Button
-          label={t('verifyBank.readScreenshot')}
-          icon={ImageIcon}
-          variant={bank.hasQr ? 'outline' : 'primary'}
-          size={bank.hasQr ? 'md' : undefined}
-          onPress={() => router.push('/verify-bank/read')}
-        />
-      </View>
-    </SafeAreaView>
+            <HeroCard>
+              <Text
+                font="bold"
+                tone="inverse"
+                className="text-[13px] uppercase tracking-[0.6px] opacity-90"
+                accessibilityRole="header"
+              >
+                {t('verifyBank.findThings', { count })}
+              </Text>
+              <View
+                className="mt-3 flex-row gap-2"
+                accessible
+                accessibilityLabel={fields.map((f) => t(`verifyBank.fields.${f.key}`)).join(', ')}
+              >
+                {fields.map((field, i) => (
+                  <FieldChip key={field.key} n={i + 1} field={field} />
+                ))}
+              </View>
+              {bank.hasQr ? (
+                <WhitePill
+                  label={t('verifyBank.scanQr')}
+                  icon={ScanLine}
+                  onPress={() => router.push('/verify-bank/scan')}
+                />
+              ) : (
+                <WhitePill
+                  label={t('verifyBank.readScreenshot')}
+                  icon={ImageIcon}
+                  onPress={() => router.push('/verify-bank/read')}
+                />
+              )}
+              <Text tone="inverse" className="mt-2 text-center text-[13px] opacity-90">
+                {t(bank.hasQr ? 'verifyBank.qrGivesAll' : 'verifyBank.photoGivesAll', { count })}
+              </Text>
+            </HeroCard>
+
+            {bank.hasQr ? (
+              <GhostButton
+                label={t('verifyBank.readScreenshot')}
+                icon={ImageIcon}
+                onPress={() => router.push('/verify-bank/read')}
+              />
+            ) : null}
+
+            {first ? (
+              <>
+                <View className="flex-row items-center gap-3 py-1">
+                  <View className="h-px flex-1 bg-black/10" />
+                  <Text
+                    font="bold"
+                    className="text-[13px] uppercase tracking-[0.6px]"
+                    style={{ color: colors.muted }}
+                  >
+                    {t('verifyBank.orTypeIt')}
+                  </Text>
+                  <View className="h-px flex-1 bg-black/10" />
+                </View>
+                <Text font="bold" className="px-1 text-sm" style={{ color: colors.muted }}>
+                  {t(`verifyBank.fields.${first.key}`)}
+                </Text>
+                <View
+                  className="h-14 flex-row items-center gap-2 rounded-[28px] pl-5 pr-1.5"
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.85)',
+                    borderWidth: 1,
+                    borderColor: 'rgba(255,255,255,0.95)',
+                  }}
+                >
+                  <TextInput
+                    value={typed}
+                    onChangeText={setTyped}
+                    onSubmitEditing={submitTyped}
+                    returnKeyType="next"
+                    autoCapitalize="characters"
+                    autoCorrect={false}
+                    placeholder={`${first.sample.slice(0, 4)}…`}
+                    placeholderTextColor={colors.placeholder}
+                    accessibilityLabel={t(`verifyBank.fields.${first.key}`)}
+                    className="h-full flex-1 font-heading text-lg text-text"
+                  />
+                  {typed.trim() ? (
+                    <Pressable
+                      onPress={submitTyped}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('verifyBank.useTyped')}
+                      className="h-11 w-11 items-center justify-center rounded-full active:opacity-80"
+                      style={{ backgroundColor: g.primaryDeep }}
+                    >
+                      <ArrowRight size={20} color="#FFFFFF" strokeWidth={2.4} />
+                    </Pressable>
+                  ) : null}
+                </View>
+              </>
+            ) : null}
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
