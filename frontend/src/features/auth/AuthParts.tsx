@@ -19,9 +19,10 @@ export const AUTH = {
 export function useAuthColors() {
   const brand = useBrandColors();
   return {
-    p: brand.primary,
+    // The start pages use the deep theme colour for every accent.
+    p: brand.primaryDeep,
     p2: shade(brand.primary, 0.16),
-    pt: brand.primaryText,
+    pt: brand.primaryDeep,
     deep: brand.primaryDeep,
   };
 }

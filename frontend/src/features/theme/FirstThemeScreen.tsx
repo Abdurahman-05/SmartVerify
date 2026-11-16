@@ -40,7 +40,7 @@ export function FirstThemeScreen() {
           style={[{ paddingTop: 56, paddingHorizontal: 22 }, themeVars(picked)]}
         >
           <AuthLogo />
-          <AuthTitle text={t('firstTheme.chooseTitle')} accent={brand.primary} />
+          <AuthTitle text={t('firstTheme.chooseTitle')} accent={brand.primaryDeep} />
           {/* Step 2 of 3 in the start flow: account, colour, plan. */}
           <AuthSubtitle
             text={`${t('auth.step', { current: 2, total: 3 })} · ${t('firstTheme.changeLater')}`}
@@ -50,7 +50,7 @@ export function FirstThemeScreen() {
               <View
                 key={n}
                 className={`h-1.5 flex-1 rounded-[3px] ${n <= 2 ? '' : 'bg-black/10'}`}
-                style={n <= 2 ? { backgroundColor: brand.primary } : null}
+                style={n <= 2 ? { backgroundColor: brand.primaryDeep } : null}
               />
             ))}
           </View>
@@ -61,7 +61,7 @@ export function FirstThemeScreen() {
                 <View key={row[0]} className="flex-row gap-2">
                   {row.map((id) => {
                     const selected = id === picked;
-                    const color = themes[id].primary;
+                    const color = themes[id].primaryDeep;
                     const name = t(`themes.${id}`);
                     return (
                       <Pressable

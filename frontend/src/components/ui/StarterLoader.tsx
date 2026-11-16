@@ -55,8 +55,8 @@ function LogoLoader({ still }: { still: boolean }) {
             height: ring,
             borderRadius: ring / 2,
             borderWidth: 5,
-            borderColor: alpha(g.primary, 0.15),
-            borderTopColor: g.primary,
+            borderColor: alpha(g.primaryDeep, 0.15),
+            borderTopColor: g.primaryDeep,
             borderRightColor: g.primary2,
           },
           spin,
@@ -110,7 +110,7 @@ function Dot({ index, still, color }: { index: number; still: boolean; color: st
 export function StarterLoader({ title, subtitle }: { title: string; subtitle: string }) {
   const still = useReducedMotion();
   const g = useGlass();
-  const dots = [g.primary, g.primary2, g.primaryText];
+  const dots = [g.primaryDeep, g.primary, g.primary2];
   const words = title.split(' ');
   const head = words.length > 1 ? `${words.slice(0, -1).join(' ')} ` : '';
   return (
@@ -123,7 +123,7 @@ export function StarterLoader({ title, subtitle }: { title: string; subtitle: st
       <View style={{ alignItems: 'center', gap: 4, paddingHorizontal: 24 }}>
         <Text font="heading" className="text-center text-[22px]" style={{ color: TEXT }}>
           {head}
-          <Text font="heading" className="text-[22px]" style={{ color: g.primary }}>
+          <Text font="heading" className="text-[22px]" style={{ color: g.primaryDeep }}>
             {words[words.length - 1]}
           </Text>
         </Text>

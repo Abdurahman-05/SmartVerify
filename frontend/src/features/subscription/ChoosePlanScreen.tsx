@@ -177,7 +177,7 @@ export default function ChoosePlanScreen() {
           style={{ paddingTop: 56, paddingHorizontal: 22 }}
         >
           <AuthLogo />
-          <AuthTitle text={t('plan.chooseTitle')} accent={brand.primary} />
+          <AuthTitle text={t('plan.chooseTitle')} accent={brand.primaryDeep} />
           <AuthSubtitle
             text={`${t('auth.step', { current: 3, total: 3 })} · ${t('plan.changeLater')}`}
           />
@@ -186,7 +186,7 @@ export default function ChoosePlanScreen() {
               <View
                 key={n}
                 className="h-1.5 flex-1 rounded-[3px]"
-                style={{ backgroundColor: brand.primary }}
+                style={{ backgroundColor: brand.primaryDeep }}
               />
             ))}
           </View>
@@ -197,13 +197,13 @@ export default function ChoosePlanScreen() {
                 <PeriodChip
                   label={t('plan.oneMonth')}
                   selected={period === 'monthly'}
-                  color={brand.primary}
+                  color={brand.primaryDeep}
                   onPress={() => setPeriod('monthly')}
                 />
                 <PeriodChip
                   label={`${t('plan.threeMonths')} −${formatMoney(normalQuarterlySavingEtb, false)}`}
                   selected={period === 'quarterly'}
-                  color={brand.primary}
+                  color={brand.primaryDeep}
                   onPress={() => setPeriod('quarterly')}
                 />
               </View>
@@ -214,13 +214,13 @@ export default function ChoosePlanScreen() {
                   priceEtb={restaurantMonthlyEtb}
                   unit={t('plan.perMonthShort')}
                   selected={chosen === 'restaurant'}
-                  color={brand.primary}
+                  color={brand.primaryDeep}
                   onPress={() => setChosen('restaurant')}
                 >
                   <View className="flex-row gap-2">
                     <Check
                       size={15}
-                      color={brand.primary}
+                      color={brand.primaryDeep}
                       strokeWidth={3}
                       style={{ marginTop: 2 }}
                     />
@@ -238,7 +238,7 @@ export default function ChoosePlanScreen() {
                     : `${t('common.etb')} / ${t('plan.threeMonths')}`
                 }
                 selected={chosen === normalPlan}
-                color={brand.primary}
+                color={brand.primaryDeep}
                 onPress={() => setChosen(normalPlan)}
               >
                 <Text className={featureText}>{t('plan.normalFeatures')}</Text>
