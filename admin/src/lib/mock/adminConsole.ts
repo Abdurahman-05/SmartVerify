@@ -84,9 +84,8 @@ const places = [
     landmark: 'Intercontinental Hotel',
   },
 ];
-// One without a location, so the "No location" look shows too.
-const withoutLocation = new Set(['offline-6']);
-const located = (id: string) => !withoutLocation.has(id);
+// All six have a map point (a real customer without one shows "No location").
+const located = (_id: string) => true;
 const customers = places.map((p, i) => ({
   id: p.id,
   name: p.name,
