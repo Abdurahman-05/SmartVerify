@@ -1,19 +1,32 @@
 import { useQuery } from '@tanstack/react-query';
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
-import { Landmark, Lock, ShieldCheck, Wallet, type LucideIcon } from 'lucide-react-native';
+import {
+  Banknote,
+  ChevronLeft,
+  Landmark,
+  Lock,
+  ShieldCheck,
+  Wallet,
+  type LucideIcon,
+} from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, TextInput, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BankBadge } from '@/components/ui/BankBadge';
-import { Button } from '@/components/ui/Button';
-import { FormScreen } from '@/components/ui/FormScreen';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { useGlass } from '@/components/ui/glassTokens';
+import { HeroCard, HeroChip } from '@/components/ui/HeroCard';
 import { LoadingView } from '@/components/ui/LoadingView';
-import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
+import { formatMoney } from '@/components/ui/MoneyText';
 import { OptionSheet } from '@/components/ui/OptionSheet';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
+import { Segmented } from '@/components/ui/Segmented';
+import { StickyFooter } from '@/components/ui/StickyFooter';
+import { TopBar } from '@/components/ui/TopBar';
 import { Text } from '@/components/ui/Text';
-import { useBrandColors } from '@/store/theme';
 import { maskedNumberKey } from '@/features/bank-accounts/telebirr';
 import { usePaymentBill } from '@/features/bills/usePaymentBill';
 import { newIdempotencyKey } from '@/lib/api/idempotency';
@@ -38,51 +51,9 @@ const methods: { value: RestaurantMethod; icon: LucideIcon }[] = [
   { value: 'cash+bank', icon: Wallet },
 ];
 
-function MethodButton({
-  label,
-  icon: Icon,
-  selected,
-  onPress,
-}: {
-  label: string;
-  icon: LucideIcon;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  const brand = useBrandColors();
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="radio"
-      accessibilityState={{ selected }}
-      className={`h-[84px] flex-1 items-center justify-center gap-1.5 rounded-[18px] px-1 ${
-        selected ? 'bg-primary' : 'border-2 border-borderStrong bg-surface'
-      }`}
-    >
-      <Icon size={26} color={selected ? colors.surface : brand.primary} strokeWidth={2.2} />
-      <Text font="bold" tone={selected ? 'inverse' : 'default'} className="text-center text-base">
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function SummaryRow({ label, value, minus }: { label: string; value: number; minus?: boolean }) {
-  return (
-    <View className="flex-row items-baseline justify-between" accessible>
-      <Text font="semibold" tone="inverse" className="text-[17px]">
-        {label}
-      </Text>
-      <Text font="semibold" tone="inverse" className="text-[17px]">
-        {minus ? '− ' : ''}
-        <MoneyText value={value} font="semibold" tone="inverse" className="text-[17px]" />
-      </Text>
-    </View>
-  );
-}
-
 export default function VerifyRestaurantScreen() {
   const { t } = useTranslation();
+  const g = useGlass();
   const router = useRouter();
   const { billId } = useLocalSearchParams<{ billId: string }>();
   const { bill, pending } = usePaymentBill(billId);
@@ -106,7 +77,6 @@ export default function VerifyRestaurantScreen() {
   const cash = cashFor(pay.method, pay.cash);
   const cashTooMuch = pay.method === 'cash+bank' && cash >= bill.total;
   const toScan = Math.max(bill.total - cash - pay.bankReceived, 0);
-  const showSummary = pay.method === 'cash+bank' || pay.bankReceived > 0;
   const canGo = Boolean(account) && !cashTooMuch && bill.status === 'open';
 
   const proceed = () => {
@@ -133,187 +103,203 @@ export default function VerifyRestaurantScreen() {
   ];
 
   return (
-    <FormScreen>
-      <ScreenHeader
-        title={t('verifyRestaurant.title')}
-        subtitle={billLabel(t, bill)}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/bills'))}
-      />
-
-      <View className="gap-[18px] px-4 pt-2">
-        <View className="gap-2">
-          <Text font="bold" className="text-[17px]">
-            {t('verifyRestaurant.howPaying')}
-          </Text>
-          <View className="flex-row gap-2" accessibilityRole="radiogroup">
-            {methods.map(({ value, icon }) => (
-              <MethodButton
-                key={value}
-                label={t(`verifyRestaurant.method.${value}`)}
-                icon={icon}
-                selected={pay.method === value}
-                onPress={() => pay.setMethod(value)}
-              />
-            ))}
-          </View>
-        </View>
-
-        <View className="gap-1.5">
-          <Text font="bold" className="text-[17px]">
-            {t('verifyRestaurant.totalBill')}
-          </Text>
-          <View
-            accessible
-            accessibilityLabel={t('verifyRestaurant.totalLocked', {
-              amount: formatMoney(bill.total),
-            })}
-            className="h-16 flex-row items-center gap-3 rounded-input border-2 border-borderStrong bg-neutralBg px-[18px]"
-          >
-            <Text font="bold" tone="muted" className="text-[17px]">
-              {t('common.etb')}
-            </Text>
-            <MoneyText
-              value={bill.total}
-              showCurrency={false}
-              className="flex-1 text-right text-[28px]"
+    <ScreenBackground>
+      <SafeAreaView edges={['top']} className="flex-1">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1"
+        >
+          <View className="px-4 pb-3 pt-2">
+            <TopBar
+              title={t('verifyRestaurant.title')}
+              subtitle={billLabel(t, bill)}
+              left={{
+                icon: ChevronLeft,
+                onPress: () => (router.canGoBack() ? router.back() : router.replace('/bills')),
+                label: t('common.back'),
+              }}
             />
-            <Lock size={22} color={colors.muted} strokeWidth={2.2} />
           </View>
-        </View>
 
-        {pay.method === 'cash+bank' ? (
-          <View className="gap-1.5">
-            <Text font="bold" className="text-[17px]">
-              {t('verifyRestaurant.cashGave')}
-            </Text>
-            <View
-              className={`h-16 flex-row items-center gap-3 rounded-input border-2 bg-surface px-[18px] ${
-                cashTooMuch ? 'border-dangerFg' : 'border-borderStrong'
-              }`}
-            >
-              <Text font="bold" tone="muted" className="text-[17px]">
-                {t('common.etb')}
+          <ScrollView
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 120, gap: 12 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View className="gap-2">
+              <Text font="bold" className="px-1 text-sm" style={{ color: colors.muted }}>
+                {t('verifyRestaurant.howPaying')}
               </Text>
-              <TextInput
-                value={pay.cash ? formatMoney(pay.cash, false) : ''}
-                onChangeText={(text) => pay.setCash(parseAmountInput(text))}
-                keyboardType="number-pad"
-                placeholder="0"
-                placeholderTextColor={colors.placeholder}
-                accessibilityLabel={t('verifyRestaurant.cashLabel')}
-                className="h-full flex-1 text-right font-heading text-[28px] text-text"
+              <Segmented<RestaurantMethod>
+                options={methods.map(({ value, icon }) => ({
+                  value,
+                  icon,
+                  label: t(`verifyRestaurant.method.${value}`),
+                }))}
+                value={pay.method}
+                onChange={(value) => pay.setMethod(value)}
               />
             </View>
-            {cashTooMuch ? (
-              <Text font="semibold" className="text-[15px] text-dangerFg">
-                {t('verifyRestaurant.cashTooMuch')}
-              </Text>
+
+            {pay.method === 'cash+bank' ? (
+              <View className="gap-2">
+                <Text font="bold" className="px-1 text-sm" style={{ color: colors.muted }}>
+                  {t('verifyRestaurant.cashGave')}
+                </Text>
+                <View
+                  className="h-14 flex-row items-center gap-3 rounded-[28px] px-5"
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.85)',
+                    borderWidth: 2,
+                    borderColor: cashTooMuch ? colors.dangerFg : g.primary,
+                  }}
+                >
+                  <Banknote size={22} color={g.primaryText} strokeWidth={2.2} />
+                  <TextInput
+                    value={pay.cash ? formatMoney(pay.cash, false) : ''}
+                    onChangeText={(text) => pay.setCash(parseAmountInput(text))}
+                    keyboardType="number-pad"
+                    placeholder="0"
+                    placeholderTextColor={colors.placeholder}
+                    accessibilityLabel={t('verifyRestaurant.cashLabel')}
+                    className="h-full flex-1 font-heading text-2xl text-text"
+                  />
+                  <Text font="bold" tone="muted" className="text-base">
+                    {t('common.etb')}
+                  </Text>
+                </View>
+                {cashTooMuch ? (
+                  <Text font="semibold" className="px-1 text-[15px] text-dangerFg">
+                    {t('verifyRestaurant.cashTooMuch')}
+                  </Text>
+                ) : null}
+              </View>
             ) : null}
-          </View>
-        ) : null}
 
-        {showSummary && !cashTooMuch ? (
-          <View className="gap-1 rounded-[20px] bg-primary px-[18px] py-3.5">
-            <SummaryRow label={t('verifyRestaurant.summaryTotal')} value={bill.total} />
-            {cash > 0 ? (
-              <SummaryRow label={t('verifyRestaurant.summaryCash')} value={cash} minus />
+            <HeroCard>
+              <View accessible>
+                <Text font="bold" tone="inverse" className="text-[13px] uppercase opacity-90">
+                  {t('verifyRestaurant.customerPaysBank')}
+                </Text>
+                <Text font="heading" tone="inverse" className="text-[40px] leading-[48px]">
+                  {formatMoney(cashTooMuch ? 0 : toScan, false)}{' '}
+                  <Text font="heading" tone="inverse" className="text-lg">
+                    {t('common.etb')}
+                  </Text>
+                </Text>
+              </View>
+              <View className="mt-3 flex-row gap-2">
+                <HeroChip style={{ flex: 1 }}>
+                  <View
+                    accessible
+                    accessibilityLabel={t('verifyRestaurant.totalLocked', {
+                      amount: formatMoney(bill.total),
+                    })}
+                  >
+                    <View className="flex-row items-center gap-1">
+                      <Lock size={13} color="#FFFFFF" strokeWidth={2.4} />
+                      <Text tone="inverse" className="text-[13px] opacity-90">
+                        {t('verifyRestaurant.totalBill')}
+                      </Text>
+                    </View>
+                    <Text font="heading" tone="inverse" className="text-lg">
+                      {formatMoney(bill.total, false)}
+                    </Text>
+                  </View>
+                </HeroChip>
+                {cash > 0 ? (
+                  <HeroChip style={{ flex: 1 }}>
+                    <Text tone="inverse" className="text-[13px] opacity-90">
+                      {t('verifyRestaurant.summaryCash')}
+                    </Text>
+                    <Text font="heading" tone="inverse" className="text-lg">
+                      {`− ${formatMoney(cash, false)}`}
+                    </Text>
+                  </HeroChip>
+                ) : null}
+                {pay.bankReceived > 0 ? (
+                  <HeroChip style={{ flex: 1 }}>
+                    <Text tone="inverse" className="text-[13px] opacity-90" numberOfLines={1}>
+                      {t('verifyRestaurant.summaryBankAlready')}
+                    </Text>
+                    <Text font="heading" tone="inverse" className="text-lg">
+                      {`− ${formatMoney(pay.bankReceived, false)}`}
+                    </Text>
+                  </HeroChip>
+                ) : null}
+              </View>
+            </HeroCard>
+
+            {account ? (
+              <GlassCard
+                onPress={() => setAccountSheet(true)}
+                accessibilityLabel={t('verifyRestaurant.chooseAccount')}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12 }}
+              >
+                <BankBadge code={account.bankCode} size={44} />
+                <View className="flex-1">
+                  <Text className="text-sm" style={{ color: colors.muted }} numberOfLines={1}>
+                    {t('verifyRestaurant.moneyGoesTo')}
+                  </Text>
+                  <Text font="bold" className="text-base" numberOfLines={1}>
+                    {account.shortName}{' '}
+                    {t(maskedNumberKey(account.bankCode), { last4: account.last4 })}
+                  </Text>
+                </View>
+                <Text font="bold" className="text-[15px]" style={{ color: g.primaryText }}>
+                  {t('verifyRestaurant.change')}
+                </Text>
+              </GlassCard>
             ) : null}
-            {pay.bankReceived > 0 ? (
-              <SummaryRow
-                label={t('verifyRestaurant.summaryBankAlready')}
-                value={pay.bankReceived}
-                minus
-              />
+
+            {__DEV__ ? (
+              <View className="gap-1.5 rounded-input border-2 border-dashed border-amber p-2.5">
+                <Text font="bold" tone="muted" className="text-sm">
+                  {t('verifyRestaurant.devSimulate')}
+                </Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {simulations.map((s) => (
+                    <Pill
+                      key={s.value}
+                      label={s.label}
+                      selected={pay.simulate === s.value}
+                      onPress={() => pay.setSimulate(s.value)}
+                    />
+                  ))}
+                </View>
+              </View>
             ) : null}
-            <View className="mt-1.5 border-t-2 border-white/35 pt-2" accessible>
-              <Text font="semibold" tone="inverse" className="text-base">
-                {t('verifyRestaurant.mustPayBank')}
-              </Text>
-              <MoneyText
-                value={toScan}
-                tone="inverse"
-                className="text-4xl"
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              />
-            </View>
-          </View>
-        ) : null}
+          </ScrollView>
 
-        {account ? (
-          <View className="flex-row items-center gap-2.5 rounded-input border-[1.5px] border-border bg-surface px-3 py-2">
-            <BankBadge code={account.bankCode} size={40} />
-            <View className="flex-1">
-              <Text font="bold" className="text-base" numberOfLines={1}>
-                {account.holderName}
-              </Text>
-              <Text tone="muted" className="text-sm" numberOfLines={1}>
-                {account.shortName} ·{' '}
-                {t(maskedNumberKey(account.bankCode), { last4: account.last4 })}
-              </Text>
-            </View>
-            <Pressable
-              onPress={() => setAccountSheet(true)}
-              accessibilityRole="button"
-              accessibilityLabel={t('verifyRestaurant.chooseAccount')}
-              className="h-11 justify-center rounded-[22px] border-2 border-borderStrong bg-surface px-3.5 active:bg-background"
-            >
-              <Text font="bold" tone="link" className="text-[15px]">
-                {t('verifyRestaurant.change')}
-              </Text>
-            </Pressable>
-          </View>
-        ) : null}
+          <StickyFooter>
+            <PrimaryButton
+              label={
+                toScan === 0
+                  ? t('verifyRestaurant.confirm')
+                  : t('verifyRestaurant.checkPayment', { amount: formatMoney(toScan) })
+              }
+              icon={ShieldCheck}
+              disabled={!canGo}
+              onPress={proceed}
+            />
+          </StickyFooter>
+        </KeyboardAvoidingView>
 
-        {__DEV__ ? (
-          <View className="gap-1.5 rounded-input border-2 border-dashed border-amber p-2.5">
-            <Text font="bold" tone="muted" className="text-sm">
-              {t('verifyRestaurant.devSimulate')}
-            </Text>
-            <View className="flex-row flex-wrap gap-2">
-              {simulations.map((s) => (
-                <Pill
-                  key={s.value}
-                  label={s.label}
-                  selected={pay.simulate === s.value}
-                  onPress={() => pay.setSimulate(s.value)}
-                />
-              ))}
-            </View>
-          </View>
-        ) : null}
-      </View>
-
-      <View className="min-h-6 flex-1" />
-
-      <View className="px-4 pb-6 pt-2">
-        <Button
-          label={
-            toScan === 0
-              ? t('verifyRestaurant.confirm')
-              : t('verifyRestaurant.scanQr', { amount: formatMoney(toScan) })
-          }
-          icon={ShieldCheck}
-          disabled={!canGo}
-          onPress={proceed}
+        <OptionSheet
+          visible={accountSheet}
+          title={t('verifyRestaurant.chooseAccount')}
+          options={accounts.map((a) => ({
+            value: a.id,
+            label: `${a.holderName} · ${a.shortName} ${t(maskedNumberKey(a.bankCode), { last4: a.last4 })}`,
+            leading: <BankBadge code={a.bankCode} size={40} />,
+          }))}
+          selected={account?.id ?? ''}
+          onSelect={(id) => {
+            const next = accounts.find((a) => a.id === id);
+            if (next) setAccount(next);
+          }}
+          onClose={() => setAccountSheet(false)}
         />
-      </View>
-
-      <OptionSheet
-        visible={accountSheet}
-        title={t('verifyRestaurant.chooseAccount')}
-        options={accounts.map((a) => ({
-          value: a.id,
-          label: `${a.holderName} · ${a.shortName} ${t(maskedNumberKey(a.bankCode), { last4: a.last4 })}`,
-          leading: <BankBadge code={a.bankCode} size={40} />,
-        }))}
-        selected={account?.id ?? ''}
-        onSelect={(id) => {
-          const next = accounts.find((a) => a.id === id);
-          if (next) setAccount(next);
-        }}
-        onClose={() => setAccountSheet(false)}
-      />
-    </FormScreen>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }

@@ -608,15 +608,12 @@
     "totalLocked": "Total bill, from the order: {{amount}}",
     "cashGave": "3. Cash the customer gave",
     "cashLabel": "Cash the customer gave, in ETB",
-    "summaryTotal": "Total bill",
     "summaryCash": "Cash received",
     "summaryBankAlready": "Bank already received",
-    "mustPayBank": "Customer must pay by bank",
     "cashTooMuch": "This cash covers the whole bill. Go back and use \"Paid by cash\" on the bill.",
     "receivingAccount": "Receiving account ••••{{last4}}",
     "change": "Change",
     "chooseAccount": "Choose receiving account",
-    "scanQr": "Check payment · {{amount}}",
     "confirm": "Confirm payment",
     "devSimulate": "DEV: bank sends",
     "devExact": "Exact",
@@ -654,7 +651,10 @@
     "giveBackNote": "Return this to the customer from the cash drawer",
     "giveBackExplain": "The customer chose to get the extra back, so it is not a tip. Give it from the cash drawer.",
     "waitingFor": "Waiting for",
-    "usuallySeconds": "This usually takes a few seconds."
+    "usuallySeconds": "This usually takes a few seconds.",
+    "customerPaysBank": "Customer pays by bank",
+    "moneyGoesTo": "Money goes to",
+    "checkPayment": "Check payment · {{amount}}"
   },
   "cash": {
     "title": "Cash payment",

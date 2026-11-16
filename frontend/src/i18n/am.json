@@ -608,15 +608,12 @@
     "totalLocked": "ጠቅላላ ሂሳብ፣ ከትዕዛዙ: {{amount}}",
     "cashGave": "3. ደንበኛው የሰጠው ጥሬ ገንዘብ",
     "cashLabel": "ደንበኛው የሰጠው ጥሬ ገንዘብ፣ በብር",
-    "summaryTotal": "ጠቅላላ ሂሳብ",
     "summaryCash": "የተቀበሉት ጥሬ ገንዘብ",
     "summaryBankAlready": "ቀድሞ በባንክ የተቀበሉት",
-    "mustPayBank": "ደንበኛው በባንክ መክፈል ያለበት",
     "cashTooMuch": "ይህ ጥሬ ገንዘብ ሙሉ ሂሳቡን ይሸፍናል። ተመልሰው በሂሳቡ ላይ \"በጥሬ ገንዘብ ተከፍሏል\" ይጠቀሙ።",
     "receivingAccount": "ተቀባይ ሂሳብ ••••{{last4}}",
     "change": "ቀይር",
     "chooseAccount": "ተቀባይ ሂሳብ ይምረጡ",
-    "scanQr": "ክፍያ ያረጋግጡ · {{amount}}",
     "confirm": "ክፍያውን አረጋግጥ",
     "devSimulate": "DEV: ባንኩ የሚልከው",
     "devExact": "ትክክል",
@@ -654,7 +651,10 @@
     "giveBackNote": "ይህን ከካሽ መሳቢያው ለደንበኛው ይመልሱ",
     "giveBackExplain": "ደንበኛው ተጨማሪውን እንዲመለስለት መርጧል፤ ስለዚህ ቲፕ አይደለም። ከካሽ መሳቢያው ይስጡ።",
     "waitingFor": "የሚጠበቀው",
-    "usuallySeconds": "ይህ ብዙውን ጊዜ ጥቂት ሰከንዶች ይወስዳል።"
+    "usuallySeconds": "ይህ ብዙውን ጊዜ ጥቂት ሰከንዶች ይወስዳል።",
+    "customerPaysBank": "ደንበኛው በባንክ የሚከፍለው",
+    "moneyGoesTo": "ገንዘቡ የሚገባበት",
+    "checkPayment": "ክፍያውን አረጋግጥ · {{amount}}"
   },
   "cash": {
     "title": "የጥሬ ገንዘብ ክፍያ",
