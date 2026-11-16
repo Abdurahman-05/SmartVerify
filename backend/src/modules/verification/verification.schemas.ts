@@ -26,6 +26,7 @@ export const verifiedSchema = z.object({
   payerName: z.string(),
   receiverName: z.string(),
   date: z.string().describe('Payment time from the receipt (ISO)'),
+  bankAccountId: z.string().optional().describe('The saved account the money went to'),
 });
 
 export const notMatchingSchema = z.object({
@@ -91,6 +92,7 @@ export const verifiedCheckSchema = z.object({
   id: z.string(),
   billId: z.string().nullable(),
   bankCode: z.string(),
+  bankAccountId: z.string().nullable().describe('The saved account the money went to'),
   reference: z.string(),
   payerName: z.string().nullable(),
   amountEtb: z.number().int().describe('Amount on the receipt'),

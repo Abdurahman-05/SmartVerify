@@ -312,7 +312,30 @@
       "status": "ሁኔታ"
     },
     "totalVerified": "ጠቅላላ የተረጋገጠ: {{amount}} ብር",
-    "downloadFailed": "ፋይሉን መፍጠር አልተቻለም። እባክዎ እንደገና ይሞክሩ።"
+    "downloadFailed": "ፋይሉን መፍጠር አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
+    "search": "ፈልግ",
+    "searchPlaceholder": "ጠረጴዛ፣ ሠራተኛ ወይም ማጣቀሻ",
+    "closeSearch": "ፍለጋ ዝጋ",
+    "problems": "ችግሮች",
+    "bankCount": "{{bank}} · {{count}}",
+    "toBank": "ወደ {{bank}}",
+    "toAccount": "ወደ {{bank}} · {{name}}",
+    "cashRow": "ጥሬ ገንዘብ",
+    "hero_today": "ዛሬ የተረጋገጠ",
+    "hero_7d": "የተረጋገጠ · 7 ቀናት",
+    "hero_30d": "የተረጋገጠ · 30 ቀናት",
+    "hero_day": "የተረጋገጠ · {{date}}",
+    "heroCash": "ጥሬ ገንዘብ",
+    "payments_one": "{{count}} ክፍያ",
+    "payments_other": "{{count}} ክፍያዎች",
+    "accountCard": "{{name}}፣ {{amount}}፣ {{count}} ክፍያዎች",
+    "tag": {
+      "verified": "ተረጋግጧል",
+      "mismatch": "አይዛመድም",
+      "duplicate": "የተደገመ",
+      "failed": "አልተረጋገጠም"
+    },
+    "expectedOf": "/ {{amount}}"
   },
   "transaction": {
     "title": "የግብይት ዝርዝር",
@@ -1084,7 +1107,19 @@
       "recordedBy": "ክፍያውን የተቀበለው",
       "time": "ሰዓት",
       "notFound": "ይህ ክፍያ አልተገኘም።",
-      "back": "ወደ ክፍያዎች ተመለስ"
+      "back": "ወደ ክፍያዎች ተመለስ",
+      "share": "ደረሰኝ አጋራ",
+      "bankName": "ባንክ",
+      "receivedIn": "የገባበት",
+      "reference": "ማጣቀሻ",
+      "expected": "የሚጠበቀው",
+      "received": "የደረሰው",
+      "bill": "ሂሳብ",
+      "checkedBy": "ያረጋገጠው",
+      "verifiedMatches": "ተረጋግጧል · መጠኑ ይዛመዳል",
+      "verifiedExtra": "ተረጋግጧል · {{amount}} ትርፍ",
+      "paidIn": "የተከፈለው በ",
+      "shareText": "{{bill}} · {{amount}} · {{bank}} · {{reference}} · {{date}}"
     },
     "report": {
       "title": "የሽያጭ ሪፖርት",
@@ -1580,7 +1615,10 @@
       "title": "ወጪ ተሰርዟል · {{title}}",
       "body": "{{reason}}"
     },
-    "unread": "አዲስ"
+    "unread": "አዲስ",
+    "alertsTitle": "ማንቂያዎች",
+    "newCount": "{{count}} አዲስ",
+    "markAllRead": "ሁሉንም እንደተነበበ ምልክት አድርግ"
   },
   "lock": {
     "createTitle": "የይለፍ ኮድ ይፍጠሩ",

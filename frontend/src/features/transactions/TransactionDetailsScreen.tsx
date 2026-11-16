@@ -1,22 +1,29 @@
 import { useQuery } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Banknote, Check, ChevronLeft, Share2 } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, View } from 'react-native';
+import { ScrollView, Share, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/Button';
+import { BankBadge } from '@/components/ui/BankBadge';
+import { GhostButton } from '@/components/ui/GhostButton';
+import { IconTile } from '@/components/ui/IconTile';
 import { LoadingView } from '@/components/ui/LoadingView';
-import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
+import { formatMoney } from '@/components/ui/MoneyText';
 import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { StickyFooter } from '@/components/ui/StickyFooter';
 import { Text } from '@/components/ui/Text';
+import { TopBar } from '@/components/ui/TopBar';
+import { bankAccountsKey, banks, getBankAccounts } from '@/lib/bankAccounts';
 import { isNetworkError } from '@/lib/errors';
 import { formatDay, formatTime } from '@/lib/format';
 import { getPayment, paymentKey } from '@/lib/history';
-import { useBrandColors } from '@/store/theme';
+import { colors } from '@/theme/tokens';
+import { GlassCard, HeroCard, ScreenBg } from '@/ui/glass';
 
-import { methodIcon, methodKey } from './methods';
+import { methodKey } from './methods';
 
 function DetailRow({
   label,
@@ -30,9 +37,9 @@ function DetailRow({
   return (
     <View
       accessible
-      className={`flex-row items-center justify-between gap-3 py-[13px] ${last ? '' : 'border-b-[1.5px] border-divider'}`}
+      className={`min-h-[48px] flex-row items-center justify-between gap-3 py-3 ${last ? '' : 'border-b border-black/[0.07]'}`}
     >
-      <Text tone="muted" className="flex-1 text-[15px]">
+      <Text tone="muted" className="text-[15px]">
         {label}
       </Text>
       {children}
@@ -40,17 +47,24 @@ function DetailRow({
   );
 }
 
-const Money = ({ value }: { value: number }) => (
-  <MoneyText value={value} font="bold" className="text-base" />
+const Value = ({ children, ok }: { children: ReactNode; ok?: boolean }) => (
+  <Text
+    font="bold"
+    className="shrink text-right text-[15px]"
+    style={ok ? { color: colors.successFg } : undefined}
+    numberOfLines={1}
+  >
+    {children}
+  </Text>
 );
 
-/** One paid bill: items, how it was paid, tip and who took the payment. */
+/** One paid bill: where the money went, the receipt, and who checked it. */
 export default function TransactionDetailsScreen() {
-  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const query = useQuery({ queryKey: paymentKey(id), queryFn: () => getPayment(id) });
+  const accounts = useQuery({ queryKey: bankAccountsKey, queryFn: getBankAccounts });
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/transactions'));
 
@@ -62,117 +76,143 @@ export default function TransactionDetailsScreen() {
   const payment = query.data;
   if (!payment) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
-        <ScreenHeader title={t('history.detail.title')} onBack={goBack} />
-        <Text tone="muted" className="px-6 pt-10 text-center text-lg">
-          {t('history.detail.notFound')}
-        </Text>
-      </SafeAreaView>
+      <ScreenBg>
+        <SafeAreaView className="flex-1">
+          <ScreenHeader title={t('history.detail.title')} onBack={goBack} />
+          <Text tone="muted" className="px-6 pt-10 text-center text-lg">
+            {t('history.detail.notFound')}
+          </Text>
+        </SafeAreaView>
+      </ScreenBg>
     );
   }
 
-  const Icon = methodIcon[payment.method];
-  const method = t(methodKey(payment.method));
   const date = `${formatDay(payment.createdAt)} · ${formatTime(payment.createdAt)}`;
-  const hasFees = payment.packingFeeEtb > 0 || payment.deliveryFeeEtb > 0;
+  const bankCode = payment.bankCode ?? null;
+  const bankFull = bankCode ? (banks.find((b) => b.code === bankCode)?.name ?? bankCode) : null;
+  const account = (accounts.data ?? []).find((a) => a.id === payment.bankAccountId);
+  const receivedIn = account
+    ? [account.holderName, `${account.shortName} ••••${account.last4}`].filter(Boolean).join(' · ')
+    : null;
+  // Bank: the amount on the verified receipt; cash: the cash part of the sale.
+  const received = bankCode ? (payment.receivedEtb ?? payment.bankEtb) : payment.cashEtb;
+  const matches = received === payment.salesEtb;
+  const extra = received - payment.salesEtb;
+  const pill = bankCode
+    ? matches
+      ? t('history.detail.verifiedMatches')
+      : extra > 0
+        ? t('history.detail.verifiedExtra', { amount: formatMoney(extra) })
+        : t('transactions.tag.verified')
+    : t('history.detail.paidWith', { method: t(methodKey(payment.method)) });
+  const checkedBy = `${payment.checkedBy ?? payment.recordedBy} · ${formatTime(payment.createdAt)}`;
+
+  const share = () => {
+    void Share.share({
+      message: t('history.detail.shareText', {
+        bill: payment.label,
+        amount: formatMoney(payment.salesEtb),
+        bank: bankFull ?? t(methodKey(payment.method)),
+        reference: payment.reference ?? '',
+        date,
+      }),
+    });
+  };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader title={payment.label} subtitle={t('history.detail.title')} onBack={goBack} />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <View
-          className="mx-4 mt-1 items-center gap-1 rounded-card bg-primary px-5 py-[18px]"
-          accessible
-          accessibilityLabel={`${t('history.detail.paidWith', { method })}, ${formatMoney(payment.salesEtb)}, ${date}`}
-        >
-          <View className="h-[52px] w-[52px] items-center justify-center rounded-full bg-surface">
-            <Icon size={28} color={brand.primary} strokeWidth={2.6} />
-          </View>
-          <Text font="bold" tone="inverse" className="mt-1 text-base">
-            {t('history.detail.paidWith', { method })}
-          </Text>
-          <MoneyText
-            value={payment.salesEtb}
-            tone="inverse"
-            className="text-4xl"
-            numberOfLines={1}
-            adjustsFontSizeToFit
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <View className="px-4 pb-3 pt-2">
+          <TopBar
+            title={t('history.detail.title')}
+            subtitle={payment.label}
+            left={{ icon: ChevronLeft, onPress: goBack, label: t('common.back') }}
+            right={{ icon: Share2, onPress: share, label: t('history.detail.share') }}
           />
-          <Text font="semibold" tone="inverse" className="text-[15px]">
-            {date}
-          </Text>
         </View>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 112 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <HeroCard
+            className="mx-4 items-center gap-2 px-4 py-6"
+            accessible
+            accessibilityLabel={`${bankFull ?? t(methodKey(payment.method))}, ${formatMoney(payment.salesEtb)}, ${pill}, ${date}`}
+          >
+            {bankCode ? (
+              <View className="rounded-[16px] bg-white/20 p-1">
+                <BankBadge code={bankCode} size={48} />
+              </View>
+            ) : (
+              <IconTile icon={Banknote} size={56} radius={16} />
+            )}
+            <Text
+              font="heading"
+              tone="inverse"
+              className="text-[44px] leading-[52px]"
+              numberOfLines={1}
+              adjustsFontSizeToFit
+            >
+              {formatMoney(payment.salesEtb, false)}{' '}
+              <Text font="heading" tone="inverse" className="text-lg">
+                {t('common.etb')}
+              </Text>
+            </Text>
+            <View className="h-8 flex-row items-center gap-1.5 rounded-full bg-successBg px-3.5">
+              <Check size={14} color={colors.successFg} strokeWidth={2.8} />
+              <Text font="bold" className="text-sm" style={{ color: colors.successFg }}>
+                {pill}
+              </Text>
+            </View>
+          </HeroCard>
 
-        <View className="mx-4 mt-3 rounded-card border-[1.5px] border-border bg-surface px-[18px] py-1">
-          <Text font="bold" tone="muted" className="pt-2.5 text-[15px]">
-            {t('history.detail.items')}
-          </Text>
-          {payment.items.map((item, i) => (
-            <DetailRow key={`${item.name}-${i}`} label={`${item.quantity} × ${item.name}`}>
-              <Money value={item.priceEtb * item.quantity} />
-            </DetailRow>
-          ))}
-          {hasFees ? (
-            <>
-              <DetailRow label={t('history.detail.food')}>
-                <Money value={payment.foodTotalEtb} />
+          <GlassCard className="mx-4 mt-3 px-4 py-1">
+            {bankFull ? (
+              <>
+                <DetailRow
+                  label={t('history.detail.bankName')}
+                  last={!receivedIn && !payment.reference}
+                >
+                  <Value>{bankFull}</Value>
+                </DetailRow>
+                {receivedIn ? (
+                  <DetailRow label={t('history.detail.receivedIn')} last={!payment.reference}>
+                    <Value>{receivedIn}</Value>
+                  </DetailRow>
+                ) : null}
+                {payment.reference ? (
+                  <DetailRow label={t('history.detail.reference')} last>
+                    <Value>{payment.reference}</Value>
+                  </DetailRow>
+                ) : null}
+              </>
+            ) : (
+              <DetailRow label={t('history.detail.paidIn')} last>
+                <Value>{t(methodKey(payment.method))}</Value>
               </DetailRow>
-              {payment.packingFeeEtb > 0 ? (
-                <DetailRow label={t('history.detail.packing')}>
-                  <Money value={payment.packingFeeEtb} />
-                </DetailRow>
-              ) : null}
-              {payment.deliveryFeeEtb > 0 ? (
-                <DetailRow label={t('history.detail.delivery')}>
-                  <Money value={payment.deliveryFeeEtb} />
-                </DetailRow>
-              ) : null}
-            </>
-          ) : null}
-          <DetailRow label={t('history.detail.total')} last>
-            <Money value={payment.salesEtb} />
-          </DetailRow>
-        </View>
+            )}
+          </GlassCard>
 
-        <View className="mx-4 mt-3 rounded-card border-[1.5px] border-border bg-surface px-[18px] py-1">
-          {payment.cashEtb > 0 ? (
-            <DetailRow label={t('history.detail.cash')}>
-              <Money value={payment.cashEtb} />
+          <GlassCard className="mx-4 mt-3 px-4 py-1">
+            <DetailRow label={t('history.detail.expected')}>
+              <Value>{formatMoney(payment.salesEtb)}</Value>
             </DetailRow>
-          ) : null}
-          {payment.bankEtb > 0 ? (
-            <DetailRow label={t('history.detail.bank')}>
-              <Money value={payment.bankEtb} />
+            <DetailRow label={t('history.detail.received')}>
+              <Value ok>{formatMoney(received)}</Value>
             </DetailRow>
-          ) : null}
-          {payment.tipEtb > 0 ? (
-            <DetailRow label={t('history.detail.tip', { name: payment.waiterName })}>
-              <Money value={payment.tipEtb} />
+            <DetailRow label={t('history.detail.bill')}>
+              <Value>{payment.label}</Value>
             </DetailRow>
-          ) : null}
-          {payment.changeEtb > 0 ? (
-            <DetailRow label={t('history.detail.change')}>
-              <Money value={payment.changeEtb} />
+            <DetailRow label={t('history.detail.checkedBy')} last>
+              <Value>{checkedBy}</Value>
             </DetailRow>
-          ) : null}
-          <DetailRow label={t('history.detail.waiter')}>
-            <Text font="bold" className="text-base">
-              {payment.waiterName}
-            </Text>
-          </DetailRow>
-          <DetailRow label={t('history.detail.recordedBy')} last>
-            <Text font="bold" className="text-base">
-              {payment.recordedBy}
-            </Text>
-          </DetailRow>
-        </View>
+          </GlassCard>
+        </ScrollView>
 
-        <View className="min-h-6 flex-1" />
-
-        <View className="px-4 pb-3">
-          <Button label={t('history.detail.back')} onPress={goBack} />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        <StickyFooter>
+          <GhostButton label={t('history.detail.share')} icon={Share2} onPress={share} />
+        </StickyFooter>
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

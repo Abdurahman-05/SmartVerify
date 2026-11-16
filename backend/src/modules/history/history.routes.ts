@@ -34,9 +34,17 @@ const paymentSchema = z.object({
   waiterName: z.string(),
   recordedBy: z.string(),
   createdAt: z.string(),
+  bankCode: z.string().nullable().describe('Bank of the verified receipt; null when paid in cash'),
+  bankAccountId: z
+    .string()
+    .nullable()
+    .describe('The saved account the bank money went to, when known'),
 });
 
 const paymentDetailSchema = paymentSchema.extend({
+  reference: z.string().nullable().describe('Bank reference of the verified receipt'),
+  receivedEtb: z.number().int().nullable().describe('Amount on the verified receipt'),
+  checkedBy: z.string().nullable().describe('Who verified the receipt'),
   foodTotalEtb: z.number().int(),
   packingFeeEtb: z.number().int(),
   deliveryFeeEtb: z.number().int(),
@@ -44,6 +52,20 @@ const paymentDetailSchema = paymentSchema.extend({
     z.object({ name: z.string(), priceEtb: z.number().int(), quantity: z.number().int() })
   ),
 });
+
+/** The bill's verified bank receipt (bank and cash + bank payments). */
+const receipt = {
+  where: { status: 'verified' },
+  orderBy: { createdAt: 'desc' },
+  take: 1,
+  select: {
+    bankCode: true,
+    bankAccountId: true,
+    reference: true,
+    receivedAmount: true,
+    member: { select: { user: { select: { name: true } } } },
+  },
+} satisfies Prisma.Bill$transactionsArgs;
 
 /** The list only needs the first order's number (for the label), not every order and item. */
 const listInclude = {
@@ -55,6 +77,7 @@ const listInclude = {
       waiter: { select: { user: { select: { name: true } } } },
       table: { select: { number: true } },
       orders: { orderBy: { number: 'asc' }, take: 1, select: { number: true } },
+      transactions: receipt,
     },
   },
 } satisfies Prisma.PaymentInclude;
@@ -71,6 +94,7 @@ const include = {
       waiterId: true,
       waiter: { select: { user: { select: { name: true } } } },
       table: { select: { number: true } },
+      transactions: receipt,
       orders: {
         // Cancelled orders were never paid for.
         where: { cancelledAt: null },
@@ -114,6 +138,8 @@ function toPayment(row: Row) {
     waiterName: bill.waiter.user.name,
     recordedBy: row.recordedBy.user.name,
     createdAt: row.createdAt.toISOString(),
+    bankCode: bill.transactions[0]?.bankCode ?? null,
+    bankAccountId: bill.transactions[0]?.bankAccountId ?? null,
   };
 }
 
@@ -166,12 +192,20 @@ export const historyRoutes: FastifyPluginAsyncZod = async (app) => {
             .optional()
             .describe('Only payments older than this time: the next page of a scrolling list'),
           limit: z.coerce.number().int().min(1).max(500).default(500),
+          bankCode: z.string().min(1).max(10).optional().describe('Only bank money to this bank'),
+          bankAccountId: z
+            .string()
+            .min(1)
+            .max(64)
+            .optional()
+            .describe('Only bank money to this saved account'),
         }),
         response: { 200: z.array(paymentSchema), ...errors },
       },
     },
     async (request) => {
-      const { period, date, method, money, since, before, limit } = request.query;
+      const { period, date, method, money, since, before, limit, bankCode, bankAccountId } =
+        request.query;
       const range: { gte?: Date; lt?: Date } = date ? dayRange(date) : listRange(period);
       if (before && (!range.lt || new Date(before) < range.lt)) range.lt = new Date(before);
       const rows = await prisma.payment.findMany({
@@ -180,6 +214,18 @@ export const historyRoutes: FastifyPluginAsyncZod = async (app) => {
           createdAt: { ...range, ...(since && { gt: new Date(since) }) },
           ...(method && { method: fromMethod(method) }),
           ...(money && { method: { in: moneyMethods(money) } }),
+          ...((bankCode || bankAccountId) && {
+            bill: {
+              ...(request.auth.role === 'waiter' && { waiterId: request.auth.memberId }),
+              transactions: {
+                some: {
+                  status: 'verified',
+                  ...(bankCode && { bankCode }),
+                  ...(bankAccountId && { bankAccountId }),
+                },
+              },
+            },
+          }),
         },
         orderBy: { createdAt: 'desc' },
         take: limit,
@@ -206,6 +252,17 @@ export const historyRoutes: FastifyPluginAsyncZod = async (app) => {
             salesEtb: z.number().int(),
             cashCount: z.number().int(),
             bankCount: z.number().int(),
+            cashEtb: z.number().int().describe('Cash part of the sales (change and tips excluded)'),
+            accounts: z
+              .array(
+                z.object({
+                  bankCode: z.string(),
+                  bankAccountId: z.string().nullable(),
+                  count: z.number().int(),
+                  totalEtb: z.number().int().describe('Verified receipt amounts'),
+                })
+              )
+              .describe('Verified bank receipts of these payments, per receiving account'),
           }),
           ...errors,
         },
@@ -217,9 +274,20 @@ export const historyRoutes: FastifyPluginAsyncZod = async (app) => {
         ...visiblePayments(request.auth),
         createdAt: date ? dayRange(date) : listRange(period),
       };
-      const [groups, sales] = await Promise.all([
-        prisma.payment.groupBy({ by: ['method'], where, _count: { _all: true } }),
+      const [groups, sales, receipts] = await Promise.all([
+        prisma.payment.groupBy({
+          by: ['method'],
+          where,
+          _count: { _all: true },
+          _sum: { cashEtb: true, tipEtb: true, changeEtb: true },
+        }),
         prisma.bill.aggregate({ where: { payment: { is: where } }, _sum: { totalEtb: true } }),
+        prisma.transaction.groupBy({
+          by: ['bankCode', 'bankAccountId'],
+          where: { status: 'verified', bill: { payment: { is: where } } },
+          _count: { _all: true },
+          _sum: { receivedAmount: true },
+        }),
       ]);
       const countOf = (methods: PaymentMethod[]) =>
         groups.filter((g) => methods.includes(g.method)).reduce((n, g) => n + g._count._all, 0);
@@ -228,6 +296,17 @@ export const historyRoutes: FastifyPluginAsyncZod = async (app) => {
         salesEtb: sales._sum.totalEtb ?? 0,
         cashCount: countOf(moneyMethods('cash')),
         bankCount: countOf(moneyMethods('bank')),
+        cashEtb: groups.reduce((sum, g) => {
+          if (g.method === 'bank') return sum;
+          const tip = g.method === 'cash' ? (g._sum.tipEtb ?? 0) : 0;
+          return sum + (g._sum.cashEtb ?? 0) - (g._sum.changeEtb ?? 0) - tip;
+        }, 0),
+        accounts: receipts.map((r) => ({
+          bankCode: r.bankCode,
+          bankAccountId: r.bankAccountId,
+          count: r._count._all,
+          totalEtb: r._sum.receivedAmount ?? 0,
+        })),
       };
     }
   );
@@ -253,8 +332,12 @@ export const historyRoutes: FastifyPluginAsyncZod = async (app) => {
         include,
       });
       if (!row) throw new AppError('NOT_FOUND');
+      const verified = row.bill.transactions[0];
       return {
         ...toPayment(row),
+        reference: verified?.reference ?? null,
+        receivedEtb: verified ? verified.receivedAmount : null,
+        checkedBy: verified?.member.user.name ?? null,
         foodTotalEtb: row.bill.foodTotalEtb,
         packingFeeEtb: row.bill.packingFeeEtb,
         deliveryFeeEtb: row.bill.deliveryFeeEtb,

@@ -135,9 +135,15 @@ const hasMoney = (p: PaymentRecord, money: MoneyFilter) =>
   money === 'cash' ? p.cashEtb > 0 : p.bankEtb > 0;
 
 export const getPaymentsPage: typeof real.getPaymentsPage = USE_MOCK_BILLS
-  ? async (period, { day, money, before, limit }) =>
+  ? async (period, { day, money, before, limit, bankCode, bankAccountId }) =>
       mockList(period, day)
-        .filter((p) => (!money || hasMoney(p, money)) && (!before || p.createdAt < before))
+        .filter(
+          (p) =>
+            (!money || hasMoney(p, money)) &&
+            (!before || p.createdAt < before) &&
+            (!bankCode || p.bankCode === bankCode) &&
+            (!bankAccountId || p.bankAccountId === bankAccountId)
+        )
         .slice(0, limit)
   : real.getPaymentsPage;
 
@@ -149,13 +155,20 @@ export const getPaymentsSummary: typeof real.getPaymentsSummary = USE_MOCK_BILLS
         salesEtb: list.reduce((s, p) => s + p.salesEtb, 0),
         cashCount: list.filter((p) => hasMoney(p, 'cash')).length,
         bankCount: list.filter((p) => hasMoney(p, 'bank')).length,
+        cashEtb: list.reduce((s, p) => s + p.cashEtb, 0),
+        // The offline mock does not know which account a receipt went to.
+        accounts: [],
       };
     }
   : real.getPaymentsSummary;
 
 /** Transactions list, loaded a page at a time while scrolling. */
-export const paymentsPagesKey = (period: ListPeriod, day?: string, money?: MoneyFilter) =>
-  ['payments-pages', day ?? period, money ?? 'all'] as const;
+export const paymentsPagesKey = (
+  period: ListPeriod,
+  day?: string,
+  money?: MoneyFilter,
+  bank?: string
+) => ['payments-pages', day ?? period, money ?? 'all', bank ?? 'any'] as const;
 export const paymentsSummaryKey = (period: ListPeriod, day?: string) =>
   ['payments-summary', day ?? period] as const;
 

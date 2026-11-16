@@ -5,6 +5,8 @@ export type MismatchReason =
 
 /** A receiving account of the business (full number stays on the server). */
 export interface OwnAccount {
+  /** The saved account's id (absent for the platform's own accounts). */
+  id?: string;
   bankCode: string;
   accountNumber: string;
   last4: string;
@@ -21,7 +23,8 @@ export interface CompareInput {
 }
 
 export type CompareResult =
-  { ok: true; extraEtb: number } | { ok: false; reasons: MismatchReason[] };
+  | { ok: true; extraEtb: number; /** The saved account the money went to. */ accountId?: string }
+  | { ok: false; reasons: MismatchReason[] };
 
 const SUCCESS = /^(success|successful|completed)$/i;
 const HOUR_MS = 60 * 60 * 1000;
@@ -69,7 +72,12 @@ const single = (w: string) => w.replace(/(.)\1+/g, '$1');
 
 /** The consonants as they sound: vowels, y, w and h dropped, ph/q/c read as f/k/k. */
 const sound = (w: string) =>
-  single(w.replace(/ph/g, 'f').replace(/[qc]/g, 'k').replace(/[aeiouyhw]/g, ''));
+  single(
+    w
+      .replace(/ph/g, 'f')
+      .replace(/[qc]/g, 'k')
+      .replace(/[aeiouyhw]/g, '')
+  );
 
 /**
  * Written differently but sounding the same (Mohammed / Muhamed, Gebremedhin / Gebremedihn,
@@ -151,9 +159,7 @@ function samePhone(printed: string, saved: string) {
   const intl = `251${saved.replace(/^0/, '')}`;
   if (!printed.includes('*')) return printed === intl;
   const m = /^(\d+)\*+(\d{3,})$/.exec(printed);
-  return (
-    !!m?.[1] && !!m[2] && printed.length >= 8 && intl.startsWith(m[1]) && intl.endsWith(m[2])
-  );
+  return !!m?.[1] && !!m[2] && printed.length >= 8 && intl.startsWith(m[1]) && intl.endsWith(m[2]);
 }
 
 /**
@@ -162,8 +168,14 @@ function samePhone(printed: string, saved: string) {
  * that account's holder. CBE to another bank: the destination account in the reason is the full
  * number of one of our accounts at another bank.
  */
-function receiverCheck(receipt: ParsedReceipt, input: CompareInput) {
+function receiverCheck(
+  receipt: ParsedReceipt,
+  input: CompareInput
+): { account: boolean; name: boolean; shown: string; match?: OwnAccount } {
   const nameOf = (a: OwnAccount) => a.holderName ?? input.businessName;
+  /** The account the money went to: the one whose holder name fits, else the first match. */
+  const pick = (matches: OwnAccount[], checkName = true) =>
+    (checkName && matches.find((a) => sameName(receipt.receiverName, nameOf(a)))) || matches[0];
   if (receipt.transfer === 'wallet') {
     // 2519****8175 against a saved Telebirr number 09xxxx8175 (as 2519xxxx8175).
     const printed = receipt.receiverAccount.replace(/[^0-9*]/g, '');
@@ -172,7 +184,7 @@ function receiverCheck(receipt: ParsedReceipt, input: CompareInput) {
     );
     const account = matches.length > 0;
     const name = matches.some((a) => sameName(receipt.receiverName, nameOf(a)));
-    return { account, name: !account || name, shown: printed.slice(-4) };
+    return { account, name: !account || name, shown: printed.slice(-4), match: pick(matches) };
   }
   if (receipt.transfer === 'masked_account') {
     // Dashen: 2926******311 against our saved accounts, at Dashen when it went to Dashen.
@@ -185,17 +197,22 @@ function receiverCheck(receipt: ParsedReceipt, input: CompareInput) {
     );
     const account = matches.length > 0;
     const name = matches.some((a) => sameName(receipt.receiverName, nameOf(a)));
-    return { account, name: !account || name, shown: printed.slice(-4) };
+    return { account, name: !account || name, shown: printed.slice(-4), match: pick(matches) };
   }
   if (receipt.transfer === 'ebirr_bank') {
     // 231****31 (first 3 and last 2 digits): the receipt has no holder name, so the account is
     // all there is to check; the printed length must also match.
     const printed = receipt.destinationAccount;
-    const account = input.accounts.some(
+    const matches = input.accounts.filter(
       (a) =>
         a.bankCode !== 'TEL' && a.bankCode !== 'EBR' && sameMaskedAccount(printed, a.accountNumber)
     );
-    return { account, name: true, shown: printed.slice(-2) };
+    return {
+      account: matches.length > 0,
+      name: true,
+      shown: printed.slice(-2),
+      match: pick(matches, false),
+    };
   }
   if (receipt.transfer === 'ebirr_wallet') {
     const printed = receipt.receiverAccount.replace(/\D/g, '');
@@ -204,21 +221,26 @@ function receiverCheck(receipt: ParsedReceipt, input: CompareInput) {
     );
     const account = matches.length > 0;
     const name = matches.some((a) => sameName(receipt.receiverName, nameOf(a)));
-    return { account, name: !account || name, shown: printed.slice(-4) };
+    return { account, name: !account || name, shown: printed.slice(-4), match: pick(matches) };
   }
   if (receipt.transfer === 'wallet_to_bank') {
     const dest = receipt.destinationAccount;
     const matches = input.accounts.filter((a) => a.bankCode !== 'TEL' && a.accountNumber === dest);
     const account = dest.length >= 8 && matches.length > 0;
     const name = matches.some((a) => sameName(receipt.receiverName, nameOf(a)));
-    return { account, name: !account || name, shown: dest.slice(-4) };
+    return { account, name: !account || name, shown: dest.slice(-4), match: pick(matches) };
   }
   if (receipt.transfer === 'other_bank') {
     const dest = receipt.destinationAccount;
-    const ok = input.accounts.some(
+    const matches = input.accounts.filter(
       (a) => a.bankCode !== 'CBE' && sameAccount(dest, a.accountNumber)
     );
-    return { account: ok, name: true, shown: dest.slice(-4) };
+    return {
+      account: matches.length > 0,
+      name: true,
+      shown: dest.slice(-4),
+      match: pick(matches, false),
+    };
   }
   const last4 = receipt.receiverAccount.replace(/\D/g, '').slice(-4);
   const matches = input.accounts.filter((a) => a.bankCode === 'CBE' && a.last4 === last4);
@@ -226,7 +248,7 @@ function receiverCheck(receipt: ParsedReceipt, input: CompareInput) {
   const name = matches.some((a) =>
     sameName(receipt.receiverName, a.holderName ?? input.businessName)
   );
-  return { account, name: !account || name, shown: last4 };
+  return { account, name: !account || name, shown: last4, match: pick(matches) };
 }
 
 /** Deterministic checks of a parsed receipt against what the business expects. */
@@ -246,7 +268,11 @@ export function compareReceipt(receipt: ParsedReceipt, input: CompareInput): Com
 
   return reasons.length
     ? { ok: false, reasons }
-    : { ok: true, extraEtb: receipt.amountEtb - input.expectedAmountEtb };
+    : {
+        ok: true,
+        extraEtb: receipt.amountEtb - input.expectedAmountEtb,
+        ...(receiver.match?.id && { accountId: receiver.match.id }),
+      };
 }
 
 /** Addis Ababa time for logs, e.g. "2026-10-13 12:15". */

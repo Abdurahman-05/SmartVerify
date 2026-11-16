@@ -312,7 +312,30 @@
       "status": "Status"
     },
     "totalVerified": "Total verified: {{amount}} ETB",
-    "downloadFailed": "Could not create the file. Please try again."
+    "downloadFailed": "Could not create the file. Please try again.",
+    "search": "Search",
+    "searchPlaceholder": "Table, staff or reference",
+    "closeSearch": "Close search",
+    "problems": "Problems",
+    "bankCount": "{{bank}} · {{count}}",
+    "toBank": "To {{bank}}",
+    "toAccount": "To {{bank}} · {{name}}",
+    "cashRow": "Cash",
+    "hero_today": "Verified today",
+    "hero_7d": "Verified · 7 days",
+    "hero_30d": "Verified · 30 days",
+    "hero_day": "Verified · {{date}}",
+    "heroCash": "Cash",
+    "payments_one": "{{count}} payment",
+    "payments_other": "{{count}} payments",
+    "accountCard": "{{name}}, {{amount}}, {{count}} payments",
+    "tag": {
+      "verified": "Verified",
+      "mismatch": "Mismatch",
+      "duplicate": "Duplicate",
+      "failed": "Not verified"
+    },
+    "expectedOf": "/ {{amount}}"
   },
   "transaction": {
     "title": "Transaction details",
@@ -1084,7 +1107,19 @@
       "recordedBy": "Payment taken by",
       "time": "Time",
       "notFound": "This payment could not be found.",
-      "back": "Back to payments"
+      "back": "Back to payments",
+      "share": "Share receipt",
+      "bankName": "Bank",
+      "receivedIn": "Received in",
+      "reference": "Reference",
+      "expected": "Expected",
+      "received": "Received",
+      "bill": "Bill",
+      "checkedBy": "Checked by",
+      "verifiedMatches": "Verified · amount matches",
+      "verifiedExtra": "Verified · {{amount}} extra",
+      "paidIn": "Paid in",
+      "shareText": "{{bill}} · {{amount}} · {{bank}} · {{reference}} · {{date}}"
     },
     "report": {
       "title": "Sales report",
@@ -1580,7 +1615,10 @@
       "title": "Expense deleted · {{title}}",
       "body": "{{reason}}"
     },
-    "unread": "New"
+    "unread": "New",
+    "alertsTitle": "Alerts",
+    "newCount": "{{count}} new",
+    "markAllRead": "Mark all read"
   },
   "lock": {
     "createTitle": "Create your passcode",

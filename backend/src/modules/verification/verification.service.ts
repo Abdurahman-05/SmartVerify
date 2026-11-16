@@ -450,7 +450,13 @@ async function checkReceipt(input: {
     : await Promise.all([
         prisma.bankAccount.findMany({
           where: { businessId, removedAt: null },
-          select: { bankCode: true, accountNumber: true, last4: true, holderName: true },
+          select: {
+            id: true,
+            bankCode: true,
+            accountNumber: true,
+            last4: true,
+            holderName: true,
+          },
         }),
         prisma.business.findUniqueOrThrow({ where: { id: businessId }, select: { name: true } }),
       ]);
@@ -494,6 +500,7 @@ async function checkReceipt(input: {
     payerName: receipt.payerName,
     receiverName: receipt.receiverName,
     date: receipt.date.toISOString(),
+    ...(result.accountId && { bankAccountId: result.accountId }),
   };
 }
 

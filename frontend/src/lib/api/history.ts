@@ -19,9 +19,17 @@ export interface PaymentRecord {
   waiterName: string;
   recordedBy: string;
   createdAt: string;
+  /** Bank of the verified receipt; null when paid in cash. */
+  bankCode?: string | null;
+  /** The saved account the bank money went to, when known. */
+  bankAccountId?: string | null;
 }
 
 export interface PaymentRecordDetail extends PaymentRecord {
+  /** The verified receipt: its reference, amount and who checked it (null for cash). */
+  reference?: string | null;
+  receivedEtb?: number | null;
+  checkedBy?: string | null;
   foodTotalEtb: number;
   packingFeeEtb: number;
   deliveryFeeEtb: number;
@@ -55,12 +63,23 @@ export interface PaymentsSummary {
   salesEtb: number;
   cashCount: number;
   bankCount: number;
+  /** Cash part of the sales (change and tips excluded). */
+  cashEtb: number;
+  /** Verified bank receipts of these payments, per receiving account. */
+  accounts: { bankCode: string; bankAccountId: string | null; count: number; totalEtb: number }[];
 }
 
 /** GET /payments — one page of a scrolling list: `before` is the oldest time already shown. */
 export const getPaymentsPage = (
   period: ListPeriod,
-  opts: { day?: string; money?: MoneyFilter; before?: string; limit: number }
+  opts: {
+    day?: string;
+    money?: MoneyFilter;
+    before?: string;
+    limit: number;
+    bankCode?: string;
+    bankAccountId?: string;
+  }
 ) =>
   api<PaymentRecord[]>('/payments', {
     query: {
@@ -69,6 +88,8 @@ export const getPaymentsPage = (
       money: opts.money,
       before: opts.before,
       limit: String(opts.limit),
+      bankCode: opts.bankCode,
+      bankAccountId: opts.bankAccountId,
     },
   });
 

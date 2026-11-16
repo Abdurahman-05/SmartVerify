@@ -20,6 +20,8 @@ export interface VerifiedCheck {
   id: string;
   billId: string | null;
   bankCode: string;
+  /** The saved account the money went to, when known. */
+  bankAccountId?: string | null;
   reference: string;
   payerName: string | null;
   amountEtb: number;
