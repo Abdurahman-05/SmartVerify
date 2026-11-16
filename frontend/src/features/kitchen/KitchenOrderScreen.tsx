@@ -1,21 +1,28 @@
 import type { TFunction } from 'i18next';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Check, ChefHat } from 'lucide-react-native';
+import { Check, ChefHat, ChevronLeft } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { NoConnection } from '@/components/ui/NoConnection';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { HeroCard } from '@/components/ui/HeroCard';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { StickyFooter } from '@/components/ui/StickyFooter';
+import { TopBar } from '@/components/ui/TopBar';
 import { Text } from '@/components/ui/Text';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 
-import { minutesSince, useNow } from './parts';
+import { colors } from '@/theme/tokens';
+
+import { minutesSince, OrderBadge, QtyBadge, useNow } from './parts';
 import type { KitchenOrder } from './types';
 import { useKitchenActions, useKitchenOrders } from './useKitchenData';
+import { ScreenBg } from '@/ui/glass';
 
 function typeDetail(order: KitchenOrder, t: TFunction) {
   if (order.type === 'dine' && order.guests) return t('bills.guests', { count: order.guests });
@@ -41,12 +48,14 @@ export default function KitchenOrderScreen() {
   const order = query.data?.find((o) => o.id === id);
   if (!order) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
-        <ScreenHeader title={t('kitchen.title')} onBack={backToKitchen} />
-        <Text tone="muted" className="px-6 pt-10 text-center text-lg">
-          {t('kitchen.notFound')}
-        </Text>
-      </SafeAreaView>
+      <ScreenBg>
+        <SafeAreaView className="flex-1">
+          <ScreenHeader title={t('kitchen.title')} onBack={backToKitchen} />
+          <Text tone="muted" className="px-6 pt-10 text-center text-lg">
+            {t('kitchen.notFound')}
+          </Text>
+        </SafeAreaView>
+      </ScreenBg>
     );
   }
 
@@ -66,90 +75,97 @@ export default function KitchenOrderScreen() {
     else if (cooking) ready.mutate(order.id, { onSuccess: backToKitchen });
   };
 
-  return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader
-        title={order.label}
-        subtitle={t('kitchen.orderLine', { number: order.orderNo, name: order.waiterName })}
-        onBack={backToKitchen}
-      />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <View
-          accessible
-          className="mx-4 mt-1 flex-row items-center justify-between gap-3 rounded-card bg-primary px-5 py-3.5"
-        >
-          <View>
-            <Text font="semibold" tone="inverse" className="text-[15px]">
-              {timerLabel}
-            </Text>
-            <Text font="heading" tone="inverse" className="text-[38px] leading-tight">
-              {t('kitchen.minutes', { count: minutes })}
-            </Text>
-          </View>
-          <View className="items-end">
-            <Text font="semibold" tone="inverse" className="text-[15px]">
-              {t(`kitchen.type.${order.type}`)}
-            </Text>
-            {detail ? (
-              <Text font="bold" tone="inverse" className="text-[17px]">
-                {detail}
-              </Text>
-            ) : null}
-          </View>
-        </View>
+  const title = t(`kitchen.tab.${order.status}`);
 
-        <View className="mx-4 mt-3 rounded-card border-[1.5px] border-border bg-surface px-4">
-          {order.items.map((item, i) => (
-            <View
-              key={`${item.name}-${i}`}
-              accessible
-              className={`flex-row items-center gap-3.5 py-3.5 ${i < order.items.length - 1 ? 'border-b-[1.5px] border-divider' : ''}`}
-            >
-              <View className="h-12 min-w-[52px] items-center justify-center rounded-[14px] bg-primaryTile px-1">
-                <Text font="bold" className="text-2xl text-primary">
-                  {item.qty}×
-                </Text>
-              </View>
-              <Text font="bold" className="flex-1 text-2xl">
-                {item.name}
+  return (
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <View className="px-4 pb-3 pt-4">
+          <TopBar
+            title={title}
+            subtitle={t('kitchen.orderLine', { number: order.orderNo, name: order.waiterName })}
+            left={{ icon: ChevronLeft, onPress: backToKitchen, label: t('common.back') }}
+          />
+        </View>
+        <ScrollView
+          contentContainerStyle={{ gap: 12, paddingHorizontal: 16, paddingBottom: 150 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <HeroCard style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+            <OrderBadge order={order} size={84} soft />
+            <View accessible className="min-w-0 flex-1">
+              <Text font="bold" tone="inverse" className="text-sm uppercase">
+                {timerLabel}
+              </Text>
+              <Text font="heading" tone="inverse" className="text-2xl leading-8" numberOfLines={2}>
+                {order.label} · {t(`kitchen.type.${order.type}`)}
+                {detail ? ` · ${detail}` : ''}
               </Text>
             </View>
-          ))}
-        </View>
+            <View className="items-center">
+              <Text font="heading" tone="inverse" className="text-[44px] leading-[48px]">
+                {minutes}
+              </Text>
+              <Text tone="inverse" className="text-sm">
+                {t('kitchen.min')}
+              </Text>
+            </View>
+          </HeroCard>
 
-        {order.notes.length > 0 ? (
-          <View
-            accessible
-            className="mx-4 mt-3 rounded-[20px] border-[2.5px] border-amber bg-tipBg px-4 py-3"
-          >
-            <Text font="bold" className="text-[15px] text-warnFg">
-              {t('kitchen.notesTitle')}
-            </Text>
-            <Text font="bold" className="mt-1 text-[22px]">
-              {order.notes.map((n) => t(`orders.note.${n}`, { defaultValue: n })).join(' · ')}
-            </Text>
-          </View>
-        ) : null}
+          <GlassCard style={{ paddingHorizontal: 16, paddingVertical: 2 }}>
+            {order.items.map((item, i) => (
+              <View
+                key={`${item.name}-${i}`}
+                accessible
+                className={`flex-row items-center gap-3.5 py-3.5 ${i ? 'border-t border-black/[0.07]' : ''}`}
+              >
+                <QtyBadge qty={item.qty} big />
+                <Text font="bold" className="flex-1 text-2xl">
+                  {item.name}
+                </Text>
+              </View>
+            ))}
+          </GlassCard>
 
-        <View className="min-h-6 flex-1" />
-
-        <View className="gap-2.5 px-4 pb-6">
-          {order.status === 'new' ? (
-            <Button label={t('kitchen.startCooking')} icon={ChefHat} onPress={act} />
-          ) : cooking ? (
-            <Button label={t('kitchen.markReady')} icon={Check} onPress={act} />
+          {order.notes.length > 0 ? (
+            <GlassCard
+              highlight="#FACC15"
+              accessibilityLabel={t('kitchen.noteFromWaiter')}
+              style={{ paddingHorizontal: 16, paddingVertical: 14 }}
+            >
+              <Text font="bold" className="text-sm uppercase" style={{ color: colors.warnFg }}>
+                {t('kitchen.noteFromWaiter')}
+              </Text>
+              <Text font="bold" className="mt-1 text-xl">
+                {order.notes.map((n) => t(`orders.note.${n}`, { defaultValue: n })).join(' · ')}
+              </Text>
+            </GlassCard>
           ) : null}
-          <Button label={t('kitchen.back')} variant="outline" size="md" onPress={backToKitchen} />
-        </View>
-      </ScrollView>
+        </ScrollView>
 
-      <ErrorDialog
-        visible={Boolean(failed)}
-        title={t('kitchen.actionFailedTitle')}
-        message={t(errorMessageKey(failed?.error))}
-        actionLabel={t('errors.retry')}
-        onClose={() => failed?.reset()}
-      />
-    </SafeAreaView>
+        {order.status === 'ready' ? null : (
+          <StickyFooter>
+            <PrimaryButton
+              label={t(cooking ? 'kitchen.markReady' : 'kitchen.startCooking')}
+              icon={cooking ? Check : ChefHat}
+              onPress={act}
+            />
+            {cooking ? (
+              <Text tone="muted" className="text-center text-sm">
+                {t('kitchen.alertHint', { name: order.waiterName })}
+              </Text>
+            ) : null}
+          </StickyFooter>
+        )}
+
+        <ErrorDialog
+          visible={Boolean(failed)}
+          title={t('kitchen.actionFailedTitle')}
+          message={t(errorMessageKey(failed?.error))}
+          actionLabel={t('errors.retry')}
+          onClose={() => failed?.reset()}
+        />
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

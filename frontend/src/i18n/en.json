@@ -749,6 +749,18 @@
       "delivery": "Delivery"
     },
     "notesTitle": "NOTES FROM THE WAITER",
+    "noteTag": "Note",
+    "noteFromWaiter": "Note from the waiter",
+    "alertHint": "{{name}} gets an alert to serve it.",
+    "min": "min",
+    "order_dine": "Order #{{number}} · Dine in",
+    "order_takeaway": "Order #{{number}} · Takeaway",
+    "order_delivery": "Order #{{number}} · Delivery",
+    "badge": {
+      "dine": "Table",
+      "takeaway": "Takeaway",
+      "delivery": "Delivery"
+    },
     "back": "Back to kitchen",
     "notFound": "This order could not be found.",
     "actionFailedTitle": "Couldn't update the order"
@@ -1355,19 +1367,19 @@
     },
     "finished": {
       "title": "Finished items",
-      "subtitle": "What ran out in the kitchen",
+      "subtitle": "Tell the manager what to buy",
       "open": "Finished items",
-      "name": "Item",
-      "namePlaceholder": "e.g. Onions",
+      "name": "What is finished?",
+      "namePlaceholder": "e.g. Cooking oil",
       "nameError": "Enter the item name.",
-      "amount": "Amount (optional)",
-      "amountPlaceholder": "e.g. 3 boxes",
+      "amount": "How much? (optional)",
+      "amountPlaceholder": "e.g. 2 jerrycans",
       "when": "When is it needed?",
       "today": "Today",
       "week": "This week",
-      "add": "Add to list",
+      "add": "Add",
       "ready": "Ready to send",
-      "send": "Send to manager ({{count}})",
+      "send": "Send to manager",
       "sentOk_one": "{{count}} item sent to the manager.",
       "sentOk_other": "{{count}} items sent to the manager.",
       "alreadySent": "Already sent",
@@ -1376,7 +1388,8 @@
       "removeTitle": "Remove {{name}} from the buy list?",
       "removeAction": "Remove",
       "sendFailedTitle": "Couldn't send the list",
-      "removeFailedTitle": "Couldn't remove the item"
+      "removeFailedTitle": "Couldn't remove the item",
+      "yourList": "Your list"
     },
     "buy": {
       "tab": "Buy list",

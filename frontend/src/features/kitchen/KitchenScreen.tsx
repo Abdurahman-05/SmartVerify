@@ -1,137 +1,110 @@
 import { useRouter } from 'expo-router';
-import { Check, ChefHat, NotebookPen } from 'lucide-react-native';
+import { ChefHat, ListChecks } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
+import { GlassCard } from '@/components/ui/GlassCard';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { NoConnection } from '@/components/ui/NoConnection';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { Segmented } from '@/components/ui/Segmented';
 import { Text } from '@/components/ui/Text';
+import { useGlass } from '@/components/ui/glassTokens';
+import { Avatar } from '@/features/waiter/Avatar';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { useFeatures } from '@/store/features';
 import { useSession } from '@/store/session';
+import { colors } from '@/theme/tokens';
+import { ScreenBg } from '@/ui/glass';
 
-import { minutesSince, NoteChips, TypeTile, useNow, useOrderSubtitle, WaitTag } from './parts';
+import {
+  isLate,
+  minutesSince,
+  NoteRow,
+  OrderBadge,
+  QtyBadge,
+  useNow,
+  useOrderTitle,
+  WaitTag,
+} from './parts';
 import type { KitchenOrder, KitchenStatus } from './types';
 import { useKitchenActions, useKitchenOrders } from './useKitchenData';
 
 const tabs: KitchenStatus[] = ['new', 'cooking', 'ready'];
 
-function TabButton({
-  label,
-  count,
-  selected,
-  onPress,
-}: {
-  label: string;
-  count: number;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="tab"
-      accessibilityState={{ selected }}
-      className={`h-14 flex-1 flex-row items-center justify-center gap-2 rounded-[18px] px-1 ${
-        selected ? 'bg-primary' : 'border-2 border-borderStrong bg-surface'
-      }`}
-    >
-      <Text
-        font="bold"
-        tone={selected ? 'inverse' : 'default'}
-        className="text-[17px]"
-        numberOfLines={1}
-      >
-        {label}
-      </Text>
-      <View
-        className={`h-7 min-w-7 items-center justify-center rounded-full px-1.5 ${selected ? 'bg-surface' : 'bg-primaryTile'}`}
-      >
-        <Text font="bold" className="text-[15px] text-primary">
-          {count}
-        </Text>
-      </View>
-    </Pressable>
-  );
-}
-
 function OrderCard({
   order,
   now,
+  urgent,
   onStart,
   onReady,
   busy,
 }: {
   order: KitchenOrder;
   now: number;
+  /** The oldest late ticket: a primary border. */
+  urgent: boolean;
   onStart: () => void;
   onReady: () => void;
   busy: boolean;
 }) {
   const { t } = useTranslation();
   const router = useRouter();
-  const subtitleFor = useOrderSubtitle();
+  const g = useGlass();
+  const titleFor = useOrderTitle();
 
   return (
-    <Pressable
+    <GlassCard
       onPress={() => router.push({ pathname: '/kitchen/[id]', params: { id: order.id } })}
       accessibilityRole="button"
       accessibilityLabel={t('kitchen.openOrder', { label: order.label })}
-      className="gap-2.5 rounded-card border-[1.5px] border-border bg-surface px-3.5 py-3 active:bg-background"
+      highlight={urgent ? g.primary : undefined}
+      style={{ padding: 14, gap: 10 }}
     >
-      <View className="flex-row items-center gap-2.5">
-        <TypeTile type={order.type} />
-        <View className="flex-1">
-          <Text font="heading" className="text-xl leading-tight" numberOfLines={1}>
-            {order.label}
+      <View className="flex-row items-center gap-3">
+        <OrderBadge order={order} />
+        <View className="min-w-0 flex-1">
+          <Text font="bold" className="text-lg leading-6" numberOfLines={2}>
+            {titleFor(order)}
           </Text>
           <Text tone="muted" className="text-sm" numberOfLines={1}>
-            {subtitleFor(order)}
+            {t('kitchen.waiter', { name: order.waiterName })}
           </Text>
         </View>
         <WaitTag minutes={minutesSince(order.createdAt, now)} />
       </View>
 
-      <View className="gap-1.5">
+      <View>
         {order.items.map((item, i) => (
-          <View key={`${item.name}-${i}`} className="flex-row items-center gap-2.5">
-            <View className="h-8 min-w-9 items-center justify-center rounded-[10px] bg-primaryTile px-1">
-              <Text font="bold" className="text-lg text-primary">
-                {item.qty}×
-              </Text>
-            </View>
-            <Text font="bold" className="flex-1 text-xl">
+          <View
+            key={`${item.name}-${i}`}
+            className={`flex-row items-center gap-3 py-2.5 ${i ? 'border-t border-black/[0.07]' : ''}`}
+          >
+            <QtyBadge qty={item.qty} />
+            <Text font="bold" className="flex-1 text-lg">
               {item.name}
             </Text>
           </View>
         ))}
       </View>
 
-      <NoteChips notes={order.notes} />
+      <NoteRow notes={order.notes} />
 
       {order.status === 'new' ? (
-        <Button
+        <PrimaryButton
           label={t('kitchen.startCooking')}
           icon={ChefHat}
-          size="md"
           disabled={busy}
           onPress={onStart}
         />
       ) : order.status === 'cooking' ? (
-        <Button
-          label={t('kitchen.markReady')}
-          icon={Check}
-          size="md"
-          disabled={busy}
-          onPress={onReady}
-        />
+        <PrimaryButton label={t('kitchen.markReady')} disabled={busy} onPress={onReady} />
       ) : null}
-    </Pressable>
+    </GlassCard>
   );
 }
 
@@ -155,77 +128,79 @@ export default function KitchenScreen() {
   const shown = orders
     .filter((o) => o.status === tab)
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  // Oldest first: the first ticket is the one to mark when it is late.
+  const urgentId = shown[0] && isLate(minutesSince(shown[0].createdAt, now)) ? shown[0].id : null;
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-background">
-      <ScreenHeader
-        title={t('kitchen.title')}
-        subtitle={t('kitchen.chef', { name: chefName })}
-        right={
-          <Pressable
-            onPress={() => router.push('/profile')}
-            accessibilityRole="button"
-            accessibilityLabel={t('profile.open')}
-            className="h-11 w-11 items-center justify-center rounded-full bg-primary active:opacity-80"
-          >
-            <Text font="bold" tone="inverse" className="text-lg">
-              {chefName.charAt(0).toUpperCase()}
-            </Text>
-          </Pressable>
-        }
-      />
+    <ScreenBg>
+      <SafeAreaView edges={['top']} className="flex-1">
+        <ScreenHeader
+          title={t('kitchen.title')}
+          subtitle={t('kitchen.chef', { name: chefName })}
+          right={
+            buyList ? (
+              <GlassCard
+                radius={28}
+                onPress={() => router.push('/finished')}
+                accessibilityRole="button"
+                accessibilityLabel={t('extras.finished.open')}
+                style={{ width: 56, height: 56, alignItems: 'center', justifyContent: 'center' }}
+              >
+                <ListChecks size={24} color={colors.text} strokeWidth={2.2} />
+              </GlassCard>
+            ) : (
+              <Pressable
+                onPress={() => router.push('/profile')}
+                accessibilityRole="button"
+                accessibilityLabel={t('profile.open')}
+                className="active:opacity-80"
+              >
+                <Avatar name={chefName} />
+              </Pressable>
+            )
+          }
+        />
 
-      {buyList ? (
-        <View className="px-4 pb-2.5">
-          <Button
-            label={t('extras.finished.open')}
-            icon={NotebookPen}
-            variant="outline"
-            size="md"
-            onPress={() => router.push('/finished')}
+        <View className="px-4 pb-3">
+          <Segmented
+            options={tabs.map((status) => ({
+              value: status,
+              label: `${t(`kitchen.tab.${status}`)} · ${orders.filter((o) => o.status === status).length}`,
+            }))}
+            value={tab}
+            onChange={setTab}
           />
         </View>
-      ) : null}
 
-      <View className="flex-row gap-2 px-4 pb-3 pt-1" accessibilityRole="tablist">
-        {tabs.map((status) => (
-          <TabButton
-            key={status}
-            label={t(`kitchen.tab.${status}`)}
-            count={orders.filter((o) => o.status === status).length}
-            selected={tab === status}
-            onPress={() => setTab(status)}
-          />
-        ))}
-      </View>
+        <FlatList
+          data={shown}
+          keyExtractor={(o) => o.id}
+          contentContainerStyle={{ gap: 12, paddingHorizontal: 16, paddingBottom: 16 }}
+          renderItem={({ item }) => (
+            <OrderCard
+              order={item}
+              now={now}
+              urgent={item.id === urgentId}
+              busy={busyId === item.id}
+              onStart={() => start.mutate(item.id)}
+              onReady={() => ready.mutate(item.id)}
+            />
+          )}
+          ListEmptyComponent={
+            <Text tone="muted" className="pt-10 text-center text-lg">
+              {query.isError ? t(errorMessageKey(query.error)) : t('kitchen.empty')}
+            </Text>
+          }
+        />
 
-      <FlatList
-        data={shown}
-        keyExtractor={(o) => o.id}
-        contentContainerStyle={{ gap: 10, paddingHorizontal: 16, paddingBottom: 16 }}
-        renderItem={({ item }) => (
-          <OrderCard
-            order={item}
-            now={now}
-            busy={busyId === item.id}
-            onStart={() => start.mutate(item.id)}
-            onReady={() => ready.mutate(item.id)}
-          />
-        )}
-        ListEmptyComponent={
-          <Text tone="muted" className="pt-10 text-center text-lg">
-            {query.isError ? t(errorMessageKey(query.error)) : t('kitchen.empty')}
-          </Text>
-        }
-      />
-
-      <ErrorDialog
-        visible={Boolean(failed)}
-        title={t('kitchen.actionFailedTitle')}
-        message={t(errorMessageKey(failed?.error))}
-        actionLabel={t('errors.retry')}
-        onClose={() => failed?.reset()}
-      />
-    </SafeAreaView>
+        <ErrorDialog
+          visible={Boolean(failed)}
+          title={t('kitchen.actionFailedTitle')}
+          message={t(errorMessageKey(failed?.error))}
+          actionLabel={t('errors.retry')}
+          onClose={() => failed?.reset()}
+        />
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

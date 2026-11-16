@@ -1,10 +1,10 @@
-import { Bike, Clock, ShoppingBag, UtensilsCrossed, type LucideIcon } from 'lucide-react-native';
+import { Clock } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
-import type { BillType } from '@/features/bills/types';
+import { useGlass } from '@/components/ui/glassTokens';
 import { colors } from '@/theme/tokens';
 
 import type { KitchenOrder } from './types';
@@ -21,33 +21,71 @@ export function useNow(intervalMs = 30_000) {
   return now;
 }
 
+export const isLate = (minutes: number) => minutes > LATE_AFTER_MIN;
+
 export const minutesSince = (iso: string, now: number) =>
   Math.max(0, Math.floor((now - new Date(iso).getTime()) / 60_000));
 
-const typeIcon: Record<BillType, LucideIcon> = {
-  dine: UtensilsCrossed,
-  takeaway: ShoppingBag,
-  delivery: Bike,
-};
-
-export function TypeTile({ type }: { type: BillType }) {
-  const Icon = typeIcon[type];
+/** Deep badge: TABLE 12, or TAKEAWAY / DELIVERY with the order number. */
+export function OrderBadge({
+  order,
+  size = 64,
+  soft,
+}: {
+  order: KitchenOrder;
+  size?: number;
+  /** See-through white, for use inside a HeroCard. */
+  soft?: boolean;
+}) {
+  const { t } = useTranslation();
+  const g = useGlass();
+  const digits = /\d+/.exec(order.label)?.[0];
+  const number = order.type === 'dine' && digits ? digits : `#${order.orderNo}`;
   return (
-    <View className="h-11 w-11 items-center justify-center rounded-[14px] bg-primary">
-      <Icon size={24} color={colors.surface} strokeWidth={2.2} />
+    <View
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      className="items-center justify-center rounded-[18px] px-1"
+      style={{
+        minWidth: size,
+        height: size,
+        backgroundColor: soft ? 'rgba(255,255,255,0.2)' : g.primaryDeep,
+      }}
+    >
+      <Text font="bold" tone="inverse" className="text-[10px] uppercase" numberOfLines={1}>
+        {t(`kitchen.badge.${order.type}`)}
+      </Text>
+      <Text font="heading" tone="inverse" className="text-2xl leading-7" numberOfLines={1}>
+        {number}
+      </Text>
+    </View>
+  );
+}
+
+/** Quantity badge in the deep theme colour. */
+export function QtyBadge({ qty, big }: { qty: number; big?: boolean }) {
+  const g = useGlass();
+  return (
+    <View
+      className={`items-center justify-center rounded-[12px] px-1 ${big ? 'h-[46px] min-w-[46px]' : 'h-[34px] min-w-[34px]'}`}
+      style={{ backgroundColor: g.primaryDeep }}
+    >
+      <Text font="heading" tone="inverse" className={big ? 'text-xl' : 'text-base'}>
+        {qty}
+      </Text>
     </View>
   );
 }
 
 export function WaitTag({ minutes }: { minutes: number }) {
   const { t } = useTranslation();
-  const late = minutes > LATE_AFTER_MIN;
+  const late = isLate(minutes);
   const fg = late ? colors.dangerFg : colors.warnFg;
   return (
     <View
       accessible
       accessibilityLabel={t('kitchen.waitingLabel', { count: minutes })}
-      className={`flex-row items-center gap-1 rounded-[14px] py-[3px] pl-2 pr-2.5 ${late ? 'bg-dangerBg' : 'bg-warnBg'}`}
+      className={`flex-row items-center gap-1 rounded-full py-1 pl-2.5 pr-3 ${late ? 'bg-dangerBg' : 'bg-warnBg'}`}
     >
       <Clock size={14} color={fg} strokeWidth={2.6} />
       <Text font="bold" className="text-sm" style={{ color: fg }}>
@@ -57,30 +95,34 @@ export function WaitTag({ minutes }: { minutes: number }) {
   );
 }
 
-export function NoteChips({ notes }: { notes: string[] }) {
+/** Amber "Note" tag with what the waiter asked for. */
+export function NoteRow({ notes }: { notes: string[] }) {
   const { t } = useTranslation();
   if (notes.length === 0) return null;
   return (
-    <View className="flex-row flex-wrap gap-1.5">
-      {notes.map((note) => (
-        <View key={note} className="rounded-[14px] bg-amber px-3 py-1">
-          <Text font="bold" className="text-[15px]">
-            {t(`orders.note.${note}`, { defaultValue: note })}
-          </Text>
-        </View>
-      ))}
+    <View
+      accessible
+      className="flex-row flex-wrap items-center gap-2.5 border-t border-black/[0.07] pt-2.5"
+    >
+      <View className="rounded-full px-3 py-1.5" style={{ backgroundColor: colors.warnBg }}>
+        <Text font="bold" className="text-sm" style={{ color: colors.warnFg }}>
+          {t('kitchen.noteTag')}
+        </Text>
+      </View>
+      <Text tone="muted" className="shrink text-base">
+        {notes.map((note) => t(`orders.note.${note}`, { defaultValue: note })).join(', ')}
+      </Text>
     </View>
   );
 }
 
-/** Second line under the order label, per order type. */
-export function useOrderSubtitle() {
+/** Order title per type: "Order #214 · Dine in", "For Mulu T.", the delivery area. */
+export function useOrderTitle() {
   const { t } = useTranslation();
   return (order: KitchenOrder) => {
-    const waiter = t('kitchen.waiter', { name: order.waiterName });
-    if (order.type === 'delivery' && order.area) return `${order.area} · ${waiter}`;
     if (order.type === 'takeaway' && order.customerName)
       return t('kitchen.forCustomer', { name: order.customerName });
-    return waiter;
+    if (order.type === 'delivery' && order.area) return order.area;
+    return t(`kitchen.order_${order.type}`, { number: order.orderNo });
   };
 }

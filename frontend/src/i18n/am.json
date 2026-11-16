@@ -749,6 +749,18 @@
       "delivery": "ማድረስ"
     },
     "notesTitle": "ከአስተናጋጁ የተሰጡ ማሳሰቢያዎች",
+    "noteTag": "ማስታወሻ",
+    "noteFromWaiter": "ከአስተናጋጁ የተላከ ማስታወሻ",
+    "alertHint": "{{name}} ለማቅረብ ማሳወቂያ ያገኛል።",
+    "min": "ደቂቃ",
+    "order_dine": "ትዕዛዝ #{{number}} · እዚህ መመገብ",
+    "order_takeaway": "ትዕዛዝ #{{number}} · ይዞ መሄጃ",
+    "order_delivery": "ትዕዛዝ #{{number}} · ማድረሻ",
+    "badge": {
+      "dine": "ጠረጴዛ",
+      "takeaway": "ይዞ መሄጃ",
+      "delivery": "ማድረሻ"
+    },
     "back": "ወደ ማብሰያ ቤት ተመለስ",
     "notFound": "ይህ ትዕዛዝ አልተገኘም።",
     "actionFailedTitle": "ትዕዛዙን ማዘመን አልተቻለም"
@@ -1355,19 +1367,19 @@
     },
     "finished": {
       "title": "ያለቁ ዕቃዎች",
-      "subtitle": "በወጥ ቤት የለቀው",
+      "subtitle": "ሥራ አስኪያጁን ምን እንደሚገዛ ይንገሩ",
       "open": "ያለቁ ዕቃዎች",
-      "name": "ዕቃ",
-      "namePlaceholder": "ለምሳሌ ሽንኩርት",
+      "name": "ምን አለቀ?",
+      "namePlaceholder": "ምሳሌ፦ የምግብ ዘይት",
       "nameError": "የዕቃውን ስም ያስገቡ።",
-      "amount": "መጠን (አማራጭ)",
-      "amountPlaceholder": "ለምሳሌ 3 ሳጥን",
+      "amount": "ምን ያህል? (አማራጭ)",
+      "amountPlaceholder": "ምሳሌ፦ 2 ጀሪካን",
       "when": "መቼ ያስፈልጋል?",
       "today": "ዛሬ",
       "week": "በዚህ ሳምንት",
-      "add": "ወደ ዝርዝር ጨምር",
+      "add": "ጨምር",
       "ready": "ለመላክ ዝግጁ",
-      "send": "ለሥራ አስኪያጅ ላክ ({{count}})",
+      "send": "ለሥራ አስኪያጅ ላክ",
       "sentOk_one": "{{count}} ዕቃ ለሥራ አስኪያጁ ተልኳል።",
       "sentOk_other": "{{count}} ዕቃዎች ለሥራ አስኪያጁ ተልከዋል።",
       "alreadySent": "ቀደም ብለው የተላኩ",
@@ -1376,7 +1388,8 @@
       "removeTitle": "{{name}} ከመግዣ ዝርዝር ይወገድ?",
       "removeAction": "አስወግድ",
       "sendFailedTitle": "ዝርዝሩን መላክ አልተቻለም",
-      "removeFailedTitle": "ዕቃውን ማስወገድ አልተቻለም"
+      "removeFailedTitle": "ዕቃውን ማስወገድ አልተቻለም",
+      "yourList": "ዝርዝርዎ"
     },
     "buy": {
       "tab": "መግዣ",
