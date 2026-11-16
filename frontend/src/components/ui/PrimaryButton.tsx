@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
 import { alpha, useGlass } from './glassTokens';
@@ -11,6 +11,10 @@ export interface PrimaryButtonProps {
   icon?: ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
   disabled?: boolean;
   loading?: boolean;
+  /** 56 by default; the Home "Verify payment" button is 60. */
+  height?: number;
+  /** Shown after the label, e.g. a small count tag. */
+  trailing?: ReactNode;
 }
 
 /** 56 dp pill in the theme gradient with white bold text. */
@@ -20,6 +24,8 @@ export function PrimaryButton({
   icon: Icon,
   disabled,
   loading,
+  height = 56,
+  trailing,
 }: PrimaryButtonProps) {
   const g = useGlass();
   const off = disabled || loading;
@@ -31,14 +37,14 @@ export function PrimaryButton({
       accessibilityState={{ disabled: !!off, busy: !!loading }}
       className="active:opacity-85"
       style={{
-        borderRadius: 28,
+        borderRadius: height / 2,
         opacity: disabled ? 0.5 : 1,
         boxShadow: `0 12px 24px ${alpha(g.primary, 0.3)}`,
       }}
     >
       <LinearGradient
         colors={[g.primary2, g.primary]}
-        style={{ height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center' }}
+        style={{ height, borderRadius: height / 2, alignItems: 'center', justifyContent: 'center' }}
       >
         {loading ? (
           <ActivityIndicator color="#FFFFFF" />
@@ -48,6 +54,7 @@ export function PrimaryButton({
             <Text font="bold" className="text-base text-white" numberOfLines={1}>
               {label}
             </Text>
+            {trailing}
           </View>
         )}
       </LinearGradient>

@@ -2,6 +2,10 @@ import type { Href } from 'expo-router';
 import {
   Banknote,
   ChartColumn,
+  Clock,
+  Armchair,
+  UtensilsCrossed,
+  Users,
   CircleDollarSign,
   LayoutDashboard,
   Landmark,
@@ -28,27 +32,66 @@ export type HomeActionKey =
   | 'transactions'
   | 'reports'
   | 'bankAccount'
-  | 'subscription';
+  | 'subscription'
+  | 'staff'
+  | 'openBills'
+  | 'tables'
+  | 'menu';
 
 export interface HomeAction {
   key: HomeActionKey;
   icon: LucideIcon;
   href: Href;
+  /** Shown with a lock: only the owner sees it. */
+  ownerOnly?: boolean;
 }
 
 const actions: Record<HomeActionKey, HomeAction> = {
   verify: { key: 'verify', icon: ShieldCheck, href: '/verify' },
   newOrder: { key: 'newOrder', icon: ReceiptText, href: '/orders' },
   overview: { key: 'overview', icon: LayoutDashboard, href: '/admin' },
-  moneyFlow: { key: 'moneyFlow', icon: Wallet, href: '/money-flow' },
+  moneyFlow: { key: 'moneyFlow', icon: Wallet, href: '/money-flow', ownerOnly: true },
   buyList: { key: 'buyList', icon: NotebookPen, href: '/buy-list' },
   moneyOut: { key: 'moneyOut', icon: Banknote, href: '/money-out' },
   tips: { key: 'tips', icon: CircleDollarSign, href: '/tips' },
   transactions: { key: 'transactions', icon: List, href: '/transactions' },
-  reports: { key: 'reports', icon: ChartColumn, href: '/reports' },
+  reports: { key: 'reports', icon: ChartColumn, href: '/reports', ownerOnly: true },
   bankAccount: { key: 'bankAccount', icon: Landmark, href: '/bank-accounts' },
   subscription: { key: 'subscription', icon: Star, href: '/subscription' },
+  staff: { key: 'staff', icon: Users, href: '/staff' },
+  openBills: { key: 'openBills', icon: Clock, href: '/bills' },
+  tables: { key: 'tables', icon: Armchair, href: '/setup/tables' },
+  menu: { key: 'menu', icon: UtensilsCrossed, href: '/menu' },
 };
+
+type Extras = { buyList: boolean; moneyOut: boolean; reports?: boolean };
+
+/** Restaurant Plus owner and manager: one grid each, in the design's order. Extras switch tiles off. */
+function managerGrid(role: 'owner' | 'manager', extras: Extras): HomeActionKey[] {
+  const keys: (HomeActionKey | false)[] =
+    role === 'owner'
+      ? [
+          extras.moneyOut && 'moneyFlow',
+          !!extras.reports && 'reports',
+          'overview',
+          'tips',
+          extras.buyList && 'buyList',
+          'newOrder',
+          extras.moneyOut && 'moneyOut',
+          'staff',
+        ]
+      : [
+          'newOrder',
+          'openBills',
+          extras.buyList && 'buyList',
+          'tables',
+          'overview',
+          'tips',
+          extras.moneyOut && 'moneyOut',
+          'menu',
+        ];
+  return keys.filter((k): k is HomeActionKey => k !== false);
+}
 
 const normalKeys: HomeActionKey[] = [
   'verify',
@@ -73,11 +116,16 @@ const restaurantKeys: HomeActionKey[] = [
 export function getHomeActions(
   plan: Plan | null,
   role: Role,
-  extras: { buyList: boolean; moneyOut: boolean; reports?: boolean } = {
+  extras: Extras = {
     buyList: false,
     moneyOut: false,
   }
 ): HomeAction[] {
+  if (plan === 'restaurant' && (role === 'owner' || role === 'manager')) {
+    return managerGrid(role, extras).map((key) =>
+      key === 'tips' ? { ...actions.tips, href: '/tips-admin' } : actions[key]
+    );
+  }
   // Normal and Normal Multi: no restaurant buttons. No plan yet: everything (not in the Normal app).
   const showRestaurant = plan === 'restaurant' || (plan === null && !isNormalApp);
   // Normal plan in the Restaurant app: waiters keep tips from overpaid receipts.
@@ -97,8 +145,9 @@ export function getHomeActions(
   ];
   const keys: HomeActionKey[] =
     plan === 'restaurant' && manages ? [...base.slice(0, 2), ...extra, ...base.slice(2)] : base;
-  // Bank accounts and the subscription are the owner's and manager's.
-  const managed = manages ? keys : keys.filter((k) => k !== 'bankAccount' && k !== 'subscription');
+  // Banks and the plan are the owner's only.
+  const managed =
+    role === 'owner' ? keys : keys.filter((k) => k !== 'bankAccount' && k !== 'subscription');
   // Restaurant Plus reports: the owner, or a manager while the owner allows it (server decides).
   const visible =
     plan === 'restaurant' && !extras.reports ? managed.filter((k) => k !== 'reports') : managed;

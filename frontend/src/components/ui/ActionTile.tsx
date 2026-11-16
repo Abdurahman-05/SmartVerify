@@ -1,3 +1,4 @@
+import { Lock } from 'lucide-react-native';
 import type { ComponentType } from 'react';
 import { Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
 
@@ -14,12 +15,14 @@ export interface ActionTileProps {
   sub?: string;
   /** Small count shown on the icon (hidden when empty or 0). */
   badge?: number | string;
+  /** Small lock before the sub line (owner-only tiles). */
+  locked?: boolean;
   onPress: () => void;
   style?: StyleProp<ViewStyle>;
 }
 
 /** Home grid tile: gradient icon box, title and one sub line. Two per row inside one GlassCard. */
-export function ActionTile({ icon, title, sub, badge, onPress, style }: ActionTileProps) {
+export function ActionTile({ icon, title, sub, badge, locked, onPress, style }: ActionTileProps) {
   const showBadge = badge !== undefined && badge !== 0 && badge !== '';
   return (
     <Pressable
@@ -54,9 +57,12 @@ export function ActionTile({ icon, title, sub, badge, onPress, style }: ActionTi
           {title}
         </Text>
         {sub ? (
-          <Text className="text-xs" style={{ color: colors.muted }} numberOfLines={1}>
-            {sub}
-          </Text>
+          <View className="flex-row items-center gap-1">
+            {locked ? <Lock size={12} color={colors.muted} strokeWidth={2.4} /> : null}
+            <Text className="flex-1 text-xs" style={{ color: colors.muted }} numberOfLines={1}>
+              {sub}
+            </Text>
+          </View>
         ) : null}
       </View>
     </Pressable>
