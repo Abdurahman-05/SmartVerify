@@ -620,7 +620,7 @@
     "devOver": "+{{amount}}",
     "devShort": "−{{amount}}",
     "checking": "ክፍያውን በማረጋገጥ ላይ",
-    "checkingSubtitle": "ባንኩን በመጠየቅ ላይ",
+    "checkingSubtitle": "እባክዎ መተግበሪያውን አይዝጉ",
     "checkFailed": "ባንኩን ማግኘት አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
     "saveFailedTitle": "ክፍያው አልተመዘገበም",
     "tryAgain": "እንደገና ሞክር",
@@ -654,7 +654,12 @@
     "usuallySeconds": "ይህ ብዙውን ጊዜ ጥቂት ሰከንዶች ይወስዳል።",
     "customerPaysBank": "ደንበኛው በባንክ የሚከፍለው",
     "moneyGoesTo": "ገንዘቡ የሚገባበት",
-    "checkPayment": "ክፍያውን አረጋግጥ · {{amount}}"
+    "checkPayment": "ክፍያውን አረጋግጥ · {{amount}}",
+    "checkingSteps": {
+      "scanned": "QR ኮዱ ተነብቧል",
+      "asking": "ባንኩን በመጠየቅ ላይ",
+      "comparing": "መጠኑን በማነጻጸር ላይ"
+    }
   },
   "cash": {
     "title": "የጥሬ ገንዘብ ክፍያ",

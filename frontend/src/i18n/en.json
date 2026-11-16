@@ -620,7 +620,7 @@
     "devOver": "+{{amount}}",
     "devShort": "−{{amount}}",
     "checking": "Checking payment",
-    "checkingSubtitle": "Asking the bank",
+    "checkingSubtitle": "Please don't close the app",
     "checkFailed": "We could not reach the bank. Please try again.",
     "saveFailedTitle": "The payment was not saved",
     "tryAgain": "Try again",
@@ -654,7 +654,12 @@
     "usuallySeconds": "This usually takes a few seconds.",
     "customerPaysBank": "Customer pays by bank",
     "moneyGoesTo": "Money goes to",
-    "checkPayment": "Check payment · {{amount}}"
+    "checkPayment": "Check payment · {{amount}}",
+    "checkingSteps": {
+      "scanned": "QR code scanned",
+      "asking": "Asking the bank",
+      "comparing": "Comparing the amount"
+    }
   },
   "cash": {
     "title": "Cash payment",
