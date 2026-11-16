@@ -5,6 +5,8 @@ export interface BrandColors {
   primaryText: string;
   /** Flat fill for hero cards, buttons, active tabs and icon tiles: 78 % primary + 22 % #2A1D18. */
   primaryDeep: string;
+  /** Second shade for rings and dots; when missing it is a lighter primary. */
+  primary2?: string;
   primaryTint: string;
   primaryTile: string;
   /** Light glass: screen background tint. */
@@ -29,14 +31,16 @@ export const DEFAULT_THEME: ThemeId = 'orange';
 
 // Only the brand colors change. Status pills, tipBg and amber stay the same in every theme.
 export const themes: Record<ThemeId, BrandColors> = {
+  // One deep orange: primary, primary2 and primaryDeep are the same colour.
   orange: {
-    primary: '#E8590C',
-    primaryText: '#C2410C',
-    primaryDeep: '#BE4C0F',
-    primaryTint: '#FFF3EA',
-    primaryTile: '#FFE2CC',
-    tint: '#FFF3EA',
-    tile: '#FFE2CC',
+    primary: '#C04B0F',
+    primary2: '#C04B0F',
+    primaryText: '#A33E0B',
+    primaryDeep: '#C04B0F',
+    primaryTint: '#FFF1E8',
+    primaryTile: '#FBE3D3',
+    tint: '#FFF1E8',
+    tile: '#FBE3D3',
   },
   forest: {
     primary: '#0D4A36',

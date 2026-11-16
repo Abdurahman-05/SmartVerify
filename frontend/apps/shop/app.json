@@ -13,7 +13,7 @@
     "android": {
       "package": "com.gebtual.shop",
       "adaptiveIcon": {
-        "backgroundColor": "#0D4A36",
+        "backgroundColor": "#C04B0F",
         "foregroundImage": "../../assets/images/android-icon-foreground.png",
         "backgroundImage": "../../assets/images/android-icon-background.png",
         "monochromeImage": "../../assets/images/android-icon-monochrome.png"
@@ -30,7 +30,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0D4A36",
+          "backgroundColor": "#C04B0F",
           "image": "../../assets/images/splash-native.png",
           "imageWidth": 288
         }
@@ -59,7 +59,7 @@
         "expo-notifications",
         {
           "icon": "../../assets/images/notification-icon.png",
-          "color": "#0D4A36"
+          "color": "#C04B0F"
         }
       ]
     ],

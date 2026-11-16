@@ -21,7 +21,7 @@ export function useAuthColors() {
   return {
     // The start pages use the deep theme colour for every accent.
     p: brand.primaryDeep,
-    p2: shade(brand.primary, 0.16),
+    p2: brand.primary2 ?? shade(brand.primary, 0.16),
     pt: brand.primaryDeep,
     deep: brand.primaryDeep,
   };
