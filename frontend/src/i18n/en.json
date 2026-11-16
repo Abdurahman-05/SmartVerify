@@ -930,7 +930,6 @@
     "cash": "Cash",
     "bank": "Bank",
     "tips": "Tips",
-    "tipsNote": "Tips are not counted as sales",
     "attention": "Needs your attention",
     "openTables_one": "{{count}} table not paid yet",
     "openTables_other": "{{count}} tables not paid yet",
@@ -940,10 +939,14 @@
     "feeChanged_one": "{{count}} delivery fee was changed",
     "feeChanged_other": "{{count}} delivery fees were changed",
     "feeChangedSub": "{{name}} · {{from}} to {{to}} ETB",
-    "tipsToPay": "Tips by waiter",
-    "tipsToPaySub": "See and pay out tips",
     "allGood": "Nothing needs your attention.",
-    "loadFailed": "Couldn't load the overview."
+    "loadFailed": "Couldn't load the overview.",
+    "bankShare": "bank",
+    "ordersLabel": "Orders",
+    "avgBill": "Avg bill",
+    "tipsNotSales": "Tips · not sales",
+    "newCount_one": "{{count}} new",
+    "newCount_other": "{{count}} new"
   },
   "tipsAdmin": {
     "title": "Tips by waiter",

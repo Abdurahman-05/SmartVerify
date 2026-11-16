@@ -930,7 +930,6 @@
     "cash": "ጥሬ ገንዘብ",
     "bank": "ባንክ",
     "tips": "ጉርሻ",
-    "tipsNote": "ጉርሻ እንደ ሽያጭ አይቆጠርም",
     "attention": "ትኩረትዎን የሚሹ",
     "openTables_one": "{{count}} ጠረጴዛ ገና አልተከፈለም",
     "openTables_other": "{{count}} ጠረጴዛዎች ገና አልተከፈሉም",
@@ -940,10 +939,14 @@
     "feeChanged_one": "{{count}} የማድረሻ ክፍያ ተቀይሯል",
     "feeChanged_other": "{{count}} የማድረሻ ክፍያዎች ተቀይረዋል",
     "feeChangedSub": "{{name}} · ከ{{from}} ወደ {{to}} ብር",
-    "tipsToPay": "ጉርሻ በአስተናጋጅ",
-    "tipsToPaySub": "ጉርሻዎችን ይዩ እና ይክፈሉ",
     "allGood": "ትኩረትዎን የሚሻ ነገር የለም።",
-    "loadFailed": "አጠቃላይ እይታውን መጫን አልተቻለም።"
+    "loadFailed": "አጠቃላይ እይታውን መጫን አልተቻለም።",
+    "bankShare": "ባንክ",
+    "ordersLabel": "ትዕዛዞች",
+    "avgBill": "አማካይ ሂሳብ",
+    "tipsNotSales": "ቲፕ · ሽያጭ አይደለም",
+    "newCount_one": "{{count}} አዲስ",
+    "newCount_other": "{{count}} አዲስ"
   },
   "tipsAdmin": {
     "title": "ጉርሻ በአስተናጋጅ",
