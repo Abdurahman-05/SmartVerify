@@ -1599,12 +1599,12 @@
       "total": "Total sales",
       "bills": "Bills",
       "average": "Average bill",
-      "up": "▲ {{percent}}% more than before ({{amount}})",
-      "down": "▼ {{percent}}% less than before ({{amount}})",
-      "methods": "How customers paid",
-      "byHour": "Busiest hours",
       "byDay": "Sales by day",
-      "byDayHint": "Each day in this period"
+      "byDayHint": "Each day in this period",
+      "vsBefore": "{{change}}% vs before",
+      "busiest": "Busiest",
+      "topSellers": "Top sellers",
+      "avgBill": "Avg bill {{amount}}"
     },
     "menu": {
       "best": "Best sellers",
@@ -1686,7 +1686,9 @@
       "title": "Reports for managers",
       "body": "Let managers open Reports (sales, expenses, staff). Waiters and chefs never see them."
     },
-    "ownOnly": "Only your own bills are counted."
+    "ownOnly": "Only your own bills are counted.",
+    "exportPdf": "Export PDF",
+    "csv": "CSV"
   },
   "firstTheme": {
     "default": "default",

@@ -1,7 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import type { TFunction } from 'i18next';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { ChevronRight, Download, Pencil, Trash2 } from 'lucide-react-native';
+import {
+  Banknote,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Download,
+  Landmark,
+  Pencil,
+  ReceiptText,
+  Trash2,
+  TrendingUp,
+} from 'lucide-react-native';
 import { useCallback, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
@@ -10,14 +22,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { formatMoney } from '@/components/ui/MoneyText';
 import { NoConnection } from '@/components/ui/NoConnection';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { CalendarButton } from '@/features/transactions/CalendarButton';
 import { CalendarSheet } from '@/features/transactions/CalendarSheet';
 import { ApiError } from '@/lib/api/client';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { shareCsv, sharePdf, type ExportTable } from '@/lib/export';
-import { periods, type Period } from '@/lib/period';
+import { type Period } from '@/lib/period';
 import {
   daysOf,
   getExpensesReport,
@@ -35,6 +45,16 @@ import {
 import { useSession } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
+import { GhostButton } from '@/components/ui/GhostButton';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { useGlass } from '@/components/ui/glassTokens';
+import { HeroCard, HeroChip } from '@/components/ui/HeroCard';
+import { IconTile } from '@/components/ui/IconTile';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
+import { Segmented } from '@/components/ui/Segmented';
+import { StickyFooter } from '@/components/ui/StickyFooter';
+import { TopBar } from '@/components/ui/TopBar';
 
 const tabs: ReportTab[] = ['sales', 'food', 'expenses', 'staff'];
 type AnyReport = SalesReport | FoodReport | ExpensesReport | StaffReport;
@@ -52,31 +72,6 @@ const maxOf = (values: number[]) => Math.max(0, ...values);
 
 // ─── Building blocks ─────────────────────────────────────────────────────────
 
-function PeriodChip({
-  label,
-  selected,
-  onPress,
-}: {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="radio"
-      accessibilityState={{ selected }}
-      className={`h-11 items-center justify-center rounded-full px-[18px] ${
-        selected ? 'bg-primary' : 'border-2 border-border bg-surface'
-      }`}
-    >
-      <Text font="bold" tone={selected ? 'inverse' : 'default'} className="text-[15px]">
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 function Card({
   title,
   hint,
@@ -90,7 +85,7 @@ function Card({
 }) {
   const { t } = useTranslation();
   return (
-    <View className="rounded-[22px] border-[1.5px] border-border bg-surface px-4 pb-2 pt-3.5">
+    <GlassCard style={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 8 }}>
       <Text font="heading" className="text-lg" accessibilityRole="header">
         {title}
       </Text>
@@ -102,7 +97,7 @@ function Card({
       ) : (
         <View className="gap-4 pb-2 pt-2.5">{children}</View>
       )}
-    </View>
+    </GlassCard>
   );
 }
 
@@ -112,7 +107,7 @@ function Track({ parts }: { parts: { share: number; color: string }[] }) {
   return (
     <View
       className="mt-1.5 h-2 flex-row overflow-hidden rounded-full"
-      style={{ backgroundColor: brand.primaryTint }}
+      style={{ backgroundColor: brand.primaryTile }}
     >
       {parts.map((p, i) => (
         <View
@@ -120,6 +115,22 @@ function Track({ parts }: { parts: { share: number; color: string }[] }) {
           style={{ width: `${Math.max(0, Math.min(p.share, 100))}%`, backgroundColor: p.color }}
         />
       ))}
+    </View>
+  );
+}
+
+/** Rank circle: number 1 in the theme colour, the others on the soft tile. */
+function RankDot({ rank }: { rank: number }) {
+  const g = useGlass();
+  const first = rank === 1;
+  return (
+    <View
+      className="mt-0.5 h-8 w-8 items-center justify-center rounded-full"
+      style={{ backgroundColor: first ? g.primary : g.tile }}
+    >
+      <Text font="bold" className="text-sm" style={{ color: first ? '#FFFFFF' : g.primaryText }}>
+        {rank}
+      </Text>
     </View>
   );
 }
@@ -142,13 +153,7 @@ function Row({
 }) {
   const body = (
     <View className="flex-row gap-3">
-      {rank ? (
-        <View className="mt-0.5 h-8 w-8 items-center justify-center rounded-full bg-primarySoft">
-          <Text font="bold" className="text-sm text-primaryText">
-            {rank}
-          </Text>
-        </View>
-      ) : null}
+      {rank ? <RankDot rank={rank} /> : null}
       <View className="flex-1">
         <View className="flex-row items-center gap-2">
           <View className="flex-1">
@@ -235,7 +240,7 @@ function Legend({ items }: { items: { label: string; color: string }[] }) {
   );
 }
 
-/** The green hero card at the top of a tab. */
+/** The theme-gradient hero card at the top of a tab. */
 function Hero({
   label,
   amount,
@@ -245,141 +250,309 @@ function Hero({
   amount: number;
   children?: ReactNode;
 }) {
-  const brand = useBrandColors();
   const { t } = useTranslation();
   return (
-    <View className="rounded-[22px] bg-primary p-5" accessible>
-      <Text font="semibold" className="text-base" style={{ color: brand.primaryTint }}>
+    <HeroCard>
+      <Text font="bold" tone="inverse" className="text-[13px] uppercase opacity-90">
         {label}
       </Text>
       <View className="flex-row items-end gap-2">
         <Text
           font="heading"
           tone="inverse"
-          className="text-[42px] leading-[50px]"
+          className="text-[34px] leading-[42px]"
           numberOfLines={1}
           adjustsFontSizeToFit
         >
           {formatMoney(amount, false)}
         </Text>
-        <Text font="heading" tone="inverse" className="pb-2 text-xl">
+        <Text font="heading" tone="inverse" className="pb-1.5 text-base">
           {t('common.etb')}
         </Text>
       </View>
       {children}
-    </View>
+    </HeroCard>
   );
 }
 
 function HeroBox({ label, value }: { label: string; value: string }) {
   return (
-    <View className="flex-1 rounded-[14px] bg-white/[0.14] px-3 py-2">
-      <Text font="semibold" tone="inverse" className="text-sm">
+    <HeroChip style={{ flex: 1 }}>
+      <Text font="semibold" tone="inverse" className="text-[13px] opacity-90">
         {label}
       </Text>
       <Text font="heading" tone="inverse" className="text-[17px]">
         {value}
       </Text>
-    </View>
+    </HeroChip>
   );
 }
 
 // ─── Tabs ────────────────────────────────────────────────────────────────────
 
-function SalesTab({ s, t, showDays }: { s: SalesReport; t: TFunction; showDays: boolean }) {
+const PEAK = '#FDE047';
+const hh = (h: number) => `${String(h).padStart(2, '0')}:00`;
+
+/** Hourly bars inside the hero: white by value, the busiest hour yellow with its total above. */
+function HourChart({ s }: { s: SalesReport }) {
+  const active = s.byHour.filter((h) => h.bills > 0);
+  if (active.length === 0) return null;
+  const first = active[0].hour;
+  const last = active[active.length - 1].hour;
+  const chart = s.byHour.filter((h) => h.hour >= first && h.hour <= last);
+  const max = maxOf(chart.map((h) => h.amount));
+  const peakIndex = chart.findIndex((h) => h.amount === max);
+  const peak = chart[peakIndex];
+  const n = chart.length;
+  const middle = chart[Math.floor((n - 1) / 2)];
+  return (
+    <View
+      className="mt-3"
+      accessible
+      accessibilityLabel={`${hh(peak.hour)} · ${formatMoney(peak.amount, false)}`}
+    >
+      <View className="h-7">
+        <View
+          className="absolute items-center"
+          style={{ left: `${(peakIndex / n) * 100}%`, width: `${100 / n}%` }}
+        >
+          <View className="rounded-[12px] bg-white px-2.5 py-0.5" style={{ minWidth: 96 }}>
+            <Text font="bold" className="text-center text-[13px]" style={{ color: colors.text }}>
+              {`${hh(peak.hour)} · ${formatMoney(peak.amount, false)}`}
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View className="h-[116px] flex-row items-end gap-1.5">
+        {chart.map((h, i) => (
+          <View key={h.hour} className="h-full flex-1 justify-end">
+            <View
+              className="w-full rounded-[8px]"
+              style={{
+                height: `${Math.max(pct(h.amount, max), h.bills ? 8 : 2)}%`,
+                backgroundColor:
+                  i === peakIndex ? PEAK : `rgba(255,255,255,${0.35 + 0.55 * (h.amount / max)})`,
+              }}
+            />
+          </View>
+        ))}
+      </View>
+      <View className="mt-2 flex-row justify-between">
+        {[first, middle.hour, last].map((h, i) => (
+          <Text key={i} tone="inverse" className="text-[13px] opacity-80">
+            {hh(h)}
+          </Text>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+/** Small glass card: icon tile, value, label (Bank, Cash, Orders, Busiest). */
+function MiniStat({
+  icon,
+  tone,
+  value,
+  label,
+}: {
+  icon: typeof Landmark;
+  tone: 'brand' | 'green' | 'amber' | 'red';
+  value: string;
+  label: string;
+}) {
+  return (
+    <GlassCard
+      containerStyle={{ flex: 1 }}
+      style={{ alignItems: 'center', paddingVertical: 12, paddingHorizontal: 4, gap: 4 }}
+    >
+      <IconTile icon={icon} tone={tone} size={36} radius={12} iconSize={18} />
+      <Text font="heading" className="text-base" numberOfLines={1} adjustsFontSizeToFit>
+        {value}
+      </Text>
+      <Text className="text-[13px]" style={{ color: colors.muted }} numberOfLines={1}>
+        {label}
+      </Text>
+    </GlassCard>
+  );
+}
+
+/** One top seller: rank, name and amount, then a theme bar and how many sold. */
+function TopSeller({
+  rank,
+  name,
+  amount,
+  qty,
+  share,
+  t,
+  first,
+}: {
+  rank: number;
+  name: string;
+  amount: number;
+  qty: number;
+  share: number;
+  t: TFunction;
+  first: boolean;
+}) {
+  const g = useGlass();
+  return (
+    <View
+      accessible
+      className={`flex-row items-center gap-3 py-3 ${first ? '' : 'border-t border-black/[0.07]'}`}
+    >
+      <RankDot rank={rank} />
+      <View className="flex-1 gap-1.5">
+        <View className="flex-row items-center gap-2">
+          <Text font="bold" className="flex-1 text-base" numberOfLines={1}>
+            {name}
+          </Text>
+          <Text font="heading" className="text-base">
+            {formatMoney(amount, false)}
+          </Text>
+        </View>
+        <View className="flex-row items-center gap-2">
+          <View
+            className="h-2 flex-1 overflow-hidden rounded-full"
+            style={{ backgroundColor: g.tile }}
+          >
+            <View
+              className="h-2 rounded-full"
+              style={{ width: `${Math.max(share, 3)}%`, backgroundColor: g.primary }}
+            />
+          </View>
+          <Text className="text-[13px]" style={{ color: colors.muted }}>
+            {t('reportsHub.qty', { count: qty })}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+function SalesTab({
+  s,
+  t,
+  showDays,
+  days,
+  am,
+}: {
+  s: SalesReport;
+  t: TFunction;
+  showDays: boolean;
+  days: ReportDays;
+  am: boolean;
+}) {
   const brand = useBrandColors();
+  // Top sellers come from the food report for the same days.
+  const food = useQuery({
+    queryKey: reportKey('food', days),
+    queryFn: () => getFoodReport(days),
+  });
   const change =
     s.previousTotal > 0 ? Math.round(((s.total - s.previousTotal) / s.previousTotal) * 100) : null;
-  // The chart runs from the first to the last hour with sales.
-  const active = s.byHour.filter((h) => h.bills > 0);
-  const first = active[0]?.hour ?? 0;
-  const last = active[active.length - 1]?.hour ?? -1;
-  const chart = s.byHour.filter((h) => h.hour >= first && h.hour <= last);
-  const maxHour = maxOf(chart.map((h) => h.amount));
-  const top = [...active].sort((a, b) => b.amount - a.amount).slice(0, 3);
-  const topHours = new Set(top.map((h) => h.hour));
+  const busiest = [...s.byHour].filter((h) => h.bills > 0).sort((a, b) => b.amount - a.amount)[0];
   const maxDay = maxOf(s.byDay.map((d) => d.amount));
-  const hourLabel = (h: number) => t('reportsHub.hour', { from: h, to: (h + 1) % 24 });
-  const methods = [
-    { key: 'cash', label: t('reportsHub.cash'), ...s.paidBy.cash },
-    { key: 'bank', label: t('reportsHub.bank'), ...s.paidBy.bank },
-    { key: 'both', label: t('reportsHub.cashBank'), ...s.paidBy.both },
-  ];
+  const top = (food.data?.bestSellers ?? []).slice(0, 3);
+  const maxTop = maxOf(top.map((i) => i.amount));
+  const both = s.paidBy.both;
 
   return (
     <>
-      <Hero label={t('reportsHub.sales.total')} amount={s.total}>
-        {change === null ? null : (
-          <View className="mt-2.5 h-8 justify-center self-start rounded-full bg-surface px-3">
+      <HeroCard>
+        <View className="flex-row items-start justify-between gap-2">
+          <View className="flex-1" accessible>
+            <Text font="bold" tone="inverse" className="text-[13px] uppercase opacity-90">
+              {t('reportsHub.sales.total')}
+            </Text>
             <Text
-              font="bold"
-              className="text-[15px]"
-              style={{ color: change >= 0 ? colors.success : colors.alert }}
+              font="heading"
+              tone="inverse"
+              className="text-[34px] leading-[42px]"
+              numberOfLines={1}
+              adjustsFontSizeToFit
             >
-              {t(change >= 0 ? 'reportsHub.sales.up' : 'reportsHub.sales.down', {
-                percent: Math.abs(change),
-                amount: money(s.previousTotal),
-              })}
+              {formatMoney(s.total, false)}{' '}
+              <Text font="heading" tone="inverse" className="text-base">
+                {t('common.etb')}
+              </Text>
             </Text>
           </View>
-        )}
-        <View className="mt-3.5 flex-row gap-2">
-          <HeroBox label={t('reportsHub.sales.bills')} value={String(s.bills)} />
-          <HeroBox label={t('reportsHub.sales.average')} value={money(s.avgBill)} />
-        </View>
-      </Hero>
-
-      <Card title={t('reportsHub.sales.methods')} isEmpty={s.bills === 0}>
-        {methods.map((m) => (
-          <Row
-            key={m.key}
-            title={m.label}
-            sub={`${t('reportsHub.billsCount', { count: m.bills })} · ${pct(m.amount, s.total)}%`}
-            value={money(m.amount)}
-            parts={[{ share: pct(m.amount, s.total), color: brand.primary }]}
-          />
-        ))}
-      </Card>
-
-      <Card title={t('reportsHub.sales.byHour')} isEmpty={active.length === 0}>
-        <View
-          className="mb-1 mt-1.5 h-[140px] flex-row items-end gap-[3px]"
-          accessible
-          accessibilityLabel={top.map((h) => `${hourLabel(h.hour)}: ${money(h.amount)}`).join(', ')}
-        >
-          {chart.map((h) => (
-            <View key={h.hour} className="h-full flex-1 justify-end">
-              <View
-                className="w-full rounded-t-[4px]"
-                style={{
-                  height: `${Math.max(pct(h.amount, maxHour), h.bills ? 6 : 0)}%`,
-                  backgroundColor: topHours.has(h.hour) ? brand.primary : `${brand.primary}59`,
-                }}
-              />
-            </View>
-          ))}
-        </View>
-        <View className="-mt-2 flex-row gap-[3px]">
-          {chart.map((h) => (
-            <Text
-              key={h.hour}
-              tone="muted"
-              className="flex-1 text-center text-sm"
-              numberOfLines={1}
+          {change === null ? null : (
+            <HeroChip
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 5 }}
             >
-              {h.hour}
-            </Text>
-          ))}
+              <TrendingUp size={15} color="#FFFFFF" strokeWidth={2.4} />
+              <Text font="bold" tone="inverse" className="text-[13px]">
+                {t('reportsHub.sales.vsBefore', {
+                  change: `${change >= 0 ? '+' : '−'}${Math.abs(change)}`,
+                })}
+              </Text>
+            </HeroChip>
+          )}
         </View>
-        {top.map((h) => (
-          <Row
-            key={h.hour}
-            title={hourLabel(h.hour)}
-            sub={t('reportsHub.billsCount', { count: h.bills })}
-            value={money(h.amount)}
-          />
-        ))}
-      </Card>
+        <HourChart s={s} />
+      </HeroCard>
+
+      <View className="flex-row gap-2">
+        <MiniStat
+          icon={Landmark}
+          tone="brand"
+          value={formatMoney(s.paidBy.bank.amount, false)}
+          label={t('reportsHub.bank')}
+        />
+        <MiniStat
+          icon={Banknote}
+          tone="green"
+          value={formatMoney(s.paidBy.cash.amount, false)}
+          label={t('reportsHub.cash')}
+        />
+        <MiniStat
+          icon={ReceiptText}
+          tone="red"
+          value={String(s.bills)}
+          label={t('reportsHub.sales.bills')}
+        />
+        <MiniStat
+          icon={Clock}
+          tone="amber"
+          value={busiest ? hh(busiest.hour) : '—'}
+          label={t('reportsHub.sales.busiest')}
+        />
+      </View>
+      {both.bills > 0 ? (
+        <Text className="-mt-1 px-1 text-[13px]" style={{ color: colors.muted }}>
+          {`${t('reportsHub.cashBank')}: ${money(both.amount)} · ${t('reportsHub.billsCount', { count: both.bills })}`}
+        </Text>
+      ) : null}
+
+      <View className="flex-row items-center justify-between">
+        <Text font="bold" className="text-base" accessibilityRole="header">
+          {t('reportsHub.sales.topSellers')}
+        </Text>
+        <Text className="text-sm" style={{ color: colors.muted }}>
+          {t('reportsHub.sales.avgBill', { amount: money(s.avgBill) })}
+        </Text>
+      </View>
+      <GlassCard style={{ paddingHorizontal: 14, paddingVertical: 2 }}>
+        {top.length === 0 ? (
+          <Text tone="muted" className="py-3 text-[15px]">
+            {food.isPending ? '…' : t('reportsHub.empty')}
+          </Text>
+        ) : (
+          top.map((i, n) => (
+            <TopSeller
+              key={`${i.name}-${n}`}
+              rank={n + 1}
+              name={am && i.nameAm ? i.nameAm : i.name}
+              amount={i.amount}
+              qty={i.qty}
+              share={pct(i.amount, maxTop)}
+              t={t}
+              first={n === 0}
+            />
+          ))
+        )}
+      </GlassCard>
 
       {showDays ? (
         <Card
@@ -914,140 +1087,102 @@ export default function ReportsHubScreen() {
   const forbidden = query.error instanceof ApiError && query.error.code === 'FORBIDDEN';
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background">
-      <ScreenHeader
-        title={t('reportsHub.title')}
-        onBack={goBack}
-        right={<CalendarButton day={dayDate ?? new Date()} onPress={() => setChoosing(true)} />}
-      />
-      {/* Fixed height: a horizontal ScrollView alone is measured too short on first load. */}
-      <View className="h-[68px]">
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 8, paddingHorizontal: 16, alignItems: 'center' }}
-          accessibilityRole="radiogroup"
-        >
-          {periods.map((p) => (
-            <PeriodChip
-              key={p}
-              label={t(`period.${p}`)}
-              selected={!day && period === p}
-              onPress={() => {
-                setDay(undefined);
-                setPeriod(p);
-              }}
-            />
-          ))}
-          {dayDate ? (
-            <PeriodChip label={rangeLabel} selected onPress={() => setChoosing(true)} />
-          ) : null}
-        </ScrollView>
-      </View>
-
-      <View className="h-[50px] border-y border-border bg-surface">
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 16, gap: 2 }}
-          accessibilityRole="tablist"
-        >
-          {shownTabs.map((x) => {
-            const selected = tab === x;
-            return (
-              <Pressable
-                key={x}
-                onPress={() => setTab(x)}
-                accessibilityRole="tab"
-                accessibilityState={{ selected }}
-                className={`h-12 justify-center border-b-[3px] px-3.5 ${
-                  selected ? 'border-primary' : 'border-transparent'
-                }`}
-              >
-                <Text
-                  font="bold"
-                  tone={selected ? 'default' : 'muted'}
-                  className={`text-[15px] ${selected ? 'text-primary' : ''}`}
-                >
-                  {tabLabel(x)}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
-      </View>
-      {ownOnly ? (
-        <Text tone="muted" className="px-4 pt-2 text-sm">
-          {t('reportsHub.ownOnly')}
-        </Text>
-      ) : null}
-
-      {query.isPending ? (
-        <LoadingView />
-      ) : !report ? (
-        <Text tone="muted" className="px-6 pt-6 text-center text-lg">
-          {forbidden ? t('extras.flow.notAllowed') : t(errorMessageKey(query.error))}
-        </Text>
-      ) : (
-        <ScrollView contentContainerStyle={{ gap: 14, padding: 16 }}>
-          {tab === 'sales' ? (
-            <SalesTab s={report as SalesReport} t={t} showDays={!day && period !== 'today'} />
-          ) : null}
-          {tab === 'food' ? (
-            <FoodTab
-              key={`${days.from}-${days.to}`}
-              f={report as FoodReport}
-              t={t}
-              am={i18n.language === 'am'}
-            />
-          ) : null}
-          {tab === 'expenses' ? (
-            <ExpensesTab e={report as ExpensesReport} t={t} go={(path) => router.push(path)} />
-          ) : null}
-          {tab === 'staff' ? <StaffTab s={report as StaffReport} t={t} /> : null}
-        </ScrollView>
-      )}
-
-      <View className="flex-row gap-2.5 border-t border-border bg-surface px-4 py-3">
-        <Pressable
-          onPress={() => void download('pdf')}
-          disabled={downloading || !report}
-          accessibilityRole="button"
-          className={`h-14 flex-1 flex-row items-center justify-center gap-2.5 rounded-button bg-primary ${
-            downloading || !report ? 'opacity-50' : 'active:opacity-90'
-          }`}
-        >
-          <Download size={20} color={colors.surface} strokeWidth={2.4} />
-          <Text font="bold" tone="inverse" className="text-[17px]">
-            {t('report.downloadPdf')}
+    <ScreenBackground>
+      <SafeAreaView edges={['top']} className="flex-1">
+        <View className="px-4 pb-3 pt-2">
+          <TopBar
+            title={t('reportsHub.title')}
+            subtitle={rangeLabel}
+            left={{ icon: ChevronLeft, onPress: goBack, label: t('common.back') }}
+            right={{
+              icon: CalendarDays,
+              onPress: () => setChoosing(true),
+              label: t('period.choose'),
+            }}
+          />
+        </View>
+        <View className="px-4 pb-2">
+          <Segmented<ReportTab>
+            options={shownTabs.map((x) => ({ value: x, label: tabLabel(x) }))}
+            value={tab}
+            onChange={setTab}
+          />
+        </View>
+        {ownOnly ? (
+          <Text tone="muted" className="px-4 pt-1 text-sm">
+            {t('reportsHub.ownOnly')}
           </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => void download('csv')}
-          disabled={downloading || !report}
-          accessibilityRole="button"
-          className={`h-14 flex-1 items-center justify-center rounded-button border-2 border-primary bg-surface ${
-            downloading || !report ? 'opacity-50' : 'active:opacity-80'
-          }`}
-        >
-          <Text font="bold" className="text-[17px] text-primary">
-            {t('report.downloadCsv')}
-          </Text>
-        </Pressable>
-      </View>
+        ) : null}
 
-      <CalendarSheet
-        key={`${choosing}-${day}`}
-        visible={choosing}
-        period={period}
-        day={day ?? null}
-        onPeriod={(p) => {
-          setDay(undefined);
-          setPeriod(p);
-        }}
-        onDay={setDay}
-        onClose={() => setChoosing(false)}
-      />
-    </SafeAreaView>
+        {query.isPending ? (
+          <LoadingView />
+        ) : !report ? (
+          <Text tone="muted" className="px-6 pt-6 text-center text-lg">
+            {forbidden ? t('extras.flow.notAllowed') : t(errorMessageKey(query.error))}
+          </Text>
+        ) : (
+          <ScrollView contentContainerStyle={{ gap: 12, padding: 16, paddingBottom: 110 }}>
+            {tab === 'sales' ? (
+              <SalesTab
+                s={report as SalesReport}
+                t={t}
+                showDays={!day && period !== 'today'}
+                days={days}
+                am={i18n.language === 'am'}
+              />
+            ) : null}
+            {tab === 'food' ? (
+              <FoodTab
+                key={`${days.from}-${days.to}`}
+                f={report as FoodReport}
+                t={t}
+                am={i18n.language === 'am'}
+              />
+            ) : null}
+            {tab === 'expenses' ? (
+              <ExpensesTab e={report as ExpensesReport} t={t} go={(path) => router.push(path)} />
+            ) : null}
+            {tab === 'staff' ? <StaffTab s={report as StaffReport} t={t} /> : null}
+          </ScrollView>
+        )}
+
+        {report ? (
+          <StickyFooter>
+            <View className="flex-row gap-2.5">
+              <View className="flex-1">
+                <PrimaryButton
+                  label={t('reportsHub.exportPdf')}
+                  icon={Download}
+                  loading={downloading}
+                  onPress={() => void download('pdf')}
+                />
+              </View>
+              <View style={{ width: 120 }}>
+                <GhostButton
+                  label={t('reportsHub.csv')}
+                  icon={Download}
+                  onPress={() => {
+                    if (!downloading) void download('csv');
+                  }}
+                />
+              </View>
+            </View>
+          </StickyFooter>
+        ) : null}
+
+        <CalendarSheet
+          key={`${choosing}-${day}`}
+          visible={choosing}
+          period={period}
+          day={day ?? null}
+          onPeriod={(p) => {
+            setDay(undefined);
+            setPeriod(p);
+          }}
+          onDay={setDay}
+          onClose={() => setChoosing(false)}
+        />
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
