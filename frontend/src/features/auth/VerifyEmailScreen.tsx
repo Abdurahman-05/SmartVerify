@@ -19,7 +19,7 @@ import {
   takeSignup,
   verifyEmailCode,
 } from '@/services/authService';
-import { homeRouteFor, useSession } from '@/store/session';
+import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 import { GlassCard, PrimaryButton } from '@/ui/glass';
 
@@ -67,8 +67,8 @@ export default function VerifyEmailScreen() {
     onSuccess: (user) => {
       takeSignup();
       startSession(user);
-      // New owner: passcode / Choose color, then Choose plan.
-      router.replace(homeRouteFor(user));
+      // New owner: "Where is your business?" first (can be skipped), then passcode / Choose plan.
+      router.replace({ pathname: '/business-location', params: { onboarding: '1' } });
     },
     onError: (e) => {
       if (e instanceof InvalidCodeError) setError(t('auth.verify.wrongCode'));

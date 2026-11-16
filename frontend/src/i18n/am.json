@@ -1368,7 +1368,27 @@
       "later": "በኋላ",
       "denied": "የአድራሻ ፈቃድ ጠፍቷል። በስልክዎ ቅንብሮች ይፍቀዱ ወይም እንደገና ይሞክሩ።",
       "unavailable": "አድራሻዎን ማግኘት አልተቻለም። Location ያብሩና እንደገና ይሞክሩ።"
-    }
+    },
+    "location": {
+      "title": "ንግድዎ የት ነው?",
+      "subtitle": "ይህን የሚያየው የSmart Verify ቡድን ብቻ ነው።",
+      "mapLabel": "ካርታ፡ ምልክቱን ለማስቀመጥ ይጎትቱ",
+      "dragHint": "ምልክቱን ለማንቀሳቀስ ካርታውን ይጎትቱ",
+      "useMine": "አካባቢዬን ተጠቀም",
+      "finding": "እየፈለግንዎት ነው…",
+      "denied": "ለዚህ መተግበሪያ አካባቢ ጠፍቷል። ካርታውን ያንቀሳቅሱ እና ዝርዝሩን ከታች ይሙሉ።",
+      "unavailable": "አካባቢዎን ማግኘት አልተቻለም። ካርታውን ያንቀሳቅሱ እና ዝርዝሩን ከታች ይሙሉ።",
+      "address": "አድራሻ",
+      "addressPlaceholder": "ጎዳና ወይም መንገድ",
+      "city": "ከተማ",
+      "area": "ሰፈር",
+      "areaPlaceholder": "ክፍለ ከተማ ወይም ሰፈር",
+      "landmark": "መለያ ቦታ",
+      "landmarkPlaceholder": "በአቅራቢያ የሚታወቅ ቦታ",
+      "save": "አካባቢ አስቀምጥ",
+      "later": "በኋላ ጨምር"
+    },
+    "locationEntry": "የንግድ አካባቢ"
   },
   "categories": {
     "title": "ምድቦች",

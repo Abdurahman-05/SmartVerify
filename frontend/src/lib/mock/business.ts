@@ -1,4 +1,10 @@
-import type { BusinessAccess, BusinessAnnouncement, BusinessProfile } from '@/lib/api/business';
+import type {
+  BusinessAccess,
+  BusinessAnnouncement,
+  BusinessLocation,
+  BusinessLocationInput,
+  BusinessProfile,
+} from '@/lib/api/business';
 
 import { mockDelay } from './mock';
 
@@ -52,4 +58,27 @@ export async function updateBusinessProfile(input: {
 export async function getBusinessAnnouncements(): Promise<BusinessAnnouncement[]> {
   await mockDelay(150);
   return [];
+}
+
+let location: BusinessLocation | null = null;
+
+export async function getBusinessLocation(): Promise<BusinessLocation | null> {
+  await mockDelay(150);
+  return location;
+}
+
+export async function updateBusinessLocation(
+  input: BusinessLocationInput
+): Promise<BusinessLocation> {
+  await mockDelay(300);
+  const text = (v: string | undefined) => v?.trim() || null;
+  location = {
+    lat: input.lat,
+    lng: input.lng,
+    address: text(input.address),
+    city: text(input.city),
+    area: text(input.area),
+    landmark: text(input.landmark),
+  };
+  return location;
 }

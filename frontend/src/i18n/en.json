@@ -1368,7 +1368,27 @@
       "later": "Later",
       "denied": "Location permission is off. Allow it in your phone settings, or try again.",
       "unavailable": "Could not find your location. Turn on location and try again."
-    }
+    },
+    "location": {
+      "title": "Where is your business?",
+      "subtitle": "Only the Smart Verify team sees this.",
+      "mapLabel": "Map: drag to place the pin",
+      "dragHint": "Drag the map to move the pin",
+      "useMine": "Use my location",
+      "finding": "Finding you…",
+      "denied": "Location is off for this app. Move the map and fill in the details below.",
+      "unavailable": "Could not find your location. Move the map and fill in the details below.",
+      "address": "Address",
+      "addressPlaceholder": "Street or road",
+      "city": "City",
+      "area": "Area",
+      "areaPlaceholder": "Sub-city or neighbourhood",
+      "landmark": "Landmark",
+      "landmarkPlaceholder": "A well-known place nearby",
+      "save": "Save location",
+      "later": "Add later"
+    },
+    "locationEntry": "Business location"
   },
   "categories": {
     "title": "Categories",

@@ -11,6 +11,7 @@ import {
   Landmark,
   LifeBuoy,
   LogOut,
+  MapPin,
   SlidersHorizontal,
   Star,
   Store,
@@ -151,6 +152,11 @@ export default function ProfileScreen() {
                     icon={Store}
                     label={t('business.businessInfo.entry')}
                     onPress={() => router.push('/business-info')}
+                  />
+                  <ListRow
+                    icon={MapPin}
+                    label={t('business.locationEntry')}
+                    onPress={() => router.push('/business-location')}
                   />
                 </>
               ) : null}

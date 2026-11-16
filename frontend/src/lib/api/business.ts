@@ -20,6 +20,25 @@ export interface BusinessProfile {
   longitude: number | null;
 }
 
+/** Where the business is (GET/PATCH /business/location). */
+export interface BusinessLocation {
+  lat: number;
+  lng: number;
+  address: string | null;
+  city: string | null;
+  area: string | null;
+  landmark: string | null;
+}
+
+export interface BusinessLocationInput {
+  lat: number;
+  lng: number;
+  address?: string;
+  city?: string;
+  area?: string;
+  landmark?: string;
+}
+
 export interface BusinessAnnouncement {
   id: string;
   bodyEn: string;
@@ -42,3 +61,10 @@ export const updateBusinessProfile = (input: {
 
 /** GET /announcements — banners from the Smart Verify team. */
 export const getBusinessAnnouncements = () => api<BusinessAnnouncement[]>('/announcements');
+
+/** GET /business/location — owner. null until a location is saved. */
+export const getBusinessLocation = () => api<BusinessLocation | null>('/business/location');
+
+/** PATCH /business/location — owner. Empty text clears a field. */
+export const updateBusinessLocation = (input: BusinessLocationInput) =>
+  api<BusinessLocation>('/business/location', { method: 'PATCH', body: input });
