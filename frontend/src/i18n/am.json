@@ -687,17 +687,41 @@
     "ledgerNote": "በዛሬው የጥሬ ገንዘብ መዝገብ ይቀመጣል · ስካን የለም",
     "confirmTotal": "ጥሬ ገንዘቡን አረጋግጥ · {{amount}}"
   },
+  "activity": {
+    "title": "እንቅስቃሴ",
+    "subtitle": "{{name}} · ዛሬ",
+    "payments": "ክፍያዎች",
+    "tips": "ቲፖች",
+    "iVerified": "ያረጋገጥኩት",
+    "myTips": "የእኔ ቲፕ",
+    "bankTables": "ባንክ · {{count}} ጠረጴዛዎች",
+    "tip": "ቲፕ {{amount}}",
+    "usedBefore": "ከዚህ በፊት ጥቅም ላይ ውሏል",
+    "empty": "ዛሬ ገና ምንም የለም።",
+    "tag": {
+      "verified": "ተረጋግጧል",
+      "cash": "በጥሬ ገንዘብ",
+      "duplicate": "ድግግሞሽ"
+    }
+  },
   "tips": {
     "title": "የእኔ ቲፖች",
     "waiter": "አስተናጋጅ: {{name}}",
     "summary_today": "የዛሬ ቲፖቼ · {{count}} ክፍያዎች",
     "summary_7d": "ቲፖቼ · ባለፉት 7 ቀናት · {{count}} ክፍያዎች",
     "summary_30d": "ቲፖቼ · ባለፉት 30 ቀናት · {{count}} ክፍያዎች",
+    "todayTitle": "የዛሬ ቲፕ",
+    "bankPayments_one": "{{count}} የባንክ ክፍያ · በባለቤቱ ይከፈላል",
+    "bankPayments_other": "{{count}} የባንክ ክፍያዎች · በባለቤቱ ይከፈላል",
+    "notPaidOut": "ገና አልተከፈለም",
+    "paidOut": "ተከፍሏል",
+    "tableBadge": "ጠረጴዛ",
+    "billPaid": "ሂሳብ {{bill}} · የተከፈለ {{paid}}",
     "fromEachTable": "ከእያንዳንዱ ጠረጴዛ የተገኙ ቲፖች",
     "bank": "ባንክ",
     "cash": "ጥሬ ገንዘብ",
     "empty": "በዚህ ጊዜ ውስጥ እስካሁን ቲፕ የለም።",
-    "note": "ከክፍያ የተረፈ ገንዘብ እዚህ በራሱ ይጨመራል።"
+    "note": "በባንክ ክፍያ ውስጥ ያለው ተጨማሪ ገንዘብ እዚህ በራስ-ሰር ይጨመራል።"
   },
   "kitchen": {
     "title": "ማብሰያ ቤት",

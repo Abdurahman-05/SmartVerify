@@ -1,155 +1,30 @@
-import { useQuery } from '@tanstack/react-query';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { Banknote, HandCoins, Info, Landmark } from 'lucide-react-native';
-import { useCallback, useState } from 'react';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { FlatList, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { LoadingView } from '@/components/ui/LoadingView';
-import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
-import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { Text } from '@/components/ui/Text';
-import { useBrandColors } from '@/store/theme';
-import { Pill } from '@/features/orders/Pill';
-import { isNetworkError } from '@/lib/errors';
-import { formatDay, formatTime } from '@/lib/format';
-import { periods, type Period } from '@/lib/period';
-import { getTips, tipsKey } from '@/lib/tips';
+import { Avatar } from '@/features/waiter/Avatar';
 import { useSession } from '@/store/session';
-import { colors } from '@/theme/tokens';
+import { ScreenBg } from '@/ui/glass';
 
-import type { Tip } from './types';
+import TipsPanel from './TipsPanel';
 
-function SourceTag({ source }: { source: Tip['source'] }) {
-  const { t } = useTranslation();
-  const isCash = source === 'cash';
-  const fg = isCash ? colors.warnFg : colors.successFg;
-  const Icon = isCash ? Banknote : Landmark;
-  return (
-    <View
-      className={`flex-row items-center gap-1 self-end rounded-[14px] py-[3px] pl-2 pr-2.5 ${isCash ? 'bg-warnBg' : 'bg-successBg'}`}
-    >
-      <Icon size={14} color={fg} strokeWidth={2.4} />
-      <Text font="bold" className="text-sm" style={{ color: fg }}>
-        {isCash ? t('tips.cash') : t('tips.bank')}
-      </Text>
-    </View>
-  );
-}
-
+/** My tips as its own page (the waiter's Activity tab shows the same panel). */
 export default function TipsScreen() {
-  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
-  const user = useSession((s) => s.user);
-  const [period, setPeriod] = useState<Period>('today');
-
-  const query = useQuery({
-    queryKey: tipsKey(period, 'mine'),
-    queryFn: () => getTips(period, { mine: true }),
-  });
-  const { refetch } = query;
-  useFocusEffect(
-    useCallback(() => {
-      void refetch();
-    }, [refetch])
-  );
-
-  if (query.isPending) return <LoadingView screenTitle={t('tips.title')} />;
-  if (query.isError && !query.data && isNetworkError(query.error)) {
-    return <NoConnection onRetry={() => void refetch()} />;
-  }
-  const tips = query.data ?? [];
-  const total = tips.reduce((sum, tip) => sum + tip.amount, 0);
-
+  const name = useSession((s) => s.user?.displayName ?? '');
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader
-        title={t('tips.title')}
-        subtitle={t('tips.waiter', { name: user?.displayName ?? '' })}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/home'))}
-      />
-
-      <View className="flex-row gap-2 px-4 pb-2.5 pt-1" accessibilityRole="radiogroup">
-        {periods.map((p) => (
-          <Pill
-            key={p}
-            label={t(`period.${p}`)}
-            selected={period === p}
-            onPress={() => setPeriod(p)}
-          />
-        ))}
-      </View>
-
-      <FlatList
-        data={tips}
-        keyExtractor={(tip) => tip.id}
-        contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 12 }}
-        ListHeaderComponent={
-          <View className="gap-2">
-            <View accessible className="rounded-card bg-primary px-5 py-3.5">
-              <Text font="semibold" tone="inverse" className="text-[15px]">
-                {t(`tips.summary_${period}`, { count: tips.length })}
-              </Text>
-              <MoneyText
-                value={total}
-                tone="inverse"
-                className="text-4xl"
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              />
-            </View>
-            <Text font="heading" className="pb-0 pt-1.5 text-lg" accessibilityRole="header">
-              {t('tips.fromEachTable')}
-            </Text>
-          </View>
-        }
-        renderItem={({ item }) => {
-          const when =
-            period === 'today'
-              ? formatTime(item.createdAt)
-              : `${formatDay(item.createdAt, false)}, ${formatTime(item.createdAt)}`;
-          return (
-            <View
-              accessible
-              accessibilityLabel={`${item.label}, +${formatMoney(item.amount)}, ${item.source === 'cash' ? t('tips.cash') : t('tips.bank')}, ${when}`}
-              className="flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface p-3"
-            >
-              <View className="h-12 w-12 items-center justify-center rounded-[14px] bg-tipBg">
-                <HandCoins size={24} color={colors.warnFg} strokeWidth={2.2} />
-              </View>
-              <View className="flex-1">
-                <Text font="bold" className="text-[17px]">
-                  {item.label}
-                </Text>
-                <Text tone="muted" className="mt-px text-sm">
-                  {when}
-                </Text>
-              </View>
-              <View className="items-end gap-1">
-                <Text font="bold" tone="link" className="text-lg">
-                  +<MoneyText value={item.amount} font="bold" tone="link" className="text-lg" />
-                </Text>
-                <SourceTag source={item.source} />
-              </View>
-            </View>
-          );
-        }}
-        ListEmptyComponent={
-          <Text tone="muted" className="pt-6 text-center text-lg">
-            {t('tips.empty')}
-          </Text>
-        }
-      />
-
-      <View className="flex-row items-start gap-2 px-4 pb-4 pt-1">
-        <Info size={20} color={brand.primaryText} strokeWidth={2.2} />
-        <Text font="semibold" tone="muted" className="flex-1 text-[15px] leading-5">
-          {t('tips.note')}
-        </Text>
-      </View>
-    </SafeAreaView>
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <ScreenHeader
+          title={t('tips.title')}
+          subtitle={t('tips.waiter', { name })}
+          onBack={() => (router.canGoBack() ? router.back() : router.replace('/home'))}
+          right={<Avatar name={name} />}
+        />
+        <TipsPanel />
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

@@ -687,17 +687,41 @@
     "ledgerNote": "Saved in today's cash ledger · no scan",
     "confirmTotal": "Confirm cash · {{amount}}"
   },
+  "activity": {
+    "title": "Activity",
+    "subtitle": "{{name}} · today",
+    "payments": "Payments",
+    "tips": "Tips",
+    "iVerified": "I verified",
+    "myTips": "My tips",
+    "bankTables": "bank · {{count}} tables",
+    "tip": "tip {{amount}}",
+    "usedBefore": "used before",
+    "empty": "Nothing yet today.",
+    "tag": {
+      "verified": "Verified",
+      "cash": "Cash",
+      "duplicate": "Duplicate"
+    }
+  },
   "tips": {
     "title": "My tips",
     "waiter": "Waiter: {{name}}",
     "summary_today": "My tips today · {{count}} payments",
     "summary_7d": "My tips · last 7 days · {{count}} payments",
     "summary_30d": "My tips · last 30 days · {{count}} payments",
+    "todayTitle": "My tips today",
+    "bankPayments_one": "{{count}} bank payment · paid out by the owner",
+    "bankPayments_other": "{{count}} bank payments · paid out by the owner",
+    "notPaidOut": "Not paid out",
+    "paidOut": "Paid out",
+    "tableBadge": "Table",
+    "billPaid": "Bill {{bill}} · paid {{paid}}",
     "fromEachTable": "Tips from each table",
     "bank": "Bank",
     "cash": "Cash",
     "empty": "No tips in this period yet.",
-    "note": "Extra money from a payment is added here automatically."
+    "note": "Extra money in a bank payment is added here automatically."
   },
   "kitchen": {
     "title": "Kitchen",

@@ -1,73 +1,44 @@
-import { CircleDollarSign, Clock, FileBarChart, type LucideIcon } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Text } from '@/components/ui/Text';
-import ReportScreen from '@/features/reports/ReportScreen';
-import TipsScreen from '@/features/tips/TipsScreen';
-import TransactionsScreen from '@/features/transactions/TransactionsScreen';
-import { useBrandColors } from '@/store/theme';
-import { colors } from '@/theme/tokens';
+import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { Segmented } from '@/components/ui/Segmented';
+import TipsPanel from '@/features/tips/TipsPanel';
+import { useSession } from '@/store/session';
+import { ScreenBg } from '@/ui/glass';
 
-type Part = 'transactions' | 'tips' | 'reports';
+import { ActivityPayments } from './ActivityPayments';
+import { Avatar } from './Avatar';
 
-const parts: { key: Part; icon: LucideIcon }[] = [
-  { key: 'transactions', icon: Clock },
-  { key: 'tips', icon: CircleDollarSign },
-  { key: 'reports', icon: FileBarChart },
-];
+type Part = 'payments' | 'tips';
 
-/**
- * Waiter's "Activity" tab: the existing Transactions, Tips and Reports pages, unchanged, with a
- * small switch under them.
- */
+const parts: Part[] = ['payments', 'tips'];
+
+/** Waiter's "Activity" tab: what they verified today, and the tips they earned from bank payments. */
 export default function ActivityScreen() {
   const { t } = useTranslation();
-  const brand = useBrandColors();
-  const [part, setPart] = useState<Part>('transactions');
+  const name = useSession((s) => s.user?.displayName ?? '');
+  const [part, setPart] = useState<Part>('payments');
 
   return (
-    <View className="flex-1 bg-background">
-      <View className="flex-1">
-        {part === 'transactions' ? (
-          <TransactionsScreen />
-        ) : part === 'tips' ? (
-          <TipsScreen />
-        ) : (
-          <ReportScreen />
-        )}
-      </View>
-
-      <View
-        className="flex-row gap-1.5 border-t border-border bg-surface px-3 py-2"
-        accessibilityRole="tablist"
-      >
-        {parts.map(({ key, icon: Icon }) => {
-          const selected = part === key;
-          return (
-            <Pressable
-              key={key}
-              onPress={() => setPart(key)}
-              accessibilityRole="tab"
-              accessibilityState={{ selected }}
-              className={`min-h-11 flex-1 flex-row items-center justify-center gap-1.5 rounded-full px-2 ${
-                selected ? 'bg-primary' : 'bg-background active:bg-border'
-              }`}
-            >
-              <Icon size={18} color={selected ? colors.surface : brand.primary} strokeWidth={2.2} />
-              <Text
-                font="bold"
-                tone={selected ? 'inverse' : 'default'}
-                className="text-sm"
-                numberOfLines={1}
-              >
-                {t(`waiterNav.${key}`)}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-    </View>
+    <ScreenBg>
+      <SafeAreaView edges={['top']} className="flex-1">
+        <ScreenHeader
+          title={t('activity.title')}
+          subtitle={t('activity.subtitle', { name })}
+          right={<Avatar name={name} />}
+        />
+        <View className="px-4 pb-3 pt-1">
+          <Segmented
+            options={parts.map((value) => ({ value, label: t(`activity.${value}`) }))}
+            value={part}
+            onChange={setPart}
+          />
+        </View>
+        {part === 'payments' ? <ActivityPayments /> : <TipsPanel />}
+      </SafeAreaView>
+    </ScreenBg>
   );
 }
