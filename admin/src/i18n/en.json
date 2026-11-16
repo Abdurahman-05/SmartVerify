@@ -259,7 +259,10 @@
       "previous": "Previous",
       "next": "Next",
       "empty": "No customers match.",
-      "count_one": "{{count}} business"
+      "count_one": "{{count}} business",
+      "cityArea": "City · Area",
+      "located": "Located",
+      "noLocation": "No location"
     },
     "customer": {
       "back": "All customers",
@@ -325,7 +328,14 @@
       "devices": "Active devices",
       "banks": "Banks they receive on",
       "exemptNote": "Never restricted: {{reason}}",
-      "suspendedNote": "Suspended by an admin"
+      "suspendedNote": "Suspended by an admin",
+      "locationNone": "Location not added",
+      "city": "City",
+      "area": "Area",
+      "landmark": "Landmark",
+      "locationSet": "Set {{date}}",
+      "copyAddress": "Copy address",
+      "copied": "Copied"
     },
     "payments": {
       "title": "Payments",

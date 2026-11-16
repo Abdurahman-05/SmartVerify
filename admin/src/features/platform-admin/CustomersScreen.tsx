@@ -13,9 +13,20 @@ import { isNetworkError } from '@/lib/errors';
 import { colors } from '@/theme/tokens';
 
 import { AdminShell } from './AdminShell';
-import { ActionButton, Card, PageTitle, StatusChip, Tabs } from './ui';
+import { ActionButton, Card, Chip, PageTitle, StatusChip, Tabs } from './ui';
 
 const PAGE = 25;
+
+/** Green when the owner has set a map point, amber when not. */
+function LocationTag({ located }: { located: boolean }) {
+  const { t } = useTranslation();
+  return (
+    <Chip
+      tone={located ? 'ok' : 'warn'}
+      label={t(located ? 'platformAdmin.customers.located' : 'platformAdmin.customers.noLocation')}
+    />
+  );
+}
 
 /** Every business: search, filter by plan/city/status, open one. */
 export default function CustomersScreen() {
@@ -133,7 +144,7 @@ export default function CustomersScreen() {
         <Card className="gap-0 px-5 py-3">
           {narrow ? null : (
             <View className="flex-row gap-4 pb-2">
-              {(['business', 'city', 'plan', 'statusCol'] as const).map((h) => (
+              {(['business', 'cityArea', 'plan', 'statusCol'] as const).map((h) => (
                 <Text
                   key={h}
                   font="bold"
@@ -184,17 +195,21 @@ export default function CustomersScreen() {
                         : c.ownerPhone}
                     </Text>
                     {narrow ? (
-                      <View className="pt-1.5">
+                      <View className="flex-row flex-wrap gap-1.5 pt-1.5">
                         <StatusChip status={c.status} daysLeft={c.daysLeft} exempt={c.exempt} />
+                        <LocationTag located={c.hasLocation} />
                       </View>
                     ) : null}
                   </View>
                 </View>
                 {narrow ? null : (
                   <>
-                    <Text className="flex-1 text-[15px]" numberOfLines={1}>
-                      {c.city ?? '–'}
-                    </Text>
+                    <View className="flex-1 gap-1">
+                      <Text className="text-[15px]" numberOfLines={1}>
+                        {[c.city, c.area].filter(Boolean).join(' · ') || '–'}
+                      </Text>
+                      <LocationTag located={c.hasLocation} />
+                    </View>
                     <Text className="flex-1 text-[15px]" numberOfLines={1}>
                       {planName(c.plan)}
                     </Text>

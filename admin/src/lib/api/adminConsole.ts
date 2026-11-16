@@ -11,6 +11,10 @@ export interface CustomerSummary {
   name: string;
   businessType: string | null;
   city: string | null;
+  /** Sub-city or neighbourhood. */
+  area: string | null;
+  /** The owner has set a map point. */
+  hasLocation: boolean;
   plan: PlanCode | null;
   ownerName: string;
   ownerPhone: string;
@@ -74,8 +78,12 @@ export interface CustomerDetail {
   businessType: string | null;
   city: string | null;
   address: string | null;
+  area: string | null;
+  landmark: string | null;
   latitude: number | null;
   longitude: number | null;
+  /** When the owner last saved the location. */
+  locationSetAt: string | null;
   createdAt: string;
   plan: PlanCode | null;
   suspendedAt: string | null;

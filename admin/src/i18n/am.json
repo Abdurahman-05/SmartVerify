@@ -252,7 +252,10 @@
       "showing": "ከ{{total}} {{from}} እስከ {{to}}",
       "previous": "ቀዳሚ",
       "next": "ቀጣይ",
-      "empty": "የሚዛመድ ደንበኛ የለም።"
+      "empty": "የሚዛመድ ደንበኛ የለም።",
+      "cityArea": "ከተማ · ሰፈር",
+      "located": "አካባቢ አለ",
+      "noLocation": "አካባቢ የለም"
     },
     "customer": {
       "back": "ሁሉም ደንበኞች",
@@ -318,7 +321,14 @@
       "devices": "ንቁ መሣሪያዎች",
       "banks": "የሚቀበሉባቸው ባንኮች",
       "exemptNote": "በጭራሽ አይገደብም፦ {{reason}}",
-      "suspendedNote": "በአስተዳዳሪ ታግዷል"
+      "suspendedNote": "በአስተዳዳሪ ታግዷል",
+      "locationNone": "አካባቢ አልተጨመረም",
+      "city": "ከተማ",
+      "area": "ሰፈር",
+      "landmark": "መለያ ቦታ",
+      "locationSet": "የተቀመጠው {{date}}",
+      "copyAddress": "አድራሻ ቅዳ",
+      "copied": "ተቀድቷል"
     },
     "payments": {
       "title": "ክፍያዎች",

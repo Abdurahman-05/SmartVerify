@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { ChevronLeft, MapPin, Phone } from 'lucide-react-native';
-import { useCallback, useState } from 'react';
+import * as Clipboard from 'expo-clipboard';
+import { ChevronLeft, Copy, MapPin, Phone } from 'lucide-react-native';
+import { createElement, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, Linking, Pressable, View } from 'react-native';
+import { Linking, Pressable, View } from 'react-native';
 
 import { MoneyText } from '@/components/ui/MoneyText';
 import { NoConnection } from '@/components/ui/NoConnection';
@@ -39,56 +40,86 @@ import {
 
 type Panel = 'extend' | 'paid' | 'suspend' | 'plan' | 'exempt' | null;
 
-/** The OpenStreetMap tile (zoom 16) holding a point, and where in it the point falls. */
-function osmTile(lat: number, lng: number) {
-  const z = 16;
-  const n = 2 ** z;
-  const x = ((lng + 180) / 360) * n;
-  const rad = (lat * Math.PI) / 180;
-  const y = ((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2) * n;
-  return {
-    url: `https://tile.openstreetmap.org/${z}/${Math.floor(x)}/${Math.floor(y)}.png`,
-    left: (x % 1) * 256,
-    top: (y % 1) * 256,
-  };
+/** Google Maps embed, shown in an iframe (the console is web only). */
+function MapFrame({ lat, lng, title }: { lat: number; lng: number; title: string }) {
+  return createElement('iframe', {
+    src: `https://maps.google.com/maps?q=${lat},${lng}&z=16&output=embed`,
+    title,
+    loading: 'lazy',
+    referrerPolicy: 'no-referrer-when-downgrade',
+    style: { width: '100%', height: 280, border: 0, borderRadius: 16 },
+  });
 }
 
+/** Address on one line: street, area, city (whatever is there). */
+const addressOf = (c: CustomerDetail) =>
+  [c.address, c.area, c.city].filter((part): part is string => !!part).join(', ');
+
 function Location({ c }: { c: CustomerDetail }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [copied, setCopied] = useState(false);
   if (c.latitude === null || c.longitude === null) {
     return (
       <Text tone="muted" className="text-[15px]">
-        {t('platformAdmin.customer.noLocation')}
+        {t('platformAdmin.customer.locationNone')}
       </Text>
     );
   }
-  const tile = osmTile(c.latitude, c.longitude);
+  const { latitude, longitude } = c;
+  const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+  const copy = () => {
+    const text = addressOf(c) || `${latitude}, ${longitude}`;
+    void Clipboard.setStringAsync(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
   return (
     <View className="gap-3">
-      <View className="h-[256px] w-[256px] self-start overflow-hidden rounded-2xl bg-neutralBg">
-        <Image
-          source={{ uri: tile.url }}
-          style={{ width: 256, height: 256 }}
-          accessibilityLabel={t('platformAdmin.customer.location')}
-        />
-        <View className="absolute" style={{ left: tile.left - 14, top: tile.top - 28 }}>
-          <MapPin size={28} color={colors.alert} fill={colors.alert} strokeWidth={1.5} />
-        </View>
+      <View className="overflow-hidden rounded-2xl bg-neutralBg">
+        <MapFrame lat={latitude} lng={longitude} title={t('platformAdmin.customer.location')} />
+      </View>
+      {c.address ? (
+        <Text font="semibold" className="text-[15px]">
+          {c.address}
+        </Text>
+      ) : null}
+      <View>
+        <Row label={t('platformAdmin.customer.city')}>
+          <Text className="text-[15px]">{c.city ?? '–'}</Text>
+        </Row>
+        <Row label={t('platformAdmin.customer.area')}>
+          <Text className="text-[15px]">{c.area ?? '–'}</Text>
+        </Row>
+        <Row label={t('platformAdmin.customer.landmark')}>
+          <Text className="text-[15px]">{c.landmark ?? '–'}</Text>
+        </Row>
       </View>
       <Text tone="muted" className="text-sm">
-        © OpenStreetMap contributors
+        {latitude.toFixed(5)}, {longitude.toFixed(5)}
+        {c.locationSetAt
+          ? ` · ${t('platformAdmin.customer.locationSet', { date: fmtDate(c.locationSetAt, i18n.language) })}`
+          : ''}
       </Text>
-      {c.address ? <Text className="text-[15px]">{c.address}</Text> : null}
-      <Text tone="muted" className="text-sm">
-        {c.latitude.toFixed(4)}° N, {c.longitude.toFixed(4)}° E
-      </Text>
-      <ActionButton
-        label={t('platformAdmin.customer.openMaps')}
-        icon={MapPin}
-        onPress={() =>
-          void Linking.openURL(`https://www.google.com/maps?q=${c.latitude},${c.longitude}`)
-        }
-      />
+      <View className="flex-row flex-wrap gap-2">
+        <ActionButton
+          label={t('platformAdmin.customer.openMaps')}
+          icon={MapPin}
+          onPress={() => {
+            // A new tab, so the console stays open.
+            if (typeof window !== 'undefined')
+              window.open(mapsUrl, '_blank', 'noopener,noreferrer');
+            else void Linking.openURL(mapsUrl);
+          }}
+        />
+        <ActionButton
+          label={
+            copied ? t('platformAdmin.customer.copied') : t('platformAdmin.customer.copyAddress')
+          }
+          icon={Copy}
+          onPress={copy}
+        />
+      </View>
     </View>
   );
 }
