@@ -556,7 +556,6 @@
     "packingNote": "Boxes and bags",
     "deliveryFee": "Delivery fee",
     "totalToPay": "Total to pay",
-    "priceNote": "This price comes from the order. The waiter does not type it.",
     "addMore": "Add more items",
     "paid": "Paid",
     "notFound": "This bill could not be found.",
@@ -590,7 +589,10 @@
     "notPaidYet": "Not paid yet",
     "search": "Search bills",
     "searchPlaceholder": "Table, order no., name or area",
-    "closeSearch": "Close search"
+    "closeSearch": "Close search",
+    "lockedPrice": "From the order · waiter can't change it",
+    "items_one": "Items · {{count}}",
+    "items_other": "Items · {{count}}"
   },
   "verifyRestaurant": {
     "title": "Verify payment",

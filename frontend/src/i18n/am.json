@@ -556,7 +556,6 @@
     "packingNote": "ሳጥኖች እና ቦርሳዎች",
     "deliveryFee": "የማድረሻ ክፍያ",
     "totalToPay": "የሚከፈል ጠቅላላ",
-    "priceNote": "ይህ ዋጋ ከትዕዛዙ የመጣ ነው። አስተናጋጁ አይጽፈውም።",
     "addMore": "ተጨማሪ ዕቃ ጨምር",
     "paid": "ተከፍሏል",
     "notFound": "ይህ ሂሳብ አልተገኘም።",
@@ -590,7 +589,10 @@
     "notPaidYet": "ያልተከፈለ",
     "search": "ሂሳብ ፈልግ",
     "searchPlaceholder": "ጠረጴዛ፣ የትዕዛዝ ቁ.፣ ስም ወይም ቦታ",
-    "closeSearch": "ፍለጋ ዝጋ"
+    "closeSearch": "ፍለጋ ዝጋ",
+    "lockedPrice": "ከትዕዛዙ · አስተናጋጁ አይቀይረውም",
+    "items_one": "ዕቃዎች · {{count}}",
+    "items_other": "ዕቃዎች · {{count}}"
   },
   "verifyRestaurant": {
     "title": "ክፍያ አረጋግጥ",

@@ -1,18 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { Banknote, Info, Pencil, Plus, QrCode, X } from 'lucide-react-native';
+import { Banknote, ChevronLeft, Info, Lock, Pencil, Plus, ScanLine, X } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, ScrollView, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
-import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
-import { MoneyText } from '@/components/ui/MoneyText';
+import { GhostButton } from '@/components/ui/GhostButton';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { useGlass } from '@/components/ui/glassTokens';
+import { HeroCard, HeroChip } from '@/components/ui/HeroCard';
+import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
+import { StickyFooter } from '@/components/ui/StickyFooter';
+import { TopBar } from '@/components/ui/TopBar';
 import { NoConnection } from '@/components/ui/NoConnection';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { billKey, cancelOrder, changeOrderItems, getBill } from '@/lib/bills';
@@ -57,26 +63,40 @@ function useHeading(bill: Bill) {
 function FeeRow({ label, note, value }: { label: string; note?: string; value: number }) {
   return (
     <View
-      className="flex-row items-center justify-between gap-3 border-t-[1.5px] border-divider py-3"
+      className="flex-row items-center justify-between gap-3 border-t border-black/[0.07] py-2.5"
       accessible
     >
       <View className="flex-1">
-        <Text font="semibold" className="text-[17px]">
+        <Text font="semibold" className="text-[15px]">
           {label}
         </Text>
         {note ? (
-          <Text tone="muted" className="text-sm">
+          <Text tone="muted" className="text-[13px]">
             {note}
           </Text>
         ) : null}
       </View>
-      <MoneyText value={value} font="bold" className="text-[17px]" />
+      <MoneyText value={value} showCurrency={false} font="heading" className="text-[15px]" />
+    </View>
+  );
+}
+
+/** Quantity badge: 32 px, flat deep theme colour, white number. */
+function Qty({ n, struck }: { n: number; struck?: string }) {
+  const g = useGlass();
+  return (
+    <View
+      className="h-8 w-8 items-center justify-center rounded-[10px]"
+      style={{ backgroundColor: g.primaryDeep }}
+    >
+      <Text font="bold" tone="inverse" className={`text-[15px] ${struck ?? ''}`}>
+        {n}
+      </Text>
     </View>
   );
 }
 
 function BillView({ bill }: { bill: Bill }) {
-  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   const { title, heroLabel, heroName } = useHeading(bill);
@@ -129,160 +149,215 @@ function BillView({ bill }: { bill: Bill }) {
     );
   };
 
-  return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader
-        title={title}
-        subtitle={t('bills.orderLine', { number: bill.orderNo, name: bill.waiterName })}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/bills'))}
-      />
+  const editable = bill.orders?.find((o) => canChange(o));
+  const itemCount = (
+    bill.orders ? bill.orders.filter((o) => !o.cancelled).flatMap((o) => o.items) : bill.items
+  ).reduce((sum, item) => sum + item.quantity, 0);
+  const open = bill.status === 'open';
 
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <View className="mx-4 mt-1 flex-row items-center justify-between gap-3 rounded-[20px] bg-primary px-[18px] py-3">
-          <View className="flex-1">
-            {heroLabel ? (
-              <Text font="semibold" tone="inverse" className="text-sm opacity-90">
-                {heroLabel}
-              </Text>
-            ) : null}
-            <Text font="heading" tone="inverse" className="text-[26px]" numberOfLines={2}>
-              {heroName}
-            </Text>
-          </View>
-          <BillPill bill={bill} />
+  return (
+    <ScreenBackground>
+      <SafeAreaView edges={['top']} className="flex-1">
+        <View className="px-4 pb-3 pt-2">
+          <TopBar
+            title={title}
+            subtitle={t('bills.orderLine', { number: bill.orderNo, name: bill.waiterName })}
+            left={{
+              icon: ChevronLeft,
+              onPress: () => (router.canGoBack() ? router.back() : router.replace('/bills')),
+              label: t('common.back'),
+            }}
+            right={
+              editable
+                ? {
+                    icon: Pencil,
+                    onPress: () => setEditing(editable),
+                    label: t('bills.change.edit'),
+                  }
+                : undefined
+            }
+          />
         </View>
 
-        {bill.orders?.map((order) => (
-          <OrderBlock
-            key={order.id}
-            order={order}
-            canChange={canChange(order)}
-            onEdit={() => setEditing(order)}
-            onCancel={() => askCancel(order)}
-          />
-        ))}
-
-        <View
-          className={`mx-4 mt-3 rounded-card border-[1.5px] border-border bg-surface px-4 py-0.5 ${
-            bill.orders ? (hasFees ? '' : 'hidden') : ''
-          }`}
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingBottom: canAct && open ? 200 : 32,
+            gap: 12,
+          }}
+          showsVerticalScrollIndicator={false}
         >
-          {(bill.orders ? [] : bill.items).map((item, i) => (
-            <View
-              key={item.itemId}
-              accessible
-              className={`flex-row items-center gap-3 py-3 ${i < bill.items.length - 1 ? 'border-b-[1.5px] border-divider' : ''}`}
+          <HeroCard style={{ alignItems: 'center' }}>
+            <View accessible className="items-center">
+              <Text
+                font="bold"
+                tone="inverse"
+                className="text-[13px] uppercase tracking-[0.8px] opacity-90"
+              >
+                {t('bills.totalToPay')}
+              </Text>
+              <Text font="heading" tone="inverse" className="text-[44px] leading-[52px]">
+                {formatMoney(bill.total, false)}{' '}
+                <Text font="heading" tone="inverse" className="text-lg">
+                  {t('common.etb')}
+                </Text>
+              </Text>
+            </View>
+            <HeroChip
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
+                paddingVertical: 5,
+                marginTop: 4,
+              }}
             >
-              <View className="h-9 w-9 items-center justify-center rounded-[10px] bg-primaryTile">
-                <Text font="bold" className="text-base text-primary">
-                  {item.quantity}×
+              <Lock size={14} color="#FFFFFF" strokeWidth={2.4} />
+              <Text font="bold" tone="inverse" className="shrink text-[13px]">
+                {t('bills.lockedPrice')}
+              </Text>
+            </HeroChip>
+          </HeroCard>
+
+          {bill.type === 'dine' ? null : (
+            <GlassCard style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
+              <View className="flex-1">
+                {heroLabel ? (
+                  <Text font="bold" tone="muted" className="text-[13px] uppercase">
+                    {heroLabel}
+                  </Text>
+                ) : null}
+                <Text font="heading" className="text-lg" numberOfLines={2}>
+                  {heroName}
                 </Text>
               </View>
-              <Text font="semibold" className="flex-1 text-[17px]">
-                {item.name}
-              </Text>
-              <MoneyText
-                value={item.priceEtb * item.quantity}
-                showCurrency={false}
-                font="bold"
-                className="text-[17px]"
-              />
-            </View>
-          ))}
-          {hasFees ? (
-            <>
-              <FeeRow label={t('bills.foodTotal')} value={bill.foodTotal} />
-              <FeeRow
-                label={t('bills.packing')}
-                note={t('bills.packingNote')}
-                value={bill.packingFee}
-              />
-              {bill.type === 'delivery' ? (
-                <FeeRow label={t('bills.deliveryFee')} value={bill.deliveryFee} />
+            </GlassCard>
+          )}
+
+          <View className="flex-row items-center justify-between gap-3">
+            <Text font="bold" className="text-base" accessibilityRole="header">
+              {t('bills.items', { count: itemCount })}
+            </Text>
+            <View className="flex-row items-center gap-2">
+              {bill.type === 'dine' && heroLabel ? (
+                <Text tone="muted" className="text-sm" numberOfLines={1}>
+                  {heroLabel}
+                </Text>
               ) : null}
-            </>
-          ) : null}
-        </View>
-
-        <View className="mx-4 mt-3 flex-row items-baseline justify-between" accessible>
-          <Text font="bold" className="text-lg">
-            {t('bills.totalToPay')}
-          </Text>
-          <Text font="heading" className="text-[30px]">
-            <MoneyText value={bill.total} showCurrency={false} className="text-[30px]" />{' '}
-            <Text font="heading" className="text-base">
-              {t('common.etb')}
-            </Text>
-          </Text>
-        </View>
-
-        <View className="mx-4 mt-2 flex-row items-start gap-2">
-          <Info size={20} color={brand.primaryText} strokeWidth={2.2} />
-          <Text font="semibold" tone="muted" className="flex-1 text-[15px] leading-5">
-            {t('bills.priceNote')}
-          </Text>
-        </View>
-
-        <View className="min-h-6 flex-1" />
-
-        {canAct ? null : (
-          <View className="mx-4 flex-row items-start gap-2 rounded-[16px] bg-warnBg px-3.5 py-3">
-            <Info size={20} color={colors.warnFg} strokeWidth={2.2} />
-            <Text font="semibold" className="flex-1 text-[15px] leading-5 text-warnFg">
-              {t('bills.othersBill', { name: bill.waiterName })}
-            </Text>
+              <BillPill bill={bill} />
+            </View>
           </View>
-        )}
 
-        {canAct ? (
-          <View className="gap-2.5 px-4 pb-6">
-            <Button
-              label={t('bills.addMore')}
-              icon={Plus}
-              variant="outline"
-              size="md"
-              disabled={bill.status !== 'open' || !bill.orders}
-              onPress={() => router.push({ pathname: '/bills/[id]/add', params: { id: bill.id } })}
+          {bill.orders?.map((order) => (
+            <OrderBlock
+              key={order.id}
+              order={order}
+              canChange={canChange(order)}
+              onEdit={() => setEditing(order)}
+              onCancel={() => askCancel(order)}
             />
-            <Button
-              label={t('bills.paidByCash')}
-              icon={Banknote}
-              variant="outline"
-              size="md"
-              disabled={bill.status !== 'open'}
-              onPress={() => router.push({ pathname: '/bills/[id]/cash', params: { id: bill.id } })}
-            />
-            <Button
+          ))}
+
+          {!bill.orders || hasFees ? (
+            <GlassCard style={{ paddingHorizontal: 14, paddingVertical: 4 }}>
+              {(bill.orders ? [] : bill.items).map((item, i) => (
+                <View
+                  key={item.itemId}
+                  accessible
+                  className={`flex-row items-center gap-3 py-3 ${i > 0 ? 'border-t border-black/[0.07]' : ''}`}
+                >
+                  <Qty n={item.quantity} />
+                  <Text font="bold" className="flex-1 text-base">
+                    {item.name}
+                  </Text>
+                  <MoneyText
+                    value={item.priceEtb * item.quantity}
+                    showCurrency={false}
+                    font="heading"
+                    className="text-base"
+                  />
+                </View>
+              ))}
+              {hasFees ? (
+                <>
+                  <FeeRow label={t('bills.foodTotal')} value={bill.foodTotal} />
+                  <FeeRow
+                    label={t('bills.packing')}
+                    note={t('bills.packingNote')}
+                    value={bill.packingFee}
+                  />
+                  {bill.type === 'delivery' ? (
+                    <FeeRow label={t('bills.deliveryFee')} value={bill.deliveryFee} />
+                  ) : null}
+                </>
+              ) : null}
+            </GlassCard>
+          ) : null}
+
+          {canAct ? null : (
+            <View className="flex-row items-start gap-2 rounded-[16px] bg-warnBg px-3.5 py-3">
+              <Info size={20} color={colors.warnFg} strokeWidth={2.2} />
+              <Text font="semibold" className="flex-1 text-[15px] leading-5 text-warnFg">
+                {t('bills.othersBill', { name: bill.waiterName })}
+              </Text>
+            </View>
+          )}
+        </ScrollView>
+
+        {canAct && open ? (
+          <StickyFooter>
+            <PrimaryButton
               label={t('bills.payByBank')}
-              icon={QrCode}
-              disabled={bill.status !== 'open'}
+              icon={ScanLine}
               onPress={() =>
                 router.push({ pathname: '/verify-restaurant', params: { billId: bill.id } })
               }
             />
-          </View>
+            <View className="flex-row gap-2.5">
+              <View className="flex-1">
+                <GhostButton
+                  label={t('bills.paidByCash')}
+                  icon={Banknote}
+                  onPress={() =>
+                    router.push({ pathname: '/bills/[id]/cash', params: { id: bill.id } })
+                  }
+                />
+              </View>
+              {bill.orders ? (
+                <View className="flex-1">
+                  <GhostButton
+                    label={t('bills.addMore')}
+                    icon={Plus}
+                    onPress={() =>
+                      router.push({ pathname: '/bills/[id]/add', params: { id: bill.id } })
+                    }
+                  />
+                </View>
+              ) : null}
+            </View>
+          </StickyFooter>
         ) : null}
-      </ScrollView>
 
-      {editing ? (
-        <EditOrderSheet
-          order={editing}
-          saving={change.isPending}
-          onSave={(items) => change.mutate({ orderId: editing.id, items })}
-          onClose={() => setEditing(null)}
+        {editing ? (
+          <EditOrderSheet
+            order={editing}
+            saving={change.isPending}
+            onSave={(items) => change.mutate({ orderId: editing.id, items })}
+            onClose={() => setEditing(null)}
+          />
+        ) : null}
+        <ErrorDialog
+          visible={change.isError || cancel.isError}
+          title={t('common.error')}
+          message={t(errorMessageKey(change.error ?? cancel.error))}
+          actionLabel={t('errors.retry')}
+          onClose={() => {
+            change.reset();
+            cancel.reset();
+          }}
         />
-      ) : null}
-      <ErrorDialog
-        visible={change.isError || cancel.isError}
-        title={t('common.error')}
-        message={t(errorMessageKey(change.error ?? cancel.error))}
-        actionLabel={t('errors.retry')}
-        onClose={() => {
-          change.reset();
-          cancel.reset();
-        }}
-      />
-    </SafeAreaView>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
 
@@ -299,11 +374,12 @@ function OrderBlock({
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
+  const brand = useBrandColors();
   const struck = order.cancelled ? 'line-through opacity-50' : '';
   return (
-    <View className="mx-4 mt-3 rounded-card border-[1.5px] border-border bg-surface px-4 py-2">
+    <GlassCard style={{ paddingHorizontal: 14, paddingVertical: 10 }}>
       <View className="flex-row flex-wrap items-center justify-between gap-2 pb-1">
-        <Text font="bold" tone="muted" className="text-[15px]">
+        <Text font="bold" tone="muted" className="text-[13px] uppercase">
           {t('bills.change.order', { number: order.number })}
           {order.edited && !order.cancelled ? ` · ${t('bills.change.edited')}` : ''}
         </Text>
@@ -315,50 +391,54 @@ function OrderBlock({
         ) : null}
       </View>
       {order.items.map((item, i) => (
-        <View key={`${order.id}-${i}`} accessible className="flex-row items-center gap-3 py-2">
-          <View className="h-9 w-9 items-center justify-center rounded-[10px] bg-primaryTile">
-            <Text font="bold" className={`text-base text-primary ${struck}`}>
-              {item.quantity}×
-            </Text>
-          </View>
-          <Text font="semibold" className={`flex-1 text-[17px] ${struck}`}>
+        <View
+          key={`${order.id}-${i}`}
+          accessible
+          className={`flex-row items-center gap-2.5 py-2.5 ${i > 0 ? 'border-t border-black/[0.07]' : ''}`}
+        >
+          <Qty n={item.quantity} struck={struck} />
+          <Text font="semibold" className={`flex-1 text-[15px] ${struck}`}>
             {item.name}
           </Text>
           <MoneyText
             value={item.priceEtb * item.quantity}
             showCurrency={false}
-            font="bold"
-            className={`text-[17px] ${struck}`}
+            font="heading"
+            className={`text-[15px] ${struck}`}
           />
         </View>
       ))}
       {canChange ? (
         <View className="flex-row gap-2 pb-1 pt-2">
-          <View className="flex-1">
-            <Button
-              label={t('bills.change.edit')}
-              icon={Pencil}
-              variant="primary"
-              size="md"
-              onPress={onEdit}
-            />
-          </View>
-          <View className="flex-1">
-            <Button
-              label={t('bills.change.cancel')}
-              icon={X}
-              variant="danger"
-              size="md"
-              onPress={onCancel}
-            />
-          </View>
+          <GlassCard
+            radius={22}
+            onPress={onEdit}
+            containerStyle={{ flex: 1 }}
+            style={styles.smallButton}
+          >
+            <Pencil size={16} color={brand.primaryText} strokeWidth={2.2} />
+            <Text font="bold" className="text-sm" style={{ color: brand.primaryText }}>
+              {t('bills.change.edit')}
+            </Text>
+          </GlassCard>
+          <GlassCard
+            radius={22}
+            onPress={onCancel}
+            containerStyle={{ flex: 1 }}
+            style={styles.smallButton}
+          >
+            <X size={16} color={colors.dangerFg} strokeWidth={2.4} />
+            <Text font="bold" className="text-sm" style={{ color: colors.dangerFg }}>
+              {t('bills.change.cancel')}
+            </Text>
+          </GlassCard>
         </View>
       ) : !order.cancelled && order.kitchenStatus !== 'new' ? (
         <Text tone="muted" className="pb-1 text-sm">
           {t('bills.change.cooking')}
         </Text>
       ) : null}
-    </View>
+    </GlassCard>
   );
 }
 
@@ -382,13 +462,35 @@ export default function TableBillScreen() {
   const bill = query.data;
   if (!bill) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
-        <ScreenHeader title={t('bills.title')} onBack={() => router.replace('/bills')} />
-        <Text tone="muted" className="px-6 pt-10 text-center text-lg">
-          {t('bills.notFound')}
-        </Text>
-      </SafeAreaView>
+      <ScreenBackground>
+        <SafeAreaView className="flex-1">
+          <View className="px-4 pt-2">
+            <TopBar
+              title={t('bills.title')}
+              left={{
+                icon: ChevronLeft,
+                onPress: () => router.replace('/bills'),
+                label: t('common.back'),
+              }}
+            />
+          </View>
+          <Text tone="muted" className="px-6 pt-10 text-center text-lg">
+            {t('bills.notFound')}
+          </Text>
+        </SafeAreaView>
+      </ScreenBackground>
     );
   }
   return <BillView bill={bill} />;
 }
+
+const styles = StyleSheet.create({
+  smallButton: {
+    height: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+  },
+});
