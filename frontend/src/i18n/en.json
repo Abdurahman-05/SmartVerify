@@ -533,7 +533,6 @@
   },
   "bills": {
     "title": "Open bills",
-    "subtitle": "Tables that have not paid yet",
     "myTables": "My tables",
     "allTables": "All tables",
     "tableTile": "TABLE",
@@ -587,7 +586,11 @@
         "outOfStock": "Out of stock"
       }
     },
-    "othersBill": "Opened by {{name}}. Only {{name}} (or the owner or manager) can take payment or change it."
+    "othersBill": "Opened by {{name}}. Only {{name}} (or the owner or manager) can take payment or change it.",
+    "notPaidYet": "Not paid yet",
+    "search": "Search bills",
+    "searchPlaceholder": "Table, order no., name or area",
+    "closeSearch": "Close search"
   },
   "verifyRestaurant": {
     "title": "Verify payment",

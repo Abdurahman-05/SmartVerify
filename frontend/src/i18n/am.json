@@ -533,7 +533,6 @@
   },
   "bills": {
     "title": "ያልተከፈሉ ሂሳቦች",
-    "subtitle": "እስካሁን ያልከፈሉ ጠረጴዛዎች",
     "myTables": "የእኔ ጠረጴዛዎች",
     "allTables": "ሁሉም ጠረጴዛዎች",
     "tableTile": "ጠረጴዛ",
@@ -587,7 +586,11 @@
         "outOfStock": "አልቋል"
       }
     },
-    "othersBill": "በ{{name}} የተከፈተ። ክፍያ መቀበል ወይም መቀየር የሚችለው {{name}} (ወይም ባለቤቱ ወይም ማኔጀሩ) ብቻ ነው።"
+    "othersBill": "በ{{name}} የተከፈተ። ክፍያ መቀበል ወይም መቀየር የሚችለው {{name}} (ወይም ባለቤቱ ወይም ማኔጀሩ) ብቻ ነው።",
+    "notPaidYet": "ያልተከፈለ",
+    "search": "ሂሳብ ፈልግ",
+    "searchPlaceholder": "ጠረጴዛ፣ የትዕዛዝ ቁ.፣ ስም ወይም ቦታ",
+    "closeSearch": "ፍለጋ ዝጋ"
   },
   "verifyRestaurant": {
     "title": "ክፍያ አረጋግጥ",

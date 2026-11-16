@@ -1,80 +1,150 @@
 import { useQuery } from '@tanstack/react-query';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Bike, ChevronRight, Info, ShieldCheck, ShoppingBag } from 'lucide-react-native';
+import {
+  Armchair,
+  Bike,
+  Check,
+  ChevronLeft,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
+  X,
+} from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Pressable, View } from 'react-native';
+import { FlatList, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/Button';
+import { GhostButton } from '@/components/ui/GhostButton';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { useGlass } from '@/components/ui/glassTokens';
+import { IconTile } from '@/components/ui/IconTile';
 import { LoadingView } from '@/components/ui/LoadingView';
-import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
+import { formatMoney } from '@/components/ui/MoneyText';
 import { NoConnection } from '@/components/ui/NoConnection';
-import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
+import { Segmented } from '@/components/ui/Segmented';
 import { Text } from '@/components/ui/Text';
 import { useSession } from '@/store/session';
-import { useBrandColors } from '@/store/theme';
-import { Pill } from '@/features/orders/Pill';
 import { billsKey, getBills } from '@/lib/bills';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { formatTime } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
-import { BillPill } from './BillPill';
 import type { Bill } from './types';
 
+// Design: docs/design/owner/verify-handoff/screens/09-open-bills.png
 /** Open bills refresh on their own (bills paid or served by someone else). */
 const BILLS_REFRESH_MS = 20_000;
 
-function BillTile({ bill }: { bill: Bill }) {
+const typeIcon = { dine: Armchair, takeaway: ShoppingBag, delivery: Bike } as const;
+
+/** Served (green, ✓) or still in the kitchen (amber). */
+function StatusTag({ bill }: { bill: Bill }) {
   const { t } = useTranslation();
+  const served = bill.status === 'paid' || bill.servedStatus === 'served';
+  const label =
+    bill.status === 'paid' ? t('bills.paid') : served ? t('bills.served') : t('bills.inKitchen');
   return (
-    <View className="h-14 w-14 items-center justify-center rounded-input bg-primary">
-      {bill.type === 'dine' ? (
-        <>
-          <Text font="bold" tone="inverse" className="text-sm">
-            {t('bills.tableTile')}
-          </Text>
-          <Text font="heading" tone="inverse" className="text-[22px] leading-6">
-            {bill.tableNo}
-          </Text>
-        </>
-      ) : bill.type === 'takeaway' ? (
-        <ShoppingBag size={26} color={colors.surface} strokeWidth={2.2} />
-      ) : (
-        <Bike size={26} color={colors.surface} strokeWidth={2.2} />
-      )}
+    <View
+      className="h-7 flex-row items-center gap-1 rounded-[14px] px-2.5"
+      style={{ backgroundColor: served ? colors.successBg : colors.warnBg }}
+    >
+      {served ? <Check size={13} color={colors.successFg} strokeWidth={2.8} /> : null}
+      <Text
+        font="bold"
+        className="text-[13px]"
+        style={{ color: served ? colors.successFg : colors.warnFg }}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
     </View>
   );
 }
 
-function useBillLabel() {
+/** Small round glass button with one icon (search, back). */
+function RoundButton({
+  icon: Icon,
+  label,
+  onPress,
+}: {
+  icon: typeof Search;
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <GlassCard
+      radius={22}
+      onPress={onPress}
+      accessibilityLabel={label}
+      style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
+    >
+      <Icon size={21} color={colors.text} strokeWidth={2.2} />
+    </GlassCard>
+  );
+}
+
+function BillCard({ bill, onPress }: { bill: Bill; onPress: () => void }) {
   const { t } = useTranslation();
-  return (bill: Bill) => {
-    const ordered = t('bills.ordered', { time: formatTime(bill.createdAt) });
-    if (bill.type === 'dine') {
-      return {
-        name: t('orders.table', { number: bill.tableNo }),
-        detail: bill.guests ? `${t('bills.guests', { count: bill.guests })} · ${ordered}` : ordered,
-      };
-    }
-    const name =
-      bill.type === 'takeaway'
-        ? `${t('bills.takeaway')} · ${bill.customerName ?? ''}`
-        : `${t('bills.delivery')} · ${bill.area ?? ''}`;
-    return { name, detail: ordered };
-  };
+  const g = useGlass();
+  const kind =
+    bill.type === 'dine'
+      ? t('bills.tableTile')
+      : bill.type === 'takeaway'
+        ? t('bills.takeaway')
+        : t('bills.delivery');
+  const who =
+    bill.type === 'dine'
+      ? bill.guests
+        ? t('bills.guests', { count: bill.guests })
+        : null
+      : bill.type === 'takeaway'
+        ? bill.customerName
+        : bill.area;
+  const sub = [who, formatTime(bill.createdAt)].filter(Boolean).join(' · ');
+  const name = bill.type === 'dine' ? t('orders.table', { number: bill.tableNo }) : kind;
+  return (
+    <GlassCard
+      onPress={onPress}
+      accessibilityLabel={t('bills.openBill', { name, amount: formatMoney(bill.total) })}
+      // Half the row each, also when a bill is alone on the last row.
+      containerStyle={{ flex: 1, maxWidth: '48.6%' }}
+      style={{ padding: 14, gap: 4, minHeight: 150 }}
+    >
+      <View className="mb-1 flex-row items-start justify-between gap-1">
+        <IconTile icon={typeIcon[bill.type]} size={34} radius={11} iconSize={18} />
+        <StatusTag bill={bill} />
+      </View>
+      <Text
+        font="bold"
+        className="text-[11px] uppercase tracking-[0.8px]"
+        style={{ color: colors.muted }}
+      >
+        {kind}
+      </Text>
+      <Text font="heading" className="text-[28px] leading-[32px]">
+        {bill.type === 'dine' ? bill.tableNo : `#${bill.orderNo}`}
+      </Text>
+      <Text font="heading" className="text-[17px]" style={{ color: g.primaryText }}>
+        {`${formatMoney(bill.total, false)} ${t('common.etb')}`}
+      </Text>
+      <Text className="text-xs" style={{ color: colors.muted }} numberOfLines={1}>
+        {sub}
+      </Text>
+    </GlassCard>
+  );
 }
 
 export default function OpenBillsScreen() {
-  const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
   // Waiters start on their own tables (they can look at the others); owner and manager look
   // after every table, so they start on All.
   const isWaiter = useSession((s) => s.user?.role === 'waiter');
   const [scope, setScope] = useState<'mine' | 'all'>(isWaiter ? 'mine' : 'all');
-  const labelFor = useBillLabel();
+  const [searching, setSearching] = useState(false);
+  const [search, setSearch] = useState('');
 
   const query = useQuery({
     queryKey: billsKey(scope),
@@ -92,86 +162,127 @@ export default function OpenBillsScreen() {
   if (query.isError && !query.data && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void refetch()} />;
   }
-  const shown = query.data ?? [];
+  const all = query.data ?? [];
+  // Search by table number, order number, customer name or area.
+  const term = search.trim().toLowerCase();
+  const shown = term
+    ? all.filter((b) =>
+        [b.tableNo, b.orderNo, b.customerName, b.area]
+          .filter((v) => v !== null && v !== undefined)
+          .some((v) => String(v).toLowerCase().includes(term))
+      )
+    : all;
+  const notPaid = all.reduce((sum, b) => sum + b.total, 0);
+  const canGoBack = router.canGoBack();
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader
-        title={t('bills.title')}
-        subtitle={t('bills.subtitle')}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/home'))}
-      />
-
-      <View className="flex-row gap-2 px-4 pb-2.5 pt-1" accessibilityRole="radiogroup">
-        <Pill
-          label={t('bills.myTables')}
-          selected={scope === 'mine'}
-          onPress={() => setScope('mine')}
-        />
-        <Pill
-          label={t('bills.allTables')}
-          selected={scope === 'all'}
-          onPress={() => setScope('all')}
-        />
-      </View>
-
-      <FlatList
-        data={shown}
-        keyExtractor={(b) => b.id}
-        contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 12 }}
-        renderItem={({ item }) => {
-          const { name, detail } = labelFor(item);
-          return (
-            <Pressable
-              onPress={() => router.push({ pathname: '/bills/[id]', params: { id: item.id } })}
-              accessibilityRole="button"
-              accessibilityLabel={t('bills.openBill', { name, amount: formatMoney(item.total) })}
-              className="flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface py-2.5 pl-2.5 pr-3 active:bg-primarySoft"
-            >
-              <BillTile bill={item} />
-              <View className="flex-1">
-                {item.type !== 'dine' ? (
-                  <Text font="bold" className="text-base" numberOfLines={1}>
-                    {name}
-                  </Text>
-                ) : null}
-                <Text tone="muted" className="mb-1 text-sm" numberOfLines={1}>
-                  {detail}
-                </Text>
-                <BillPill bill={item} className="self-start" />
-              </View>
-              <View className="items-end">
-                <MoneyText value={item.total} showCurrency={false} className="text-xl" />
-                <Text font="bold" tone="muted" className="text-sm">
-                  {t('common.etb')}
-                </Text>
-              </View>
-              <ChevronRight size={22} color={colors.muted} strokeWidth={2} />
-            </Pressable>
-          );
-        }}
-        ListEmptyComponent={
-          <Text tone="muted" className="px-4 pt-8 text-center text-lg">
-            {query.isError ? t(errorMessageKey(query.error)) : t('bills.empty')}
-          </Text>
-        }
-      />
-
-      <View className="gap-2.5 px-4 pb-3 pt-1">
-        <Button
-          label={t('bills.verifyWithoutOrder')}
-          icon={ShieldCheck}
-          variant="outline"
-          size="md"
-          onPress={() => router.push('/verify')}
-        />
-        <View className="flex-row items-start gap-2">
-          <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
-          <Text font="semibold" tone="muted" className="flex-1 text-sm leading-5">
-            {t('bills.listNote')}
-          </Text>
+    <ScreenBackground>
+      <SafeAreaView edges={['top']} className="flex-1">
+        <View className="flex-row items-center gap-3 px-4 pb-3 pt-2">
+          {canGoBack ? (
+            <RoundButton
+              icon={ChevronLeft}
+              label={t('common.back')}
+              onPress={() => router.back()}
+            />
+          ) : null}
+          <View className="flex-1">
+            <Text font="heading" className="text-[28px] leading-[34px]" accessibilityRole="header">
+              {t('bills.title')}
+            </Text>
+            <Text className="text-sm" style={{ color: colors.muted }} numberOfLines={1}>
+              {`${t('bills.notPaidYet')} · ${formatMoney(notPaid, false)} ${t('common.etb')}`}
+            </Text>
+          </View>
+          <RoundButton
+            icon={searching ? X : Search}
+            label={t(searching ? 'bills.closeSearch' : 'bills.search')}
+            onPress={() => {
+              setSearching((v) => !v);
+              setSearch('');
+            }}
+          />
         </View>
-      </View>
-    </SafeAreaView>
+
+        {searching ? (
+          <View className="px-4 pb-3">
+            <GlassCard
+              radius={26}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 10,
+                paddingHorizontal: 16,
+                height: 52,
+              }}
+            >
+              <Search size={18} color={colors.muted} strokeWidth={2.2} />
+              <TextInput
+                autoFocus
+                value={search}
+                onChangeText={setSearch}
+                placeholder={t('bills.searchPlaceholder')}
+                placeholderTextColor={colors.placeholder}
+                accessibilityLabel={t('bills.search')}
+                className="h-full flex-1 font-body text-base text-text"
+              />
+            </GlassCard>
+          </View>
+        ) : null}
+
+        <View className="px-4 pb-3">
+          <Segmented<'mine' | 'all'>
+            options={[
+              {
+                value: 'mine',
+                label:
+                  scope === 'mine' ? `${t('bills.myTables')} · ${all.length}` : t('bills.myTables'),
+              },
+              {
+                value: 'all',
+                label:
+                  scope === 'all'
+                    ? `${t('bills.allTables')} · ${all.length}`
+                    : t('bills.allTables'),
+              },
+            ]}
+            value={scope}
+            onChange={setScope}
+          />
+        </View>
+
+        <FlatList
+          data={shown}
+          keyExtractor={(b) => b.id}
+          numColumns={2}
+          columnWrapperStyle={{ gap: 10 }}
+          contentContainerStyle={{ gap: 10, paddingHorizontal: 16, paddingBottom: 120 }}
+          keyboardShouldPersistTaps="handled"
+          renderItem={({ item }) => (
+            <BillCard
+              bill={item}
+              onPress={() => router.push({ pathname: '/bills/[id]', params: { id: item.id } })}
+            />
+          )}
+          ListEmptyComponent={
+            <Text tone="muted" className="px-4 pt-8 text-center text-lg">
+              {query.isError ? t(errorMessageKey(query.error)) : t('bills.empty')}
+            </Text>
+          }
+          ListFooterComponent={
+            <View className="gap-3 pt-1">
+              <GhostButton
+                label={t('bills.verifyWithoutOrder')}
+                icon={ShieldCheck}
+                onPress={() => router.push('/verify')}
+              />
+              <Text tone="muted" className="px-2.5 text-center text-sm leading-5">
+                {t('bills.listNote')}
+              </Text>
+            </View>
+          }
+        />
+      </SafeAreaView>
+    </ScreenBackground>
   );
 }
