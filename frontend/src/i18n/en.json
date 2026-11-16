@@ -1092,7 +1092,6 @@
     },
     "stepOf": "Step {{step}} of 3: {{name}}",
     "payByBank": "Pay by bank",
-    "mostUsed": "Most used",
     "otherBanks": "Other banks",
     "canCheck": "Can check",
     "otherBank": "Other bank",
