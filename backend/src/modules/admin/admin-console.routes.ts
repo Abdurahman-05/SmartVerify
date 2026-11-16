@@ -211,7 +211,7 @@ export const adminConsoleRoutes: FastifyPluginAsyncZod = async (app) => {
     const monthStart = startOfMonth(now);
     return rows.filter((c) => {
       if (q.plan && c.plan !== q.plan) return false;
-      if (q.city && (c.city ?? '').toLowerCase() !== q.city.toLowerCase()) return false;
+      if (q.city && !(c.city ?? '').toLowerCase().includes(q.city.toLowerCase())) return false;
       if (q.filter === 'overdue' && !isOverdue(c)) return false;
       if (q.filter === 'trial' && c.access.status !== 'trial') return false;
       if (
