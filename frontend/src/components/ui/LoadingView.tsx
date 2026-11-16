@@ -13,14 +13,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 
-import { AuthBackground } from './AuthBackground';
+import { ChevronLeft } from 'lucide-react-native';
+
+import { PageLoader } from './PageLoader';
+import { ScreenBackground } from './ScreenBackground';
 import { ScreenHeader } from './ScreenHeader';
-import { StarterLoader } from './StarterLoader';
+import { TopBar } from './TopBar';
 import { Text } from './Text';
 import { GlassCard, HeroCard, ScreenBg } from '@/ui/glass';
 
 interface LoadingViewProps {
   title?: string;
+  /** Kept for callers; the loader shows only the title (or "Loading…"). */
   subtitle?: string;
   /** Header of the page being opened, shown on the slow-connection skeleton. */
   screenTitle?: string;
@@ -110,20 +114,31 @@ export function LoadingView({ title, subtitle, screenTitle, onBack }: LoadingVie
   }, [screenTitle, title]);
 
   if (slow) return <SlowLoading screenTitle={screenTitle} onBack={onBack} />;
-  return <BrandLoading title={title} subtitle={subtitle} />;
+  return <BrandLoading title={title} screenTitle={screenTitle} onBack={onBack} />;
 }
 
-/** The full loading page: the starter loader on the auth background, in both apps. */
-function BrandLoading({ title, subtitle }: Pick<LoadingViewProps, 'title' | 'subtitle'>) {
+/** The page's background (and its title bar, when known) with the loader over it. */
+function BrandLoading({
+  title,
+  screenTitle,
+  onBack,
+}: Pick<LoadingViewProps, 'title' | 'screenTitle' | 'onBack'>) {
   const { t } = useTranslation();
   return (
-    <AuthBackground>
-      <SafeAreaView className="flex-1 items-center justify-center">
-        <StarterLoader
-          title={title ?? t('splash.ready')}
-          subtitle={subtitle ?? t('splash.moment')}
-        />
+    <ScreenBackground>
+      <SafeAreaView className="flex-1">
+        {screenTitle ? (
+          <View className="px-4 pt-2">
+            <TopBar
+              title={screenTitle}
+              left={
+                onBack ? { icon: ChevronLeft, onPress: onBack, label: t('common.back') } : undefined
+              }
+            />
+          </View>
+        ) : null}
       </SafeAreaView>
-    </AuthBackground>
+      <PageLoader visible label={title} />
+    </ScreenBackground>
   );
 }

@@ -21,7 +21,8 @@
   },
   "loading": {
     "title": "Please wait",
-    "slow": "Slow connection, still loading…"
+    "slow": "Slow connection, still loading…",
+    "label": "Loading…"
   },
   "auth": {
     "welcomeBack": "Welcome back",
