@@ -7,6 +7,9 @@ export interface CustomerRow {
   name: string;
   businessType: string | null;
   city: string | null;
+  area: string | null;
+  /** The owner has set a map point. */
+  hasLocation: boolean;
   plan: 'normal' | 'normal_multi' | 'restaurant_normal' | 'restaurant' | null;
   ownerName: string;
   ownerPhone: string;
@@ -29,6 +32,9 @@ export async function loadCustomers(
         name: true,
         businessType: true,
         city: true,
+        area: true,
+        latitude: true,
+        longitude: true,
         plan: true,
         createdAt: true,
         suspendedAt: true,
@@ -59,6 +65,8 @@ export async function loadCustomers(
       name: b.name,
       businessType: b.businessType,
       city: b.city,
+      area: b.area,
+      hasLocation: b.latitude !== null && b.longitude !== null,
       plan: b.plan,
       ownerName: b.owner.name,
       ownerPhone: b.owner.phone,

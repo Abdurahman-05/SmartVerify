@@ -29,6 +29,44 @@ const profileSchema = z.object({
   longitude: z.number().nullable(),
 });
 
+const locationSchema = z.object({
+  lat: z.number(),
+  lng: z.number(),
+  address: z.string().nullable(),
+  city: z.string().nullable(),
+  area: z.string().nullable(),
+  landmark: z.string().nullable(),
+});
+
+const locationSelect = {
+  latitude: true,
+  longitude: true,
+  address: true,
+  city: true,
+  area: true,
+  landmark: true,
+} as const;
+
+/** The saved location, or null while no point has been set. */
+const toLocation = (b: {
+  latitude: number | null;
+  longitude: number | null;
+  address: string | null;
+  city: string | null;
+  area: string | null;
+  landmark: string | null;
+}) =>
+  b.latitude === null || b.longitude === null
+    ? null
+    : {
+        lat: b.latitude,
+        lng: b.longitude,
+        address: b.address,
+        city: b.city,
+        area: b.area,
+        landmark: b.landmark,
+      };
+
 /**
  * Reads "lat,lng" from what the owner pastes: a Google Maps link (…/@9.01,38.76,17z or
  * …?q=9.01,38.76) or the two numbers themselves.
@@ -158,6 +196,76 @@ export const businessRoutes: FastifyPluginAsyncZod = async (app) => {
           longitude: true,
         },
       });
+    }
+  );
+
+  app.get(
+    '/business/location',
+    {
+      preHandler: requireRoles('owner'),
+      schema: {
+        tags: ['business'],
+        security,
+        description: 'Owner: the saved business location, or null when none is set.',
+        response: {
+          200: locationSchema.nullable(),
+          401: errorResponseSchema,
+          403: errorResponseSchema,
+        },
+      },
+    },
+    async (request) =>
+      toLocation(
+        await prisma.business.findUniqueOrThrow({
+          where: { id: request.auth.businessId },
+          select: locationSelect,
+        })
+      )
+  );
+
+  app.patch(
+    '/business/location',
+    {
+      preHandler: requireRoles('owner'),
+      schema: {
+        tags: ['business'],
+        security,
+        description:
+          'Owner: save where the business is. `lat` and `lng` are required; the text fields are ' +
+          'optional (an empty string clears one). Seen by the Smart Verify team only.',
+        body: z.object({
+          lat: z.number().min(-90).max(90),
+          lng: z.number().min(-180).max(180),
+          address: z.string().trim().max(200).optional(),
+          city: z.string().trim().max(200).optional(),
+          area: z.string().trim().max(200).optional(),
+          landmark: z.string().trim().max(200).optional(),
+        }),
+        response: {
+          200: locationSchema,
+          400: errorResponseSchema.describe('VALIDATION_ERROR'),
+          401: errorResponseSchema,
+          403: errorResponseSchema,
+        },
+      },
+    },
+    async (request) => {
+      const { lat, lng, address, city, area, landmark } = request.body;
+      const text = (v: string | undefined) => (v === undefined ? undefined : v || null);
+      const saved = await prisma.business.update({
+        where: { id: request.auth.businessId },
+        data: {
+          latitude: lat,
+          longitude: lng,
+          locationSetAt: new Date(),
+          address: text(address),
+          city: text(city),
+          area: text(area),
+          landmark: text(landmark),
+        },
+        select: locationSelect,
+      });
+      return toLocation(saved)!;
     }
   );
 

@@ -155,6 +155,9 @@ model Business {
   businessType    String?
   city            String?
   address         String?
+  /// Sub-city or neighbourhood, and a nearby well-known place (owner fills in with the location).
+  area            String?
+  landmark        String?
   latitude        Float?
   longitude       Float?
   locationSetAt   DateTime?
