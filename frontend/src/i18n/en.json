@@ -21,10 +21,7 @@
   },
   "loading": {
     "title": "Please wait",
-    "subtitle": "Getting things ready",
-    "slow": "Slow connection, still loading…",
-    "foodTitle": "Please wait",
-    "foodSubtitle": "Getting things ready"
+    "slow": "Slow connection, still loading…"
   },
   "auth": {
     "welcomeBack": "Welcome back",
