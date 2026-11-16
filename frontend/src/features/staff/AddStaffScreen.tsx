@@ -4,7 +4,9 @@ import { useRouter } from 'expo-router';
 import {
   ChefHat,
   Info,
+  Mail,
   Save,
+  Send,
   Shuffle,
   UserCog,
   UtensilsCrossed,
@@ -15,7 +17,6 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import { z } from 'zod';
 
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { Input } from '@/components/ui/Input';
@@ -26,30 +27,46 @@ import { useBrandColors } from '@/store/theme';
 import { ApiError } from '@/lib/api/client';
 import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
-import { addStaff, randomPin, staffKey, type StaffRole } from '@/lib/staff';
+import { randomPin, staffKey, type StaffRole } from '@/lib/staff';
+import { createStaff, inviteManager } from '@/services/authService';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
 import { useRoleLabel, useWorkersOnly } from './roleLabel';
+import { useInvites } from './invites';
 import { isStaffLimit, StaffLimitSheet } from './StaffLimitSheet';
+import { GlassCard, PrimaryButton, SecondaryButton } from '@/ui/glass';
 
-const STAFF_PIN_DIGITS = 4;
+/** Waiters and chefs get a PIN of 4 to 6 digits from the owner or manager. */
+const STAFF_PIN_MAX = 6;
 
-const schema = z.object({
-  name: z.string().trim().min(2, 'staff.errors.name'),
-  phone: z.string().regex(/^[79]\d{8}$/, 'auth.errors.phone'),
-  pin: z.string().regex(/^\d{4}$/, 'staff.errors.pin'),
-  role: z.enum(['waiter', 'chef', 'manager']),
-  canChangeDeliveryFee: z.boolean(),
-  canSeeReports: z.boolean(),
-});
+const schema = z
+  .object({
+    name: z.string().trim().min(2, 'staff.errors.name'),
+    email: z.string(),
+    phone: z.string().regex(/^[79]\d{8}$/, 'auth.errors.phone'),
+    pin: z.string(),
+    role: z.enum(['waiter', 'chef', 'manager']),
+    canChangeDeliveryFee: z.boolean(),
+    canSeeReports: z.boolean(),
+  })
+  .superRefine((v, ctx) => {
+    // A manager is invited by email and sets their own PIN; waiters and chefs get a PIN, no email.
+    if (v.role === 'manager') {
+      if (!z.email().max(254).safeParse(v.email.trim()).success) {
+        ctx.addIssue({ code: 'custom', path: ['email'], message: 'auth.errors.email' });
+      }
+    } else if (!/^\d{4,6}$/.test(v.pin)) {
+      ctx.addIssue({ code: 'custom', path: ['pin'], message: 'staff.errors.pin' });
+    }
+  });
 
 type Values = z.infer<typeof schema>;
 
 const roleOptions: { role: StaffRole; icon: LucideIcon }[] = [
+  { role: 'manager', icon: UserCog },
   { role: 'waiter', icon: UtensilsCrossed },
   { role: 'chef', icon: ChefHat },
-  { role: 'manager', icon: UserCog },
 ];
 
 function PermissionRow({
@@ -80,6 +97,7 @@ export default function AddStaffScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const addInvite = useInvites((s) => s.add);
   const isOwner = useSession((s) => s.user?.role === 'owner');
   const workersOnly = useWorkersOnly();
   const roleLabel = useRoleLabel();
@@ -89,11 +107,13 @@ export default function AddStaffScreen() {
     handleSubmit,
     setError,
     setValue,
+    clearErrors,
     formState: { errors },
   } = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: '',
+      email: '',
       phone: '',
       pin: '',
       role: 'waiter',
@@ -107,14 +127,24 @@ export default function AddStaffScreen() {
   const err = (message?: string) => (message ? t(message) : undefined);
 
   const mutation = useMutation({
-    mutationFn: (values: Values) => {
+    mutationFn: async (values: Values) => {
+      if (values.role === 'manager') {
+        const email = values.email.trim().toLowerCase();
+        const invite = await inviteManager({
+          name: values.name.trim(),
+          email,
+          phone: values.phone,
+        });
+        addInvite(invite, t('staff.inviteSentTo', { email }));
+        return invite;
+      }
       const isWaiter = values.role === 'waiter';
-      return addStaff({
+      return createStaff({
         name: values.name.trim(),
         phone: values.phone,
         pin: values.pin,
         role: values.role,
-        // Only waiters use these two; managers can do both anyway.
+        // Only waiters use these two.
         canChangeDeliveryFee: isWaiter && values.canChangeDeliveryFee,
         canSeeReports: isWaiter && values.canSeeReports,
       });
@@ -145,40 +175,6 @@ export default function AddStaffScreen() {
       <ScreenHeader title={t('staff.addTitle')} subtitle={t('staff.addSubtitle')} onBack={goBack} />
 
       <View className="gap-3.5 px-4 pt-2">
-        <Controller
-          control={control}
-          name="name"
-          render={({ field }) => (
-            <Input
-              label={t('staff.fullName')}
-              placeholder={t('staff.fullNamePlaceholder')}
-              value={field.value}
-              onChangeText={field.onChange}
-              onBlur={field.onBlur}
-              autoCapitalize="words"
-              error={err(errors.name?.message)}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="phone"
-          render={({ field }) => (
-            <Input
-              label={t('staff.phone')}
-              prefix="+251"
-              placeholder={t('auth.phonePlaceholder')}
-              value={formatPhone(field.value)}
-              onChangeText={(text) => field.onChange(digitsOnly(text, PHONE_DIGITS))}
-              onBlur={field.onBlur}
-              keyboardType="number-pad"
-              maxLength={11}
-              error={err(errors.phone?.message)}
-            />
-          )}
-        />
-
         <View className="gap-1.5">
           <Text font="bold" className="text-base">
             {t('staff.role')}
@@ -188,14 +184,23 @@ export default function AddStaffScreen() {
             name="role"
             render={({ field }) => (
               <View className="flex-row gap-2" accessibilityRole="radiogroup">
-                {(workersOnly ? roleOptions.filter((o) => o.role === 'waiter') : roleOptions).map(
-                  ({ role: value, icon: Icon }) => {
+                {roleOptions
+                  // Only the owner can add a manager; Normal plans have one kind of staff.
+                  .filter((o) =>
+                    workersOnly ? o.role === 'waiter' : o.role !== 'manager' || isOwner
+                  )
+                  .map(({ role: value, icon: Icon }) => {
                     const selected = field.value === value;
-                    const disabled = value === 'manager' && !isOwner;
+                    const disabled = false;
                     return (
                       <Pressable
                         key={value}
-                        onPress={() => field.onChange(value)}
+                        onPress={() => {
+                          field.onChange(value);
+                          // Email is for managers only: hide and clear it for the other roles.
+                          if (value !== 'manager') setValue('email', '');
+                          clearErrors(['email', 'pin']);
+                        }}
                         disabled={disabled}
                         accessibilityRole="radio"
                         accessibilityState={{ selected, disabled }}
@@ -217,48 +222,112 @@ export default function AddStaffScreen() {
                         </Text>
                       </Pressable>
                     );
-                  }
-                )}
+                  })}
               </View>
             )}
           />
         </View>
 
-        <View className="gap-1.5">
+        <Controller
+          control={control}
+          name="name"
+          render={({ field }) => (
+            <Input
+              label={t('staff.fullName')}
+              placeholder={t('staff.fullNamePlaceholder')}
+              value={field.value}
+              onChangeText={field.onChange}
+              onBlur={field.onBlur}
+              autoCapitalize="words"
+              error={err(errors.name?.message)}
+            />
+          )}
+        />
+
+        {role === 'manager' ? (
           <Controller
             control={control}
-            name="pin"
+            name="email"
             render={({ field }) => (
               <Input
-                label={t('staff.pin')}
-                placeholder={t('staff.pinPlaceholder')}
+                label={t('staff.email')}
+                labelIcon={Mail}
+                labelIconColor={brand.primary}
+                placeholder={t('auth.emailPlaceholder')}
                 value={field.value}
-                onChangeText={(text) => field.onChange(digitsOnly(text, STAFF_PIN_DIGITS))}
+                onChangeText={field.onChange}
                 onBlur={field.onBlur}
-                keyboardType="number-pad"
-                maxLength={STAFF_PIN_DIGITS}
-                error={err(errors.pin?.message)}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="emailAddress"
+                error={err(errors.email?.message)}
               />
             )}
           />
+        ) : null}
+
+        <Controller
+          control={control}
+          name="phone"
+          render={({ field }) => (
+            <Input
+              label={t('staff.phone')}
+              prefix="+251"
+              placeholder={t('auth.phonePlaceholder')}
+              value={formatPhone(field.value)}
+              onChangeText={(text) => field.onChange(digitsOnly(text, PHONE_DIGITS))}
+              onBlur={field.onBlur}
+              keyboardType="number-pad"
+              maxLength={11}
+              error={err(errors.phone?.message)}
+            />
+          )}
+        />
+
+        {role === 'manager' ? (
           <View className="flex-row items-start gap-2">
             <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
             <Text tone="muted" className="flex-1 text-sm leading-5">
-              {t('staff.pinNote')}
+              {t('staff.inviteNote')}
             </Text>
           </View>
-          <Button
-            label={t('staff.generatePin')}
-            icon={Shuffle}
-            variant="outline"
-            size="md"
-            onPress={() => setValue('pin', randomPin(), { shouldValidate: true })}
-          />
-        </View>
+        ) : (
+          <View className="gap-1.5">
+            <Controller
+              control={control}
+              name="pin"
+              render={({ field }) => (
+                <Input
+                  label={t('staff.pin')}
+                  placeholder={t('staff.pinPlaceholder')}
+                  value={field.value}
+                  onChangeText={(text) => field.onChange(digitsOnly(text, STAFF_PIN_MAX))}
+                  onBlur={field.onBlur}
+                  keyboardType="number-pad"
+                  maxLength={STAFF_PIN_MAX}
+                  error={err(errors.pin?.message)}
+                />
+              )}
+            />
+            <View className="flex-row items-start gap-2">
+              <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
+              <Text tone="muted" className="flex-1 text-sm leading-5">
+                {t('staff.pinNote')}
+              </Text>
+            </View>
+            <SecondaryButton
+              label={t('staff.generatePin')}
+              icon={Shuffle}
+              size="md"
+              onPress={() => setValue('pin', randomPin(), { shouldValidate: true })}
+            />
+          </View>
+        )}
       </View>
 
       {role === 'waiter' && !workersOnly ? (
-        <View className="mx-4 mt-3 rounded-[20px] border-[1.5px] border-border bg-surface px-4 py-0.5">
+        <GlassCard className="mx-4 mt-3 px-4 py-0.5">
           <Text font="bold" tone="muted" className="pt-2.5 text-[15px]">
             {t('staff.permissions')}
           </Text>
@@ -285,7 +354,7 @@ export default function AddStaffScreen() {
               />
             )}
           />
-        </View>
+        </GlassCard>
       ) : null}
 
       <View className="min-h-6 flex-1" />
@@ -300,13 +369,13 @@ export default function AddStaffScreen() {
       />
 
       <View className="gap-2.5 px-4 pb-6 pt-3">
-        <Button
-          label={t('staff.save')}
-          icon={Save}
+        <PrimaryButton
+          label={role === 'manager' ? t('staff.sendInvite') : t('staff.addButton')}
+          icon={role === 'manager' ? Send : Save}
           disabled={mutation.isPending}
           onPress={() => void save()}
         />
-        <Button label={t('staff.cancel')} variant="outline" size="md" onPress={goBack} />
+        <SecondaryButton label={t('staff.cancel')} size="md" onPress={goBack} />
       </View>
     </FormScreen>
   );

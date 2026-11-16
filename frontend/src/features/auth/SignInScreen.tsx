@@ -2,7 +2,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Mail } from 'lucide-react-native';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Keyboard, Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -12,6 +13,7 @@ import { Checkbox } from '@/components/ui/Checkbox';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { Input } from '@/components/ui/Input';
+import { Segmented } from '@/components/ui/Segmented';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
@@ -20,6 +22,7 @@ import { signIn, signOut } from '@/lib/auth';
 import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
 import { belongsToOtherApp, isNormalApp } from '@/lib/variant';
+import { signInWithEmail } from '@/services/authService';
 import { homeRouteFor, useSession } from '@/store/session';
 import { PrimaryButton } from '@/ui/glass';
 
@@ -35,7 +38,7 @@ import {
   ShieldFilled,
 } from './AuthParts';
 import { PinVisibilityButton } from './PinVisibilityButton';
-import { PIN_LENGTH, signInSchema, type SignInValues } from './schemas';
+import { PIN_LENGTH, signInFormSchema, type SignInFormValues } from './schemas';
 
 /** The account belongs to the other app (shop plan in the Restaurant app, or the reverse). */
 class WrongAppError extends Error {}
@@ -51,16 +54,26 @@ export default function SignInScreen() {
   const {
     control,
     handleSubmit,
+    setValue,
+    clearErrors,
     formState: { errors },
-  } = useForm<SignInValues>({
-    resolver: zodResolver(signInSchema),
-    defaultValues: { phone: '', pin: '', rememberMe: true },
+  } = useForm<SignInFormValues>({
+    resolver: zodResolver(signInFormSchema),
+    defaultValues: { mode: 'owner', email: '', phone: '', pin: '', rememberMe: true },
   });
+  const mode = useWatch({ control, name: 'mode' });
 
   const mutation = useMutation({
     // A business of the other app is not signed in here at all.
-    mutationFn: async (values: SignInValues) => {
-      const user = await signIn(values);
+    mutationFn: async (values: SignInFormValues) => {
+      const user =
+        values.mode === 'owner'
+          ? await signInWithEmail({
+              email: values.email.trim().toLowerCase(),
+              pin: values.pin,
+              rememberMe: values.rememberMe,
+            })
+          : await signIn({ phone: values.phone, pin: values.pin, rememberMe: values.rememberMe });
       if (belongsToOtherApp(user.plan)) {
         await signOut();
         throw new WrongAppError();
@@ -93,31 +106,68 @@ export default function SignInScreen() {
           <AuthSubtitle text={t('auth.signInSubtitle')} />
 
           <AuthCard>
-            <Controller
-              control={control}
-              name="phone"
-              render={({ field }) => (
-                <Animated.View style={phoneFull.style}>
+            <Segmented
+              options={[
+                { value: 'owner', label: t('auth.ownerTab') },
+                { value: 'staff', label: t('auth.staffTab') },
+              ]}
+              value={mode}
+              onChange={(next) => {
+                setValue('mode', next);
+                clearErrors();
+              }}
+            />
+
+            {mode === 'owner' ? (
+              <Controller
+                control={control}
+                name="email"
+                render={({ field }) => (
                   <Input
-                    label={t('auth.phone')}
-                    labelIcon={PhoneFilled}
+                    label={t('auth.email')}
+                    labelIcon={Mail}
                     labelIconColor={auth.p}
                     round
-                    prefix="+251"
-                    placeholder={t('auth.phonePlaceholder')}
-                    value={formatPhone(field.value)}
-                    onChangeText={(text) => field.onChange(phoneFull.limit(text, field.value))}
+                    placeholder={t('auth.emailPlaceholder')}
+                    value={field.value}
+                    onChangeText={field.onChange}
                     onBlur={field.onBlur}
-                    keyboardType="number-pad"
-                    textContentType="telephoneNumber"
-                    autoComplete="tel"
-                    // "912 345 678" is 11 characters; one more lets an extra digit reach `limit`.
-                    maxLength={12}
-                    error={errorText(errors.phone?.message)}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    textContentType="emailAddress"
+                    autoComplete="email"
+                    error={errorText(errors.email?.message)}
                   />
-                </Animated.View>
-              )}
-            />
+                )}
+              />
+            ) : (
+              <Controller
+                control={control}
+                name="phone"
+                render={({ field }) => (
+                  <Animated.View style={phoneFull.style}>
+                    <Input
+                      label={t('auth.phone')}
+                      labelIcon={PhoneFilled}
+                      labelIconColor={auth.p}
+                      round
+                      prefix="+251"
+                      placeholder={t('auth.phonePlaceholder')}
+                      value={formatPhone(field.value)}
+                      onChangeText={(text) => field.onChange(phoneFull.limit(text, field.value))}
+                      onBlur={field.onBlur}
+                      keyboardType="number-pad"
+                      textContentType="telephoneNumber"
+                      autoComplete="tel"
+                      // "912 345 678" is 11 characters; one more lets an extra digit reach `limit`.
+                      maxLength={12}
+                      error={errorText(errors.phone?.message)}
+                    />
+                  </Animated.View>
+                )}
+              />
+            )}
 
             <Controller
               control={control}
@@ -162,7 +212,7 @@ export default function SignInScreen() {
                 />
               </View>
               <Pressable
-                onPress={() => router.push('/forgot-pin')}
+                onPress={() => router.push({ pathname: '/forgot-pin', params: { kind: mode } })}
                 accessibilityRole="link"
                 hitSlop={10}
                 className="min-h-11 justify-center"

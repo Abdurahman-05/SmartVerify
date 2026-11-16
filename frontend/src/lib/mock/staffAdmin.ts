@@ -12,7 +12,11 @@ export interface StaffMember {
   name: string;
   /** 9 digits without +251. */
   phone: string;
+  /** Required for managers (they get an invite there); optional for waiters and chefs. */
+  email?: string;
   role: StaffRole;
+  /** A manager invited by email who has not accepted yet. */
+  inviteSent?: boolean;
   /** false = cannot sign in. */
   active: boolean;
   canChangeDeliveryFee: boolean;
@@ -26,7 +30,8 @@ export interface StaffMember {
 export interface NewStaffInput {
   name: string;
   phone: string;
-  /** 4 digits. */
+  email?: string;
+  /** 4 to 6 digits. */
   pin: string;
   role: StaffRole;
   canChangeDeliveryFee: boolean;

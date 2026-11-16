@@ -10,6 +10,7 @@ export default function AuthLayout() {
       <Stack.Screen name="splash" />
       <Stack.Screen name="sign-in" />
       <Stack.Screen name="create-account" />
+      <Stack.Screen name="verify-email" />
       <Stack.Screen name="choose-plan" />
       <Stack.Screen name="forgot-pin" />
       <Stack.Screen name="set-passcode" />

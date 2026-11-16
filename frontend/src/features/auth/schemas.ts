@@ -15,6 +15,30 @@ export const signInSchema = z.object({
   rememberMe: z.boolean(),
 });
 
+const emailOk = (value: string) => z.email().max(254).safeParse(value.trim()).success;
+const signInPinOk = (value: string) =>
+  new RegExp(`^\\d{${STAFF_PIN_LENGTH},${PIN_LENGTH}}$`).test(value);
+
+/**
+ * The Sign in form has two modes: owner / manager (email + PIN) and staff (phone + PIN). Only the
+ * fields of the chosen mode are checked.
+ */
+export const signInFormSchema = z
+  .object({
+    mode: z.enum(['owner', 'staff']),
+    email: z.string(),
+    phone: z.string(),
+    pin: z.string(),
+    rememberMe: z.boolean(),
+  })
+  .superRefine((v, ctx) => {
+    const fail = (path: 'email' | 'phone' | 'pin', message: string) =>
+      ctx.addIssue({ code: 'custom', path: [path], message });
+    if (v.mode === 'owner' && !emailOk(v.email)) fail('email', 'auth.errors.email');
+    if (v.mode === 'staff' && !/^[79]\d{8}$/.test(v.phone)) fail('phone', 'auth.errors.phone');
+    if (!signInPinOk(v.pin)) fail('pin', 'auth.errors.signInPin');
+  });
+
 export const createAccountSchema = z.object({
   fullName: z.string().trim().min(2, 'auth.errors.fullName'),
   businessName: z.string().trim().min(2, 'auth.errors.businessName'),
@@ -29,4 +53,5 @@ export const createAccountSchema = z.object({
 });
 
 export type SignInValues = z.infer<typeof signInSchema>;
+export type SignInFormValues = z.infer<typeof signInFormSchema>;
 export type CreateAccountValues = z.infer<typeof createAccountSchema>;

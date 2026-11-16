@@ -16,10 +16,10 @@ import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { Text } from '@/components/ui/Text';
 import { useFullFieldFeedback } from '@/hooks/useFullFieldFeedback';
-import { createAccount } from '@/lib/auth';
+import type { createAccount } from '@/lib/auth';
 import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
-import { homeRouteFor, useSession } from '@/store/session';
+import { holdSignup, sendEmailCode } from '@/services/authService';
 
 import { FormScreen } from '@/components/ui/FormScreen';
 import {
@@ -41,10 +41,9 @@ export default function CreateAccountScreen() {
   const auth = useAuthColors();
   const { t } = useTranslation();
   const router = useRouter();
-  const startSession = useSession((s) => s.signIn);
   const [showPin, setShowPin] = useState(false);
   const phoneFull = useFullFieldFeedback(PHONE_DIGITS);
-  // Two short steps so nothing scrolls: 1 = name, email, PIN; 2 = business, phone and terms.
+  // Two short steps: 1 = name, email, phone, PIN; 2 = business and terms. Then Verify email.
   const [step, setStep] = useState<1 | 2>(1);
 
   const {
@@ -74,12 +73,15 @@ export default function CreateAccountScreen() {
     return () => sub.remove();
   }, [step]);
 
+  // Nothing is created yet: the code is sent, and the account is made once the email is verified.
   const mutation = useMutation({
-    mutationFn: createAccount,
-    onSuccess: (user) => {
-      startSession(user);
-      // New owner: passcode first, then Choose plan (no plan yet).
-      router.replace(homeRouteFor(user));
+    mutationFn: async (values: Parameters<typeof createAccount>[0]) => {
+      await sendEmailCode(values.email);
+      return values;
+    },
+    onSuccess: (values) => {
+      holdSignup(values);
+      router.push({ pathname: '/verify-email', params: { email: values.email } });
     },
   });
 
@@ -173,6 +175,32 @@ export default function CreateAccountScreen() {
 
                 <Controller
                   control={control}
+                  name="phone"
+                  render={({ field }) => (
+                    <Animated.View style={phoneFull.style}>
+                      <Input
+                        label={t('auth.phone')}
+                        labelIcon={PhoneFilled}
+                        labelIconColor={auth.p}
+                        round
+                        prefix="+251"
+                        placeholder={t('auth.phonePlaceholder')}
+                        value={formatPhone(field.value)}
+                        onChangeText={(text) => field.onChange(phoneFull.limit(text, field.value))}
+                        onBlur={field.onBlur}
+                        keyboardType="number-pad"
+                        textContentType="telephoneNumber"
+                        autoComplete="tel"
+                        // "912 345 678" is 11 characters; one more lets an extra digit reach `limit`.
+                        maxLength={12}
+                        error={errorText(errors.phone?.message)}
+                      />
+                    </Animated.View>
+                  )}
+                />
+
+                <Controller
+                  control={control}
                   name="pin"
                   render={({ field }) => (
                     <Input
@@ -222,32 +250,6 @@ export default function CreateAccountScreen() {
 
                 <Controller
                   control={control}
-                  name="phone"
-                  render={({ field }) => (
-                    <Animated.View style={phoneFull.style}>
-                      <Input
-                        label={t('auth.phone')}
-                        labelIcon={PhoneFilled}
-                        labelIconColor={auth.p}
-                        round
-                        prefix="+251"
-                        placeholder={t('auth.phonePlaceholder')}
-                        value={formatPhone(field.value)}
-                        onChangeText={(text) => field.onChange(phoneFull.limit(text, field.value))}
-                        onBlur={field.onBlur}
-                        keyboardType="number-pad"
-                        textContentType="telephoneNumber"
-                        autoComplete="tel"
-                        // "912 345 678" is 11 characters; one more lets an extra digit reach `limit`.
-                        maxLength={12}
-                        error={errorText(errors.phone?.message)}
-                      />
-                    </Animated.View>
-                  )}
-                />
-
-                <Controller
-                  control={control}
                   name="acceptTerms"
                   render={({ field }) => (
                     <View className="gap-1">
@@ -282,7 +284,9 @@ export default function CreateAccountScreen() {
                 Keyboard.dismiss();
                 if (step === 1) {
                   // Step 1 checks only its own fields; the whole form is sent from step 2.
-                  void trigger(['fullName', 'email', 'pin']).then((ok) => ok && setStep(2));
+                  void trigger(['fullName', 'email', 'phone', 'pin']).then(
+                    (ok) => ok && setStep(2)
+                  );
                   return;
                 }
                 void handleSubmit(({ acceptTerms: _accepted, ...values }) =>

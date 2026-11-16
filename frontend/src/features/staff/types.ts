@@ -7,6 +7,7 @@ export interface Staff {
   name: string;
   /** 9 digits without +251. */
   phone: string;
+  email?: string;
   pin: string;
   role: StaffRole;
   canChangeDeliveryFee: boolean;

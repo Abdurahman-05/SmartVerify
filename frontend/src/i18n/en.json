@@ -64,7 +64,20 @@
       "email": "Enter a valid email",
       "emailTaken": "This email already has an account."
     },
-    "continue": "Continue"
+    "continue": "Continue",
+    "ownerTab": "Owner / Manager",
+    "staffTab": "Staff",
+    "verify": {
+      "title": "Verify email",
+      "subtitle": "Enter the 6-digit code we sent to",
+      "codeLabel": "Verification code",
+      "verify": "Verify",
+      "resend": "Resend code",
+      "resendIn": "Resend code ({{time}})",
+      "change": "Change email",
+      "wrongCode": "That code is not right. Try again.",
+      "incomplete": "Enter all {{count}} digits"
+    }
   },
   "plan": {
     "normalFeatures": "Verify Payment · Transactions · Reports",
@@ -831,12 +844,12 @@
     "confirmActive": "Make active",
     "cancel": "Cancel",
     "addTitle": "Add staff",
-    "addSubtitle": "They get a sign-in by phone number",
+    "addSubtitle": "Managers get an email invite, others a PIN",
     "fullName": "Full name",
     "fullNamePlaceholder": "e.g. Selam Tadesse",
     "phone": "Phone number",
     "role": "Role",
-    "pin": "Temporary PIN (4 digits)",
+    "pin": "PIN (4 to 6 digits)",
     "pinPlaceholder": "e.g. 4821",
     "pinNote": "Give this PIN to the person. They sign in with it and then choose their own PIN.",
     "permissions": "What can this person do?",
@@ -846,7 +859,7 @@
     "errors": {
       "name": "Enter the full name",
       "phoneTaken": "This phone number is already used",
-      "pin": "PIN must be 4 digits",
+      "pin": "PIN must be 4 to 6 digits",
       "limit": "The Normal plan has up to 2 workers. Turn one off, or upgrade to Normal Multi for more."
     },
     "inactive": "Inactive",
@@ -871,7 +884,13 @@
       "body": "To add more workers, move to Normal Multi: any number of workers, for branches too.",
       "upgrade": "Get Normal Multi",
       "notNow": "Not now"
-    }
+    },
+    "email": "Email",
+    "sendInvite": "Send invite",
+    "addButton": "Add staff",
+    "inviteSent": "Invite sent",
+    "inviteSentTo": "Invite sent to {{email}}",
+    "inviteNote": "They set their own PIN from the invite email."
   },
   "themes": {
     "orange": "Orange",
@@ -1056,7 +1075,11 @@
       "staffBody": "Ask your owner or manager to set a new PIN for you.",
       "ownerTitle": "Owner",
       "ownerBody": "Contact ገብቷል support to reset your PIN. Soon you will be able to reset it yourself with a code sent to your phone.",
-      "back": "Back to sign in"
+      "back": "Back to sign in",
+      "emailPrompt": "Enter your email. We will send you a code to reset your PIN.",
+      "phonePrompt": "Enter your phone number. We will send you a code by SMS.",
+      "send": "Send reset code",
+      "sent": "Code sent to {{value}}"
     },
     "forcedSubtitle": "Choose your own PIN to continue",
     "forcedNote": "Your PIN was set by your manager. Choose a new PIN that only you know. Enter the PIN you were given as the current PIN."
