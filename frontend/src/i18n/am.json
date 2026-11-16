@@ -1340,19 +1340,17 @@
     "buy": {
       "tab": "መግዣ",
       "title": "የመግዣ ዝርዝር",
-      "subtitle": "ወጥ ቤቱ የሚፈልገው",
       "toBuy": "የሚገዛ",
       "bought": "የተገዛ",
       "emptyOpen": "አሁን የሚገዛ ምንም የለም።",
       "emptyBought": "ገና የተገዛ ምንም የለም።",
-      "askedBy": "የጠየቀው {{name}}",
       "boughtBy": "የገዛው {{name}}",
-      "sheetTitle": "እንደተገዛ ምልክት አድርግ",
       "price": "ዋጋ (ብር)",
-      "paidCash": "በጥሬ ገንዘብ ተከፍሏል",
-      "paidBank": "በባንክ ተከፍሏል",
       "markBought": "እንደተገዛ ምልክት አድርግ",
-      "failedTitle": "እንደተገዛ ምልክት ማድረግ አልተቻለም"
+      "failedTitle": "እንደተገዛ ምልክት ማድረግ አልተቻለም",
+      "subtitleCount_one": "{{count}} የሚገዛ · በኩሽና የተጨመረ",
+      "subtitleCount_other": "{{count}} የሚገዙ · በኩሽና የተጨመሩ",
+      "pricePaid": "የተከፈለ ዋጋ"
     },
     "money": {
       "tab": "ወጪ",

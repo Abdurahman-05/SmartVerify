@@ -1340,19 +1340,17 @@
     "buy": {
       "tab": "Buy list",
       "title": "Buy list",
-      "subtitle": "What the kitchen needs",
       "toBuy": "To buy",
       "bought": "Bought",
       "emptyOpen": "Nothing to buy right now.",
       "emptyBought": "Nothing bought yet.",
-      "askedBy": "Asked by {{name}}",
       "boughtBy": "Bought by {{name}}",
-      "sheetTitle": "Mark as bought",
       "price": "Price (ETB)",
-      "paidCash": "Paid cash",
-      "paidBank": "Paid by bank",
       "markBought": "Mark as bought",
-      "failedTitle": "Couldn't mark it as bought"
+      "failedTitle": "Couldn't mark it as bought",
+      "subtitleCount_one": "{{count}} to buy · added by the kitchen",
+      "subtitleCount_other": "{{count}} to buy · added by the kitchen",
+      "pricePaid": "Price paid"
     },
     "money": {
       "tab": "Money out",

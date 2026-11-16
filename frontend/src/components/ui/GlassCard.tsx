@@ -13,6 +13,8 @@ export interface GlassCardProps {
   /** Outer box (margins, width, flex). */
   containerStyle?: StyleProp<ViewStyle>;
   onPress?: () => void;
+  /** A 2 px border in this colour (e.g. the open item). */
+  highlight?: string;
   accessibilityLabel?: string;
   accessibilityRole?: 'button' | 'radio' | 'tab';
   accessibilityState?: { selected?: boolean; disabled?: boolean };
@@ -25,6 +27,7 @@ export function GlassCard({
   style,
   containerStyle,
   onPress,
+  highlight,
   ...a11y
 }: GlassCardProps) {
   const g = useGlass();
@@ -37,8 +40,8 @@ export function GlassCard({
       style={{
         borderRadius: radius,
         overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.8)',
+        borderWidth: highlight ? 2 : 1,
+        borderColor: highlight ?? 'rgba(255,255,255,0.8)',
       }}
     >
       <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />

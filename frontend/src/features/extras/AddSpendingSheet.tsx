@@ -18,11 +18,11 @@ import {
 } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Keyboard, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Keyboard, ScrollView, TextInput, View } from 'react-native';
 
 import { BottomSheet } from '@/components/ui/BottomSheet';
+import { ChoicePill } from '@/components/ui/ChoicePill';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
-import { useGlass } from '@/components/ui/glassTokens';
 import { HeroCard } from '@/components/ui/HeroCard';
 import { Input } from '@/components/ui/Input';
 import { formatMoney } from '@/components/ui/MoneyText';
@@ -68,52 +68,6 @@ const categoryIcons: Record<ExpenseCategory, LucideIcon> = {
   BILLS: ReceiptText,
   OTHER: Ellipsis,
 };
-
-/** A choice pill or tile: selected = 2 px theme border, tile background, theme text. */
-function Choice({
-  label,
-  icon: Icon,
-  selected,
-  onPress,
-  tall,
-}: {
-  label: string;
-  icon?: LucideIcon;
-  selected: boolean;
-  onPress: () => void;
-  tall?: boolean;
-}) {
-  const g = useGlass();
-  const fg = selected ? g.primaryText : colors.text;
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="radio"
-      accessibilityState={{ selected }}
-      accessibilityLabel={label}
-      className={`flex-1 items-center justify-center active:opacity-80 ${
-        tall ? 'h-16 gap-0.5 rounded-[18px] px-1' : 'h-12 flex-row gap-2 rounded-[24px] px-3'
-      }`}
-      style={{
-        backgroundColor: selected ? g.tile : 'rgba(255,255,255,0.55)',
-        borderWidth: selected ? 2 : 1,
-        borderColor: selected ? g.primary : 'rgba(255,255,255,0.9)',
-      }}
-    >
-      {Icon ? <Icon size={tall ? 20 : 18} color={fg} strokeWidth={2.2} /> : null}
-      <Text
-        font="bold"
-        className={tall ? 'text-[13px]' : 'text-[15px]'}
-        style={{ color: fg }}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.8}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
 
 function rows<T>(items: T[], size: number): T[][] {
   const out: T[][] = [];
@@ -271,7 +225,7 @@ export function AddSpendingSheet({
             {rows(kinds, 4).map((row) => (
               <View key={row[0]} className="flex-row gap-2">
                 {row.map((c) => (
-                  <Choice
+                  <ChoicePill
                     tall
                     key={c}
                     icon={categoryIcons[c]}
@@ -291,13 +245,13 @@ export function AddSpendingSheet({
         <View className="gap-1.5">
           {label(t('extras.money.paidFrom'))}
           <View className="flex-row gap-2" accessibilityRole="radiogroup">
-            <Choice
+            <ChoicePill
               icon={Banknote}
               label={t('extras.cash')}
               selected={paidFrom === 'CASH'}
               onPress={() => setPaidFrom('CASH')}
             />
-            <Choice
+            <ChoicePill
               icon={Landmark}
               label={t('extras.bank')}
               selected={paidFrom === 'BANK'}
@@ -308,12 +262,12 @@ export function AddSpendingSheet({
         <View className="gap-1.5">
           {label(t('extras.money.receipt'))}
           <View className="flex-row gap-2" accessibilityRole="radiogroup">
-            <Choice
+            <ChoicePill
               label={t('extras.money.hasReceipt')}
               selected={hasReceipt}
               onPress={() => setHasReceipt(true)}
             />
-            <Choice
+            <ChoicePill
               label={t('extras.money.noReceipt')}
               selected={!hasReceipt}
               onPress={() => setHasReceipt(false)}
@@ -323,12 +277,12 @@ export function AddSpendingSheet({
         <View className="gap-1.5">
           {label(t('extras.money.usedFor'))}
           <View className="flex-row gap-2" accessibilityRole="radiogroup">
-            <Choice
+            <ChoicePill
               label={t('extras.money.forBusiness')}
               selected={forBusiness}
               onPress={() => setForBusiness(true)}
             />
-            <Choice
+            <ChoicePill
               label={t('extras.money.personal')}
               selected={!forBusiness}
               onPress={() => setForBusiness(false)}
