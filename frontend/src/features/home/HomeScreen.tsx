@@ -125,6 +125,14 @@ function TodayHero({
   return (
     <View style={{ marginHorizontal: 16 }}>
       <HeroCard>
+        {/* Transparent pizza in the top corner, kept inside the card. */}
+        <Image
+          source={heroPizza}
+          contentFit="contain"
+          pointerEvents="none"
+          accessible={false}
+          style={{ position: 'absolute', top: 0, right: 0, width: 132, height: 136 }}
+        />
         <View className="flex-row items-center gap-1.5">
           <View
             className="h-3.5 w-3.5 rounded-full border-2 border-white/50"
@@ -149,14 +157,6 @@ function TodayHero({
           <HeroStat value={day.duplicate} label={t('status.duplicate')} />
         </View>
       </HeroCard>
-      {/* Transparent pizza on the top corner, a little over the card's edge. */}
-      <Image
-        source={heroPizza}
-        contentFit="contain"
-        pointerEvents="none"
-        accessible={false}
-        style={{ position: 'absolute', top: -14, right: -4, width: 132, height: 136 }}
-      />
     </View>
   );
 }
