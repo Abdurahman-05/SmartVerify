@@ -1,6 +1,5 @@
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
@@ -94,21 +93,18 @@ export function PageLoader({ visible, label }: { visible: boolean; label?: strin
             ]}
           />
           <Animated.View style={pulse}>
-            <LinearGradient
-              colors={[g.primary2, g.primary, g.primaryText]}
-              // 160°: from the top, a little to the right, down to the bottom-left.
-              start={{ x: 0.67, y: 0 }}
-              end={{ x: 0.33, y: 1 }}
+            <View
               style={{
                 width: LOGO,
                 height: LOGO,
                 borderRadius: LOGO / 2,
                 alignItems: 'center',
                 justifyContent: 'center',
+                backgroundColor: g.primaryDeep,
               }}
             >
               <Image source={glyph} style={{ width: 64, height: 64 }} contentFit="contain" />
-            </LinearGradient>
+            </View>
           </Animated.View>
         </View>
         <View

@@ -68,7 +68,7 @@ function HomeHeader({ user }: { user: SessionUser }) {
           accessible
           accessibilityLabel={t('home.profile')}
           className="h-11 w-11 items-center justify-center rounded-full"
-          style={{ backgroundColor: g.primary }}
+          style={{ backgroundColor: g.primaryDeep }}
         >
           <Text font="bold" tone="inverse" className="text-lg">
             {user.displayName.charAt(0).toUpperCase()}

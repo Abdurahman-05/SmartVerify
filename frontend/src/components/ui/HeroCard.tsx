@@ -1,10 +1,9 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
 import { View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useGlass } from './glassTokens';
 
-/** Big theme-gradient card with white content and a faint circle at the bottom-right. */
+/** Big card in the flat deep theme colour with white content. */
 export function HeroCard({
   children,
   style,
@@ -14,27 +13,14 @@ export function HeroCard({
 }) {
   const g = useGlass();
   return (
-    <LinearGradient
-      colors={[g.primary2, g.primary, g.primaryText]}
-      locations={[0, 0.58, 1]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0.85, y: 1 }}
-      style={[{ borderRadius: 26, padding: 18, overflow: 'hidden' }, style]}
+    <View
+      style={[
+        { borderRadius: 26, padding: 18, overflow: 'hidden', backgroundColor: g.primaryDeep },
+        style,
+      ]}
     >
-      <View
-        pointerEvents="none"
-        style={{
-          position: 'absolute',
-          right: -60,
-          bottom: -80,
-          width: 200,
-          height: 200,
-          borderRadius: 100,
-          backgroundColor: 'rgba(255,255,255,0.1)',
-        }}
-      />
       {children}
-    </LinearGradient>
+    </View>
   );
 }
 

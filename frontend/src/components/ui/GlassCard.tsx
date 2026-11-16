@@ -33,7 +33,7 @@ export function GlassCard({
   const g = useGlass();
   const outer: ViewStyle = {
     borderRadius: radius,
-    boxShadow: `0 10px 30px ${alpha(g.primaryText, 0.16)}`,
+    boxShadow: `0 10px 30px ${alpha(g.primary, 0.16)}`,
   };
   const body = (
     <View

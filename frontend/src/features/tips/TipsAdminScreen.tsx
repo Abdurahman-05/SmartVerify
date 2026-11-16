@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
 import {
   Banknote,
   CalendarDays,
@@ -168,9 +167,11 @@ function WeekStrip({
               }}
             >
               {selected ? (
-                <LinearGradient
-                  colors={[g.primary2, g.primary]}
-                  style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+                <View
+                  style={[
+                    { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 },
+                    { backgroundColor: g.primaryDeep },
+                  ]}
                 />
               ) : null}
               <Text font="bold" className="text-[13px]" style={{ color }}>
@@ -214,20 +215,22 @@ function WaiterRow({
       className={`flex-row items-center gap-3 py-3 ${first ? '' : 'border-t border-black/[0.07]'}`}
       style={{ opacity: toPay ? 1 : 0.7 }}
     >
-      <LinearGradient
-        colors={item.count ? [g.primary2, g.primary] : ['#D6CFCB', '#B9AEB3']}
-        style={{
-          width: 42,
-          height: 42,
-          borderRadius: 21,
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
+      <View
+        style={[
+          {
+            width: 42,
+            height: 42,
+            borderRadius: 21,
+            alignItems: 'center',
+            justifyContent: 'center',
+          },
+          { backgroundColor: item.count ? g.primaryDeep : '#B9AEB3' },
+        ]}
       >
         <Text font="bold" tone="inverse" className="text-[17px]">
           {(item.name.charAt(0) || '?').toUpperCase()}
         </Text>
-      </LinearGradient>
+      </View>
       <View className="min-w-0 flex-1">
         <Text font="bold" className="text-base" numberOfLines={1}>
           {item.name}
@@ -247,19 +250,21 @@ function WaiterRow({
           accessibilityLabel={`${t('tipsAdmin.pay')} ${item.name}`}
           className="min-h-11 justify-center active:opacity-80"
         >
-          <LinearGradient
-            colors={[g.primary2, g.primary]}
-            style={{
-              height: 34,
-              borderRadius: 17,
-              paddingHorizontal: 16,
-              justifyContent: 'center',
-            }}
+          <View
+            style={[
+              {
+                height: 34,
+                borderRadius: 17,
+                paddingHorizontal: 16,
+                justifyContent: 'center',
+              },
+              { backgroundColor: g.primaryDeep },
+            ]}
           >
             <Text font="bold" tone="inverse" className="text-sm">
               {t('tipsAdmin.pay')}
             </Text>
-          </LinearGradient>
+          </View>
         </Pressable>
       ) : item.count ? (
         <View className="h-7 flex-row items-center gap-1 rounded-[14px] bg-successBg px-2.5">

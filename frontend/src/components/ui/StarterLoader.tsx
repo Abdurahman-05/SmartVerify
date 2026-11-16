@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import Animated, {
@@ -64,20 +63,20 @@ function LogoLoader({ still }: { still: boolean }) {
         ]}
       />
       <Animated.View style={pulse}>
-        <LinearGradient
-          colors={[g.primary2, g.primary, g.primaryText]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-          style={{
-            width: LOGO,
-            height: LOGO,
-            borderRadius: LOGO / 2,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
+        <View
+          style={[
+            {
+              width: LOGO,
+              height: LOGO,
+              borderRadius: LOGO / 2,
+              alignItems: 'center',
+              justifyContent: 'center',
+            },
+            { backgroundColor: g.primaryDeep },
+          ]}
         >
           <Image source={glyph} style={{ width: 82, height: 82 }} contentFit="contain" />
-        </LinearGradient>
+        </View>
       </Animated.View>
     </View>
   );

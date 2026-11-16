@@ -1,9 +1,7 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, View, type ViewProps } from 'react-native';
 
 import { useBrandColors } from '@/store/theme';
 
-import { brandGradient } from './glassColors';
 
 export interface HeroCardProps extends ViewProps {
   radius?: number;
@@ -17,13 +15,12 @@ export function HeroCard({ radius = 20, style, children, className, ...props }: 
   const brand = useBrandColors();
   return (
     <View className={className} style={[styles.shadow, { borderRadius: radius }, style]} {...props}>
-      <LinearGradient
+      <View
         pointerEvents="none"
-        colors={brandGradient(brand.primary)}
-        locations={[0, 0.55, 1]}
-        start={{ x: 0, y: 0.15 }}
-        end={{ x: 1, y: 0.85 }}
-        style={[StyleSheet.absoluteFill, styles.edge, { borderRadius: radius }]}
+        style={[
+          [StyleSheet.absoluteFill, styles.edge, { borderRadius: radius }],
+          { backgroundColor: brand.primaryDeep },
+        ]}
       />
       {children}
     </View>

@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, View } from 'react-native';
 
 import { colors } from '@/theme/tokens';
@@ -33,11 +32,11 @@ export function Segmented<T extends string>({ options, value, onChange }: Segmen
               style={active ? { boxShadow: `0 6px 14px ${alpha(g.primary, 0.3)}` } : null}
             >
               {active ? (
-                <LinearGradient
-                  colors={[g.primary2, g.primary]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+                <View
+                  style={[
+                    { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 },
+                    { backgroundColor: g.primaryDeep },
+                  ]}
                 />
               ) : null}
               <Text

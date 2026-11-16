@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { Check } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +11,7 @@ import { Text } from '@/components/ui/Text';
 import { AuthCard, AuthLogo, AuthSubtitle, AuthTitle, SecureLine } from '@/features/auth/AuthParts';
 import { useTheme } from '@/store/theme';
 import { DEFAULT_THEME, THEME_IDS, themes, themeVars, type ThemeId } from '@/theme/themes';
-import { brandGradient, PrimaryButton, shade } from '@/ui/glass';
+import { PrimaryButton } from '@/ui/glass';
 
 /** Sample amount in the preview strip, so the pick can be seen on a real-looking number. */
 const PREVIEW_ETB = 18200;
@@ -101,12 +100,11 @@ export function FirstThemeScreen() {
             </View>
 
             <View className="overflow-hidden rounded-[18px] px-3.5 py-3">
-              <LinearGradient
-                colors={brandGradient(brand.primary)}
-                locations={[0, 0.55, 1]}
-                start={{ x: 0, y: 0.15 }}
-                end={{ x: 1, y: 0.85 }}
-                style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+              <View
+                style={[
+                  { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 },
+                  { backgroundColor: brand.primaryDeep },
+                ]}
               />
               <Text
                 font="bold"
@@ -122,7 +120,7 @@ export function FirstThemeScreen() {
 
             <PrimaryButton
               accent
-              gradient={[shade(brand.primary, 0.16), brand.primary]}
+              gradient={[brand.primaryDeep, brand.primaryDeep]}
               label={t('firstTheme.useColor')}
               onPress={() => setTheme(picked)}
             />

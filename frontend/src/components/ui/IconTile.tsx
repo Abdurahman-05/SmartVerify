@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import type { ComponentType } from 'react';
 import { View } from 'react-native';
 
@@ -42,14 +41,9 @@ export function IconTile({
   const glyphSize = iconSize ?? Math.round(size / 2);
   if (tone === 'brand') {
     return (
-      <LinearGradient
-        colors={[g.primary2, g.primary]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={box}
-      >
+      <View style={[box, { backgroundColor: g.primaryDeep }]}>
         <Glyph size={glyphSize} color="#FFFFFF" strokeWidth={2.2} />
-      </LinearGradient>
+      </View>
     );
   }
   return (

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Check, EllipsisVertical, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
@@ -7,7 +8,6 @@ import { Alert, FlatList, Modal, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BankBadge } from '@/components/ui/BankBadge';
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { NoConnection } from '@/components/ui/NoConnection';
@@ -24,15 +24,18 @@ import {
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { colors } from '@/theme/tokens';
 
+import { useBrandColors } from '@/store/theme';
+
 import { maskedNumberKey } from './telebirr';
+import { GlassCard, PrimaryButton, ScreenBg, SecondaryButton } from '@/ui/glass';
 
 function UsageCard({ count }: { count: number }) {
   const { t } = useTranslation();
   return (
-    <View
+    <GlassCard
       accessible
       accessibilityLabel={`${t('bankAccounts.connected')}: ${t('bankAccounts.used', { count, max: MAX_BANK_ACCOUNTS })}`}
-      className="mx-4 mt-1 rounded-[18px] border-[1.5px] border-border bg-surface px-4 py-3"
+      className="mx-4 mt-1 px-4 py-3"
     >
       <View className="mb-2 flex-row items-center justify-between gap-2">
         <Text font="bold" className="text-[17px]">
@@ -50,37 +53,65 @@ function UsageCard({ count }: { count: number }) {
           />
         ))}
       </View>
-    </View>
+    </GlassCard>
   );
 }
 
+/** Card colours per bank (design: each account is a card in its bank's colours). */
+const bankGradient: Record<string, readonly [string, string, string]> = {
+  CBE: ['#7B3FB0', '#5B2A86', '#3A1A5C'],
+  TEL: ['#4A9BF0', '#1F7AE0', '#0F4E99'],
+  DAS: ['#3F86C9', '#1B5E9C', '#0F3D6B'],
+  BOA: ['#D9AE3A', '#B8860B', '#7A5A08'],
+  MPE: ['#4CC160', '#2E9E45', '#1D6B2E'],
+  EBR: ['#F29A45', '#E07A1F', '#A4540F'],
+};
+
 function AccountRow({ account, onMore }: { account: BankAccount; onMore: () => void }) {
   const { t } = useTranslation();
+  const brand = useBrandColors();
+  const fill = bankGradient[account.bankCode] ?? ([brand.primaryDeep, brand.primaryDeep] as const);
   return (
-    <View className="flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface py-3 pl-3 pr-2">
-      <BankBadge code={account.bankCode} />
-      <View className="min-w-0 flex-1">
-        <Text font="bold" className="text-[17px]" numberOfLines={1}>
+    <View
+      className="overflow-hidden rounded-card p-4"
+      style={{ boxShadow: '0 14px 28px rgba(30,20,25,0.2)' }}
+    >
+      <LinearGradient
+        colors={fill}
+        locations={[0, 0.55, 1]}
+        start={{ x: 0, y: 0.1 }}
+        end={{ x: 1, y: 0.9 }}
+        style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
+      />
+      <View className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10" />
+      <View className="flex-row items-center justify-between gap-2">
+        <Text font="bold" tone="inverse" className="flex-1 text-base" numberOfLines={1}>
+          {account.bankName}
+        </Text>
+        <Pressable
+          onPress={onMore}
+          accessibilityRole="button"
+          accessibilityLabel={t('bankAccounts.moreOptions', { bank: account.bankName })}
+          hitSlop={6}
+          className="-mr-2 h-11 w-11 items-center justify-center rounded-full active:bg-white/20"
+        >
+          <EllipsisVertical size={22} color="#FFFFFF" strokeWidth={2.5} />
+        </Pressable>
+      </View>
+      <Text font="heading" tone="inverse" className="mt-3 text-[22px] tracking-[2px]">
+        {t(maskedNumberKey(account.bankCode), { last4: account.last4 })}
+      </Text>
+      <View className="mt-2.5 flex-row items-center justify-between gap-2">
+        <Text tone="inverse" className="flex-1 text-sm opacity-90" numberOfLines={1}>
           {account.holderName}
         </Text>
-        <Text tone="muted" className="mb-1 mt-px text-[15px]" numberOfLines={1}>
-          {account.shortName} · {t(maskedNumberKey(account.bankCode), { last4: account.last4 })}
-        </Text>
-        <View className="flex-row items-center gap-1 self-start rounded-[14px] bg-successBg py-[3px] pl-2 pr-2.5">
-          <Check size={14} color={colors.successFg} strokeWidth={2.6} />
-          <Text font="bold" className="text-sm text-successFg">
+        <View className="h-[26px] flex-row items-center gap-1 rounded-[13px] bg-white/20 px-2.5">
+          <Check size={13} color="#FFFFFF" strokeWidth={2.8} />
+          <Text font="bold" tone="inverse" className="text-[13px]">
             {t('bankAccounts.statusConnected')}
           </Text>
         </View>
       </View>
-      <Pressable
-        onPress={onMore}
-        accessibilityRole="button"
-        accessibilityLabel={t('bankAccounts.moreOptions', { bank: account.bankName })}
-        className="h-11 w-11 items-center justify-center rounded-full active:bg-border"
-      >
-        <EllipsisVertical size={22} color={colors.muted} strokeWidth={2.5} />
-      </Pressable>
     </View>
   );
 }
@@ -125,16 +156,16 @@ function AccountActions({
                 </Text>
               </View>
             </View>
-            <Pressable
+            <GlassCard
               onPress={() => onEdit(account)}
               accessibilityRole="button"
-              className="min-h-14 flex-row items-center gap-3 rounded-[18px] border-2 border-border bg-surface px-4 active:bg-background"
+              className="min-h-14 flex-row items-center gap-3 border-2 px-4"
             >
               <Pencil size={22} color={colors.text} strokeWidth={2.2} />
               <Text font="bold" className="text-lg">
                 {t('bankAccounts.edit')}
               </Text>
-            </Pressable>
+            </GlassCard>
             <Pressable
               onPress={() => onRemove(account)}
               accessibilityRole="button"
@@ -145,12 +176,7 @@ function AccountActions({
                 {t('bankAccounts.remove')}
               </Text>
             </Pressable>
-            <Button
-              label={t('bankAccounts.cancel')}
-              variant="secondary"
-              size="md"
-              onPress={onClose}
-            />
+            <SecondaryButton label={t('bankAccounts.cancel')} size="md" onPress={onClose} />
           </>
         ) : null}
       </SafeAreaView>
@@ -181,14 +207,20 @@ export default function BankAccountsScreen() {
   const accounts = query.data;
   if (query.isError && !accounts) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-6">
-        <Text font="semibold" className="text-center text-lg">
-          {t(errorMessageKey(query.error))}
-        </Text>
-        <View className="w-full">
-          <Button label={t('errors.retry')} icon={RefreshCw} onPress={() => void refetch()} />
-        </View>
-      </SafeAreaView>
+      <ScreenBg>
+        <SafeAreaView className="flex-1 items-center justify-center gap-4 px-6">
+          <Text font="semibold" className="text-center text-lg">
+            {t(errorMessageKey(query.error))}
+          </Text>
+          <View className="w-full">
+            <PrimaryButton
+              label={t('errors.retry')}
+              icon={RefreshCw}
+              onPress={() => void refetch()}
+            />
+          </View>
+        </SafeAreaView>
+      </ScreenBg>
     );
   }
 
@@ -217,72 +249,59 @@ export default function BankAccountsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader
-        title={t('bankAccounts.title')}
-        subtitle={t('bankAccounts.subtitle')}
-        onBack={goBack}
-        right={
-          <Pressable
-            onPress={addAccount}
-            disabled={atLimit}
-            accessibilityRole="button"
-            accessibilityLabel={t('bankAccounts.addAccount')}
-            accessibilityState={{ disabled: atLimit }}
-            className={`h-11 flex-row items-center gap-1 rounded-[22px] bg-primary pl-3 pr-4 ${atLimit ? 'opacity-50' : 'active:opacity-80'}`}
-          >
-            <Plus size={20} color={colors.surface} strokeWidth={2.8} />
-            <Text font="bold" tone="inverse" className="text-base">
-              {t('bankAccounts.add')}
-            </Text>
-          </Pressable>
-        }
-      />
-
-      <UsageCard count={accounts.length} />
-
-      <FlatList
-        data={accounts}
-        keyExtractor={(a) => a.id}
-        contentContainerStyle={{ gap: 8, padding: 16, paddingTop: 12 }}
-        renderItem={({ item }) => <AccountRow account={item} onMore={() => setMenuFor(item)} />}
-        ListEmptyComponent={
-          <Text tone="muted" className="px-4 pt-8 text-center text-lg">
-            {t('bankAccounts.empty')}
-          </Text>
-        }
-      />
-
-      <View className="gap-2 px-4 pb-3 pt-2.5">
-        {atLimit ? (
-          <Text font="semibold" tone="muted" className="text-center text-[15px]">
-            {t('bankAccounts.limitReached', { max: MAX_BANK_ACCOUNTS })}
-          </Text>
-        ) : null}
-        <Button
-          label={t('bankAccounts.addAccount')}
-          icon={Plus}
-          disabled={atLimit}
-          onPress={addAccount}
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <ScreenHeader
+          title={t('bankAccounts.title')}
+          subtitle={t('bankAccounts.subtitle')}
+          onBack={goBack}
         />
-      </View>
 
-      <AccountActions
-        account={menuFor}
-        onEdit={(account) => {
-          setMenuFor(null);
-          router.push({ pathname: '/add-bank-account', params: { id: account.id } });
-        }}
-        onRemove={confirmRemove}
-        onClose={() => setMenuFor(null)}
-      />
-      <ErrorDialog
-        visible={remove.isError}
-        title={t('common.error')}
-        message={t(errorMessageKey(remove.error))}
-        actionLabel={t('errors.retry')}
-        onClose={remove.reset}
-      />
-    </SafeAreaView>
+        <UsageCard count={accounts.length} />
+
+        <FlatList
+          data={accounts}
+          keyExtractor={(a) => a.id}
+          contentContainerStyle={{ gap: 12, padding: 16, paddingTop: 12 }}
+          renderItem={({ item }) => <AccountRow account={item} onMore={() => setMenuFor(item)} />}
+          ListEmptyComponent={
+            <Text tone="muted" className="px-4 pt-8 text-center text-lg">
+              {t('bankAccounts.empty')}
+            </Text>
+          }
+        />
+
+        <View className="gap-2 px-4 pb-3 pt-2.5">
+          {atLimit ? (
+            <Text font="semibold" tone="muted" className="text-center text-[15px]">
+              {t('bankAccounts.limitReached', { max: MAX_BANK_ACCOUNTS })}
+            </Text>
+          ) : null}
+          <PrimaryButton
+            label={t('bankAccounts.addAccount')}
+            icon={Plus}
+            disabled={atLimit}
+            onPress={addAccount}
+          />
+        </View>
+
+        <AccountActions
+          account={menuFor}
+          onEdit={(account) => {
+            setMenuFor(null);
+            router.push({ pathname: '/add-bank-account', params: { id: account.id } });
+          }}
+          onRemove={confirmRemove}
+          onClose={() => setMenuFor(null)}
+        />
+        <ErrorDialog
+          visible={remove.isError}
+          title={t('common.error')}
+          message={t(errorMessageKey(remove.error))}
+          actionLabel={t('errors.retry')}
+          onClose={remove.reset}
+        />
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

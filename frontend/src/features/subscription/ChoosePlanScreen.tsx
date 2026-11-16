@@ -19,7 +19,7 @@ import { isNormalApp } from '@/lib/variant';
 import { useSession, type Plan } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
-import { GlassCard, PrimaryButton, shade } from '@/ui/glass';
+import { GlassCard, PrimaryButton } from '@/ui/glass';
 
 import {
   normalPlan,
@@ -246,7 +246,7 @@ export default function ChoosePlanScreen() {
 
               <PrimaryButton
                 accent
-                gradient={[shade(brand.primary, 0.16), brand.primary]}
+                gradient={[brand.primaryDeep, brand.primaryDeep]}
                 label={t('plan.continuePrice', { price: formatMoney(chosenPrice, false) })}
                 onPress={() => explore(chosen)}
               />

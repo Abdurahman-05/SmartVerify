@@ -1,12 +1,9 @@
 import type { LucideIcon } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
-
-import { shade } from './glassColors';
 
 export interface GlassButtonProps {
   label: string;
@@ -19,7 +16,7 @@ export interface GlassButtonProps {
   trailing?: ReactNode;
   /** Sign in / Sign up design button: 54 px pill in the theme gradient. */
   accent?: boolean;
-  /** With `accent`: gradient colours (top to bottom) instead of the theme gradient. */
+  /** Colours instead of the theme; the button is flat in the last one. */
   gradient?: readonly [string, string];
 }
 
@@ -37,7 +34,8 @@ export function PrimaryButton({
   gradient: customGradient,
 }: GlassButtonProps) {
   const brand = useBrandColors();
-  const gradient = customGradient ?? ([shade(brand.primary, 0.16), brand.primary] as const);
+  // Flat fill: the deep theme colour (or the last colour of a given gradient, e.g. a preview).
+  const fill = customGradient ? customGradient[customGradient.length - 1] : brand.primaryDeep;
   const height = accent ? 54 : buttonHeights[size];
   const radius = accent ? height / 2 : 16;
   return (
@@ -49,7 +47,7 @@ export function PrimaryButton({
       className={`w-full ${disabled ? 'opacity-50' : 'active:opacity-85'}`}
       style={[
         styles.button,
-        { height, borderRadius: radius, backgroundColor: accent ? gradient[1] : brand.primary },
+        { height, borderRadius: radius, backgroundColor: fill },
         accent
           ? {
               // Theme-coloured glow (8-digit hex: 0x52 = 32 % alpha).
@@ -58,15 +56,6 @@ export function PrimaryButton({
           : null,
       ]}
     >
-      {accent ? (
-        <LinearGradient
-          pointerEvents="none"
-          colors={gradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          style={[StyleSheet.absoluteFill, { borderRadius: radius }]}
-        />
-      ) : null}
       <View className="flex-1 flex-row items-center justify-center gap-2 px-4">
         {Icon ? <Icon size={22} color="#FFFFFF" strokeWidth={2.2} /> : null}
         <Text

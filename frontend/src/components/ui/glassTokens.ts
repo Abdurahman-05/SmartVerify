@@ -14,6 +14,7 @@ export function useGlass() {
     primary: brand.primary,
     primary2: shade(brand.primary, 0.16),
     primaryText: brand.primaryText,
+    primaryDeep: brand.primaryDeep,
     tint: brand.tint,
     tile: brand.tile,
   };

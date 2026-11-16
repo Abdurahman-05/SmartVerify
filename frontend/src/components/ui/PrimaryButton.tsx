@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import type { ComponentType, ReactNode } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 
@@ -42,9 +41,11 @@ export function PrimaryButton({
         boxShadow: `0 12px 24px ${alpha(g.primary, 0.3)}`,
       }}
     >
-      <LinearGradient
-        colors={[g.primary2, g.primary]}
-        style={{ height, borderRadius: height / 2, alignItems: 'center', justifyContent: 'center' }}
+      <View
+        style={[
+          { height, borderRadius: height / 2, alignItems: 'center', justifyContent: 'center' },
+          { backgroundColor: g.primaryDeep },
+        ]}
       >
         {loading ? (
           <ActivityIndicator color="#FFFFFF" />
@@ -57,7 +58,7 @@ export function PrimaryButton({
             {trailing}
           </View>
         )}
-      </LinearGradient>
+      </View>
     </Pressable>
   );
 }

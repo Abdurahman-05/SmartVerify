@@ -1,6 +1,5 @@
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Lock } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
@@ -19,7 +18,12 @@ export const AUTH = {
 /** The chosen theme's colours for the auth screens (orange by default). */
 export function useAuthColors() {
   const brand = useBrandColors();
-  return { p: brand.primary, p2: shade(brand.primary, 0.16), pt: brand.primaryText };
+  return {
+    p: brand.primary,
+    p2: shade(brand.primary, 0.16),
+    pt: brand.primaryText,
+    deep: brand.primaryDeep,
+  };
 }
 
 const glyph = require('../../../assets/images/auth/logo-glyph.png') as number;
@@ -33,18 +37,12 @@ export function AuthLogo() {
       importantForAccessibility="no-hide-descendants"
       style={[
         styles.logoShadow,
-        { boxShadow: `inset 0 2px 0 rgba(255,255,255,0.35), 0 14px 28px ${c.p}59` },
+        { boxShadow: `inset 0 2px 0 rgba(255,255,255,0.35), 0 14px 28px ${c.p}52` },
       ]}
     >
-      <LinearGradient
-        colors={[c.p2, c.p, c.pt]}
-        locations={[0, 0.6, 1]}
-        start={{ x: 0.67, y: 0 }}
-        end={{ x: 0.33, y: 1 }}
-        style={styles.logo}
-      >
+      <View style={[styles.logo, { backgroundColor: c.deep }]}>
         <Image source={glyph} style={{ width: 70, height: 70 }} contentFit="contain" />
-      </LinearGradient>
+      </View>
     </View>
   );
 }

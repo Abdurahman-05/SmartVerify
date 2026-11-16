@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   Bell,
@@ -14,7 +15,7 @@ import {
 } from 'lucide-react-native';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Pressable, View } from 'react-native';
+import { FlatList, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LoadingView } from '@/components/ui/LoadingView';
@@ -35,6 +36,7 @@ import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
 import { targetOf } from './target';
+import { GlassCard, ScreenBg } from '@/ui/glass';
 
 const icons: Record<string, LucideIcon> = {
   new_order: ChefHat,
@@ -148,44 +150,69 @@ function useNotificationText() {
   };
 }
 
+/** Icon tile colours by kind (design): red warnings, green money in, amber spending, purple plan. */
+const tileColors: Record<string, readonly [string, string]> = {
+  bad_receipt: ['#E5544B', '#B3261E'],
+  plan_late: ['#E5544B', '#B3261E'],
+  order_cancelled: ['#E5544B', '#B3261E'],
+  expense_deleted: ['#E5544B', '#B3261E'],
+  big_payment: ['#2BC489', '#0E7A4E'],
+  daily_summary: ['#2BC489', '#0E7A4E'],
+  new_expense: ['#FFC93D', '#D98A00'],
+  plan_ending: ['#9C8AF0', '#5B3FB0'],
+};
+
 function Row({ item, onPress }: { item: AppNotification; onPress: (() => void) | null }) {
+  const { t } = useTranslation();
   const brand = useBrandColors();
   const text = useNotificationText();
   const { title, body } = text(item);
   const Icon = icons[item.type] ?? Star;
   const today = new Date(item.createdAt).toDateString() === new Date().toDateString();
   const alert = item.type === 'bad_receipt' || item.type === 'plan_late';
+  const fill = tileColors[item.type] ?? ([brand.primaryDeep, brand.primaryDeep] as const);
 
   return (
-    <Pressable
+    <GlassCard
       onPress={onPress ?? undefined}
       disabled={!onPress}
       accessibilityRole={onPress ? 'button' : undefined}
-      className={`min-h-[64px] flex-row gap-3 rounded-[18px] border-[1.5px] px-3.5 py-3 ${
-        item.read ? 'border-border bg-surface' : 'border-primary bg-primarySoft'
-      } active:opacity-80`}
+      className={`flex-row items-start gap-3 px-3.5 py-3 ${alert ? 'border-2' : ''}`}
+      style={alert ? { borderColor: 'rgba(179,38,30,0.4)' } : null}
     >
       <View
-        className={`h-11 w-11 items-center justify-center rounded-full ${alert ? 'bg-dangerBg' : 'bg-surface'}`}
+        className="h-[42px] w-[42px] overflow-hidden rounded-[13px]"
+        style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.35)' }}
       >
-        <Icon size={22} color={alert ? colors.dangerFg : brand.primary} strokeWidth={2.2} />
+        <LinearGradient
+          colors={fill}
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Icon size={20} color="#FFFFFF" strokeWidth={2.2} />
+        </LinearGradient>
       </View>
-      <View className="flex-1 gap-0.5">
+      <View className="flex-1">
         <View className="flex-row items-start justify-between gap-2">
-          <Text font="bold" className="flex-1 text-base">
+          <Text font="bold" className="flex-1 text-[15px] leading-[19px]">
             {title}
           </Text>
-          <Text tone="muted" className="text-sm">
+          <Text tone="muted" className="text-[13px]">
             {today ? formatTime(item.createdAt) : formatDay(item.createdAt, false)}
           </Text>
         </View>
         {body ? (
-          <Text tone="muted" className="text-[15px]">
+          <Text tone="muted" className="mt-0.5 text-sm leading-[18px]">
             {body}
           </Text>
         ) : null}
       </View>
-    </Pressable>
+      {item.read ? null : (
+        <View
+          className="mt-1.5 h-[9px] w-[9px] rounded-full bg-primary"
+          accessibilityLabel={t('notifications.unread')}
+        />
+      )}
+    </GlassCard>
   );
 }
 
@@ -217,25 +244,27 @@ export default function NotificationsScreen() {
   if (!query.data) return <LoadingView screenTitle={t('notifications.title')} />;
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-background">
-      <ScreenHeader title={t('notifications.title')} />
-      <FlatList
-        data={query.data.items}
-        keyExtractor={(n) => n.id}
-        contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 24 }}
-        ListEmptyComponent={
-          <View className="items-center gap-2 px-6 py-16">
-            <Bell size={36} color={colors.muted} strokeWidth={2} />
-            <Text tone="muted" className="text-center text-base">
-              {t('notifications.empty')}
-            </Text>
-          </View>
-        }
-        renderItem={({ item }) => {
-          const target = targetOf(item.type, item.data, role);
-          return <Row item={item} onPress={target ? () => router.push(target) : null} />;
-        }}
-      />
-    </SafeAreaView>
+    <ScreenBg>
+      <SafeAreaView edges={['top']} className="flex-1">
+        <ScreenHeader title={t('notifications.title')} />
+        <FlatList
+          data={query.data.items}
+          keyExtractor={(n) => n.id}
+          contentContainerStyle={{ gap: 10, paddingHorizontal: 16, paddingBottom: 24 }}
+          ListEmptyComponent={
+            <View className="items-center gap-2 px-6 py-16">
+              <Bell size={36} color={colors.muted} strokeWidth={2} />
+              <Text tone="muted" className="text-center text-base">
+                {t('notifications.empty')}
+              </Text>
+            </View>
+          }
+          renderItem={({ item }) => {
+            const target = targetOf(item.type, item.data, role);
+            return <Row item={item} onPress={target ? () => router.push(target) : null} />;
+          }}
+        />
+      </SafeAreaView>
+    </ScreenBg>
   );
 }
