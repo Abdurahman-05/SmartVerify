@@ -1,11 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
 import * as Location from 'expo-location';
-import { LocateFixed, MapPin } from 'lucide-react-native';
-import { useRef, useState } from 'react';
+import { Link2, LocateFixed } from 'lucide-react-native';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
-import MapView, { PROVIDER_GOOGLE, type Region } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Input } from '@/components/ui/Input';
@@ -16,12 +15,25 @@ import { Text } from '@/components/ui/Text';
 import { getBusinessLocation, updateBusinessLocation } from '@/lib/business';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { homeRouteFor, useSession } from '@/store/session';
-import { useBrandColors } from '@/store/theme';
-import { GlassCard, PrimaryButton, ScreenBg, SecondaryButton } from '@/ui/glass';
+import { PrimaryButton, ScreenBg, SecondaryButton } from '@/ui/glass';
 
-/** Addis Ababa, where the map opens until the owner has a point. */
-const ADDIS = { latitude: 9.0192, longitude: 38.7525 };
-const DELTA = 0.005;
+/**
+ * "lat, lng" from what the owner pastes: a Google Maps link (…/@9.01,38.76,17z or …?q=9.01,38.76)
+ * or the two numbers themselves. Short share links (maps.app.goo.gl) carry no numbers.
+ */
+function coordinatesOf(text: string): { lat: number; lng: number } | null {
+  const match =
+    /@(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)/.exec(text) ??
+    /[?&](?:q|ll|query)=(-?\d{1,2}\.\d+),\s*(-?\d{1,3}\.\d+)/.exec(text) ??
+    /^\s*(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)\s*$/.exec(text);
+  if (!match) return null;
+  const lat = Number(match[1]);
+  const lng = Number(match[2]);
+  return Math.abs(lat) <= 90 && Math.abs(lng) <= 180 ? { lat, lng } : null;
+}
+
+const isShortLink = (text: string) => /(maps\.app\.goo\.gl|goo\.gl\/maps)/i.test(text);
+const linkFor = (lat: number, lng: number) => `https://maps.google.com/?q=${lat},${lng}`;
 
 type Fields = { address: string; city: string; area: string; landmark: string };
 const EMPTY: Fields = { address: '', city: '', area: '', landmark: '' };
@@ -42,32 +54,29 @@ function fieldsFrom(place: Location.LocationGeocodedAddress | undefined): Fields
 }
 
 /**
- * "Where is your business?" Owner: a map with a pin in the middle (drag the map to move it),
- * "Use my location" to fill the point and the address fields, and Save. After sign-up it comes
- * before the plan ("Add later" skips it); from Profile it edits what is saved.
+ * "Where is your business?" Owner: a Google Maps link (pasted, or filled by "Use my location"),
+ * the address fields, and Save. No map here (the Smart Verify team sees it on a map in the admin).
+ * After sign-up it comes before the plan ("Add later" skips it); from Profile it edits what is saved.
  */
 export default function BusinessLocationScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const brand = useBrandColors();
   const queryClient = useQueryClient();
   const user = useSession((s) => s.user);
   const { onboarding } = useLocalSearchParams<{ onboarding?: string }>();
   const firstRun = onboarding === '1';
   const saved = useQuery({ queryKey: ['business-location'], queryFn: getBusinessLocation });
 
-  const map = useRef<MapView>(null);
   // Edits sit on top of what is saved, so nothing has to be copied into state.
   const data = saved.data;
-  const [pointEdit, setPointEdit] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [linkEdit, setLinkEdit] = useState<string | null>(null);
+  const [linkError, setLinkError] = useState<string | undefined>();
   const [fieldEdits, setFieldEdits] = useState<Partial<Fields>>({});
   const [locating, setLocating] = useState(false);
   const [denied, setDenied] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
-  // The map and the page scroll with the same finger: the page waits while the map is touched.
-  const [pageScroll, setPageScroll] = useState(true);
 
-  const point = pointEdit ?? (data ? { latitude: data.lat, longitude: data.lng } : ADDIS);
+  const link = linkEdit ?? (data ? linkFor(data.lat, data.lng) : '');
   const fields: Fields = {
     address: data?.address ?? '',
     city: data?.city ?? '',
@@ -85,7 +94,7 @@ export default function BusinessLocationScreen() {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        // No permission: the owner fills the fields (and moves the map) by hand.
+        // No permission: the owner pastes a link and fills the fields by hand.
         setDenied(true);
         return;
       }
@@ -94,8 +103,8 @@ export default function BusinessLocationScreen() {
         accuracy: Location.Accuracy.High,
       });
       const here = { latitude: coords.latitude, longitude: coords.longitude };
-      setPointEdit(here);
-      map.current?.animateToRegion({ ...here, latitudeDelta: DELTA, longitudeDelta: DELTA }, 400);
+      setLinkEdit(linkFor(Number(here.latitude.toFixed(6)), Number(here.longitude.toFixed(6))));
+      setLinkError(undefined);
       // The address is a help, not a must: without it the owner types the fields.
       const [place] = await Location.reverseGeocodeAsync(here).catch(() => []);
       setFieldEdits(fieldsFrom(place));
@@ -107,10 +116,10 @@ export default function BusinessLocationScreen() {
   };
 
   const save = useMutation({
-    mutationFn: () =>
+    mutationFn: (point: { lat: number; lng: number }) =>
       updateBusinessLocation({
-        lat: point.latitude,
-        lng: point.longitude,
+        lat: point.lat,
+        lng: point.lng,
         address: fields.address.trim(),
         city: fields.city.trim(),
         area: fields.area.trim(),
@@ -122,6 +131,24 @@ export default function BusinessLocationScreen() {
       finish();
     },
   });
+
+  const submit = () => {
+    const point = coordinatesOf(link.trim());
+    if (!point) {
+      setLinkError(
+        t(
+          !link.trim()
+            ? 'business.location.linkMissing'
+            : isShortLink(link)
+              ? 'business.location.linkShort'
+              : 'business.location.linkBad'
+        )
+      );
+      return;
+    }
+    setLinkError(undefined);
+    save.mutate(point);
+  };
 
   const finish = () => {
     if (firstRun) router.replace(homeRouteFor(useSession.getState().user));
@@ -135,12 +162,6 @@ export default function BusinessLocationScreen() {
     return <NoConnection onRetry={() => void saved.refetch()} />;
   }
 
-  const initial: Region = {
-    ...point,
-    latitudeDelta: DELTA,
-    longitudeDelta: DELTA,
-  };
-
   return (
     <ScreenBg>
       <SafeAreaView className="flex-1">
@@ -149,7 +170,6 @@ export default function BusinessLocationScreen() {
           className="flex-1"
         >
           <ScrollView
-            scrollEnabled={pageScroll}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ flexGrow: 1 }}
@@ -161,43 +181,22 @@ export default function BusinessLocationScreen() {
             />
 
             <View className="gap-3 px-4 pt-1">
-              <GlassCard radius={22} className="overflow-hidden">
-                <View
-                  className="h-[280px]"
-                  onTouchStart={() => setPageScroll(false)}
-                  onTouchEnd={() => setPageScroll(true)}
-                  onTouchCancel={() => setPageScroll(true)}
-                >
-                  <MapView
-                    ref={map}
-                    provider={PROVIDER_GOOGLE}
-                    style={{ flex: 1 }}
-                    initialRegion={initial}
-                    onRegionChangeComplete={(region) =>
-                      setPointEdit({ latitude: region.latitude, longitude: region.longitude })
-                    }
-                    toolbarEnabled={false}
-                    accessibilityLabel={t('business.location.mapLabel')}
-                  />
-                  {/* The pin stays in the middle; its tip is the centre of the map. */}
-                  <View
-                    pointerEvents="none"
-                    className="absolute inset-0 items-center justify-center"
-                  >
-                    <View style={{ marginBottom: 40 }}>
-                      <MapPin
-                        size={40}
-                        color={brand.primaryDeep}
-                        fill={brand.primaryDeep}
-                        strokeWidth={1.5}
-                      />
-                    </View>
-                  </View>
-                </View>
-              </GlassCard>
-
-              <Text tone="muted" className="text-center text-sm">
-                {t('business.location.dragHint')}
+              <Input
+                label={t('business.location.link')}
+                labelIcon={Link2}
+                value={link}
+                onChangeText={(text) => {
+                  setLinkEdit(text);
+                  setLinkError(undefined);
+                }}
+                placeholder={t('business.location.linkPlaceholder')}
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="url"
+                error={linkError}
+              />
+              <Text tone="muted" className="text-sm">
+                {t('business.location.linkHint')}
               </Text>
 
               <SecondaryButton
@@ -258,7 +257,7 @@ export default function BusinessLocationScreen() {
               <PrimaryButton
                 label={t('business.location.save')}
                 disabled={save.isPending}
-                onPress={() => save.mutate()}
+                onPress={submit}
               />
               {firstRun ? (
                 <SecondaryButton label={t('business.location.later')} size="md" onPress={finish} />

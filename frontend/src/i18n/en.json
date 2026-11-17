@@ -1372,12 +1372,10 @@
     "location": {
       "title": "Where is your business?",
       "subtitle": "Only the Smart Verify team sees this.",
-      "mapLabel": "Map: drag to place the pin",
-      "dragHint": "Drag the map to move the pin",
       "useMine": "Use my location",
       "finding": "Finding you…",
-      "denied": "Location is off for this app. Move the map and fill in the details below.",
-      "unavailable": "Could not find your location. Move the map and fill in the details below.",
+      "denied": "Location is off for this app. Paste a Google Maps link and fill in the details below.",
+      "unavailable": "Could not find your location. Paste a Google Maps link instead.",
       "address": "Address",
       "addressPlaceholder": "Street or road",
       "city": "City",
@@ -1386,7 +1384,13 @@
       "landmark": "Landmark",
       "landmarkPlaceholder": "A well-known place nearby",
       "save": "Save location",
-      "later": "Add later"
+      "later": "Add later",
+      "link": "Google Maps link",
+      "linkPlaceholder": "Paste the link of your place",
+      "linkHint": "In Google Maps, find your business, tap Share and copy the link. Or tap Use my location while you are there.",
+      "linkMissing": "Paste a Google Maps link or tap Use my location",
+      "linkBad": "This link has no map point. Copy the full link from Google Maps.",
+      "linkShort": "Short share links cannot be read. Open the link in your browser and copy the full address, or tap Use my location."
     },
     "locationEntry": "Business location"
   },
