@@ -22,6 +22,9 @@ export async function createTestApp(envOverrides: Record<string, string> = {}) {
     SUBSCRIPTION_CBE_NAME: undefined,
     SUBSCRIPTION_TELEBIRR: undefined,
     SUBSCRIPTION_TELEBIRR_NAME: undefined,
+    // Tests never send real email, whatever the developer's .env says.
+    EMAIL_PROVIDER: undefined,
+    RESEND_API_KEY: undefined,
     // A fixed test key (never the real one).
     TELEGRAM_BOT_TOKEN: undefined,
     TELEGRAM_CHAT_ID: undefined,

@@ -153,7 +153,9 @@ describe('payment history and report', () => {
     expect(cash.map((p) => p.method).sort()).toEqual(['cash', 'cash+bank']);
 
     const summary = (await get('/payments/summary?period=all', r.owner.token)).json();
-    expect(summary).toEqual({ count: 3, salesEtb: 2880, cashCount: 2, bankCount: 2 });
+    expect(summary).toMatchObject({ count: 3, salesEtb: 2880, cashCount: 2, bankCount: 2 });
+    // Cash taken, and verified bank receipts per account (none in this test).
+    expect(summary).toMatchObject({ cashEtb: expect.any(Number), accounts: [] });
     // A waiter's summary counts only their own bills.
     const mine = (await get('/payments/summary?period=all', r.waiter2.token)).json();
     expect(mine).toMatchObject({ count: 1, salesEtb: 960 });

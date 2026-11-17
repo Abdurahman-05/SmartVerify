@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { createTestApp, resetDatabase, type TestApp } from './helpers.js';
+import { createTestApp, headers, resetDatabase, type TestApp } from './helpers.js';
 
 let app: TestApp;
 
@@ -15,8 +15,15 @@ beforeEach(async () => {
 });
 
 type Res = { statusCode: number; json: () => unknown };
+// Each request comes from its own address, so the route's per-IP limits do not mix tests up.
+let clients = 0;
 const post = (url: string, payload: object) =>
-  app.inject({ method: 'POST', url: `/api/v1${url}`, payload });
+  app.inject({
+    method: 'POST',
+    url: `/api/v1${url}`,
+    payload,
+    remoteAddress: `10.9.${Math.floor(++clients / 250)}.${(clients % 250) + 1}`,
+  });
 const error = (res: Res) =>
   (res.json() as { error?: { code?: string; details?: Record<string, unknown> } }).error;
 
@@ -105,5 +112,79 @@ describe('email codes for owner sign-up', () => {
     await register(used);
     const taken = await post('/auth/email-code', { email: used });
     expect(taken.statusCode).toBe(409);
+  });
+  it('the email is matched ignoring case, and sign-up must use the verified email', async () => {
+    const email = newEmail();
+    const code = await sendCode(email);
+    const ok = await post('/auth/verify-email', { email: email.toUpperCase(), code });
+    expect(ok.statusCode).toBe(200);
+    // Another email never verified: refused.
+    const other = await register(newEmail());
+    expect(other.statusCode).toBe(403);
+    expect(error(other)?.code).toBe('EMAIL_NOT_VERIFIED');
+    expect((await register(email.toUpperCase())).statusCode).toBe(201);
+  });
+
+  it('a verified email that waited more than 30 minutes is refused', async () => {
+    const email = newEmail();
+    const code = await sendCode(email);
+    await post('/auth/verify-email', { email, code });
+    await app.prisma.emailCode.updateMany({
+      where: { email },
+      data: { verifiedAt: new Date(Date.now() - 31 * 60_000) },
+    });
+    const res = await register(email);
+    expect(res.statusCode).toBe(403);
+    expect(error(res)?.code).toBe('EMAIL_NOT_VERIFIED');
+  });
+
+  it('a bad email or code format is refused before anything is sent', async () => {
+    expect((await post('/auth/email-code', { email: 'not-an-email' })).statusCode).toBe(400);
+    expect((await post('/auth/verify-email', { email: newEmail(), code: '12' })).statusCode).toBe(
+      400
+    );
+    expect(
+      (await post('/auth/verify-email', { email: newEmail(), code: 'abcdef' })).statusCode
+    ).toBe(400);
+    expect(await app.prisma.emailCode.count()).toBe(0);
+  });
+
+  it('the new owner has no plan yet, signs in by phone, and can save the business location', async () => {
+    const email = newEmail();
+    const phone = '977123456';
+    const code = await sendCode(email);
+    await post('/auth/verify-email', { email, code });
+    const made = await register(email, phone);
+    expect(made.statusCode).toBe(201);
+    const { token, user } = made.json() as {
+      token: string;
+      user: { role: string; plan: string | null };
+    };
+    expect(user).toMatchObject({ role: 'owner', plan: null });
+
+    const signIn = await post('/auth/sign-in', { phone, pin: '135790' });
+    expect(signIn.statusCode).toBe(200);
+
+    const location = {
+      lat: 9.0108,
+      lng: 38.7613,
+      address: 'Bole Road',
+      city: 'Addis Ababa',
+      area: 'Bole',
+      landmark: 'Edna Mall',
+    };
+    const saved = await app.inject({
+      method: 'PATCH',
+      url: '/api/v1/business/location',
+      headers: headers(token),
+      payload: location,
+    });
+    expect(saved.statusCode).toBe(200);
+    const read = await app.inject({
+      method: 'GET',
+      url: '/api/v1/business/location',
+      headers: headers(token),
+    });
+    expect(read.json()).toEqual(location);
   });
 });
