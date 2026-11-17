@@ -12,7 +12,6 @@ import { useGlass } from '@/components/ui/glassTokens';
 import { Input } from '@/components/ui/Input';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { StickyFooter } from '@/components/ui/StickyFooter';
 import { Text } from '@/components/ui/Text';
 import { errorMessageKey } from '@/lib/errors';
 import {
@@ -30,6 +29,13 @@ import { FeatureGate } from './FeatureGate';
 import { ScreenBg } from '@/ui/glass';
 
 type Draft = NewBuyItem & { key: number };
+
+/**
+ * "Send to manager" floats 12 above the bottom of the screen. The tab layout already pads every
+ * tab scene by the nav's room (see NAV_ROOM), so that bottom edge is above the nav.
+ */
+const SEND_HEIGHT = 56;
+const SEND_BOTTOM = 12;
 
 /** The buy list no longer asks for a date: everything is needed today. */
 const WHEN = 'TODAY' as const;
@@ -157,7 +163,12 @@ function FinishedItems() {
         <ScreenHeader title={t('extras.finished.title')} subtitle={t('extras.finished.subtitle')} />
         <ScrollView
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 150, gap: 12 }}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            // Room for the Send button only while it is shown, so the last item is never hidden.
+            paddingBottom: drafts.length ? SEND_HEIGHT + SEND_BOTTOM + 24 : 16,
+            gap: 12,
+          }}
         >
           <GlassCard style={{ gap: 12, paddingHorizontal: 16, paddingVertical: 14 }}>
             <Input
@@ -240,17 +251,21 @@ function FinishedItems() {
         </ScrollView>
 
         {drafts.length ? (
-          <StickyFooter>
+          <View
+            pointerEvents="box-none"
+            style={{ position: 'absolute', left: 16, right: 16, bottom: SEND_BOTTOM }}
+          >
             <PrimaryButton
               label={t('extras.finished.send')}
               icon={Send}
+              height={SEND_HEIGHT}
               disabled={send.isPending}
               onPress={() => {
                 setSentCount(0);
                 send.mutate(drafts);
               }}
             />
-          </StickyFooter>
+          </View>
         ) : null}
 
         <ErrorDialog
