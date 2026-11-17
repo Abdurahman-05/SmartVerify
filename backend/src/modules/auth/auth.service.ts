@@ -6,6 +6,7 @@ import { hashPin, verifyAgainstDummy, verifyPin } from '../../services/pin-hashe
 import { hashSessionToken, newSessionToken } from '../../services/session-token.js';
 import { AppError } from '../../shared/errors/app-error.js';
 
+import { VERIFIED_FOR_MS } from './email-code.js';
 import { loadSessionUser } from './session-user.js';
 
 /** Session length without and with "Remember me" (registration is always remembered). */
@@ -61,9 +62,26 @@ export function createAuthService(app: FastifyInstance) {
       if (await prisma.user.findUnique({ where: { email: input.email } })) {
         throw new AppError('EMAIL_TAKEN');
       }
+      // The email must have been proved with a code a short while ago (POST /auth/verify-email).
+      const proof = await prisma.emailCode.findFirst({
+        where: {
+          email: input.email,
+          usedAt: null,
+          verifiedAt: { gte: new Date(Date.now() - VERIFIED_FOR_MS) },
+        },
+        orderBy: { verifiedAt: 'desc' },
+        select: { id: true },
+      });
+      if (!proof) throw new AppError('EMAIL_NOT_VERIFIED');
       const pinHash = await hashPin(input.pin);
       try {
         const member = await prisma.$transaction(async (tx) => {
+          // One sign-up per proof, even if two arrive at once.
+          const claimed = await tx.emailCode.updateMany({
+            where: { id: proof.id, usedAt: null },
+            data: { usedAt: new Date() },
+          });
+          if (claimed.count === 0) throw new AppError('EMAIL_NOT_VERIFIED');
           const user = await tx.user.create({
             data: { name: input.fullName, phone: input.phone, email: input.email, pinHash },
           });

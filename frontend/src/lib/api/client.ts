@@ -32,6 +32,8 @@ export type ApiErrorCode =
   | 'NOT_FOUND'
   | 'PHONE_TAKEN'
   | 'EMAIL_TAKEN'
+  | 'EMAIL_NOT_VERIFIED'
+  | 'EMAIL_NOT_SENT'
   | 'STAFF_LIMIT'
   | 'ACCOUNT_DUPLICATE'
   | 'ACCOUNT_LIMIT'

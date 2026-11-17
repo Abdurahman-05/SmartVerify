@@ -76,7 +76,14 @@
       "resendIn": "Resend code ({{time}})",
       "change": "Change email",
       "wrongCode": "That code is not right. Try again.",
-      "incomplete": "Enter all {{count}} digits"
+      "incomplete": "Enter all {{count}} digits",
+      "expired": "This code has expired. Tap Resend code for a new one.",
+      "tooManyTries": "Too many wrong tries. Tap Resend code for a new one.",
+      "triesLeft_one": "That code is not right. {{count}} try left.",
+      "triesLeft_other": "That code is not right. {{count}} tries left.",
+      "notVerified": "Please verify your email first.",
+      "notSent": "We could not send the email. Please try again in a moment.",
+      "devCode": "Test server: your code is {{code}}"
     }
   },
   "plan": {

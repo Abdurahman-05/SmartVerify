@@ -7,6 +7,8 @@ export type ErrorCode =
   | 'NOT_FOUND'
   | 'PHONE_TAKEN'
   | 'EMAIL_TAKEN'
+  | 'EMAIL_NOT_VERIFIED'
+  | 'EMAIL_NOT_SENT'
   | 'STAFF_LIMIT'
   | 'SUBSCRIPTION_REQUIRED'
   | 'TABLE_BUSY'
@@ -39,6 +41,10 @@ const statusByCode: Record<ErrorCode, number> = {
   PHONE_TAKEN: 409,
   /** Another account already uses this email. */
   EMAIL_TAKEN: 409,
+  /** Sign-up without a verified email code (POST /auth/verify-email first). */
+  EMAIL_NOT_VERIFIED: 403,
+  /** The email provider refused or is not set up: the code could not be sent. */
+  EMAIL_NOT_SENT: 503,
   /** Normal plan: the business already has the most workers allowed (details.limit). */
   STAFF_LIMIT: 409,
   /** Dine-in table already has an open bill. */

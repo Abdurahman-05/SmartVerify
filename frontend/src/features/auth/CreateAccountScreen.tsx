@@ -76,12 +76,19 @@ export default function CreateAccountScreen() {
   // Nothing is created yet: the code is sent, and the account is made once the email is verified.
   const mutation = useMutation({
     mutationFn: async (values: Parameters<typeof createAccount>[0]) => {
-      await sendEmailCode(values.email);
-      return values;
+      const sent = await sendEmailCode(values.email);
+      return { values, sent };
     },
-    onSuccess: (values) => {
+    onSuccess: ({ values, sent }) => {
       holdSignup(values);
-      router.push({ pathname: '/verify-email', params: { email: values.email } });
+      router.push({
+        pathname: '/verify-email',
+        params: {
+          email: values.email,
+          wait: String(sent.resendInSeconds),
+          ...(sent.devCode && { dev: sent.devCode }),
+        },
+      });
     },
   });
 

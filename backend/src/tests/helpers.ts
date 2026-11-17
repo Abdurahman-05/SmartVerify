@@ -42,6 +42,7 @@ export async function createTestApp(envOverrides: Record<string, string> = {}) {
 
 /** Tables these tests write to. Always schema-qualified, so only the test schema is emptied. */
 const USED_TABLES = [
+  'EmailCode',
   'Announcement',
   'AdminNote',
   'PaymentReview',

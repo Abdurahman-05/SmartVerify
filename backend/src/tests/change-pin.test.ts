@@ -29,10 +29,23 @@ type Res = { statusCode: number; json: () => unknown };
 const code = (res: Res) => (res.json() as { error?: { code?: string } }).error?.code;
 
 const register = async (phone: string, pin: string) => {
+  // Sign-up needs a verified email (the test server has no email provider: it returns the code).
+  const email = `owner-${phone}@example.com`;
+  const sent = await app.inject({
+    method: 'POST',
+    url: '/api/v1/auth/email-code',
+    payload: { email },
+  });
+  const { devCode } = sent.json() as { devCode: string };
+  await app.inject({
+    method: 'POST',
+    url: '/api/v1/auth/verify-email',
+    payload: { email, code: devCode },
+  });
   const res = await app.inject({
     method: 'POST',
     url: '/api/v1/auth/register',
-    payload: { fullName: 'Pin Owner', businessName: 'Pin Cafe', phone, pin },
+    payload: { fullName: 'Pin Owner', businessName: 'Pin Cafe', email, phone, pin },
   });
   return (res.json() as { token: string }).token;
 };

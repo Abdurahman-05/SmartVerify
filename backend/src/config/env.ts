@@ -85,6 +85,9 @@ const schema = z.object({
   UNLIMITED_OCR_URL: z.string().url().optional(),
   UNLIMITED_OCR_MODEL: z.string().min(1).default('baidu/Unlimited-OCR'),
   UNLIMITED_OCR_API_KEY: z.string().min(1).optional(),
+  /** Resend (email): sign-up codes. Without a key, codes are only written to the log (not production). */
+  RESEND_API_KEY: z.string().min(10).optional(),
+  EMAIL_FROM: z.string().min(3).default('Gebtual <no-reply@gebtual.com.et>'),
 });
 
 export type Env = z.infer<typeof schema>;

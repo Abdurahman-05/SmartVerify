@@ -10,6 +10,7 @@ import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { Text } from '@/components/ui/Text';
+import { ApiError } from '@/lib/api/client';
 import { createAccount } from '@/lib/auth';
 import { errorMessageKey } from '@/lib/errors';
 import {
@@ -45,10 +46,13 @@ export default function VerifyEmailScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const startSession = useSession((s) => s.signIn);
-  const { email = '' } = useLocalSearchParams<{ email?: string }>();
+  const params = useLocalSearchParams<{ email?: string; wait?: string; dev?: string }>();
+  const email = params.email ?? '';
+  // Development server without an email provider: it hands back the code to type.
+  const [devCode, setDevCode] = useState(params.dev);
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | undefined>();
-  const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
+  const [secondsLeft, setSecondsLeft] = useState(Number(params.wait) || RESEND_SECONDS);
   const input = useRef<ComponentRef<typeof TextInput>>(null);
 
   useEffect(() => {
@@ -59,7 +63,7 @@ export default function VerifyEmailScreen() {
 
   const verify = useMutation({
     mutationFn: async (value: string) => {
-      await verifyEmailCode(value);
+      await verifyEmailCode(email, value);
       const values = peekSignup();
       if (!values) throw new Error('SIGNUP_LOST');
       return createAccount(values);
@@ -71,15 +75,32 @@ export default function VerifyEmailScreen() {
       router.replace({ pathname: '/business-location', params: { onboarding: '1' } });
     },
     onError: (e) => {
-      if (e instanceof InvalidCodeError) setError(t('auth.verify.wrongCode'));
+      if (!(e instanceof InvalidCodeError)) return;
+      setCode('');
+      setError(
+        e.reason === 'expired'
+          ? t('auth.verify.expired')
+          : e.reason === 'tooManyTries'
+            ? t('auth.verify.tooManyTries')
+            : e.triesLeft !== undefined
+              ? t('auth.verify.triesLeft', { count: e.triesLeft })
+              : t('auth.verify.wrongCode')
+      );
     },
   });
   const resend = useMutation({
     mutationFn: () => sendEmailCode(email),
-    onSuccess: () => {
+    onSuccess: (sent) => {
       setCode('');
       setError(undefined);
-      setSecondsLeft(RESEND_SECONDS);
+      setDevCode(sent.devCode);
+      setSecondsLeft(sent.resendInSeconds);
+    },
+    onError: (e) => {
+      // Asked again too soon: wait what the server says.
+      const wait = e instanceof ApiError ? e.details?.retryAfterSeconds : undefined;
+      if (typeof wait === 'number') setSecondsLeft(wait);
+      else setError(t(errorMessageKey(e)));
     },
   });
 
@@ -173,6 +194,11 @@ export default function VerifyEmailScreen() {
             {error ? (
               <Text font="semibold" className="text-[15px] text-dangerFg">
                 {error}
+              </Text>
+            ) : null}
+            {__DEV__ && devCode ? (
+              <Text tone="muted" className="text-sm">
+                {t('auth.verify.devCode', { code: devCode })}
               </Text>
             ) : null}
 

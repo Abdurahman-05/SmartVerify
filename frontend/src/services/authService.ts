@@ -1,6 +1,7 @@
 import { addStaff } from '@/lib/staff';
 import type { NewStaffInput, StaffMember } from '@/lib/mock/staffAdmin';
-import type { RegisterInput } from '@/lib/auth';
+import { ApiError, api } from '@/lib/api/client';
+import { USE_MOCK_AUTH, type RegisterInput } from '@/lib/auth';
 import type { SessionUser } from '@/store/session';
 
 // Frontend only: the backend for these calls is not ready. Each function waits 600 ms and returns
@@ -9,10 +10,18 @@ import type { SessionUser } from '@/store/session';
 const STUB_DELAY_MS = 600;
 const wait = () => new Promise<void>((resolve) => setTimeout(resolve, STUB_DELAY_MS));
 
-/** The only code the stub accepts. */
+/** The only code the offline mock accepts. */
 export const STUB_EMAIL_CODE = '123456';
 
-export class InvalidCodeError extends Error {}
+/** Wrong, expired or used-up sign-up code (`reason` from the server). */
+export class InvalidCodeError extends Error {
+  constructor(
+    readonly reason: 'wrong' | 'expired' | 'tooManyTries' = 'wrong',
+    readonly triesLeft?: number
+  ) {
+    super('INVALID_CODE');
+  }
+}
 
 export interface OwnerSignInInput {
   email: string;
@@ -45,15 +54,43 @@ export async function requestPinReset(_input: PinResetInput): Promise<void> {
   await wait();
 }
 
-/** Sends (or re-sends) the 6-digit sign-up code. TODO: connect API (POST /auth/email-code). */
-export async function sendEmailCode(_email: string): Promise<void> {
-  await wait();
+export interface EmailCodeSent {
+  /** Seconds before another code can be asked for. */
+  resendInSeconds: number;
+  /** Development server without an email provider only: the code itself. */
+  devCode?: string;
 }
 
-/** Checks the sign-up code. The stub accepts "123456". TODO: connect API (POST /auth/verify-email). */
-export async function verifyEmailCode(code: string): Promise<void> {
-  await wait();
-  if (code !== STUB_EMAIL_CODE) throw new InvalidCodeError();
+/** Sends (or re-sends) the 6-digit sign-up code (POST /auth/email-code). */
+export async function sendEmailCode(email: string): Promise<EmailCodeSent> {
+  if (USE_MOCK_AUTH) {
+    // Offline mock: nothing is sent; the code is always 123456.
+    await wait();
+    return { resendInSeconds: 45, devCode: STUB_EMAIL_CODE };
+  }
+  return api<EmailCodeSent>('/auth/email-code', { method: 'POST', body: { email } });
+}
+
+/** Checks the sign-up code (POST /auth/verify-email). */
+export async function verifyEmailCode(email: string, code: string): Promise<void> {
+  if (USE_MOCK_AUTH) {
+    await wait();
+    if (code !== STUB_EMAIL_CODE) throw new InvalidCodeError();
+    return;
+  }
+  try {
+    await api('/auth/verify-email', { method: 'POST', body: { email, code } });
+  } catch (error) {
+    if (error instanceof ApiError && error.code === 'WRONG_CODE') {
+      const reason = error.details?.reason;
+      const triesLeft = error.details?.triesLeft;
+      throw new InvalidCodeError(
+        reason === 'expired' || reason === 'tooManyTries' ? reason : 'wrong',
+        typeof triesLeft === 'number' ? triesLeft : undefined
+      );
+    }
+    throw error;
+  }
 }
 
 // What was typed on Create account waits here until its email is verified; only then is the
