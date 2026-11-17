@@ -24,6 +24,7 @@
     "seed:activity": "tsx src/scripts/seed-activity.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-sesv2": "^3.1170.0",
     "@fastify/rate-limit": "^11.2.1",
     "@fastify/swagger": "^9.9.2",
     "@fastify/swagger-ui": "^6.1.2",

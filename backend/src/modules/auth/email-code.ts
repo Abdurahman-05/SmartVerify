@@ -2,7 +2,7 @@ import { createHash, randomInt, timingSafeEqual } from 'node:crypto';
 
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 
-import { sendEmail } from '../../services/email.js';
+import { emailProvider, sendEmail } from '../../services/email.js';
 import { AppError } from '../../shared/errors/app-error.js';
 
 /** How long a code works, how often one can be sent, and how many wrong tries it takes. */
@@ -70,7 +70,7 @@ export function createEmailCodes(app: FastifyInstance) {
         expiresInSeconds: CODE_TTL_MS / 1000,
         resendInSeconds: RESEND_AFTER_MS / 1000,
       };
-      if (!env.RESEND_API_KEY) {
+      if (!emailProvider(env)) {
         if (env.NODE_ENV === 'production') {
           await prisma.emailCode.delete({ where: { id: row.id } });
           throw new AppError('EMAIL_NOT_SENT');

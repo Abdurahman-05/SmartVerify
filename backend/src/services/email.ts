@@ -1,3 +1,4 @@
+import { SESv2Client, SendEmailCommand } from '@aws-sdk/client-sesv2';
 import type { FastifyBaseLogger } from 'fastify';
 
 import type { Env } from '../config/env.js';
@@ -11,16 +12,53 @@ export interface OutgoingEmail {
   idempotencyKey: string;
 }
 
+type EmailEnv = Pick<Env, 'EMAIL_PROVIDER' | 'RESEND_API_KEY' | 'EMAIL_FROM' | 'SES_REGION'>;
+
+/** Which provider sends (SES when asked for, else Resend when it has a key), or null for none. */
+export const emailProvider = (env: EmailEnv): 'ses' | 'resend' | null =>
+  env.EMAIL_PROVIDER === 'ses' ? 'ses' : env.RESEND_API_KEY ? 'resend' : null;
+
+let ses: SESv2Client | undefined;
+
+/** Amazon SES: credentials come from the server's AWS role (nothing stored in the app). */
+async function sendWithSes(env: EmailEnv, log: FastifyBaseLogger, email: OutgoingEmail) {
+  ses ??= new SESv2Client({ region: env.SES_REGION });
+  try {
+    await ses.send(
+      new SendEmailCommand({
+        FromEmailAddress: env.EMAIL_FROM,
+        Destination: { ToAddresses: [email.to] },
+        Content: {
+          Simple: {
+            Subject: { Data: email.subject, Charset: 'UTF-8' },
+            Body: {
+              Text: { Data: email.text, Charset: 'UTF-8' },
+              Html: { Data: email.html, Charset: 'UTF-8' },
+            },
+          },
+        },
+      })
+    );
+    return true;
+  } catch (error) {
+    // The error name only (e.g. MessageRejected in the sandbox): never the address or message.
+    log.error({ sesError: error instanceof Error ? error.name : 'unknown' }, 'email not sent');
+    return false;
+  }
+}
+
 /**
- * Sends one email with Resend (HTTP API, no SDK). Returns false when it could not be sent.
- * Without RESEND_API_KEY (development and tests) nothing is sent and the caller decides.
+ * Sends one email (Amazon SES or Resend, see emailProvider). Returns false when it could not be
+ * sent. With no provider (development and tests) nothing is sent and the caller decides.
  */
 export async function sendEmail(
-  env: Pick<Env, 'RESEND_API_KEY' | 'EMAIL_FROM'>,
+  env: EmailEnv,
   log: FastifyBaseLogger,
   email: OutgoingEmail
 ): Promise<boolean> {
-  if (!env.RESEND_API_KEY) return false;
+  const provider = emailProvider(env);
+  if (!provider) return false;
+  if (provider === 'ses') return sendWithSes(env, log, email);
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
