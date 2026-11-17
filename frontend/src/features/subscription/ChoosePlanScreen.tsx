@@ -11,6 +11,7 @@ import { FormScreen } from '@/components/ui/FormScreen';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
+import { NoConnection } from '@/components/ui/NoConnection';
 import { Text } from '@/components/ui/Text';
 import { AuthCard, AuthLogo, AuthSubtitle, AuthTitle, SecureLine } from '@/features/auth/AuthParts';
 import { errorMessageKey } from '@/lib/errors';
@@ -21,13 +22,8 @@ import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 import { GlassCard, PrimaryButton } from '@/ui/glass';
 
-import {
-  normalPlan,
-  normalPricing,
-  normalQuarterlySavingEtb,
-  restaurantMonthlyEtb,
-  type BillingPeriod,
-} from './plans';
+import { normalPlan, type BillingPeriod } from './plans';
+import { usePlanPrices } from './usePlanPrices';
 
 const FIELD_BORDER = 'rgba(30,26,28,0.08)';
 
@@ -131,6 +127,7 @@ export default function ChoosePlanScreen() {
   const setPlan = useSession((s) => s.setPlan);
   const [period, setPeriod] = useState<BillingPeriod>('quarterly');
   const [chosen, setChosen] = useState<Plan>(isNormalApp ? normalPlan : 'restaurant');
+  const planPrices = usePlanPrices();
 
   // The plan is saved on the server first, so it survives a restart and staff get it too.
   const mutation = useMutation({
@@ -146,10 +143,14 @@ export default function ChoosePlanScreen() {
     else router.dismissTo('/home');
   };
 
-  if (mutation.isPending) return <LoadingView />;
+  if (mutation.isPending || planPrices.isPending) return <LoadingView />;
+  if (planPrices.isError || !planPrices.prices) {
+    return <NoConnection onRetry={() => void planPrices.refetch()} />;
+  }
 
-  const normalPrice = normalPricing[period].priceEtb;
-  const chosenPrice = chosen === 'restaurant' ? restaurantMonthlyEtb : normalPrice;
+  const { prices } = planPrices;
+  const normalPrice = prices.normal[period];
+  const chosenPrice = chosen === 'restaurant' ? prices.restaurant : normalPrice;
   const featureText = 'text-[13px] text-[#3E3539]';
 
   return (
@@ -201,7 +202,7 @@ export default function ChoosePlanScreen() {
                   onPress={() => setPeriod('monthly')}
                 />
                 <PeriodChip
-                  label={`${t('plan.threeMonths')} −${formatMoney(normalQuarterlySavingEtb, false)}`}
+                  label={`${t('plan.threeMonths')} −${formatMoney(prices.quarterlySaving, false)}`}
                   selected={period === 'quarterly'}
                   color={brand.primaryDeep}
                   onPress={() => setPeriod('quarterly')}
@@ -211,7 +212,7 @@ export default function ChoosePlanScreen() {
               {isNormalApp ? null : (
                 <PlanRow
                   name={t('plans.restaurant')}
-                  priceEtb={restaurantMonthlyEtb}
+                  priceEtb={prices.restaurant}
                   unit={t('plan.perMonthShort')}
                   selected={chosen === 'restaurant'}
                   color={brand.primaryDeep}
