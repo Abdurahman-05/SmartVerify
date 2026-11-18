@@ -27,7 +27,6 @@ async function main() {
     url: `${base}/api/v1/support-bot/webhook`,
     secret_token: env.SUPPORT_WEBHOOK_SECRET,
     allowed_updates: ['message'],
-    drop_pending_updates: true,
   });
   await call('setMyCommands', { commands: [{ command: 'help', description: 'How to reach us' }] });
 }
