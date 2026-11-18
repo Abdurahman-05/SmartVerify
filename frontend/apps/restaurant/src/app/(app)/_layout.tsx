@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
 
 import { LockOverlay } from '@/features/lock/LockOverlay';
@@ -9,8 +9,21 @@ import { listenToPushes, registerForPush } from '@/lib/push';
 import { belongsToOtherApp } from '@/lib/variant';
 import { useFeatures } from '@/store/features';
 import { targetOf } from '@/features/notifications/target';
-import { useSession } from '@/store/session';
-import { colors } from '@/theme/tokens';
+import { useSession, type Role } from '@/store/session';
+import { useBrandColors } from '@/store/theme';
+
+const ownerOnly: Role[] = ['owner'];
+const managers: Role[] = ['owner', 'manager'];
+/** First route segment -> roles allowed in. Matches the backend's role checks. */
+const guardedRoles: Record<string, Role[]> = {
+  'bank-accounts': ownerOnly,
+  'add-bank-account': ownerOnly,
+  menu: managers,
+  setup: managers,
+  admin: managers,
+  'tips-admin': managers,
+  staff: managers,
+};
 
 export default function AppLayout() {
   // Which owner extras are on: asked after sign-in and whenever the app opens signed in.
@@ -41,14 +54,23 @@ export default function AppLayout() {
     [queryClient, router]
   );
   // Each business uses its own app: restaurants the Restaurant app, shops the Shop app.
+  const { tint } = useBrandColors();
   const wrongApp = useSession((s) => belongsToOtherApp(s.user?.plan));
+  // Role guard: a wrong role opening these by deep link or notification goes Home.
+  const role = useSession((s) => s.user?.role);
+  const segments = useSegments() as string[];
+  const first = segments.find((s) => !s.startsWith('(')) ?? '';
+  const allowed = guardedRoles[first];
+  const blocked = !!role && !!allowed && !allowed.includes(role);
+  useEffect(() => {
+    if (blocked) router.replace('/');
+  }, [blocked, router]);
   if (wrongApp) return <WrongAppScreen />;
+  if (blocked) return null;
 
   return (
     <>
-      <Stack
-        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
-      >
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: tint } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="scan" options={{ animation: 'fade' }} />
         <Stack.Screen name="checking" options={{ gestureEnabled: false }} />

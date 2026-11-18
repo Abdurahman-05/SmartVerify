@@ -99,7 +99,7 @@ export const bankAccountRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post(
     '/bank-accounts',
     {
-      preHandler: requireRoles('owner', 'manager'),
+      preHandler: requireRoles('owner'),
       schema: {
         tags: ['bank accounts'],
         security,
@@ -171,7 +171,7 @@ export const bankAccountRoutes: FastifyPluginAsyncZod = async (app) => {
   app.patch(
     '/bank-accounts/:id',
     {
-      preHandler: requireRoles('owner', 'manager'),
+      preHandler: requireRoles('owner'),
       schema: {
         tags: ['bank accounts'],
         security,
@@ -247,7 +247,7 @@ export const bankAccountRoutes: FastifyPluginAsyncZod = async (app) => {
   app.delete(
     '/bank-accounts/:id',
     {
-      preHandler: requireRoles('owner', 'manager'),
+      preHandler: requireRoles('owner'),
       schema: {
         tags: ['bank accounts'],
         security,
