@@ -23,6 +23,12 @@
 		reverse_proxy api:3000
 	}
 
+	# Public Terms and Privacy pages (served by the API, en + /am) and their stylesheet.
+	@legal path /terms /terms/* /privacy /privacy/* /legal.css
+	handle @legal {
+		reverse_proxy api:3000
+	}
+
 	handle {
 		header X-Frame-Options DENY
 		root * /srv/admin
