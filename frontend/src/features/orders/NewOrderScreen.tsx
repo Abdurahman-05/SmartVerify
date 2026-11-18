@@ -25,6 +25,7 @@ import { Text } from '@/components/ui/Text';
 import { newIdempotencyKey } from '@/lib/api/idempotency';
 import { ApiError } from '@/lib/api/client';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
+import { toastIfNetworkError } from '@/store/toast';
 import {
   feesKey,
   getFees,
@@ -102,6 +103,7 @@ export default function NewOrderScreen({ addTo }: { addTo?: string } = {}) {
       router.replace({ pathname: '/order-sent', params: { id: order.id } });
     },
     onError: (error) => {
+      toastIfNetworkError(error);
       // Someone else took the table meanwhile: refresh tables and let the waiter pick again.
       if (error instanceof ApiError && error.code === 'TABLE_BUSY') {
         setTable(null);
@@ -125,6 +127,7 @@ export default function NewOrderScreen({ addTo }: { addTo?: string } = {}) {
       void queryClient.invalidateQueries({ queryKey: ['bills'] });
       router.back();
     },
+    onError: toastIfNetworkError,
   });
 
   const menu = menuQuery.data;
@@ -136,7 +139,9 @@ export default function NewOrderScreen({ addTo }: { addTo?: string } = {}) {
     void tablesQuery.refetch();
     void feesQuery.refetch();
   };
-  if (loadError && isNetworkError(loadError)) return <NoConnection onRetry={retryLoad} />;
+  // Saved data shows (the banner says no connection); the full page only when there is none.
+  if (loadError && isNetworkError(loadError) && (!menu || !tables || !fees))
+    return <NoConnection onRetry={retryLoad} />;
   // Any other answer (not Restaurant Plus, signed out…): say so, never spin forever.
   if (loadError && (!menu || !tables || !fees)) {
     return (
@@ -561,14 +566,14 @@ export default function NewOrderScreen({ addTo }: { addTo?: string } = {}) {
         </KeyboardAvoidingView>
 
         <ErrorDialog
-          visible={mutation.isError}
+          visible={mutation.isError && !isNetworkError(mutation.error)}
           title={t('orders.sendFailedTitle')}
           message={t(errorMessageKey(mutation.error))}
           actionLabel={t('errors.retry')}
           onClose={mutation.reset}
         />
         <ErrorDialog
-          visible={addMutation.isError}
+          visible={addMutation.isError && !isNetworkError(addMutation.error)}
           title={t('orders.sendFailedTitle')}
           message={t(errorMessageKey(addMutation.error))}
           actionLabel={t('errors.retry')}

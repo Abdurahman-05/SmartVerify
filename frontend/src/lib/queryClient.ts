@@ -4,6 +4,7 @@ import { focusManager, onlineManager, QueryClient } from '@tanstack/react-query'
 import * as Network from 'expo-network';
 import { AppState, Platform } from 'react-native';
 
+import { isNetworkError } from '@/lib/errors';
 import { useSession } from '@/store/session';
 
 // Back online: React Query refetches what is on screen by itself.
@@ -38,12 +39,15 @@ export const queryClient = new QueryClient({
     queries: {
       gcTime: 24 * 60 * 60 * 1000,
       staleTime: 30 * 1000,
-      retry: 1,
+      // No internet: fail at once (the screen shows its saved data or "No connection") instead of
+      // waiting for a retry that is paused while offline. Other errors retry once.
+      retry: (count, error) => !isNetworkError(error) && count < 1,
       networkMode: 'offlineFirst',
     },
     // An action (pay, order, save) without internet fails at once with "No connection" instead
     // of waiting silently; the person sees it and tries again (the Idempotency-Key makes it safe).
-    mutations: { networkMode: 'always' },
+    // Writes are never retried by themselves: the person taps again.
+    mutations: { networkMode: 'always', retry: false },
   },
 });
 

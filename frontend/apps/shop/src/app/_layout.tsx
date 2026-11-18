@@ -17,14 +17,14 @@ import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { OfflineBanner } from '@/components/ui/OfflineBanner';
+import { Toast } from '@/components/ui/Toast';
 import { FirstThemeScreen } from '@/features/theme/FirstThemeScreen';
 import { setUnauthorizedHandler } from '@/lib/api/client';
 import { clearToken } from '@/lib/api/token';
 import { CACHE_MAX_AGE, queryClient, queryPersister } from '@/lib/queryClient';
 import { useSession } from '@/store/session';
 import { useTheme } from '@/store/theme';
-import { themeVars } from '@/theme/themes';
-import { colors } from '@/theme/tokens';
+import { themes, themeVars } from '@/theme/themes';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -90,7 +90,7 @@ export default function RootLayout() {
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: colors.background },
+            contentStyle: { backgroundColor: themes[themeId].tint },
           }}
         >
           <Stack.Screen name="index" />
@@ -98,6 +98,7 @@ export default function RootLayout() {
           <Stack.Screen name="(app)" />
         </Stack>
         <OfflineBanner />
+        <Toast />
       </View>
     </PersistQueryClientProvider>
   );

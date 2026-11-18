@@ -20,6 +20,7 @@ import { Segmented } from '@/components/ui/Segmented';
 import { Text } from '@/components/ui/Text';
 import { TopBar } from '@/components/ui/TopBar';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
+import { toastIfNetworkError } from '@/store/toast';
 import { digitsOnly, formatTime } from '@/lib/format';
 import {
   buyItemsKey,
@@ -150,6 +151,7 @@ function BuyList() {
     mutationFn: (input: { id: string; price: number; paidFrom: PaidFrom }) =>
       markBought(input.id, { price: input.price, paidFrom: input.paidFrom }),
     onSuccess: () => setPicked(null),
+    onError: toastIfNetworkError,
     onSettled: () => {
       // A new spending may have been added too.
       void queryClient.invalidateQueries({ queryKey: buyItemsKey });
@@ -305,7 +307,7 @@ function BuyList() {
         />
 
         <ErrorDialog
-          visible={bought.isError}
+          visible={bought.isError && !isNetworkError(bought.error)}
           title={t('extras.buy.failedTitle')}
           message={t(errorMessageKey(bought.error))}
           actionLabel={t('errors.retry')}

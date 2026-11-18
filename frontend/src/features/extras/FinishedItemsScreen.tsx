@@ -13,7 +13,8 @@ import { Input } from '@/components/ui/Input';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
-import { errorMessageKey } from '@/lib/errors';
+import { errorMessageKey, isNetworkError } from '@/lib/errors';
+import { toastIfNetworkError } from '@/store/toast';
 import {
   addBuyItem,
   buyItemsKey,
@@ -117,10 +118,12 @@ function FinishedItems() {
       return items.length;
     },
     onSuccess: (count) => setSentCount(count),
+    onError: toastIfNetworkError,
     onSettled: () => queryClient.invalidateQueries({ queryKey: buyItemsKey }),
   });
   const remove = useMutation({
     mutationFn: removeBuyItem,
+    onError: toastIfNetworkError,
     onSettled: () => queryClient.invalidateQueries({ queryKey: buyItemsKey }),
   });
 
@@ -283,7 +286,7 @@ function FinishedItems() {
         ) : null}
 
         <ErrorDialog
-          visible={Boolean(failed)}
+          visible={Boolean(failed) && !isNetworkError(failed?.error)}
           title={t(
             send.isError ? 'extras.finished.sendFailedTitle' : 'extras.finished.removeFailedTitle'
           )}

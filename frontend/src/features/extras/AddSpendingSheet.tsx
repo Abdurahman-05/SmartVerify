@@ -30,7 +30,8 @@ import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { Segmented } from '@/components/ui/Segmented';
 import { Text } from '@/components/ui/Text';
 import { TopBar } from '@/components/ui/TopBar';
-import { errorMessageKey } from '@/lib/errors';
+import { errorMessageKey, isNetworkError } from '@/lib/errors';
+import { toastIfNetworkError } from '@/store/toast';
 import { digitsOnly } from '@/lib/format';
 import {
   addExpense,
@@ -133,6 +134,7 @@ export function AddSpendingSheet({
       setForBusiness(true);
       onClose();
     },
+    onError: toastIfNetworkError,
   });
 
   const submit = () => {
@@ -310,7 +312,7 @@ export function AddSpendingSheet({
       </ScrollView>
 
       <ErrorDialog
-        visible={save.isError}
+        visible={save.isError && !isNetworkError(save.error)}
         title={t('extras.money.failedTitle')}
         message={t(errorMessageKey(save.error))}
         actionLabel={t('errors.retry')}
