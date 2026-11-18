@@ -33,5 +33,7 @@ rm -rf admin.new
 
 cd app/deploy
 docker compose --env-file /opt/smartverify/.env.compose up -d --build
+# The app folder is replaced on every update, so recreate Caddy to make it read the new Caddyfile.
+docker compose --env-file /opt/smartverify/.env.compose up -d --force-recreate --no-deps web
 docker image prune -f >/dev/null
 echo "updated"
