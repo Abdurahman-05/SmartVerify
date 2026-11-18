@@ -76,7 +76,7 @@ describe('bank accounts', () => {
     expect(JSON.stringify(res.json())).not.toContain('1000293884582');
 
     const tele = (
-      await add(r.manager.token, {
+      await add(r.owner.token, {
         bankCode: 'TEL',
         accountNumber: '0911227788',
         holderName: 'Abebe Kebede',
@@ -155,7 +155,7 @@ describe('bank accounts', () => {
       { bankCode: 'TEL', accountNumber: '1000293884582' },
       { bankCode: 'TEL', accountNumber: '0812345678' },
     ]) {
-      expect(code(await add(r.manager.token, body)), JSON.stringify(body)).toBe('VALIDATION_ERROR');
+      expect(code(await add(r.owner.token, body)), JSON.stringify(body)).toBe('VALIDATION_ERROR');
     }
     expect(
       code(
@@ -184,7 +184,7 @@ describe('bank accounts', () => {
       })
     ).json() as Account;
 
-    const named = await call('PATCH', `/bank-accounts/${cbe.id}`, r.manager.token, {
+    const named = await call('PATCH', `/bank-accounts/${cbe.id}`, r.owner.token, {
       holderName: 'Abebe Kebede Coffee',
     });
     expect(named.statusCode).toBe(200);
@@ -232,6 +232,28 @@ describe('bank accounts', () => {
         })
       )
     ).toBe('NOT_FOUND');
+  });
+
+  it('a manager cannot add, edit or delete a bank account', async () => {
+    const acc = (
+      await add(r.owner.token, {
+        bankCode: 'CBE',
+        accountNumber: '1000293884582',
+        holderName: 'Abebe Kebede',
+      })
+    ).json() as Account;
+    const added = await add(r.manager.token, {
+      bankCode: 'CBE',
+      accountNumber: '1000293884599',
+      holderName: 'Abebe Kebede',
+    });
+    expect(added.statusCode).toBe(403);
+    const edited = await call('PATCH', `/bank-accounts/${acc.id}`, r.manager.token, {
+      holderName: 'X Y',
+    });
+    expect(edited.statusCode).toBe(403);
+    const removed = await call('DELETE', `/bank-accounts/${acc.id}`, r.manager.token);
+    expect(removed.statusCode).toBe(403);
   });
 
   it('remove is soft: it leaves the list, frees a place and can be added again', async () => {
