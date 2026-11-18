@@ -80,7 +80,15 @@ function HomeHeader({ user }: { user: SessionUser }) {
 }
 
 /** One see-through number chip inside the hero. */
-function HeroStat({ value, label, warn }: { value: number; label: string; warn?: boolean }) {
+function HeroStat({
+  value,
+  label,
+  warn,
+}: {
+  value: number | string;
+  label: string;
+  warn?: boolean;
+}) {
   return (
     <HeroChip style={{ flex: 1, paddingHorizontal: 10 }}>
       <View accessible accessibilityLabel={`${label}: ${value}`}>
@@ -90,7 +98,9 @@ function HeroStat({ value, label, warn }: { value: number; label: string; warn?:
         <Text
           font="heading"
           className="text-lg leading-6"
-          style={{ color: warn && value > 0 ? colors.tipOnDark : '#FFFFFF' }}
+          style={{
+            color: warn && typeof value === 'number' && value > 0 ? colors.tipOnDark : '#FFFFFF',
+          }}
         >
           {value}
         </Text>
@@ -103,8 +113,11 @@ function HeroStat({ value, label, warn }: { value: number; label: string; warn?:
 function TodayHero({
   user,
   today,
+  failed = false,
 }: {
   user: SessionUser;
+  /** The numbers could not be loaded: show "—" instead of 0. */
+  failed?: boolean;
   today?: {
     salesEtb: number;
     payments: number;
@@ -116,6 +129,7 @@ function TodayHero({
   const { t } = useTranslation();
   const planLine = user.plan ? t(`plans.${user.plan}`) : t('home.exploring');
   // Every plan shows today's live numbers (0 until the first payment).
+  const dash = '—';
   const day = today ?? { salesEtb: 0, payments: 0, pending: 0, duplicate: 0, tablesOpen: 0 };
   // Restaurant managers run the floor: open tables instead of the plan name.
   const secondLine =
@@ -143,18 +157,18 @@ function TodayHero({
           </Text>
         </View>
         <Text font="heading" tone="inverse" className="mt-0.5 pr-28 text-[32px] leading-[38px]">
-          {formatMoney(day.salesEtb, false)}{' '}
+          {failed ? dash : formatMoney(day.salesEtb, false)}{' '}
           <Text font="heading" tone="inverse" className="text-base">
             {t('common.etb')}
           </Text>
         </Text>
         <Text tone="inverse" className="pr-24 text-sm opacity-90" numberOfLines={1}>
-          {t('home.paymentsCount', { count: day.payments })} · {secondLine}
+          {failed ? dash : t('home.paymentsCount', { count: day.payments })} · {secondLine}
         </Text>
         <View className="mt-3 flex-row gap-2">
-          <HeroStat value={day.payments} label={t('status.verified')} />
-          <HeroStat value={day.pending} label={t('status.pending')} warn />
-          <HeroStat value={day.duplicate} label={t('status.duplicate')} />
+          <HeroStat value={failed ? dash : day.payments} label={t('status.verified')} />
+          <HeroStat value={failed ? dash : day.pending} label={t('status.pending')} warn />
+          <HeroStat value={failed ? dash : day.duplicate} label={t('status.duplicate')} />
         </View>
       </HeroCard>
     </View>
@@ -209,22 +223,25 @@ export default function HomeScreen() {
     enabled: isRestaurant,
   });
   const tablesWaiting = (openList ?? []).filter((b) => b.type === 'dine').length;
-  const { data: paidToday } = useQuery({
+  const { data: paidToday, isError: paidFailed } = useQuery({
     queryKey: paymentsKey('today'),
     queryFn: () => syncPayments('today'),
     enabled: signedIn,
   });
   // Checks that did not verify today: not confirmed yet (pending) and already-used receipts.
-  const { data: failed } = useQuery({
+  const { data: failed, isError: failedChecksFailed } = useQuery({
     queryKey: failedChecksKey('today'),
     queryFn: () => getFailedChecks('today'),
     enabled: signedIn,
   });
-  const { data: summary } = useQuery({
+  const { data: summary, isError: summaryFailed } = useQuery({
     queryKey: paymentsSummaryKey('today'),
     queryFn: () => getPaymentsSummary('today'),
     enabled: signedIn,
   });
+  // Any dashboard number that could not load shows "—", never a false 0.
+  const dashFailed =
+    (summaryFailed && !summary) || (paidFailed && !paidToday) || (failedChecksFailed && !failed);
   const manages = user?.role === 'owner' || user?.role === 'manager';
   const subtitleFor = useActionSubtitle(
     user?.plan ?? null,
@@ -262,6 +279,7 @@ export default function HomeScreen() {
           <LocationPrompt />
           <TodayHero
             user={user}
+            failed={dashFailed}
             today={
               summary
                 ? {

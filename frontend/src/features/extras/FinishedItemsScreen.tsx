@@ -229,6 +229,15 @@ function FinishedItems() {
             </>
           ) : null}
 
+          {open.isError && !open.data ? (
+            <GlassCard style={{ gap: 12, paddingHorizontal: 16, paddingVertical: 14 }}>
+              <Text tone="muted" className="text-base">
+                {t(errorMessageKey(open.error))}
+              </Text>
+              <PrimaryButton label={t('errors.retry')} onPress={() => void refetch()} />
+            </GlassCard>
+          ) : null}
+
           {mine.length ? (
             <>
               <Text font="heading" className="px-1 text-lg" accessibilityRole="header">

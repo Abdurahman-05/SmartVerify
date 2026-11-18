@@ -236,8 +236,11 @@ export default function NotificationsScreen() {
     }, [refetch, mutate])
   );
 
-  if (query.isError && !query.data && isNetworkError(query.error)) {
-    return <NoConnection onRetry={() => void query.refetch()} />;
+  if (query.isError && !query.data) {
+    // No internet: pop-up and back. Any other failure stays as a page with Retry.
+    return (
+      <NoConnection fullPage={!isNetworkError(query.error)} onRetry={() => void query.refetch()} />
+    );
   }
   if (!query.data) return <LoadingView screenTitle={t('notifications.alertsTitle')} />;
 

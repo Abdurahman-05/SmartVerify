@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Send } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
@@ -10,6 +10,7 @@ import { useGlass } from '@/components/ui/glassTokens';
 import { StickyFooter } from '@/components/ui/StickyFooter';
 import { formatMoney } from '@/components/ui/MoneyText';
 import { LoadingView } from '@/components/ui/LoadingView';
+import { NoConnection } from '@/components/ui/NoConnection';
 import { Text } from '@/components/ui/Text';
 import { areaLabel } from '@/lib/areaLabel';
 import { getOrder, getTables, tablesKey, type Order } from '@/lib/restaurant';
@@ -159,12 +160,17 @@ function SentView({ order }: { order: Order }) {
 
 export default function OrderSentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { data: order, isPending } = useQuery({
+  const {
+    data: order,
+    isPending,
+    refetch,
+  } = useQuery({
     queryKey: ['order', id],
     queryFn: () => getOrder(id),
   });
 
   if (isPending) return <LoadingView />;
-  if (!order) return <Redirect href="/home" />;
+  // The order could not be loaded: say so, with Retry, instead of silently going Home.
+  if (!order) return <NoConnection fullPage onRetry={() => void refetch()} />;
   return <SentView order={order} />;
 }

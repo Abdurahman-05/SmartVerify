@@ -6,9 +6,9 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
-import { Button } from '@/components/ui/Button';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { LoadingView } from '@/components/ui/LoadingView';
+import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { getBankAccounts } from '@/lib/bankAccounts';
@@ -18,17 +18,24 @@ import { colors } from '@/theme/tokens';
 import { AccountPicker } from './AccountPicker';
 import { useReceiptFlow } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
+import { HeroCard, PrimaryButton } from '@/ui/glass';
 
 export default function VerifyPaymentScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [amountFocused, setAmountFocused] = useState(false);
   const { account: chosenAccount, amount, setAccount, setAmount } = useVerifyFlow();
-  const { data: accounts, isPending } = useQuery({
+  const {
+    data: accounts,
+    isPending,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ['bank-accounts'],
     queryFn: getBankAccounts,
   });
 
+  if (isError && !accounts) return <NoConnection fullPage onRetry={() => void refetch()} />;
   if (isPending || !accounts) return <LoadingView screenTitle={t('verify.title')} />;
 
   const account = accounts.find((a) => a.id === chosenAccount?.id) ?? accounts[0];
@@ -63,7 +70,7 @@ export default function VerifyPaymentScreen() {
               <Text tone="muted" className="text-base">
                 {t('bankAccounts.noAccountsVerify')}
               </Text>
-              <Button
+              <PrimaryButton
                 label={t('bankAccounts.addAccount')}
                 icon={Plus}
                 size="md"
@@ -100,7 +107,7 @@ export default function VerifyPaymentScreen() {
         </View>
       </View>
 
-      <View className="mx-4 mt-5 rounded-card bg-primary px-5 py-4">
+      <HeroCard className="mx-4 mt-5 px-5 py-4">
         <Text font="semibold" tone="inverse" className="text-base">
           {t('verify.totalLabel')}
         </Text>
@@ -111,7 +118,7 @@ export default function VerifyPaymentScreen() {
           numberOfLines={1}
           adjustsFontSizeToFit
         />
-      </View>
+      </HeroCard>
 
       <View className="min-h-6 flex-1" />
 

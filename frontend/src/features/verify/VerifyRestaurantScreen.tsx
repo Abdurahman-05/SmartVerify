@@ -19,6 +19,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { useGlass } from '@/components/ui/glassTokens';
 import { HeroCard, HeroChip } from '@/components/ui/HeroCard';
 import { LoadingView } from '@/components/ui/LoadingView';
+import { NoConnection } from '@/components/ui/NoConnection';
 import { formatMoney } from '@/components/ui/MoneyText';
 import { OptionSheet } from '@/components/ui/OptionSheet';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
@@ -62,7 +63,11 @@ export default function VerifyRestaurantScreen() {
   const [settleKey] = useState(newIdempotencyKey);
   const { account: chosenAccount, setAccount, setAmount } = useVerifyFlow();
   const [accountSheet, setAccountSheet] = useState(false);
-  const { data: accounts } = useQuery({ queryKey: ['bank-accounts'], queryFn: getBankAccounts });
+  const {
+    data: accounts,
+    isError: accountsFailed,
+    refetch: refetchAccounts,
+  } = useQuery({ queryKey: ['bank-accounts'], queryFn: getBankAccounts });
 
   const { start } = pay;
   useEffect(() => {
@@ -71,6 +76,9 @@ export default function VerifyRestaurantScreen() {
 
   if (pending || settling) return <LoadingView />;
   if (!bill) return <Redirect href="/bills" />;
+  if (accountsFailed && !accounts) {
+    return <NoConnection fullPage onRetry={() => void refetchAccounts()} />;
+  }
   if (!accounts) return <LoadingView />;
 
   const account = accounts.find((a) => a.id === chosenAccount?.id) ?? accounts[0];
