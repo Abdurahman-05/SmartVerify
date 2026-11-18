@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { MoneyText } from '@/components/ui/MoneyText';
@@ -28,6 +27,7 @@ import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
 import { useLocalName } from './useLocalName';
+import { GlassCard, PrimaryButton, ScreenBg } from '@/ui/glass';
 
 function ItemRow({
   item,
@@ -128,123 +128,125 @@ export default function StarterPackScreen() {
     });
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader
-        title={pack ? localName(pack) : t('menuAdmin.starter.title')}
-        subtitle={
-          pack
-            ? t('menuAdmin.starter.added', { added: pack.addedCount, total: pack.itemCount })
-            : undefined
-        }
-        onBack={goBack}
-      />
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <ScreenHeader
+          title={pack ? localName(pack) : t('menuAdmin.starter.title')}
+          subtitle={
+            pack
+              ? t('menuAdmin.starter.added', { added: pack.addedCount, total: pack.itemCount })
+              : undefined
+          }
+          onBack={goBack}
+        />
 
-      {loadError || !pack ? (
-        <View className="flex-1 items-center justify-center gap-4 px-6">
-          <Text font="semibold" className="text-center text-lg">
-            {t(errorMessageKey(loadError))}
-          </Text>
-          <View className="w-full">
-            <Button label={t('errors.retry')} icon={RefreshCw} onPress={refetchAll} />
-          </View>
-        </View>
-      ) : (
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 12 }}>
-          {result ? (
-            <View
-              className="flex-row items-start gap-2 rounded-[16px] bg-successBg p-3"
-              accessibilityLiveRegion="polite"
-            >
-              <CircleCheck size={22} color={colors.successFg} strokeWidth={2.2} />
-              <View className="flex-1">
-                <Text font="bold" className="text-base" style={{ color: colors.successFg }}>
-                  {t('menuAdmin.starter.resultAdded', { count: result.totalCreated })}
-                </Text>
-                {result.skipped.length ? (
-                  <Text font="semibold" className="text-sm" style={{ color: colors.successFg }}>
-                    {t('menuAdmin.starter.resultSkipped', { count: result.skipped.length })}
-                  </Text>
-                ) : null}
-              </View>
-            </View>
-          ) : null}
-
-          <View className="flex-row items-start gap-2">
-            <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
-            <Text tone="muted" className="flex-1 text-sm leading-5">
-              {t('menuAdmin.starter.priceNote')}
+        {loadError || !pack ? (
+          <View className="flex-1 items-center justify-center gap-4 px-6">
+            <Text font="semibold" className="text-center text-lg">
+              {t(errorMessageKey(loadError))}
             </Text>
+            <View className="w-full">
+              <PrimaryButton label={t('errors.retry')} icon={RefreshCw} onPress={refetchAll} />
+            </View>
           </View>
-
-          {notAdded.length ? (
-            <Button
-              label={t('menuAdmin.starter.addPack', { count: notAdded.length })}
-              icon={Plus}
-              onPress={() => mutation.mutate({ packs: [pack.key] })}
-            />
-          ) : null}
-
-          {pack.groups.map((group) => {
-            const groupItems = all.filter((i) => i.groupKey === group.key);
-            const remaining = groupItems.filter((i) => !i.alreadyAdded).length;
-            return (
-              <View key={group.key} className="gap-2 pt-2">
-                <View className="min-h-11 flex-row items-center gap-2">
-                  <Text font="heading" className="flex-1 text-lg" accessibilityRole="header">
-                    {localName(group)}
+        ) : (
+          <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 12 }}>
+            {result ? (
+              <View
+                className="flex-row items-start gap-2 rounded-[16px] bg-successBg p-3"
+                accessibilityLiveRegion="polite"
+              >
+                <CircleCheck size={22} color={colors.successFg} strokeWidth={2.2} />
+                <View className="flex-1">
+                  <Text font="bold" className="text-base" style={{ color: colors.successFg }}>
+                    {t('menuAdmin.starter.resultAdded', { count: result.totalCreated })}
                   </Text>
-                  {remaining ? (
-                    <Pressable
-                      onPress={() =>
-                        mutation.mutate({ groups: [{ pack: pack.key, group: group.key }] })
-                      }
-                      accessibilityRole="button"
-                      className="h-11 flex-row items-center gap-1 rounded-[22px] border-2 border-primary bg-surface pl-3 pr-4 active:bg-background"
-                    >
-                      <Plus size={18} color={brand.primary} strokeWidth={2.8} />
-                      <Text font="bold" className="text-[15px]" style={{ color: brand.primary }}>
-                        {t('menuAdmin.starter.addSection', { count: remaining })}
-                      </Text>
-                    </Pressable>
-                  ) : (
-                    <Text font="bold" className="text-sm" style={{ color: colors.successFg }}>
-                      {t('menuAdmin.starter.sectionDone')}
+                  {result.skipped.length ? (
+                    <Text font="semibold" className="text-sm" style={{ color: colors.successFg }}>
+                      {t('menuAdmin.starter.resultSkipped', { count: result.skipped.length })}
                     </Text>
-                  )}
+                  ) : null}
                 </View>
-                {groupItems.map((item) => (
-                  <ItemRow
-                    key={item.key}
-                    item={item}
-                    selected={selected.has(item.key)}
-                    onToggle={() => toggle(item.key)}
-                  />
-                ))}
               </View>
-            );
-          })}
-        </ScrollView>
-      )}
+            ) : null}
 
-      {selected.size ? (
-        <View className="border-t border-border bg-surface px-4 pb-6 pt-3">
-          <Button
-            label={t('menuAdmin.starter.addSelected', { count: selected.size })}
-            icon={Plus}
-            onPress={() =>
-              mutation.mutate({ items: [...selected].map((itemKey) => ({ key: itemKey })) })
-            }
-          />
-        </View>
-      ) : null}
+            <View className="flex-row items-start gap-2">
+              <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
+              <Text tone="muted" className="flex-1 text-sm leading-5">
+                {t('menuAdmin.starter.priceNote')}
+              </Text>
+            </View>
 
-      <ErrorDialog
-        visible={mutation.isError}
-        title={t('menuAdmin.starter.importFailedTitle')}
-        message={t(errorMessageKey(mutation.error))}
-        actionLabel={t('errors.retry')}
-        onClose={mutation.reset}
-      />
-    </SafeAreaView>
+            {notAdded.length ? (
+              <PrimaryButton
+                label={t('menuAdmin.starter.addPack', { count: notAdded.length })}
+                icon={Plus}
+                onPress={() => mutation.mutate({ packs: [pack.key] })}
+              />
+            ) : null}
+
+            {pack.groups.map((group) => {
+              const groupItems = all.filter((i) => i.groupKey === group.key);
+              const remaining = groupItems.filter((i) => !i.alreadyAdded).length;
+              return (
+                <View key={group.key} className="gap-2 pt-2">
+                  <View className="min-h-11 flex-row items-center gap-2">
+                    <Text font="heading" className="flex-1 text-lg" accessibilityRole="header">
+                      {localName(group)}
+                    </Text>
+                    {remaining ? (
+                      <Pressable
+                        onPress={() =>
+                          mutation.mutate({ groups: [{ pack: pack.key, group: group.key }] })
+                        }
+                        accessibilityRole="button"
+                        className="h-11 flex-row items-center gap-1 rounded-[22px] border-2 border-primary bg-surface pl-3 pr-4 active:bg-background"
+                      >
+                        <Plus size={18} color={brand.primary} strokeWidth={2.8} />
+                        <Text font="bold" className="text-[15px]" style={{ color: brand.primary }}>
+                          {t('menuAdmin.starter.addSection', { count: remaining })}
+                        </Text>
+                      </Pressable>
+                    ) : (
+                      <Text font="bold" className="text-sm" style={{ color: colors.successFg }}>
+                        {t('menuAdmin.starter.sectionDone')}
+                      </Text>
+                    )}
+                  </View>
+                  {groupItems.map((item) => (
+                    <ItemRow
+                      key={item.key}
+                      item={item}
+                      selected={selected.has(item.key)}
+                      onToggle={() => toggle(item.key)}
+                    />
+                  ))}
+                </View>
+              );
+            })}
+          </ScrollView>
+        )}
+
+        {selected.size ? (
+          <GlassCard className="px-4 pb-6 pt-3">
+            <PrimaryButton
+              label={t('menuAdmin.starter.addSelected', { count: selected.size })}
+              icon={Plus}
+              onPress={() =>
+                mutation.mutate({ items: [...selected].map((itemKey) => ({ key: itemKey })) })
+              }
+            />
+          </GlassCard>
+        ) : null}
+
+        <ErrorDialog
+          visible={mutation.isError}
+          title={t('menuAdmin.starter.importFailedTitle')}
+          message={t(errorMessageKey(mutation.error))}
+          actionLabel={t('errors.retry')}
+          onClose={mutation.reset}
+        />
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

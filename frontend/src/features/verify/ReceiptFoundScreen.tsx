@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TextInput, View } from 'react-native';
 
-import { Button } from '@/components/ui/Button';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { formatMoney } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
@@ -22,6 +21,7 @@ import { colors } from '@/theme/tokens';
 import { findPayerBank, linkValue, type ReceiptField } from './payerBanks';
 import { checkingRoute, useReceiptFlow, type ReceiptValues } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
+import { PrimaryButton, SecondaryButton } from '@/ui/glass';
 
 function FoundValue({ field, value }: { field: ReceiptField; value: string }) {
   const { t } = useTranslation();
@@ -161,15 +161,14 @@ export default function ReceiptFoundScreen() {
       <View className="min-h-6 flex-1" />
 
       <View className="gap-2.5 px-4 pb-6 pt-2">
-        <Button
+        <PrimaryButton
           label={t('verifyBank.found.check', { amount: formatMoney(amount) })}
           disabled={!ready}
           onPress={check}
         />
-        <Button
+        <SecondaryButton
           label={t('verifyBank.found.readAgain')}
           icon={RotateCcw}
-          variant="outline"
           size="md"
           onPress={() => router.replace('/verify-bank/read')}
         />

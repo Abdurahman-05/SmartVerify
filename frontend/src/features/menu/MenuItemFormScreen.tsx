@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import { Keyboard, View } from 'react-native';
 import { z } from 'zod';
 
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { Input } from '@/components/ui/Input';
@@ -24,6 +23,7 @@ import { getMenuCategories, itemCategoryKey, menuCategoriesKey } from '@/lib/men
 import { colors } from '@/theme/tokens';
 
 import { useLocalName } from './useLocalName';
+import { PrimaryButton, SecondaryButton } from '@/ui/glass';
 
 const MAX_PRICE_DIGITS = 7;
 
@@ -198,7 +198,7 @@ export default function MenuItemFormScreen() {
       />
 
       <View className="gap-2.5 px-4 pb-6 pt-3">
-        <Button
+        <PrimaryButton
           label={t('common.save')}
           icon={Save}
           disabled={mutation.isPending}
@@ -207,7 +207,7 @@ export default function MenuItemFormScreen() {
             void handleSubmit((values) => mutation.mutate(values))();
           }}
         />
-        <Button label={t('common.cancel')} variant="outline" size="md" onPress={goBack} />
+        <SecondaryButton label={t('common.cancel')} size="md" onPress={goBack} />
       </View>
     </FormScreen>
   );

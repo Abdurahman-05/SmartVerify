@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Transaction details</title>
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F1F2}
+button{font-family:'DM Sans',sans-serif}
+[data-theme=forest]{--p:#0D4A36;--pt:#0D6B47;--tint:#E6F2EC;--tile:#DDEFE6}
+[data-theme=ocean]{--p:#0B3D6B;--pt:#0B5CA8;--tint:#E5F0FA;--tile:#D6E7F7}
+[data-theme=royal]{--p:#3F2A7A;--pt:#5B3FB0;--tint:#EEEAF8;--tile:#E0D9F2}
+[data-theme=teal]{--p:#0B4F55;--pt:#0E7480;--tint:#E3F2F3;--tile:#D2EAEC}
+[data-theme=slate]{--p:#26323F;--pt:#3D5A80;--tint:#E8EDF2;--tile:#DAE3EC}
+[data-theme=rose]{--p:#9D174D;--pt:#BE185D;--tint:#FDF0F5;--tile:#FADCE8}
+[data-theme=berry]{--p:#6B1F5E;--pt:#8E2B7C;--tint:#F7ECF5;--tile:#EFD8EB}
+.scr{width:390px;height:844px;box-sizing:border-box;position:relative;overflow:hidden;color:#1E1A1C;font-family:'DM Sans',sans-serif;background:radial-gradient(circle at 6% 4%,var(--tile) 0%,rgba(255,255,255,0) 46%),radial-gradient(circle at 100% 34%,#FFE7AE 0%,rgba(255,231,174,0) 36%),radial-gradient(circle at 22% 100%,var(--tile) 0%,rgba(255,255,255,0) 50%),var(--tint)}
+.in{display:flex;flex-direction:column;gap:12px;padding:16px;height:100%;box-sizing:border-box}
+.g{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.95);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 1px 0 #fff,0 10px 26px rgba(30,20,25,.08);border-radius:20px}
+.h1{margin:0;font-family:Sora,sans-serif;font-size:22px;font-weight:700;line-height:1.2}
+.num{font-family:Sora,sans-serif;font-weight:700}
+.ib{width:44px;height:44px;border-radius:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;color:#1E1A1C}
+.r{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid rgba(0,0,0,.07);font-size:15px}
+.k{color:#5E5559}.v{font-weight:700;text-align:right}
+.btn2{width:100%;height:52px;border-radius:16px;color:var(--pt);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+</style>
+</helmet>
+<div class="scr" data-theme="{{theme}}">
+<div class="in">
+<div style="display:flex;align-items:center;gap:10px">
+<button class="g ib" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+<h1 class="h1">Transaction details</h1>
+</div>
+
+<section class="g" style="padding:18px 16px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center">
+<span style="width:56px;height:56px;border-radius:16px;background:#5B2A86;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center">CBE</span>
+<div class="num" style="font-size:36px">1,250 <span style="font-size:16px">ETB</span></div>
+<span style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:15px;background:#DDF3E8;color:#0B5A38;font-size:14px;font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Verified · amount matches</span>
+</section>
+
+<section class="g" style="padding:4px 16px">
+<div class="r" style="border-top:0"><span class="k">Paid by</span><span class="v">Abel Kebede</span></div>
+<div class="r"><span class="k">Bank</span><span class="v">Commercial Bank of Ethiopia</span></div>
+<div class="r"><span class="k">Received in</span><span class="v">CBE ••••4521</span></div>
+<div class="r"><span class="k">Reference</span><span class="v">FT25318A4K9P</span></div>
+<div class="r"><span class="k">Expected</span><span class="v">1,250 ETB</span></div>
+<div class="r"><span class="k">Received</span><span class="v">1,250 ETB</span></div>
+<div class="r"><span class="k">Bill</span><span class="v">Table 3 · Order #208</span></div>
+<div class="r"><span class="k">Checked by</span><span class="v">Almaz · 12:04, Sat 14 Nov</span></div>
+</section>
+
+<div style="flex-grow:1"></div>
+<button class="g btn2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Share receipt</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["forest","ocean","royal","teal","slate","rose","berry"],"default":"rose"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return { theme: this.props.theme ?? 'rose' }; }
+}
+</script>
+</body>
+</html>

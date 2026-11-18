@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Payment verified</title>
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Noto+Sans+Ethiopic:wght@700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F1F2}
+button{font-family:'DM Sans',sans-serif}
+[data-theme=forest]{--p:#0D4A36;--pt:#0D6B47;--tint:#E6F2EC;--tile:#DDEFE6}
+[data-theme=ocean]{--p:#0B3D6B;--pt:#0B5CA8;--tint:#E5F0FA;--tile:#D6E7F7}
+[data-theme=royal]{--p:#3F2A7A;--pt:#5B3FB0;--tint:#EEEAF8;--tile:#E0D9F2}
+[data-theme=teal]{--p:#0B4F55;--pt:#0E7480;--tint:#E3F2F3;--tile:#D2EAEC}
+[data-theme=slate]{--p:#26323F;--pt:#3D5A80;--tint:#E8EDF2;--tile:#DAE3EC}
+[data-theme=rose]{--p:#9D174D;--pt:#BE185D;--tint:#FDF0F5;--tile:#FADCE8}
+[data-theme=berry]{--p:#6B1F5E;--pt:#8E2B7C;--tint:#F7ECF5;--tile:#EFD8EB}
+.scr{width:390px;height:844px;box-sizing:border-box;position:relative;overflow:hidden;color:#1E1A1C;font-family:'DM Sans',sans-serif;background:radial-gradient(circle at 50% 10%,#BDEBD5 0%,rgba(189,235,213,0) 45%),radial-gradient(circle at 100% 60%,#FFE7AE 0%,rgba(255,231,174,0) 36%),radial-gradient(circle at 0% 100%,var(--tile) 0%,rgba(255,255,255,0) 50%),var(--tint)}
+.g{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.95);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 1px 0 #fff,0 10px 26px rgba(30,20,25,.08);border-radius:20px}
+.num{font-family:Sora,sans-serif;font-weight:700}
+.r{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid rgba(0,0,0,.07);font-size:15px}
+.k{color:#5E5559}.v{font-weight:700;text-align:right}
+.btn{width:100%;height:58px;border:0;border-radius:16px;background:var(--p);color:#fff;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 10px 22px rgba(30,20,25,.18)}
+.btn2{width:100%;height:52px;border-radius:16px;color:var(--pt);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+</style>
+</helmet>
+<div class="scr" data-theme="{{theme}}">
+<div style="display:flex;flex-direction:column;gap:12px;padding:28px 16px 16px;height:100%;box-sizing:border-box">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center">
+<div style="width:96px;height:96px;border-radius:48px;background:rgba(14,122,78,.14);display:flex;align-items:center;justify-content:center"><div style="width:74px;height:74px;border-radius:37px;background:linear-gradient(180deg,#2BC489,#0E7A4E);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 12px 24px rgba(14,122,78,.35)"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div></div>
+<div style="font-family:'Noto Sans Ethiopic','Sora',sans-serif;font-size:30px;font-weight:700;color:#0B5A38">ገብቷል</div>
+<div style="font-size:16px;font-weight:700">Fully paid · Table 12</div>
+<div style="font-size:14px;color:#3E5A4C">Cash and bank match the bill</div>
+</div>
+
+<section class="g" style="padding:6px 16px">
+<div class="r" style="border-top:0"><span class="k">Total bill</span><span class="v num">940 ETB</span></div>
+<div class="r"><span class="k">Cash received</span><span class="v">400</span></div>
+<div class="r"><span class="k">Bank received</span><span class="v">590</span></div>
+<div class="r"><span class="k">Tip for Dawit</span><span class="v" style="color:#8A5A00">50</span></div>
+</section>
+
+<section class="g" style="padding:6px 16px">
+<div class="r" style="border-top:0"><span class="k">Received from</span><span class="v">Mekdes Tadesse</span></div>
+<div class="r"><span class="k">Bank</span><span class="v">CBE → ••••4521</span></div>
+<div class="r"><span class="k">Reference</span><span class="v">FT25318K7Q2M</span></div>
+<div class="r"><span class="k">Time</span><span class="v">Today, 11:31</span></div>
+</section>
+
+<div style="flex-grow:1"></div>
+<button class="btn">Done</button>
+<button class="g btn2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Share receipt</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["forest","ocean","royal","teal","slate","rose","berry"],"default":"rose"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return { theme: this.props.theme ?? 'rose' }; }
+}
+</script>
+</body>
+</html>

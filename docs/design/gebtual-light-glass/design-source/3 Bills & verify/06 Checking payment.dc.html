@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Checking payment</title>
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F1F2}
+[data-theme=forest]{--p:#0D4A36;--pt:#0D6B47;--tint:#E6F2EC;--tile:#DDEFE6}
+[data-theme=ocean]{--p:#0B3D6B;--pt:#0B5CA8;--tint:#E5F0FA;--tile:#D6E7F7}
+[data-theme=royal]{--p:#3F2A7A;--pt:#5B3FB0;--tint:#EEEAF8;--tile:#E0D9F2}
+[data-theme=teal]{--p:#0B4F55;--pt:#0E7480;--tint:#E3F2F3;--tile:#D2EAEC}
+[data-theme=slate]{--p:#26323F;--pt:#3D5A80;--tint:#E8EDF2;--tile:#DAE3EC}
+[data-theme=rose]{--p:#9D174D;--pt:#BE185D;--tint:#FDF0F5;--tile:#FADCE8}
+[data-theme=berry]{--p:#6B1F5E;--pt:#8E2B7C;--tint:#F7ECF5;--tile:#EFD8EB}
+.scr{width:390px;height:844px;box-sizing:border-box;position:relative;overflow:hidden;color:#1E1A1C;font-family:'DM Sans',sans-serif;background:radial-gradient(circle at 50% 28%,var(--tile) 0%,rgba(255,255,255,0) 50%),radial-gradient(circle at 100% 70%,#FFE7AE 0%,rgba(255,231,174,0) 36%),var(--tint)}
+.g{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.95);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 1px 0 #fff,0 10px 26px rgba(30,20,25,.08);border-radius:20px}
+.num{font-family:Sora,sans-serif;font-weight:700}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%{transform:scale(.9);opacity:.6}70%{transform:scale(1.3);opacity:0}100%{opacity:0}}
+.ring{position:absolute;inset:0;border-radius:50%;border:5px solid rgba(0,0,0,.06);border-top-color:var(--p);animation:spin 1.1s linear infinite}
+.pl{position:absolute;inset:16px;border-radius:50%;background:var(--tile);animation:pulse 2s ease-out infinite}
+.s{display:flex;align-items:center;gap:12px;padding:12px 0;font-size:16px}
+.d{width:28px;height:28px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+@media (prefers-reduced-motion: reduce){.ring,.pl{animation:none}}
+</style>
+</helmet>
+<div class="scr" data-theme="{{theme}}">
+<div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:80px 20px 24px;height:100%;box-sizing:border-box;text-align:center">
+<div style="position:relative;width:170px;height:170px;display:flex;align-items:center;justify-content:center">
+<span class="pl"></span><span class="ring"></span>
+<span style="position:relative;width:96px;height:96px;border-radius:48px;background:var(--p);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 0 rgba(255,255,255,.3),0 14px 28px rgba(30,20,25,.25)"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></span>
+</div>
+<div><h1 style="margin:0;font-family:Sora,sans-serif;font-size:26px;font-weight:700">Checking payment</h1><div style="font-size:15px;color:#5E5559;margin-top:4px">Please do not close the app</div></div>
+<section class="g" style="padding:12px 16px;display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;text-align:left">
+<div style="flex:1"><div style="font-size:13px;font-weight:700;color:#5E5559">WAITING FOR</div><div class="num" style="font-size:24px">540 ETB</div></div>
+<span style="width:40px;height:40px;border-radius:12px;background:#5B2A86;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">CBE</span>
+</section>
+<section class="g" style="padding:4px 16px;width:100%;box-sizing:border-box;text-align:left">
+<div class="s"><span class="d" style="background:#2BB37A;color:#fff"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span style="flex:1;font-weight:600">QR code scanned</span></div>
+<div class="s" style="border-top:1px solid rgba(0,0,0,.07)"><span class="d" style="border:3px solid var(--p);border-top-color:transparent;box-sizing:border-box;animation:spin 1s linear infinite"></span><span style="flex:1;font-weight:700;color:var(--p)">Asking the bank</span></div>
+<div class="s" style="border-top:1px solid rgba(0,0,0,.07);color:#8A8085"><span class="d" style="border:2px solid #C9C0C4;box-sizing:border-box"></span><span style="flex:1">Comparing the amount</span></div>
+</section>
+<div style="font-size:14px;color:#5E5559">This usually takes a few seconds.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["forest","ocean","royal","teal","slate","rose","berry"],"default":"rose"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return { theme: this.props.theme ?? 'rose' }; }
+}
+</script>
+</body>
+</html>

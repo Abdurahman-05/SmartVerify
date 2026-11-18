@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Check payment: bank</title>
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F1F2}
+button{font-family:'DM Sans',sans-serif}
+[data-theme=forest]{--p:#0D4A36;--pt:#0D6B47;--tint:#E6F2EC;--tile:#DDEFE6}
+[data-theme=ocean]{--p:#0B3D6B;--pt:#0B5CA8;--tint:#E5F0FA;--tile:#D6E7F7}
+[data-theme=royal]{--p:#3F2A7A;--pt:#5B3FB0;--tint:#EEEAF8;--tile:#E0D9F2}
+[data-theme=teal]{--p:#0B4F55;--pt:#0E7480;--tint:#E3F2F3;--tile:#D2EAEC}
+[data-theme=slate]{--p:#26323F;--pt:#3D5A80;--tint:#E8EDF2;--tile:#DAE3EC}
+[data-theme=rose]{--p:#9D174D;--pt:#BE185D;--tint:#FDF0F5;--tile:#FADCE8}
+[data-theme=berry]{--p:#6B1F5E;--pt:#8E2B7C;--tint:#F7ECF5;--tile:#EFD8EB}
+.scr{width:390px;height:844px;box-sizing:border-box;position:relative;overflow:hidden;color:#1E1A1C;font-family:'DM Sans',sans-serif;background:radial-gradient(circle at 6% 4%,var(--tile) 0%,rgba(255,255,255,0) 46%),radial-gradient(circle at 100% 34%,#FFE7AE 0%,rgba(255,231,174,0) 36%),radial-gradient(circle at 22% 100%,var(--tile) 0%,rgba(255,255,255,0) 50%),var(--tint)}
+.in{display:flex;flex-direction:column;gap:12px;padding:16px;height:100%;box-sizing:border-box}
+.g{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.95);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 1px 0 #fff,0 10px 26px rgba(30,20,25,.08);border-radius:20px}
+.h1{margin:0;font-family:Sora,sans-serif;font-size:24px;font-weight:700;line-height:1.2}
+.sub{font-size:14px;color:#5E5559}
+.lb{font-size:13px;font-weight:700;color:#5E5559}
+.ib{width:44px;height:44px;border-radius:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;color:#1E1A1C}
+.st{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#5E5559}
+.sn{width:24px;height:24px;border-radius:12px;background:rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:12px}
+.big{height:96px;border-radius:20px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#1E1A1C;font-size:16px;font-weight:700;padding:0}
+.bk{width:40px;height:40px;border-radius:12px;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ob{display:flex;align-items:center;gap:12px;min-height:60px;padding:0 4px;border-top:1px solid rgba(0,0,0,.07);background:transparent;border-left:0;border-right:0;border-bottom:0;width:100%;cursor:pointer;color:#1E1A1C;text-align:left}
+.ok{height:24px;padding:0 9px;border-radius:12px;background:#DDF3E8;color:#0B5A38;font-size:13px;font-weight:700;display:inline-flex;align-items:center}
+</style>
+</helmet>
+<div class="scr" data-theme="{{theme}}">
+<div class="in">
+<div style="display:flex;align-items:center;gap:10px">
+<button class="g ib" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+<div style="flex:1"><h1 class="h1">Check payment</h1><div class="sub">Table 12 · pay 540 ETB by bank</div></div>
+</div>
+
+<div class="g" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:16px">
+<span class="st" style="color:var(--p)"><span class="sn" style="background:var(--p);color:#fff">1</span>Bank</span>
+<span style="flex:1;height:2px;background:rgba(0,0,0,.1);margin:0 8px"></span>
+<span class="st"><span class="sn">2</span>Receipt</span>
+<span style="flex:1;height:2px;background:rgba(0,0,0,.1);margin:0 8px"></span>
+<span class="st"><span class="sn">3</span>Check</span>
+</div>
+
+<h2 style="margin:4px 0 0;font-size:18px;font-weight:700">Which bank did the customer use?</h2>
+<div class="lb">MOST USED</div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+<button class="g big"><span class="bk" style="background:#5B2A86;width:48px;height:48px;border-radius:14px">CBE</span>CBE</button>
+<button class="g big"><span class="bk" style="background:#1F7AE0;width:48px;height:48px;border-radius:14px">TB</span>Telebirr</button>
+</div>
+
+<div class="lb" style="margin-top:4px">OTHER BANKS</div>
+<section class="g" style="padding:0 12px">
+<button class="ob" style="border-top:0"><span class="bk" style="background:#1B5E9C">DB</span><span style="flex:1;font-size:16px;font-weight:600">Dashen Bank</span><span class="ok">Can check</span></button>
+<button class="ob"><span class="bk" style="background:#B8860B">BoA</span><span style="flex:1;font-size:16px;font-weight:600">Bank of Abyssinia</span><span class="ok">Can check</span></button>
+<button class="ob"><span class="bk" style="background:#2E9E45">MP</span><span style="flex:1;font-size:16px;font-weight:600">M-PESA</span><span class="ok">Can check</span></button>
+<button class="ob"><span class="bk" style="background:#E07A1F">eB</span><span style="flex:1;font-size:16px;font-weight:600">eBirr</span><span class="ok">Can check</span></button>
+<button class="ob"><span class="bk" style="background:#9A9095">?</span><span style="flex:1;font-size:16px;font-weight:600">Other bank</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5E5559" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["forest","ocean","royal","teal","slate","rose","berry"],"default":"rose"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return { theme: this.props.theme ?? 'rose' }; }
+}
+</script>
+</body>
+</html>

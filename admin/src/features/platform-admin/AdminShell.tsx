@@ -285,13 +285,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
               </Text>
             </View>
           </View>
-          <View className="flex-row justify-between">
-            {modeButton}
-            {signOutButton}
-          </View>
+          <View className="flex-row justify-end">{signOutButton}</View>
         </View>
       </View>
-      {page}
+      {/* Day / night sits at the top right of the page. */}
+      <View className="flex-1">
+        {page}
+        <View className="absolute right-6 top-4 rounded-xl border-[1.5px] border-border bg-surface">
+          {modeButton}
+        </View>
+      </View>
     </View>
   );
 }

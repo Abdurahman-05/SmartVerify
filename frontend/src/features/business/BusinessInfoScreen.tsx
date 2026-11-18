@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { Button } from '@/components/ui/Button';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { Input } from '@/components/ui/Input';
 import { LoadingView } from '@/components/ui/LoadingView';
@@ -19,6 +18,7 @@ import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
 import { detectLocation } from './detectLocation';
+import { PrimaryButton, SecondaryButton } from '@/ui/glass';
 
 /** Owner: business type, city, address and map location (only the Smart Verify team sees it). */
 export default function BusinessInfoScreen() {
@@ -108,12 +108,11 @@ export default function BusinessInfoScreen() {
           autoCorrect={false}
           error={locationError}
         />
-        <Button
+        <SecondaryButton
           label={
             detecting ? t('business.locationPrompt.detecting') : t('business.locationPrompt.detect')
           }
           icon={MapPin}
-          variant="outline"
           size="md"
           disabled={detecting}
           onPress={() => {
@@ -160,7 +159,7 @@ export default function BusinessInfoScreen() {
       </View>
       <View className="min-h-6 flex-1" />
       <View className="px-4 pb-6 pt-2">
-        <Button
+        <PrimaryButton
           label={
             save.isSuccess ? t('business.businessInfo.saved') : t('business.businessInfo.save')
           }

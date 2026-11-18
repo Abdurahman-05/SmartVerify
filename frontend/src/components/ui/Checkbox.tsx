@@ -18,14 +18,12 @@ export function Checkbox({ checked, onChange, accessibilityLabel, children }: Ch
       accessibilityRole="checkbox"
       accessibilityState={{ checked }}
       accessibilityLabel={accessibilityLabel}
-      className="min-h-11 flex-row items-center gap-3"
+      className="min-h-11 flex-row items-center gap-2.5"
     >
       <View
-        className={`h-[26px] w-[26px] items-center justify-center rounded-md border-2 ${
-          checked ? 'border-primary bg-primary' : 'border-borderStrong bg-surface'
-        }`}
+        className={`h-[22px] w-[22px] items-center justify-center rounded-[6px] border-2 ${checked ? 'border-primary bg-primary' : 'border-borderStrong bg-white/70'}`}
       >
-        {checked ? <Check size={18} color={colors.surface} strokeWidth={3} /> : null}
+        {checked ? <Check size={15} color={colors.surface} strokeWidth={3.2} /> : null}
       </View>
       <View className="flex-1 flex-row flex-wrap">{children}</View>
     </Pressable>

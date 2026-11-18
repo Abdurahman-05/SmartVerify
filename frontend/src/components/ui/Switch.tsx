@@ -15,8 +15,12 @@ export const Switch = ({ value, onValueChange, accessibilityLabel }: SwitchProps
       accessibilityLabel={accessibilityLabel}
       hitSlop={8}
     >
-      <View className={`h-8 w-14 justify-center rounded-full ${value ? 'bg-primary' : 'bg-borderStrong'}`}>
-        <View className={`h-6 w-6 rounded-full bg-surface ${value ? 'ml-[26px]' : 'ml-1'}`} />
+      <View
+        className={`h-7 w-12 justify-center rounded-full ${value ? 'bg-primary' : 'bg-[#C9C0C4]'}`}
+      >
+        <View
+          className={`h-[22px] w-[22px] rounded-full bg-surface ${value ? 'ml-[23px]' : 'ml-[3px]'}`}
+        />
       </View>
     </Pressable>
   );

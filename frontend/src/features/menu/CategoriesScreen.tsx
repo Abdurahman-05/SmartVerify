@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { Alert, FlatList, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { NoConnection } from '@/components/ui/NoConnection';
@@ -17,6 +16,7 @@ import { colors } from '@/theme/tokens';
 
 import { categoryKinds, type CategoryKind, type CategoryRowData } from './categoryKinds';
 import { useLocalName } from './useLocalName';
+import { GlassCard, PrimaryButton, ScreenBg } from '@/ui/glass';
 
 function CategoryRow({
   category,
@@ -33,7 +33,7 @@ function CategoryRow({
   const localName = useLocalName();
 
   return (
-    <View className="flex-row items-center gap-2 rounded-[18px] border-[1.5px] border-border bg-surface py-2 pl-4 pr-2">
+    <GlassCard className="flex-row items-center gap-2 py-2 pl-4 pr-2">
       <View className="min-w-0 flex-1">
         <Text font="bold" className="text-[17px] leading-tight" numberOfLines={1}>
           {localName(category)}
@@ -58,7 +58,7 @@ function CategoryRow({
       >
         <Trash2 size={22} color={colors.dangerFg} strokeWidth={2.2} />
       </Pressable>
-    </View>
+    </GlassCard>
   );
 }
 
@@ -111,63 +111,69 @@ export default function CategoriesScreen({ kind = 'menu' }: { kind?: CategoryKin
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader
-        title={t('categories.title')}
-        subtitle={t(kind === 'menu' ? 'categories.subtitle' : 'categories.tableSubtitle')}
-        onBack={goBack}
-        right={
-          <Pressable
-            onPress={() => router.push(config.formPath)}
-            accessibilityRole="button"
-            accessibilityLabel={t('categories.addTitle')}
-            className="h-11 flex-row items-center gap-1 rounded-[22px] bg-primary pl-3 pr-4 active:opacity-80"
-          >
-            <Plus size={20} color={colors.surface} strokeWidth={2.8} />
-            <Text font="bold" tone="inverse" className="text-base">
-              {t('categories.add')}
-            </Text>
-          </Pressable>
-        }
-      />
-
-      {query.isError ? (
-        <View className="flex-1 items-center justify-center gap-4 px-6">
-          <Text font="semibold" className="text-center text-lg">
-            {t('categories.loadFailed')} {t(errorMessageKey(query.error))}
-          </Text>
-          <View className="w-full">
-            <Button label={t('errors.retry')} icon={RefreshCw} onPress={() => void refetch()} />
-          </View>
-        </View>
-      ) : (
-        <FlatList
-          data={query.data}
-          keyExtractor={(category) => category.id}
-          contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 24 }}
-          renderItem={({ item }) => (
-            <CategoryRow
-              category={item}
-              countKey={config.countKey}
-              onEdit={() => router.push({ pathname: config.formPath, params: { id: item.id } })}
-              onRemove={() => confirmRemove(item)}
-            />
-          )}
-          ListEmptyComponent={
-            <Text tone="muted" className="pt-8 text-center text-lg">
-              {t('categories.empty')}
-            </Text>
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <ScreenHeader
+          title={t('categories.title')}
+          subtitle={t(kind === 'menu' ? 'categories.subtitle' : 'categories.tableSubtitle')}
+          onBack={goBack}
+          right={
+            <Pressable
+              onPress={() => router.push(config.formPath)}
+              accessibilityRole="button"
+              accessibilityLabel={t('categories.addTitle')}
+              className="h-11 flex-row items-center gap-1 rounded-[22px] bg-primary pl-3 pr-4 active:opacity-80"
+            >
+              <Plus size={20} color={colors.surface} strokeWidth={2.8} />
+              <Text font="bold" tone="inverse" className="text-base">
+                {t('categories.add')}
+              </Text>
+            </Pressable>
           }
         />
-      )}
 
-      <ErrorDialog
-        visible={remove.isError}
-        title={t('categories.removeFailedTitle')}
-        message={t(errorMessageKey(remove.error))}
-        actionLabel={t('errors.retry')}
-        onClose={remove.reset}
-      />
-    </SafeAreaView>
+        {query.isError ? (
+          <View className="flex-1 items-center justify-center gap-4 px-6">
+            <Text font="semibold" className="text-center text-lg">
+              {t('categories.loadFailed')} {t(errorMessageKey(query.error))}
+            </Text>
+            <View className="w-full">
+              <PrimaryButton
+                label={t('errors.retry')}
+                icon={RefreshCw}
+                onPress={() => void refetch()}
+              />
+            </View>
+          </View>
+        ) : (
+          <FlatList
+            data={query.data}
+            keyExtractor={(category) => category.id}
+            contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 24 }}
+            renderItem={({ item }) => (
+              <CategoryRow
+                category={item}
+                countKey={config.countKey}
+                onEdit={() => router.push({ pathname: config.formPath, params: { id: item.id } })}
+                onRemove={() => confirmRemove(item)}
+              />
+            )}
+            ListEmptyComponent={
+              <Text tone="muted" className="pt-8 text-center text-lg">
+                {t('categories.empty')}
+              </Text>
+            }
+          />
+        )}
+
+        <ErrorDialog
+          visible={remove.isError}
+          title={t('categories.removeFailedTitle')}
+          message={t(errorMessageKey(remove.error))}
+          actionLabel={t('errors.retry')}
+          onClose={remove.reset}
+        />
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

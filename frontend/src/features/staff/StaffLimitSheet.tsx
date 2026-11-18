@@ -4,11 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { BottomSheet } from '@/components/ui/BottomSheet';
-import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { ApiError } from '@/lib/api/client';
 import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
+import { PrimaryButton, SecondaryButton } from '@/ui/glass';
 
 /** The Normal plan's worker limit was reached (adding one, or turning one back on). */
 export const isStaffLimit = (error: unknown) =>
@@ -50,8 +50,8 @@ export function StaffLimitSheet({ visible, onClose }: { visible: boolean; onClos
           </Text>
         </View>
       </View>
-      <Button label={t('staff.limit.upgrade')} icon={Users} onPress={upgrade} />
-      <Button label={t('staff.limit.notNow')} variant="secondary" size="md" onPress={onClose} />
+      <PrimaryButton label={t('staff.limit.upgrade')} icon={Users} onPress={upgrade} />
+      <SecondaryButton label={t('staff.limit.notNow')} size="md" onPress={onClose} />
     </BottomSheet>
   );
 }

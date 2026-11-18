@@ -8,12 +8,12 @@ import { Linking, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MoneyText } from '@/components/ui/MoneyText';
-import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
 import { useVerifyFlow } from './verifyFlow';
+import { HeroCard, PrimaryButton, ScreenBg } from '@/ui/glass';
 
 const FRAME = 250;
 const CORNER = 36;
@@ -69,28 +69,30 @@ export function PermissionView({
   const brand = useBrandColors();
   const { t } = useTranslation();
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <View className="px-2.5 pt-4">
-        <CloseButton onPress={onClose} />
-      </View>
-      <View className="flex-1 items-center justify-center gap-4 px-6">
-        <View className="h-24 w-24 items-center justify-center rounded-[28px] bg-primaryTile">
-          <Camera size={48} color={brand.primary} strokeWidth={2} />
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <View className="px-2.5 pt-4">
+          <CloseButton onPress={onClose} />
         </View>
-        <Text font="heading" className="text-center text-[26px]" accessibilityRole="header">
-          {t('verify.scan.permissionTitle')}
-        </Text>
-        <Text tone="muted" className="text-center text-lg">
-          {t('verify.scan.permissionBody')}
-        </Text>
-      </View>
-      <View className="px-4 pb-7">
-        <Button
-          label={canAskAgain ? t('verify.scan.allow') : t('verify.scan.openSettings')}
-          onPress={canAskAgain ? onAllow : () => Linking.openSettings()}
-        />
-      </View>
-    </SafeAreaView>
+        <View className="flex-1 items-center justify-center gap-4 px-6">
+          <View className="h-24 w-24 items-center justify-center rounded-[28px] bg-primaryTile">
+            <Camera size={48} color={brand.primary} strokeWidth={2} />
+          </View>
+          <Text font="heading" className="text-center text-[26px]" accessibilityRole="header">
+            {t('verify.scan.permissionTitle')}
+          </Text>
+          <Text tone="muted" className="text-center text-lg">
+            {t('verify.scan.permissionBody')}
+          </Text>
+        </View>
+        <View className="px-4 pb-7">
+          <PrimaryButton
+            label={canAskAgain ? t('verify.scan.allow') : t('verify.scan.openSettings')}
+            onPress={canAskAgain ? onAllow : () => Linking.openSettings()}
+          />
+        </View>
+      </SafeAreaView>
+    </ScreenBg>
   );
 }
 
@@ -150,7 +152,7 @@ export default function ScanScreen() {
           </Text>
         </View>
 
-        <View className="mx-4 mb-6 flex-row items-center justify-between rounded-[20px] bg-primary px-[18px] py-3">
+        <HeroCard className="mx-4 mb-6 flex-row items-center justify-between px-[18px] py-3">
           <View className="flex-1 pr-3">
             <Text font="semibold" tone="inverse" className="text-base">
               {t('verify.scan.waitingFor')}
@@ -160,7 +162,7 @@ export default function ScanScreen() {
             </Text>
           </View>
           <MoneyText value={amount} tone="inverse" className="text-[26px]" />
-        </View>
+        </HeroCard>
       </SafeAreaView>
     </View>
   );

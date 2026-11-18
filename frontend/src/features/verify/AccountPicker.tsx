@@ -11,6 +11,7 @@ import { useBrandColors } from '@/store/theme';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
 import type { BankAccount } from '@/lib/bankAccounts';
 import { colors } from '@/theme/tokens';
+import { GlassCard } from '@/ui/glass';
 
 function AccountText({ account }: { account: BankAccount }) {
   const { t } = useTranslation();
@@ -41,16 +42,16 @@ export function AccountPicker({ accounts, selected, onSelect, onAddAccount }: Ac
 
   return (
     <>
-      <Pressable
+      <GlassCard
         onPress={() => setOpen(true)}
         accessibilityRole="button"
         accessibilityLabel={`${selected.holderName}, ${selected.bankName}, ${t(maskedNumberKey(selected.bankCode), { last4: selected.last4 })}. ${t('verify.chooseAccount')}`}
-        className="flex-row items-center gap-3 rounded-[18px] border-2 border-primary bg-surface px-3.5 py-3 active:bg-background"
+        className="flex-row items-center gap-3 border-2 border-primary px-3.5 py-3"
       >
         <BankBadge code={selected.bankCode} />
         <AccountText account={selected} />
         <ChevronDown size={26} color={colors.text} strokeWidth={2} />
-      </Pressable>
+      </GlassCard>
 
       <Pressable
         onPress={onAddAccount}

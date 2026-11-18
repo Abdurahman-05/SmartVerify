@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Keyboard, Pressable, View } from 'react-native';
 
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { LoadingView } from '@/components/ui/LoadingView';
@@ -19,6 +18,7 @@ import { feesKey, type Fees } from '@/lib/restaurant';
 import { getSetupFees, saveFees } from '@/lib/setup';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
+import { GlassCard, PrimaryButton } from '@/ui/glass';
 
 const setupFeesKey = ['setup', 'fees'] as const;
 const MAX_FEE_DIGITS = 5;
@@ -102,7 +102,7 @@ function FeesForm({ initial, onSaved }: { initial: Fees; onSaved: (fees: Fees) =
           </View>
         ) : null}
 
-        <View className="gap-3 rounded-[20px] border-[1.5px] border-border bg-surface px-3.5 py-3">
+        <GlassCard className="gap-3 px-3.5 py-3">
           <View className="flex-row items-center gap-2">
             <Package size={22} color={brand.primary} strokeWidth={2.2} />
             <View className="flex-1">
@@ -126,9 +126,9 @@ function FeesForm({ initial, onSaved }: { initial: Fees; onSaved: (fees: Fees) =
             emphasis
             error={err('packing')}
           />
-        </View>
+        </GlassCard>
 
-        <View className="gap-3 rounded-[20px] border-[1.5px] border-border bg-surface px-3.5 py-3">
+        <GlassCard className="gap-3 px-3.5 py-3">
           <View className="flex-row items-center gap-2">
             <MapPin size={22} color={brand.primary} strokeWidth={2.2} />
             <Text font="bold" className="flex-1 text-[17px]">
@@ -192,13 +192,13 @@ function FeesForm({ initial, onSaved }: { initial: Fees; onSaved: (fees: Fees) =
               {t('setup.fees.addArea')}
             </Text>
           </Pressable>
-        </View>
+        </GlassCard>
       </View>
 
       <View className="min-h-6 flex-1" />
 
       <View className="px-4 pb-6 pt-3">
-        <Button
+        <PrimaryButton
           label={t('setup.fees.save')}
           icon={Save}
           disabled={mutation.isPending}
@@ -243,7 +243,7 @@ export default function FeesSetupScreen() {
             {t(errorMessageKey(query.error))}
           </Text>
           <View className="w-full">
-            <Button
+            <PrimaryButton
               label={t('errors.retry')}
               icon={RefreshCw}
               onPress={() => void query.refetch()}

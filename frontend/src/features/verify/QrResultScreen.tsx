@@ -6,9 +6,9 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/Button';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
+import { GlassCard, PrimaryButton, ScreenBg, SecondaryButton } from '@/ui/glass';
 
 /** TEMPORARY: shows exactly what the scanned QR says, before we parse it per bank. */
 export default function QrResultScreen() {
@@ -34,32 +34,33 @@ export default function QrResultScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader
-        title={t(read ? 'verifyBank.qrResult.readTitle' : 'verifyBank.qrResult.title')}
-        onBack={scanAgain}
-      />
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <View className="rounded-card border-[1.5px] border-border bg-surface p-4">
-          <Text className="text-base" selectable>
-            {text}
-          </Text>
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <ScreenHeader
+          title={t(read ? 'verifyBank.qrResult.readTitle' : 'verifyBank.qrResult.title')}
+          onBack={scanAgain}
+        />
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <GlassCard className="p-4">
+            <Text className="text-base" selectable>
+              {text}
+            </Text>
+          </GlassCard>
+        </ScrollView>
+        <View className="gap-2.5 px-4 pb-6 pt-2">
+          <PrimaryButton
+            label={t(read ? 'verifyBank.found.readAgain' : 'verifyBank.scan.again')}
+            icon={RotateCcw}
+            onPress={scanAgain}
+          />
+          <SecondaryButton
+            label={t(copied ? 'verifyBank.qrResult.copied' : 'verifyBank.qrResult.copy')}
+            icon={copied ? Check : Copy}
+            size="md"
+            onPress={copy}
+          />
         </View>
-      </ScrollView>
-      <View className="gap-2.5 px-4 pb-6 pt-2">
-        <Button
-          label={t(read ? 'verifyBank.found.readAgain' : 'verifyBank.scan.again')}
-          icon={RotateCcw}
-          onPress={scanAgain}
-        />
-        <Button
-          label={t(copied ? 'verifyBank.qrResult.copied' : 'verifyBank.qrResult.copy')}
-          icon={copied ? Check : Copy}
-          variant="outline"
-          size="md"
-          onPress={copy}
-        />
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

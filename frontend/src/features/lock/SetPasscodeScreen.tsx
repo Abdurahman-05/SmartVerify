@@ -6,7 +6,6 @@ import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandMark } from '@/components/ui/BrandMark';
-import { Button } from '@/components/ui/Button';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { biometricAvailable, setBiometric, setPasscode } from '@/lib/appLock';
@@ -14,6 +13,7 @@ import { homeRouteFor, useSession } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
 
 import { PasscodeDots, PasscodePad } from './PasscodePad';
+import { PrimaryButton, ScreenBg, SecondaryButton } from '@/ui/glass';
 
 type Step = 'create' | 'confirm' | 'fingerprint';
 
@@ -61,51 +61,57 @@ export default function SetPasscodeScreen() {
 
   if (step === 'fingerprint') {
     return (
-      <SafeAreaView className="flex-1 justify-center gap-5 bg-background px-6">
-        <View className="items-center gap-3">
-          <Fingerprint size={64} color={brand.primary} strokeWidth={1.8} />
-          <Text font="heading" className="text-center text-2xl" accessibilityRole="header">
-            {t('lock.fingerprintTitle')}
-          </Text>
-          <Text tone="muted" className="text-center text-base">
-            {t('lock.fingerprintBody')}
-          </Text>
-        </View>
-        <Button
-          label={t('lock.fingerprintYes')}
-          icon={Fingerprint}
-          onPress={() =>
-            void (user ? setBiometric(user.userId, true) : Promise.resolve()).then(finish)
-          }
-        />
-        <Button label={t('lock.notNow')} variant="outline" onPress={finish} />
-      </SafeAreaView>
+      <ScreenBg>
+        <SafeAreaView className="flex-1 justify-center gap-5 px-6">
+          <View className="items-center gap-3">
+            <Fingerprint size={64} color={brand.primary} strokeWidth={1.8} />
+            <Text font="heading" className="text-center text-2xl" accessibilityRole="header">
+              {t('lock.fingerprintTitle')}
+            </Text>
+            <Text tone="muted" className="text-center text-base">
+              {t('lock.fingerprintBody')}
+            </Text>
+          </View>
+          <PrimaryButton
+            label={t('lock.fingerprintYes')}
+            icon={Fingerprint}
+            onPress={() =>
+              void (user ? setBiometric(user.userId, true) : Promise.resolve()).then(finish)
+            }
+          />
+          <SecondaryButton label={t('lock.notNow')} onPress={finish} />
+        </SafeAreaView>
+      </ScreenBg>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      {change ? <ScreenHeader title={t('lock.changeTitle')} onBack={() => router.back()} /> : null}
-      <View className="flex-1 justify-center gap-6 px-6">
-        <View className="items-center gap-2">
-          {change ? null : <BrandMark size={48} />}
-          <Text font="heading" className="text-center text-2xl" accessibilityRole="header">
-            {step === 'create' ? t('lock.createTitle') : t('lock.confirmTitle')}
-          </Text>
-          <Text
-            tone={mismatch ? undefined : 'muted'}
-            className={`text-center text-base ${mismatch ? 'text-dangerFg' : ''}`}
-          >
-            {mismatch
-              ? t('lock.mismatch')
-              : step === 'create'
-                ? t('lock.createBody')
-                : t('lock.confirmBody')}
-          </Text>
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        {change ? (
+          <ScreenHeader title={t('lock.changeTitle')} onBack={() => router.back()} />
+        ) : null}
+        <View className="flex-1 justify-center gap-6 px-6">
+          <View className="items-center gap-2">
+            {change ? null : <BrandMark size={48} />}
+            <Text font="heading" className="text-center text-2xl" accessibilityRole="header">
+              {step === 'create' ? t('lock.createTitle') : t('lock.confirmTitle')}
+            </Text>
+            <Text
+              tone={mismatch ? undefined : 'muted'}
+              className={`text-center text-base ${mismatch ? 'text-dangerFg' : ''}`}
+            >
+              {mismatch
+                ? t('lock.mismatch')
+                : step === 'create'
+                  ? t('lock.createBody')
+                  : t('lock.confirmBody')}
+            </Text>
+          </View>
+          <PasscodeDots count={value.length} error={mismatch && value.length === 0} />
+          <PasscodePad value={value} onChange={setValue} onDone={(code) => void onDone(code)} />
         </View>
-        <PasscodeDots count={value.length} error={mismatch && value.length === 0} />
-        <PasscodePad value={value} onChange={setValue} onDone={(code) => void onDone(code)} />
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

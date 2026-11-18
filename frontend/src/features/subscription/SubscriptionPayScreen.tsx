@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, TextInput, View } from 'react-native';
 
 import { BankBadge } from '@/components/ui/BankBadge';
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { LoadingView } from '@/components/ui/LoadingView';
@@ -35,6 +34,7 @@ import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
 import { hasQuarterly, normalMultiMonthlyEtb, normalPricing } from './plans';
+import { GlassCard, HeroCard, PrimaryButton, SecondaryButton } from '@/ui/glass';
 
 /** Banks a plan can be paid from; each is checked with its own bank's receipt. */
 const SENDER_BANKS = ['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR'] as const;
@@ -250,12 +250,12 @@ export default function SubscriptionPayScreen() {
         </Text>
       ) : (
         <View className="gap-4 px-4 pt-2">
-          <View className="items-center gap-1 rounded-[20px] bg-primary px-[18px] py-4">
+          <HeroCard className="items-center gap-1 px-[18px] py-4">
             <Text font="semibold" tone="inverse" className="text-[15px]">
               {t('subscriptionPay.amount')}
             </Text>
             <MoneyText value={price} tone="inverse" className="text-4xl" />
-          </View>
+          </HeroCard>
 
           <View className="gap-2">
             <Text font="bold" className="text-[17px]">
@@ -293,7 +293,7 @@ export default function SubscriptionPayScreen() {
             <Text font="bold" className="text-[17px]">
               {t('subscriptionPay.step1')}
             </Text>
-            <View className="flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface p-3">
+            <GlassCard className="flex-row items-center gap-3 p-3">
               <BankBadge code={toTelebirr ? 'TEL' : 'CBE'} size={44} />
               <View className="min-w-0 flex-1">
                 <Text font="heading" className="text-xl" selectable>
@@ -320,17 +320,16 @@ export default function SubscriptionPayScreen() {
                   {t(copied ? 'subscriptionPay.copied' : 'subscriptionPay.copy')}
                 </Text>
               </Pressable>
-            </View>
+            </GlassCard>
           </View>
 
           <View className="gap-2">
             <Text font="bold" className="text-[17px]">
               {t('subscriptionPay.step2')}
             </Text>
-            <Button
+            <SecondaryButton
               label={t('subscriptionPay.upload')}
               icon={ImageIcon}
-              variant="outline"
               size="md"
               onPress={() => void upload()}
             />
@@ -371,7 +370,7 @@ export default function SubscriptionPayScreen() {
       <View className="min-h-6 flex-1" />
       {payTo && ask.length > 0 ? (
         <View className="px-4 pb-6 pt-2">
-          <Button
+          <PrimaryButton
             label={t('subscriptionPay.check')}
             icon={Landmark}
             disabled={!ready}

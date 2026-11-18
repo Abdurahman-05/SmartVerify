@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Splash</title>
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#1E1A1C}
+[data-theme=forest]{--p:#0D4A36}[data-theme=ocean]{--p:#0B3D6B}[data-theme=royal]{--p:#3F2A7A}[data-theme=teal]{--p:#0B4F55}[data-theme=slate]{--p:#26323F}[data-theme=rose]{--p:#9D174D}[data-theme=berry]{--p:#6B1F5E}
+@keyframes dt{0%,70%,100%{transform:translateY(0) scale(.7);opacity:.4}35%{transform:translateY(-14px) scale(1.1);opacity:1}}
+.dt{width:14px;height:14px;border-radius:7px;background:#F5B301;animation:dt 1s ease-in-out infinite}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width:390px;height:844px;box-sizing:border-box;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 42%,color-mix(in srgb,var(--p) 70%,#fff) 0%,var(--p) 45%,color-mix(in srgb,var(--p) 75%,#000) 100%);display:flex;align-items:center;justify-content:center">
+<svg width="230" height="230" viewBox="112 112 352 352" role="img" aria-label="ገብቷል"><g transform="translate(203.3 375.0) scale(0.38 -0.38)"><path d="M273 -2Q233 -2 233 51Q233 79 268.5 257.0Q304 435 304 440Q304 476 277.0 505.0Q250 534 214 535Q206 535 192.5 530.0Q179 525 175 524Q177 510 177 503Q177 458 148.0 419.5Q119 381 77 381Q57 381 41.0 388.0Q25 395 17.5 403.0Q10 411 10 415Q10 420 25.0 444.0Q40 468 40 484Q40 489 36.5 497.0Q33 505 33 509Q33 521 53.5 527.0Q74 533 137 539H158Q163 540 182.5 546.5Q202 553 229.0 559.0Q256 565 282 565Q330 565 368.5 527.0Q407 489 407 440V437Q407 435 371.0 252.0Q335 69 335 56Q335 44 339.0 36.5Q343 29 348.5 26.5Q354 24 358.0 21.0Q362 18 362.0 15.0Q362 12 360.5 9.5Q359 7 355.5 6.0Q352 5 349.5 4.5Q347 4 342.5 3.5Q338 3 337.0 3.0Q336 3 324.5 2.0Q313 1 298.0 -0.5Q283 -2 273 -2Z" fill="#fff" stroke="#fff" stroke-width="14" stroke-linejoin="round"/></g><circle cx="394" cy="404" r="44" fill="#F5B301" stroke="var(--p)" stroke-width="24"/><path d="M375 404l13 15 24-31" stroke="var(--p)" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div aria-label="Loading" style="position:absolute;bottom:120px;left:0;right:0;display:flex;justify-content:center;gap:14px"><span class="dt"></span><span class="dt" style="animation-delay:.15s"></span><span class="dt" style="animation-delay:.3s"></span></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["forest","ocean","royal","teal","slate","rose","berry"],"default":"rose"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return { theme: this.props.theme ?? 'rose' }; }
+}
+</script>
+</body>
+</html>

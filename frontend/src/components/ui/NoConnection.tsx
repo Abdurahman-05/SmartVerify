@@ -8,8 +8,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useOnline } from '@/hooks/useOnline';
 import { useBrandColors } from '@/store/theme';
 
-import { Button } from './Button';
 import { Text } from './Text';
+import { PrimaryButton, ScreenBg } from '@/ui/glass';
 
 /**
  * A screen could not load (no internet, or the server not answering): a pop-up says so and the
@@ -44,24 +44,26 @@ export function NoConnection({
   // Leaving: an empty page for the moment before the previous one is back.
   if (leave) return <View className="flex-1 bg-background" />;
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <View
-        className="flex-1 items-center justify-center gap-4 px-6"
-        accessibilityLiveRegion="polite"
-      >
-        <View className="h-24 w-24 items-center justify-center rounded-[28px] bg-primaryTile">
-          <WifiOff size={48} color={brand.primary} strokeWidth={2} />
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <View
+          className="flex-1 items-center justify-center gap-4 px-6"
+          accessibilityLiveRegion="polite"
+        >
+          <View className="h-24 w-24 items-center justify-center rounded-[28px] bg-primaryTile">
+            <WifiOff size={48} color={brand.primary} strokeWidth={2} />
+          </View>
+          <Text font="heading" className="text-center text-[26px]" accessibilityRole="header">
+            {t(online ? 'errors.serverDownTitle' : 'errors.noConnectionTitle')}
+          </Text>
+          <Text tone="muted" className="text-center text-lg">
+            {t(online ? 'errors.serverDownBody' : 'errors.noConnectionBody')}
+          </Text>
         </View>
-        <Text font="heading" className="text-center text-[26px]" accessibilityRole="header">
-          {t(online ? 'errors.serverDownTitle' : 'errors.noConnectionTitle')}
-        </Text>
-        <Text tone="muted" className="text-center text-lg">
-          {t(online ? 'errors.serverDownBody' : 'errors.noConnectionBody')}
-        </Text>
-      </View>
-      <View className="px-4 pb-7">
-        <Button label={t('errors.retry')} icon={RefreshCw} onPress={onRetry} />
-      </View>
-    </SafeAreaView>
+        <View className="px-4 pb-7">
+          <PrimaryButton label={t('errors.retry')} icon={RefreshCw} onPress={onRetry} />
+        </View>
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

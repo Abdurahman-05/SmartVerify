@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Transactions</title>
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F1F2}
+button{font-family:'DM Sans',sans-serif}
+[data-theme=forest]{--p:#0D4A36;--pt:#0D6B47;--tint:#E6F2EC;--tile:#DDEFE6}
+[data-theme=ocean]{--p:#0B3D6B;--pt:#0B5CA8;--tint:#E5F0FA;--tile:#D6E7F7}
+[data-theme=royal]{--p:#3F2A7A;--pt:#5B3FB0;--tint:#EEEAF8;--tile:#E0D9F2}
+[data-theme=teal]{--p:#0B4F55;--pt:#0E7480;--tint:#E3F2F3;--tile:#D2EAEC}
+[data-theme=slate]{--p:#26323F;--pt:#3D5A80;--tint:#E8EDF2;--tile:#DAE3EC}
+[data-theme=rose]{--p:#9D174D;--pt:#BE185D;--tint:#FDF0F5;--tile:#FADCE8}
+[data-theme=berry]{--p:#6B1F5E;--pt:#8E2B7C;--tint:#F7ECF5;--tile:#EFD8EB}
+.scr{width:390px;height:844px;box-sizing:border-box;position:relative;overflow:hidden;color:#1E1A1C;font-family:'DM Sans',sans-serif;background:radial-gradient(circle at 6% 4%,var(--tile) 0%,rgba(255,255,255,0) 46%),radial-gradient(circle at 100% 34%,#FFE7AE 0%,rgba(255,231,174,0) 36%),radial-gradient(circle at 22% 100%,var(--tile) 0%,rgba(255,255,255,0) 50%),var(--tint)}
+.in{display:flex;flex-direction:column;gap:12px;padding:16px 16px 0}
+.g{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.95);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 1px 0 #fff,0 10px 26px rgba(30,20,25,.08);border-radius:20px}
+.h1{margin:0;font-family:Sora,sans-serif;font-size:26px;font-weight:700;line-height:1.2}
+.sub{font-size:14px;color:#5E5559}
+.num{font-family:Sora,sans-serif;font-weight:700}
+.ib{width:44px;height:44px;border-radius:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;color:#1E1A1C}
+.chip{height:44px;padding:0 14px;border-radius:22px;font-size:15px;font-weight:700;cursor:pointer;color:#1E1A1C;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.chip.on{background:var(--p);color:#fff;border-color:var(--p)}
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(0,0,0,.07)}
+.bk{width:40px;height:40px;border-radius:12px;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tag{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:12px;font-size:13px;font-weight:700;white-space:nowrap}
+.nav{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);padding:8px;border-radius:40px;display:flex;align-items:center;gap:10px}
+.nb{width:52px;height:52px;border-radius:26px;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;position:relative;color:#1E1A1C}
+.nb.on{background:var(--p);color:#fff;box-shadow:0 8px 18px rgba(30,20,25,.25)}
+.bd{position:absolute;top:-2px;right:-2px;min-width:20px;height:20px;border-radius:10px;background:#D9342B;border:2px solid #fff;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:0 4px}
+</style>
+</helmet>
+<div class="scr" data-theme="{{theme}}">
+<div class="in">
+<div style="display:flex;align-items:center;justify-content:space-between"><h1 class="h1">Transactions</h1>
+<div style="display:flex;gap:8px"><button class="g ib" aria-label="Pick a day"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button><button class="g ib" aria-label="Download statement (PDF)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button></div></div>
+<div style="display:flex;gap:8px"><button class="g chip on">Today</button><button class="g chip">7 days</button><button class="g chip">30 days</button></div>
+<div style="display:flex;gap:8px"><button class="g chip">All banks<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><button class="g chip">All payments<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button></div>
+
+<section style="border-radius:20px;padding:14px 16px;color:#fff;background:linear-gradient(125deg,color-mix(in srgb,var(--p) 72%,#fff),var(--p) 55%,color-mix(in srgb,var(--p) 78%,#000));box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 14px 28px rgba(30,20,25,.2)">
+<div style="font-size:13px;font-weight:700;opacity:.88">VERIFIED TODAY · 24 PAYMENTS</div>
+<div class="num" style="font-size:30px">11,400 <span style="font-size:15px">ETB</span></div>
+</section>
+
+<section class="g" style="padding:4px 16px">
+<div class="row" style="border-top:0"><span class="bk" style="background:#5B2A86">CBE</span><div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700">Abel Kebede</div><div class="sub">12:04 · Table 3 · Almaz</div></div><div style="text-align:right"><div class="num" style="font-size:15px">1,250</div><span class="tag" style="background:#DDF3E8;color:#0B5A38">Verified</span></div></div>
+<div class="row"><span class="bk" style="background:#1F7AE0">TB</span><div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700">Sara Mohammed</div><div class="sub">11:52 · Table 7 · Dawit</div></div><div style="text-align:right"><div class="num" style="font-size:15px">680</div><span class="tag" style="background:#DDF3E8;color:#0B5A38">Verified</span></div></div>
+<div class="row"><span class="bk" style="background:#5B2A86">CBE</span><div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700">Mekdes Tadesse</div><div class="sub">11:31 · Table 12 · Dawit</div></div><div style="text-align:right"><div class="num" style="font-size:15px">500 <span style="font-size:12px;color:#5E5559">/ 540</span></div><span class="tag" style="background:#FFF0C2;color:#6B4B00">Mismatch</span></div></div>
+<div class="row"><span class="bk" style="background:#1F7AE0">TB</span><div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:700">Yonas Ali</div><div class="sub">11:18 · Table 5 · used before</div></div><div style="text-align:right"><div class="num" style="font-size:15px">540</div><span class="tag" style="background:#FBE0DD;color:#8C1D18">Duplicate</span></div></div>
+</section>
+</div>
+
+<nav class="g nav" aria-label="Main">
+<button class="nb" aria-label="Home"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg></button>
+<button class="nb" aria-label="Verify"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></button>
+<button class="nb on" aria-label="History" aria-current="page"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
+<button class="nb" aria-label="Alerts, 1 new"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/></svg><span class="bd">1</span></button>
+<button class="nb" aria-label="Profile"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></button>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["forest","ocean","royal","teal","slate","rose","berry"],"default":"rose"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return { theme: this.props.theme ?? 'rose' }; }
+}
+</script>
+</body>
+</html>

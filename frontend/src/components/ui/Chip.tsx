@@ -12,9 +12,7 @@ export const Chip = ({ label, onPress, selected = false }: ChipProps) => {
       onPress={onPress}
       className={`rounded-chip px-4 py-2 ${selected ? 'bg-primary' : 'bg-surface border border-border'}`}
     >
-      <Text
-        className={`text-sm font-medium ${selected ? 'text-surface' : 'text-text'}`}
-      >
+      <Text className={`text-sm font-medium ${selected ? 'text-surface' : 'text-text'}`}>
         {label}
       </Text>
     </Pressable>

@@ -12,6 +12,7 @@ import {
   spendingsKey,
   type ExpenseCategory,
 } from '@/lib/extras';
+import { GlassCard } from '@/ui/glass';
 
 /**
  * Owner (Money out on): which kinds of spending count as business costs. Tapping a kind turns it
@@ -35,7 +36,7 @@ export function CostKindsCard() {
     save.mutate(kinds.includes(kind) ? kinds.filter((k) => k !== kind) : [...kinds, kind]);
 
   return (
-    <View className="gap-2 rounded-[18px] border-[1.5px] border-border bg-surface px-3 py-3">
+    <GlassCard className="gap-2 px-3 py-3">
       <Text font="bold" className="text-base" accessibilityRole="header">
         {t('extras.costs.title')}
       </Text>
@@ -59,6 +60,6 @@ export function CostKindsCard() {
       {save.isError ? (
         <Text className="text-sm text-dangerFg">{t('extras.costs.failed')}</Text>
       ) : null}
-    </View>
+    </GlassCard>
   );
 }

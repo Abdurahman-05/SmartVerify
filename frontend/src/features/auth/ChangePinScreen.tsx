@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Keyboard, View } from 'react-native';
 
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { Input } from '@/components/ui/Input';
@@ -20,6 +19,7 @@ import { colors } from '@/theme/tokens';
 
 import { PinVisibilityButton } from './PinVisibilityButton';
 import { PIN_LENGTH, STAFF_PIN_LENGTH } from './schemas';
+import { PrimaryButton, SecondaryButton } from '@/ui/glass';
 
 type Field = 'current' | 'next' | 'again';
 
@@ -125,15 +125,13 @@ export default function ChangePinScreen() {
       <View className="min-h-6 flex-1" />
 
       <View className="gap-2.5 px-4 pb-6 pt-3">
-        <Button
+        <PrimaryButton
           label={t('pin.save')}
           icon={KeyRound}
           disabled={mutation.isPending}
           onPress={save}
         />
-        {forced ? null : (
-          <Button label={t('common.cancel')} variant="outline" size="md" onPress={goBack} />
-        )}
+        {forced ? null : <SecondaryButton label={t('common.cancel')} size="md" onPress={goBack} />}
       </View>
 
       <ErrorDialog

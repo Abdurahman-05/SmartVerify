@@ -10,7 +10,7 @@ import { belongsToOtherApp } from '@/lib/variant';
 import { useFeatures } from '@/store/features';
 import { targetOf } from '@/features/notifications/target';
 import { useSession } from '@/store/session';
-import { colors } from '@/theme/tokens';
+import { useBrandColors } from '@/store/theme';
 
 export default function AppLayout() {
   // Which owner extras are on: asked after sign-in and whenever the app opens signed in.
@@ -41,14 +41,13 @@ export default function AppLayout() {
     [queryClient, router]
   );
   // Each business uses its own app: restaurants the Restaurant app, shops the Shop app.
+  const { tint } = useBrandColors();
   const wrongApp = useSession((s) => belongsToOtherApp(s.user?.plan));
   if (wrongApp) return <WrongAppScreen />;
 
   return (
     <>
-      <Stack
-        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
-      >
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: tint } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="scan" options={{ animation: 'fade' }} />
         <Stack.Screen name="checking" options={{ gestureEnabled: false }} />

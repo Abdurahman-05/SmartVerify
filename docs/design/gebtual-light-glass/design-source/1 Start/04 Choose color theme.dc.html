@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Choose color theme</title>
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F1F2}
+button{font-family:'DM Sans',sans-serif}
+[data-theme=forest]{--p:#0D4A36;--pt:#0D6B47;--tint:#E6F2EC;--tile:#DDEFE6}
+[data-theme=ocean]{--p:#0B3D6B;--pt:#0B5CA8;--tint:#E5F0FA;--tile:#D6E7F7}
+[data-theme=royal]{--p:#3F2A7A;--pt:#5B3FB0;--tint:#EEEAF8;--tile:#E0D9F2}
+[data-theme=teal]{--p:#0B4F55;--pt:#0E7480;--tint:#E3F2F3;--tile:#D2EAEC}
+[data-theme=slate]{--p:#26323F;--pt:#3D5A80;--tint:#E8EDF2;--tile:#DAE3EC}
+[data-theme=rose]{--p:#9D174D;--pt:#BE185D;--tint:#FDF0F5;--tile:#FADCE8}
+[data-theme=berry]{--p:#6B1F5E;--pt:#8E2B7C;--tint:#F7ECF5;--tile:#EFD8EB}
+.scr{width:390px;height:844px;box-sizing:border-box;position:relative;overflow:hidden;color:#1E1A1C;font-family:'DM Sans',sans-serif;background:radial-gradient(circle at 6% 4%,var(--tile) 0%,rgba(255,255,255,0) 46%),radial-gradient(circle at 100% 34%,#FFE7AE 0%,rgba(255,231,174,0) 36%),radial-gradient(circle at 22% 100%,var(--tile) 0%,rgba(255,255,255,0) 50%),var(--tint)}
+.g{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.95);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 1px 0 #fff,0 10px 26px rgba(30,20,25,.08);border-radius:20px}
+.h1{margin:0;font-family:Sora,sans-serif;font-size:26px;font-weight:700;line-height:1.2}
+.sub{font-size:15px;color:#5E5559}
+.btn{width:100%;height:58px;border:0;border-radius:16px;background:var(--p);color:#fff;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 10px 22px rgba(30,20,25,.18)}
+.sw{height:96px;border-radius:18px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700;color:#1E1A1C;padding:0}
+.dot{width:40px;height:40px;border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 2px 0 rgba(255,255,255,.3)}
+</style>
+</helmet>
+<div class="scr" data-theme="{{theme}}">
+<div style="display:flex;flex-direction:column;gap:16px;padding:40px 20px 24px;height:100%;box-sizing:border-box">
+
+<div><h1 class="h1">Choose your color</h1><div class="sub" style="margin-top:4px">Pick the color your team will see. You can change it later in Profile.</div></div>
+
+<section class="g" style="padding:14px">
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px">
+<sc-for list="{{themes}}" as="t" hint-placeholder-count="7">
+<button class="g sw" aria-label="{{t.label}} theme" style="{{t.ring}}" onClick="{{t.pick}}"><span class="dot" style="background:{{t.color}}"><sc-if value="{{t.on}}" hint-placeholder-val="{{false}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></sc-if></span>{{t.label}}</button>
+</sc-for>
+</div>
+</section>
+
+<div style="font-size:14px;font-weight:700;color:#5E5559">PREVIEW</div>
+<section class="g" style="padding:14px;display:flex;flex-direction:column;gap:12px">
+<div style="border-radius:16px;padding:14px;color:#fff;background:linear-gradient(125deg,color-mix(in srgb,var(--p) 72%,#fff),var(--p) 55%,color-mix(in srgb,var(--p) 78%,#000))"><div style="font-size:13px;font-weight:700;opacity:.88">TODAY</div><div style="font-family:Sora,sans-serif;font-size:26px;font-weight:700">18,200 ETB</div></div>
+<div style="display:flex;gap:10px;align-items:center"><span style="width:42px;height:42px;border-radius:13px;background:var(--tile);color:var(--p);display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></span><div style="flex:1"><div style="font-size:15px;font-weight:700">Verify payment</div><div style="font-size:13px;color:#5E5559">Check a payment</div></div><span style="color:var(--pt);font-weight:700;font-size:14px">Open</span></div>
+</section>
+
+<div style="flex-grow:1"></div>
+<button class="btn">Use this color</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["forest","ocean","royal","teal","slate","rose","berry"],"default":"rose"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const cur = (this.state && this.state.pick) || this.props.theme || 'rose';
+const all = [['forest','Forest','#0D4A36'],['ocean','Ocean','#0B3D6B'],['royal','Royal','#3F2A7A'],['teal','Teal','#0B4F55'],['slate','Slate','#26323F'],['rose','Rose','#9D174D'],['berry','Berry','#6B1F5E']];
+return {
+theme: cur,
+themes: all.map(([id,label,color]) => ({ id, label, color, on: id === cur, ring: id === cur ? 'border:2px solid ' + color : '', pick: () => this.setState({ pick: id }) }))
+};
+}
+}
+</script>
+</body>
+</html>

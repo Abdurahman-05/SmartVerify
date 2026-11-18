@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Menu</title>
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F1F2}
+button,input{font-family:'DM Sans',sans-serif}
+input::placeholder{color:#6B6268}
+[data-theme=forest]{--p:#0D4A36;--pt:#0D6B47;--tint:#E6F2EC;--tile:#DDEFE6}
+[data-theme=ocean]{--p:#0B3D6B;--pt:#0B5CA8;--tint:#E5F0FA;--tile:#D6E7F7}
+[data-theme=royal]{--p:#3F2A7A;--pt:#5B3FB0;--tint:#EEEAF8;--tile:#E0D9F2}
+[data-theme=teal]{--p:#0B4F55;--pt:#0E7480;--tint:#E3F2F3;--tile:#D2EAEC}
+[data-theme=slate]{--p:#26323F;--pt:#3D5A80;--tint:#E8EDF2;--tile:#DAE3EC}
+[data-theme=rose]{--p:#9D174D;--pt:#BE185D;--tint:#FDF0F5;--tile:#FADCE8}
+[data-theme=berry]{--p:#6B1F5E;--pt:#8E2B7C;--tint:#F7ECF5;--tile:#EFD8EB}
+.scr{width:390px;height:844px;box-sizing:border-box;position:relative;overflow:hidden;color:#1E1A1C;font-family:'DM Sans',sans-serif;background:radial-gradient(circle at 6% 4%,var(--tile) 0%,rgba(255,255,255,0) 46%),radial-gradient(circle at 100% 34%,#FFE7AE 0%,rgba(255,231,174,0) 36%),radial-gradient(circle at 22% 100%,var(--tile) 0%,rgba(255,255,255,0) 50%),var(--tint)}
+.in{display:flex;flex-direction:column;gap:12px;padding:16px;height:100%;box-sizing:border-box}
+.g{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.95);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 1px 0 #fff,0 10px 26px rgba(30,20,25,.08);border-radius:20px}
+.h1{margin:0;font-family:Sora,sans-serif;font-size:24px;font-weight:700;line-height:1.2}
+.sub{font-size:14px;color:#5E5559}
+.num{font-family:Sora,sans-serif;font-weight:700}
+.ib{width:44px;height:44px;border-radius:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;color:#1E1A1C}
+.chip{height:44px;padding:0 14px;border-radius:22px;font-size:15px;font-weight:700;cursor:pointer;color:#1E1A1C;white-space:nowrap}
+.chip.on{background:var(--p);color:#fff;border-color:var(--p)}
+.mi{display:flex;align-items:center;gap:12px;min-height:64px;padding:0 4px;border-top:1px solid rgba(0,0,0,.07)}
+.pl{width:44px;height:44px;border-radius:14px;flex-shrink:0}
+.sw{width:48px;height:28px;border-radius:14px;background:var(--p);position:relative;flex-shrink:0}
+.sw::after{content:'';position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:11px;background:#fff}
+.sw.off{background:#C9C0C4}.sw.off::after{right:auto;left:3px}
+.btn{width:100%;height:58px;border:0;border-radius:16px;background:var(--p);color:#fff;font-size:17px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 10px 22px rgba(30,20,25,.18)}
+</style>
+</helmet>
+<div class="scr" data-theme="{{theme}}">
+<div class="in">
+<div style="display:flex;align-items:center;gap:10px">
+<button class="g ib" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+<div style="flex:1"><h1 class="h1">Menu</h1><div class="sub">24 items · 4 categories</div></div>
+<button class="g" style="height:44px;padding:0 14px;border-radius:22px;color:var(--pt);font-size:14px;font-weight:700;cursor:pointer">Categories</button>
+</div>
+<div class="g" style="display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:24px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input aria-label="Search the menu" placeholder="Search the menu" style="flex:1;height:44px;border:0;background:transparent;font-size:16px;outline:none;padding:0;color:#1E1A1C"></div>
+<div style="display:flex;gap:8px"><button class="g chip on">All</button><button class="g chip">Food</button><button class="g chip">Drinks</button><button class="g chip">Combos</button></div>
+
+<section class="g" style="padding:0 12px">
+<div class="mi" style="border-top:0"><span class="pl" style="background:radial-gradient(circle,#8A2F12 0 34%,#D9B77E 35% 70%,#F2EFE8 71%)"></span><div style="flex:1"><div style="font-size:16px;font-weight:700">Doro wat</div><div class="sub">Food · 380 ETB</div></div><span class="sw" role="img" aria-label="On the menu"></span></div>
+<div class="mi"><span class="pl" style="background:radial-gradient(circle,#5A2A12 0 34%,#D9B77E 35% 70%,#F2EFE8 71%)"></span><div style="flex:1"><div style="font-size:16px;font-weight:700">Special tibs</div><div class="sub">Food · 320 ETB</div></div><span class="sw" role="img" aria-label="On the menu"></span></div>
+<div class="mi"><span class="pl" style="background:radial-gradient(circle,#A33A2A 0 34%,#D9B77E 35% 70%,#F2EFE8 71%)"></span><div style="flex:1"><div style="font-size:16px;font-weight:700">Kitfo</div><div class="sub">Food · 350 ETB</div></div><span class="sw" role="img" aria-label="On the menu"></span></div>
+<div class="mi"><span class="pl" style="background:radial-gradient(circle,#C9801B 0 34%,#D9B77E 35% 70%,#F2EFE8 71%)"></span><div style="flex:1"><div style="font-size:16px;font-weight:700">Shiro</div><div class="sub">Food · fasting · 180 ETB</div></div><span class="sw" role="img" aria-label="On the menu"></span></div>
+<div class="mi"><span class="pl" style="background:linear-gradient(180deg,#F5E6C8,#8A5A2B)"></span><div style="flex:1"><div style="font-size:16px;font-weight:700">Macchiato</div><div class="sub">Drinks · 45 ETB</div></div><span class="sw off" role="img" aria-label="Hidden, sold out"></span></div>
+</section>
+<div style="flex-grow:1"></div>
+<button class="btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Add item</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["forest","ocean","royal","teal","slate","rose","berry"],"default":"rose"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return { theme: this.props.theme ?? 'rose' }; }
+}
+</script>
+</body>
+</html>

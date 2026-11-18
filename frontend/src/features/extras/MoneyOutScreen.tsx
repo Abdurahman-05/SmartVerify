@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { NoConnection } from '@/components/ui/NoConnection';
@@ -21,6 +20,7 @@ import { useBrandColors } from '@/store/theme';
 
 import { AddSpendingSheet } from './AddSpendingSheet';
 import { FeatureGate } from './FeatureGate';
+import { GlassCard, HeroCard, PrimaryButton, ScreenBg } from '@/ui/glass';
 
 type Filter = 'all' | 'cash' | 'bank' | 'costs' | 'other' | 'new';
 
@@ -35,10 +35,7 @@ function TotalBox({
 }) {
   const brand = useBrandColors();
   return (
-    <View
-      className="flex-1 gap-1 rounded-[18px] border-[1.5px] border-border bg-surface px-3 py-2.5"
-      accessible
-    >
+    <GlassCard className="flex-1 gap-1 px-3 py-2.5" accessible>
       <View className="flex-row items-center gap-1.5">
         <Icon size={18} color={brand.primary} strokeWidth={2.2} />
         <Text font="bold" tone="muted" className="text-sm">
@@ -46,7 +43,7 @@ function TotalBox({
         </Text>
       </View>
       <MoneyText value={value} font="bold" className="text-[17px]" />
-    </View>
+    </GlassCard>
   );
 }
 
@@ -197,7 +194,7 @@ function MoneyOut() {
 
   const header = totals ? (
     <View className="gap-2 pb-2">
-      <View className="rounded-[20px] bg-primary px-[18px] py-3.5" accessible>
+      <HeroCard className="px-[18px] py-3.5" accessible>
         <Text font="semibold" tone="inverse" className="text-sm opacity-90">
           {range.day
             ? `${t('period.day', {
@@ -207,7 +204,7 @@ function MoneyOut() {
             : `${t(`period.${range.period}`)} · ${t('extras.money.spentIn', { count: counted.length })}`}
         </Text>
         <MoneyText value={spent} tone="inverse" className="mt-1 text-[32px]" />
-      </View>
+      </HeroCard>
       <View className="flex-row gap-2">
         <TotalBox icon={Banknote} label={t('extras.cash')} value={totals.cash} />
         <TotalBox icon={Landmark} label={t('extras.bank')} value={totals.bank} />
@@ -256,45 +253,51 @@ function MoneyOut() {
   ) : null;
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} className="flex-1 bg-background">
-      <ScreenHeader
-        title={t('extras.money.title')}
-        subtitle={t('extras.money.subtitle')}
-        onBack={() => (router.canGoBack() ? router.back() : router.navigate('/home'))}
-        right={<CalendarButton day={dayDate} onPress={() => setChoosing(true)} />}
-      />
-      <FlatList
-        data={shown}
-        keyExtractor={(entry) => entry.id}
-        ListHeaderComponent={header ?? undefined}
-        contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 16 }}
-        renderItem={({ item }) => (
-          <ExpenseRow
-            entry={item}
-            showDate={!range.day && range.period !== 'today'}
-            onPress={() => router.push(`/expense/${item.id}`)}
+    <ScreenBg>
+      <SafeAreaView edges={['top', 'bottom']} className="flex-1">
+        <ScreenHeader
+          title={t('extras.money.title')}
+          subtitle={t('extras.money.subtitle')}
+          onBack={() => (router.canGoBack() ? router.back() : router.navigate('/home'))}
+          right={<CalendarButton day={dayDate} onPress={() => setChoosing(true)} />}
+        />
+        <FlatList
+          data={shown}
+          keyExtractor={(entry) => entry.id}
+          ListHeaderComponent={header ?? undefined}
+          contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 16 }}
+          renderItem={({ item }) => (
+            <ExpenseRow
+              entry={item}
+              showDate={!range.day && range.period !== 'today'}
+              onPress={() => router.push(`/expense/${item.id}`)}
+            />
+          )}
+          ListEmptyComponent={
+            <Text tone="muted" className="px-6 pt-6 text-center text-lg">
+              {query.isError ? t(errorMessageKey(query.error)) : t('extras.money.emptyIn')}
+            </Text>
+          }
+        />
+        <View className="px-4 pb-3 pt-2">
+          <PrimaryButton
+            label={t('extras.money.add')}
+            icon={Plus}
+            onPress={() => setAdding(true)}
           />
-        )}
-        ListEmptyComponent={
-          <Text tone="muted" className="px-6 pt-6 text-center text-lg">
-            {query.isError ? t(errorMessageKey(query.error)) : t('extras.money.emptyIn')}
-          </Text>
-        }
-      />
-      <View className="px-4 pb-3 pt-2">
-        <Button label={t('extras.money.add')} icon={Plus} onPress={() => setAdding(true)} />
-      </View>
-      <AddSpendingSheet visible={adding} onClose={() => setAdding(false)} />
-      <CalendarSheet
-        key={`${choosing}-${range.day}`}
-        visible={choosing}
-        period={range.period}
-        day={range.day ?? null}
-        onPeriod={(period) => setRange({ period })}
-        onDay={(day) => setRange({ period: range.period, day })}
-        onClose={() => setChoosing(false)}
-      />
-    </SafeAreaView>
+        </View>
+        <AddSpendingSheet visible={adding} onClose={() => setAdding(false)} />
+        <CalendarSheet
+          key={`${choosing}-${range.day}`}
+          visible={choosing}
+          period={range.period}
+          day={range.day ?? null}
+          onPeriod={(period) => setRange({ period })}
+          onDay={(day) => setRange({ period: range.period, day })}
+          onClose={() => setChoosing(false)}
+        />
+      </SafeAreaView>
+    </ScreenBg>
   );
 }
 

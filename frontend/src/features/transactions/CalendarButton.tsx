@@ -1,30 +1,24 @@
+import { CalendarDays } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
 
-import { Text } from '@/components/ui/Text';
+import { colors } from '@/theme/tokens';
+import { GlassCard } from '@/ui/glass/GlassCard';
 
 /**
- * Header button that opens the CalendarSheet: a calendar page in the brand colour, two rings on
- * top, the chosen day's number (today's for a period) in white in the middle.
+ * Header button that opens the CalendarSheet (design: round 44 px glass button with a calendar
+ * icon). `day` is kept for callers; the chosen day is shown in the screen's subtitle.
  */
-export function CalendarButton({ day, onPress }: { day: Date | null; onPress: () => void }) {
+export function CalendarButton({ onPress }: { day: Date | null; onPress: () => void }) {
   const { t } = useTranslation();
   return (
-    <Pressable
+    <GlassCard
+      radius={22}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={t('period.choose')}
-      className="h-11 w-11 items-center active:opacity-80"
+      className="h-11 w-11 items-center justify-center"
     >
-      <View className="mt-1 h-10 w-10 items-center justify-center rounded-[11px] bg-primary">
-        <Text font="bold" tone="inverse" className="text-[17px] leading-tight">
-          {(day ?? new Date()).getDate()}
-        </Text>
-      </View>
-      <View className="absolute top-0 w-full flex-row justify-center gap-4">
-        <View className="h-2.5 w-[5px] rounded-full border border-surface bg-primary" />
-        <View className="h-2.5 w-[5px] rounded-full border border-surface bg-primary" />
-      </View>
-    </Pressable>
+      <CalendarDays size={20} color={colors.text} strokeWidth={2} />
+    </GlassCard>
   );
 }

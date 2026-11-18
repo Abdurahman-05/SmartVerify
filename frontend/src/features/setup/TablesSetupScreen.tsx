@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Keyboard, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { NoConnection } from '@/components/ui/NoConnection';
@@ -21,6 +20,8 @@ import { addTables, getSetupTables, removeTable } from '@/lib/setup';
 import { getTableCategories, tableCategoriesKey, tableCategoryKey } from '@/lib/tableCategories';
 import { useLocalName } from '@/features/menu/useLocalName';
 import { colors } from '@/theme/tokens';
+import { useBrandColors } from '@/store/theme';
+import { GlassCard, PrimaryButton, ScreenBg } from '@/ui/glass';
 
 const setupTablesKey = ['setup', 'tables'] as const;
 const MAX_AT_ONCE = 100;
@@ -31,6 +32,7 @@ export default function TablesSetupScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const localName = useLocalName();
+  const brand = useBrandColors();
   // A category id; empty = the first one.
   const [picked, setPicked] = useState('');
   const [range, setRange] = useState({ from: '', to: '' });
@@ -48,6 +50,8 @@ export default function TablesSetupScreen() {
   );
   const categories = categoriesQuery.data ?? [];
   const area = categories.some((c) => c.id === picked) ? picked : (categories[0]?.id ?? '');
+  const areaCategory = categories.find((c) => c.id === area);
+  const areaName = areaCategory ? localName(areaCategory) : '';
 
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: setupTablesKey });
@@ -101,141 +105,159 @@ export default function TablesSetupScreen() {
   const failed = add.isError ? add : remove.isError ? remove : null;
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader
-        title={t('setup.tables.title')}
-        subtitle={t('setup.tables.inUse', { count: tables.length })}
-        onBack={goBack}
-      />
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <ScreenHeader
+          title={t('setup.tables.title')}
+          subtitle={t('setup.tables.inUse', { count: tables.length })}
+          onBack={goBack}
+        />
 
-      {query.isError ? (
-        <View className="flex-1 items-center justify-center gap-4 px-6">
-          <Text font="semibold" className="text-center text-lg">
-            {t(errorMessageKey(query.error))}
-          </Text>
-          <View className="w-full">
-            <Button label={t('errors.retry')} icon={RefreshCw} onPress={() => void refetch()} />
-          </View>
-        </View>
-      ) : (
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 14 }}
-        >
-          <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
-            {categories.map((c) => (
-              <Pill
-                key={c.id}
-                label={localName(c)}
-                selected={area === c.id}
-                onPress={() => setPicked(c.id)}
+        {query.isError ? (
+          <View className="flex-1 items-center justify-center gap-4 px-6">
+            <Text font="semibold" className="text-center text-lg">
+              {t(errorMessageKey(query.error))}
+            </Text>
+            <View className="w-full">
+              <PrimaryButton
+                label={t('errors.retry')}
+                icon={RefreshCw}
+                onPress={() => void refetch()}
               />
-            ))}
+            </View>
           </View>
-
-          <Pressable
-            onPress={() => router.push('/setup/table-categories')}
-            accessibilityRole="button"
-            className="flex-row items-center gap-3 rounded-[18px] border-2 border-primary bg-primarySoft px-3 py-2.5 active:opacity-80"
+        ) : (
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 14 }}
           >
-            <View className="h-11 w-11 items-center justify-center rounded-[12px] bg-primary">
-              <Layers size={22} color={colors.surface} strokeWidth={2.2} />
+            <View className="flex-row flex-wrap gap-2" accessibilityRole="radiogroup">
+              {categories.map((c) => (
+                <Pill
+                  key={c.id}
+                  label={localName(c)}
+                  selected={area === c.id}
+                  onPress={() => setPicked(c.id)}
+                />
+              ))}
             </View>
-            <View className="min-w-0 flex-1">
-              <Text font="bold" className="text-base">
-                {t('categories.manageTables')}
-              </Text>
-              <Text tone="muted" className="text-sm">
-                {t('categories.manageTablesHint')}
-              </Text>
-            </View>
-            <ChevronRight size={22} color={colors.muted} strokeWidth={2.2} />
-          </Pressable>
 
-          {shown.length ? (
-            <View className="gap-2">
-              <Text tone="muted" className="text-sm">
-                {t('setup.tables.tapToRemove')}
-              </Text>
-              <View className="flex-row flex-wrap" style={{ marginHorizontal: -5 }}>
-                {shown.map((table) => (
-                  <View key={table.id} className="w-1/4 p-[5px]">
-                    <Pressable
-                      onPress={() => confirmRemove(table)}
-                      accessibilityRole="button"
-                      accessibilityLabel={t('setup.tables.removeTitle', { number: table.number })}
-                      className={`h-[66px] items-center justify-center rounded-[18px] border-2 ${
-                        table.busy ? 'border-borderMid bg-neutralBg' : 'border-primary bg-surface'
-                      } active:bg-primarySoft`}
-                    >
-                      <Text font="heading" className="text-[22px]">
-                        {table.number}
-                      </Text>
-                      {table.busy ? (
-                        <Text font="bold" className="text-[11px]" style={{ color: colors.muted }}>
-                          {t('setup.tables.busy')}
+            <Pressable
+              onPress={() => router.push('/setup/table-categories')}
+              accessibilityRole="button"
+              className="flex-row items-center gap-3 rounded-[20px] border border-white bg-white/60 px-3.5 py-2.5 active:opacity-80"
+              style={{ boxShadow: 'inset 0 1px 0 #FFFFFF, 0 10px 26px rgba(30,20,25,0.08)' }}
+            >
+              <View className="h-[42px] w-[42px] items-center justify-center rounded-[13px] bg-primaryTile">
+                <Layers size={22} color={brand.primary} strokeWidth={2.2} />
+              </View>
+              <View className="min-w-0 flex-1">
+                <Text font="bold" className="text-base">
+                  {t('categories.manageTables')}
+                </Text>
+                <Text tone="muted" className="text-sm">
+                  {t('categories.manageTablesHint')}
+                </Text>
+              </View>
+              <ChevronRight size={22} color={colors.muted} strokeWidth={2.2} />
+            </Pressable>
+
+            {shown.length ? (
+              <GlassCard className="gap-2.5 px-3.5 py-3">
+                <View className="flex-row items-center justify-between">
+                  <Text font="bold" className="text-base">
+                    {areaName}
+                  </Text>
+                  <Text tone="muted" className="text-sm">
+                    {t('setup.tables.inUse', { count: shown.length })}
+                  </Text>
+                </View>
+                <View className="flex-row flex-wrap" style={{ marginHorizontal: -4 }}>
+                  {shown.map((table) => (
+                    <View key={table.id} className="w-1/5 p-1">
+                      <Pressable
+                        onPress={() => confirmRemove(table)}
+                        accessibilityRole="button"
+                        accessibilityLabel={t('setup.tables.removeTitle', { number: table.number })}
+                        className={`h-14 items-center justify-center rounded-[14px] ${
+                          table.busy ? 'bg-neutralBg' : 'bg-primaryTile'
+                        } active:opacity-70`}
+                      >
+                        <Text
+                          font="heading"
+                          className={`text-[19px] ${table.busy ? 'text-muted' : 'text-primary'}`}
+                        >
+                          {table.number}
                         </Text>
-                      ) : null}
-                    </Pressable>
-                  </View>
-                ))}
-              </View>
-            </View>
-          ) : (
-            <Text tone="muted" className="py-2 text-base">
-              {t('setup.tables.empty')}
-            </Text>
-          )}
-
-          <View className="gap-3 rounded-[20px] border-[1.5px] border-border bg-surface px-3.5 py-3">
-            <Text font="bold" className="text-[17px]">
-              {t('setup.tables.addTitle')}
-            </Text>
-            <View className="flex-row gap-3">
-              <View className="flex-1">
-                <Field
-                  label={t('setup.tables.from')}
-                  placeholder={String(nextNumber)}
-                  value={range.from}
-                  onChangeText={(text) => setRange((r) => ({ ...r, from: digitsOnly(text, 3) }))}
-                  keyboardType="number-pad"
-                  maxLength={3}
-                />
-              </View>
-              <View className="flex-1">
-                <Field
-                  label={t('setup.tables.to')}
-                  placeholder={range.from || String(nextNumber)}
-                  value={range.to}
-                  onChangeText={(text) => setRange((r) => ({ ...r, to: digitsOnly(text, 3) }))}
-                  keyboardType="number-pad"
-                  maxLength={3}
-                />
-              </View>
-            </View>
-            {rangeError ? (
-              <Text font="semibold" className="text-sm text-dangerFg">
-                {t('setup.tables.rangeError')}
+                        {table.busy ? (
+                          <Text font="bold" className="text-[11px]" style={{ color: colors.muted }}>
+                            {t('setup.tables.busy')}
+                          </Text>
+                        ) : null}
+                      </Pressable>
+                    </View>
+                  ))}
+                </View>
+                <Text tone="muted" className="text-[13px]">
+                  {t('setup.tables.tapToRemove')}
+                </Text>
+              </GlassCard>
+            ) : (
+              <Text tone="muted" className="py-2 text-base">
+                {t('setup.tables.empty')}
               </Text>
-            ) : null}
-            <Button
-              label={t('setup.tables.add')}
-              icon={Plus}
-              size="md"
-              disabled={add.isPending}
-              onPress={onAdd}
-            />
-          </View>
-        </ScrollView>
-      )}
+            )}
 
-      <ErrorDialog
-        visible={Boolean(failed)}
-        title={t('setup.tables.failedTitle')}
-        message={t(errorMessageKey(failed?.error))}
-        actionLabel={t('errors.retry')}
-        onClose={() => failed?.reset()}
-      />
-    </SafeAreaView>
+            <GlassCard className="gap-3 px-3.5 py-3">
+              <Text font="bold" className="text-[17px]">
+                {t('setup.tables.addTitle')}
+              </Text>
+              <View className="flex-row gap-3">
+                <View className="flex-1">
+                  <Field
+                    label={t('setup.tables.from')}
+                    placeholder={String(nextNumber)}
+                    value={range.from}
+                    onChangeText={(text) => setRange((r) => ({ ...r, from: digitsOnly(text, 3) }))}
+                    keyboardType="number-pad"
+                    maxLength={3}
+                  />
+                </View>
+                <View className="flex-1">
+                  <Field
+                    label={t('setup.tables.to')}
+                    placeholder={range.from || String(nextNumber)}
+                    value={range.to}
+                    onChangeText={(text) => setRange((r) => ({ ...r, to: digitsOnly(text, 3) }))}
+                    keyboardType="number-pad"
+                    maxLength={3}
+                  />
+                </View>
+              </View>
+              {rangeError ? (
+                <Text font="semibold" className="text-sm text-dangerFg">
+                  {t('setup.tables.rangeError')}
+                </Text>
+              ) : null}
+              <PrimaryButton
+                label={t('setup.tables.add')}
+                icon={Plus}
+                size="md"
+                disabled={add.isPending}
+                onPress={onAdd}
+              />
+            </GlassCard>
+          </ScrollView>
+        )}
+
+        <ErrorDialog
+          visible={Boolean(failed)}
+          title={t('setup.tables.failedTitle')}
+          message={t(errorMessageKey(failed?.error))}
+          actionLabel={t('errors.retry')}
+          onClose={() => failed?.reset()}
+        />
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 
 import { BottomSheet } from '@/components/ui/BottomSheet';
-import { Button } from '@/components/ui/Button';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { Text } from '@/components/ui/Text';
 import { colors } from '@/theme/tokens';
 
 import type { BillOrder } from './types';
+import { PrimaryButton } from '@/ui/glass';
 
 /** Change how many of each item, before the kitchen starts. 0 removes the item. */
 export function EditOrderSheet({
@@ -85,7 +85,7 @@ export function EditOrderSheet({
           {t('bills.change.emptyHint')}
         </Text>
       ) : null}
-      <Button
+      <PrimaryButton
         label={t('bills.change.save')}
         disabled={kept.length === 0 || saving}
         onPress={() =>

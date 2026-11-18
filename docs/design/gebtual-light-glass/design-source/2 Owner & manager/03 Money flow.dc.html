@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Money flow</title>
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F1F2}
+button{font-family:'DM Sans',sans-serif}
+[data-theme=forest]{--p:#0D4A36;--pt:#0D6B47;--tint:#E6F2EC;--tile:#DDEFE6}
+[data-theme=ocean]{--p:#0B3D6B;--pt:#0B5CA8;--tint:#E5F0FA;--tile:#D6E7F7}
+[data-theme=royal]{--p:#3F2A7A;--pt:#5B3FB0;--tint:#EEEAF8;--tile:#E0D9F2}
+[data-theme=teal]{--p:#0B4F55;--pt:#0E7480;--tint:#E3F2F3;--tile:#D2EAEC}
+[data-theme=slate]{--p:#26323F;--pt:#3D5A80;--tint:#E8EDF2;--tile:#DAE3EC}
+[data-theme=rose]{--p:#9D174D;--pt:#BE185D;--tint:#FDF0F5;--tile:#FADCE8}
+[data-theme=berry]{--p:#6B1F5E;--pt:#8E2B7C;--tint:#F7ECF5;--tile:#EFD8EB}
+.scr{width:390px;height:844px;box-sizing:border-box;position:relative;overflow:hidden;color:#1E1A1C;font-family:'DM Sans',sans-serif;background:radial-gradient(circle at 6% 4%,var(--tile) 0%,rgba(255,255,255,0) 46%),radial-gradient(circle at 100% 34%,#FFE7AE 0%,rgba(255,231,174,0) 36%),radial-gradient(circle at 22% 100%,var(--tile) 0%,rgba(255,255,255,0) 50%),var(--tint)}
+.in{display:flex;flex-direction:column;gap:12px;padding:16px 16px 0}
+.g{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.95);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 1px 0 #fff,0 10px 26px rgba(30,20,25,.08);border-radius:20px}
+.h1{margin:0;font-family:Sora,sans-serif;font-size:24px;font-weight:700;line-height:1.2}
+.sub{font-size:14px;color:#5E5559}
+.h2{margin:0;font-size:16px;font-weight:700}
+.lk{color:var(--pt);font-size:14px;font-weight:700;text-decoration:none}
+.num{font-family:Sora,sans-serif;font-weight:700}
+.ib{width:44px;height:44px;border-radius:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;color:#1E1A1C}
+.chip{height:44px;padding:0 16px;border-radius:22px;font-size:15px;font-weight:700;cursor:pointer;color:#1E1A1C;white-space:nowrap}
+.chip.on{background:var(--p);color:#fff;border-color:var(--p)}
+.ln{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid rgba(0,0,0,.07)}
+.ai{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.btn{flex:1;height:54px;border:0;border-radius:16px;background:var(--p);color:#fff;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 10px 22px rgba(30,20,25,.18)}
+.btn2{flex:1;height:54px;border-radius:16px;color:var(--pt);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+</style>
+</helmet>
+<div class="scr" data-theme="{{theme}}">
+<div class="in">
+<div style="display:flex;align-items:center;gap:10px">
+<button class="g ib" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+<div><h1 class="h1">Money flow</h1><div class="sub">Sales, expenses, what is left</div></div>
+</div>
+<div style="display:flex;gap:8px"><button class="g chip on">Today</button><button class="g chip">This week</button><button class="g chip">Month</button></div>
+
+<section class="g" style="padding:16px">
+<div style="font-size:13px;font-weight:700;color:#5E5559">LEFT AFTER COSTS</div>
+<div class="num" style="font-size:34px;color:#0B5A38">12,450 <span style="font-size:16px">ETB</span></div>
+<div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-top:12px;gap:2px"><div style="width:68.4%;background:#2BB37A"></div><div style="width:18.7%;background:var(--p)"></div><div style="width:12.9%;background:#E39A1B"></div></div>
+<div class="ln" style="border-top:0;margin-top:6px"><span style="width:12px;height:12px;border-radius:6px;background:#2BB37A"></span><span style="flex:1;font-size:15px">Sales</span><span class="num" style="font-size:16px">18,200</span></div>
+<div class="ln"><span style="width:12px;height:12px;border-radius:6px;background:var(--p)"></span><span style="flex:1;font-size:15px">Purchases <span class="sub">(food, drinks, supplies)</span></span><span class="num" style="font-size:16px">− 3,400</span></div>
+<div class="ln"><span style="width:12px;height:12px;border-radius:6px;background:#E39A1B"></span><span style="flex:1;font-size:15px">Expenses <span class="sub">(gas, rent, salary)</span></span><span class="num" style="font-size:16px">− 2,350</span></div>
+</section>
+
+<section class="g" style="padding:6px 16px">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 2px"><h2 class="h2">Latest money out</h2><a class="lk" href="#">See all</a></div>
+<div class="ln" style="border-top:0"><span class="ai" style="background:var(--tile);color:var(--p)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h3l2.5 11h10l2-8H7"/></svg></span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:700">Cooking oil · 2 jerrycans</span><span class="sub">Purchase · Meron · 10:15</span></span><span class="num" style="font-size:15px">1,900</span></div>
+<div class="ln"><span class="ai" style="background:#FFF0C2;color:#6B4B00"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c2 3 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5.5 1.5 1.5 2.5 3 2.5-1-3 0-6 0-8z"/></svg></span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:700">Cooking gas</span><span class="sub">Expense · Meron · 09:30</span></span><span class="num" style="font-size:15px">1,250</span></div>
+<div class="ln"><span class="ai" style="background:var(--tile);color:var(--p)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M3 4h3l2.5 11h10l2-8H7"/></svg></span><span style="flex:1"><span style="display:block;font-size:15px;font-weight:700">Napkins · 3 boxes</span><span class="sub">Purchase · from buy list · 08:50</span></span><span class="num" style="font-size:15px">480</span></div>
+</section>
+
+<div style="display:flex;gap:10px">
+<button class="btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Purchase</button>
+<button class="g btn2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Expense</button>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["forest","ocean","royal","teal","slate","rose","berry"],"default":"rose"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return { theme: this.props.theme ?? 'rose' }; }
+}
+</script>
+</body>
+</html>

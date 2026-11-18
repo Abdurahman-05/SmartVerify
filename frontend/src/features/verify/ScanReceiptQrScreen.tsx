@@ -9,7 +9,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BankBadge } from '@/components/ui/BankBadge';
 import { BottomSheet } from '@/components/ui/BottomSheet';
-import { Button } from '@/components/ui/Button';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { Text } from '@/components/ui/Text';
 import { receiptLinkFromQr } from '@/lib/verification';
@@ -19,6 +18,7 @@ import { findPayerBank } from './payerBanks';
 import { checkingRoute, useReceiptFlow } from './receiptFlow';
 import { PermissionView, ScanFrame } from './ScanScreen';
 import { useVerifyFlow } from './verifyFlow';
+import { PrimaryButton, SecondaryButton } from '@/ui/glass';
 
 /**
  * Step 2: scan the receipt QR (VerifyScanQR + VerifyQRNotFound). A CBE receipt link is checked
@@ -142,11 +142,10 @@ export default function ScanReceiptQrScreen() {
         <Text font="heading" className="text-center text-2xl" accessibilityRole="header">
           {t('verifyBank.scan.notFound')}
         </Text>
-        <Button label={t('verifyBank.readReceipt')} icon={FileText} onPress={readReceipt} />
-        <Button
+        <PrimaryButton label={t('verifyBank.readReceipt')} icon={FileText} onPress={readReceipt} />
+        <SecondaryButton
           label={t('verifyBank.scan.again')}
           icon={RotateCcw}
-          variant="outline"
           size="md"
           onPress={scanAgain}
         />

@@ -9,7 +9,6 @@ import { Pressable, View } from 'react-native';
 import { z } from 'zod';
 
 import { BankBadge } from '@/components/ui/BankBadge';
-import { Button } from '@/components/ui/Button';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { Input } from '@/components/ui/Input';
 import { LoadingView } from '@/components/ui/LoadingView';
@@ -31,6 +30,7 @@ import { digitsOnly } from '@/lib/format';
 import { colors } from '@/theme/tokens';
 
 import { maskedNumberKey, TELEBIRR, TELEBIRR_PHONE } from './telebirr';
+import { PrimaryButton, SecondaryButton } from '@/ui/glass';
 
 /** CBE accounts need the holder name: CBE receipts show it and the check compares it. */
 const CBE = 'CBE';
@@ -280,12 +280,12 @@ function AccountForm({ account }: { account?: BankAccount }) {
             {generalError}
           </Text>
         ) : null}
-        <Button
+        <PrimaryButton
           label={t(editing ? 'bankAccounts.save' : 'bankAccounts.connect')}
           icon={editing ? Check : Link}
           onPress={handleSubmit((values) => mutation.mutate(values))}
         />
-        <Button label={t('bankAccounts.cancel')} variant="outline" size="md" onPress={goBack} />
+        <SecondaryButton label={t('bankAccounts.cancel')} size="md" onPress={goBack} />
       </View>
 
       <OptionSheet

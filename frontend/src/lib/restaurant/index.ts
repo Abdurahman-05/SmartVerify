@@ -15,7 +15,8 @@ export type {
 } from '@/lib/mock/restaurant';
 
 /** A menu item on New order. `categoryId` is the owner's category (the offline mock has none). */
-export type MenuItem = mock.MenuItem & { categoryId?: string };
+/** catalogKey: the starter-pack item it came from (its photo); absent for hand-added items. */
+export type MenuItem = mock.MenuItem & { categoryId?: string; catalogKey?: string | null };
 
 /** EXPO_PUBLIC_USE_MOCK_RESTAURANT=true uses the offline mock (src/lib/mock/restaurant.ts); default is the real backend. */
 export const USE_MOCK_RESTAURANT = process.env.EXPO_PUBLIC_USE_MOCK_RESTAURANT === 'true';

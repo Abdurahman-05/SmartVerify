@@ -7,7 +7,6 @@ import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MoneyText } from '@/components/ui/MoneyText';
-import { Button } from '@/components/ui/Button';
 import { SmallSpinner, SpinnerRing } from '@/components/ui/Spinner';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
@@ -15,6 +14,7 @@ import { checkReceipt } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
 import { useVerifyFlow } from './verifyFlow';
+import { GlassCard, HeroCard, PrimaryButton, ScreenBg } from '@/ui/glass';
 
 type Stage = 'bank' | 'compare' | 'error';
 type StepState = 'done' | 'active' | 'todo';
@@ -84,60 +84,62 @@ export default function CheckingScreen() {
   };
 
   return (
-    <SafeAreaView
-      className="flex-1 bg-background"
-      accessibilityLiveRegion="polite"
-      accessibilityLabel={t('verify.checking.title')}
-    >
-      <View className="flex-1 items-center justify-center gap-[22px] px-6">
-        <SpinnerRing size={170}>
-          <Landmark size={52} color={brand.primary} strokeWidth={1.8} />
-        </SpinnerRing>
+    <ScreenBg>
+      <SafeAreaView
+        className="flex-1"
+        accessibilityLiveRegion="polite"
+        accessibilityLabel={t('verify.checking.title')}
+      >
+        <View className="flex-1 items-center justify-center gap-[22px] px-6">
+          <SpinnerRing size={170}>
+            <Landmark size={52} color={brand.primary} strokeWidth={1.8} />
+          </SpinnerRing>
 
-        <View className="items-center">
-          <Text font="heading" className="text-center text-[26px]" accessibilityRole="header">
-            {t('verify.checking.title')}
-          </Text>
-          <Text tone="muted" className="mt-1.5 text-center text-[17px]">
-            {t('verify.checking.subtitle')}
-          </Text>
-        </View>
-
-        <View className="w-full flex-row items-center justify-between rounded-[20px] bg-primary px-[18px] py-3">
-          <Text font="semibold" tone="inverse" className="text-base">
-            {t('verify.checking.waitingFor')}
-          </Text>
-          <MoneyText value={amount} tone="inverse" className="text-[26px]" />
-        </View>
-
-        <View className="w-full gap-4 rounded-[20px] border-[1.5px] border-border bg-surface px-[18px] py-4">
-          <Step state="done" label={t('verify.checking.stepScanned')} />
-          <Step
-            state={stage === 'bank' ? 'active' : stage === 'compare' ? 'done' : 'todo'}
-            label={t('verify.checking.stepBank')}
-            detail={account.bankName}
-          />
-          <Step
-            state={stage === 'compare' ? 'active' : 'todo'}
-            label={t('verify.checking.stepCompare')}
-          />
-        </View>
-      </View>
-
-      <View className="px-6 pb-8">
-        {stage === 'error' ? (
-          <View className="gap-3">
-            <Text font="semibold" className="text-center text-base text-dangerFg">
-              {t('verify.checking.error')}
+          <View className="items-center">
+            <Text font="heading" className="text-center text-[26px]" accessibilityRole="header">
+              {t('verify.checking.title')}
             </Text>
-            <Button label={t('verify.result.tryAgain')} onPress={retry} />
+            <Text tone="muted" className="mt-1.5 text-center text-[17px]">
+              {t('verify.checking.subtitle')}
+            </Text>
           </View>
-        ) : (
-          <Text font="semibold" tone="muted" className="text-center text-[15px]">
-            {t('verify.checking.takesSeconds')}
-          </Text>
-        )}
-      </View>
-    </SafeAreaView>
+
+          <HeroCard className="w-full flex-row items-center justify-between px-[18px] py-3">
+            <Text font="semibold" tone="inverse" className="text-base">
+              {t('verify.checking.waitingFor')}
+            </Text>
+            <MoneyText value={amount} tone="inverse" className="text-[26px]" />
+          </HeroCard>
+
+          <GlassCard className="w-full gap-4 px-[18px] py-4">
+            <Step state="done" label={t('verify.checking.stepScanned')} />
+            <Step
+              state={stage === 'bank' ? 'active' : stage === 'compare' ? 'done' : 'todo'}
+              label={t('verify.checking.stepBank')}
+              detail={account.bankName}
+            />
+            <Step
+              state={stage === 'compare' ? 'active' : 'todo'}
+              label={t('verify.checking.stepCompare')}
+            />
+          </GlassCard>
+        </View>
+
+        <View className="px-6 pb-8">
+          {stage === 'error' ? (
+            <View className="gap-3">
+              <Text font="semibold" className="text-center text-base text-dangerFg">
+                {t('verify.checking.error')}
+              </Text>
+              <PrimaryButton label={t('verify.result.tryAgain')} onPress={retry} />
+            </View>
+          ) : (
+            <Text font="semibold" tone="muted" className="text-center text-[15px]">
+              {t('verify.checking.takesSeconds')}
+            </Text>
+          )}
+        </View>
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

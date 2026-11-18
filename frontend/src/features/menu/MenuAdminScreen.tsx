@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Image } from 'expo-image';
 import { useFocusEffect, useRouter } from 'expo-router';
 import {
   ChevronRight,
@@ -14,7 +15,6 @@ import { useTranslation } from 'react-i18next';
 import { Alert, FlatList, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { MoneyText } from '@/components/ui/MoneyText';
@@ -29,33 +29,54 @@ import { getMenuCategories, itemCategoryKey, menuCategoriesKey } from '@/lib/men
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 
+import { pieceRadius } from '@/features/transactions/PaymentRow';
+import { menuPhotoFor } from '@/lib/menuPhotos';
+
 import { useLocalName } from './useLocalName';
+import { GlassCard, PrimaryButton, ScreenBg } from '@/ui/glass';
 
 function MenuRow({
   item,
   onEdit,
   onRemove,
+  position = 'single',
 }: {
   item: MenuAdminItem;
   onEdit: () => void;
   onRemove: () => void;
+  position?: 'single' | 'first' | 'middle' | 'last';
 }) {
   const brand = useBrandColors();
   const { t, i18n } = useTranslation();
   const localName = useLocalName();
   const Icon = categoryIcon[item.category];
+  const photo = menuPhotoFor(item.catalogKey);
   const categoryName =
     i18n.language === 'am' && item.categoryNameAm ? item.categoryNameAm : item.categoryName;
   const subtitle = [categoryName, item.groupName].filter(Boolean).join(' · ');
 
   return (
-    <View className="flex-row items-center gap-1 rounded-[18px] border-[1.5px] border-border bg-surface py-2 pl-2 pr-2">
+    <GlassCard
+      radius={0}
+      className="min-h-16 flex-row items-center gap-1 py-2 pl-3 pr-1.5"
+      style={[
+        pieceRadius(position),
+        position === 'middle' || position === 'last' ? { borderTopWidth: 0 } : null,
+      ]}
+    >
+      {position === 'middle' || position === 'last' ? (
+        <View className="absolute left-3 right-3 top-0 h-px bg-black/[0.07]" />
+      ) : null}
       <View className="min-h-14 min-w-0 flex-1 flex-row items-center gap-3">
-        <View className="h-14 w-14 items-center justify-center rounded-[14px] bg-primaryTile">
-          <Icon size={26} color={brand.primary} strokeWidth={2} />
+        <View className="h-11 w-11 items-center justify-center overflow-hidden rounded-[14px] bg-primaryTile">
+          {photo ? (
+            <Image source={photo} style={{ width: 44, height: 44 }} contentFit="cover" />
+          ) : (
+            <Icon size={22} color={brand.primary} strokeWidth={2} />
+          )}
         </View>
         <View className="min-w-0 flex-1">
-          <Text font="bold" className="text-[17px] leading-tight">
+          <Text font="bold" className="text-base leading-tight">
             {localName(item)}
           </Text>
           {subtitle ? (
@@ -63,7 +84,7 @@ function MenuRow({
               {subtitle}
             </Text>
           ) : null}
-          <MoneyText value={item.priceEtb} font="bold" tone="link" className="mt-[3px] text-base" />
+          <MoneyText value={item.priceEtb} font="bold" tone="link" className="mt-0.5 text-sm" />
         </View>
       </View>
       <Pressable
@@ -82,7 +103,7 @@ function MenuRow({
       >
         <Trash2 size={22} color={colors.dangerFg} strokeWidth={2.2} />
       </Pressable>
-    </View>
+    </GlassCard>
   );
 }
 
@@ -166,98 +187,113 @@ export default function MenuAdminScreen() {
     ]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader
-        title={t('menuAdmin.title')}
-        subtitle={t('menuAdmin.subtitle')}
-        onBack={goBack}
-        right={
-          <Pressable
-            onPress={() => router.push('/menu/edit')}
-            accessibilityRole="button"
-            accessibilityLabel={t('menuAdmin.addTitle')}
-            className="h-11 flex-row items-center gap-1 rounded-[22px] bg-primary pl-3 pr-4 active:opacity-80"
-          >
-            <Plus size={20} color={colors.surface} strokeWidth={2.8} />
-            <Text font="bold" tone="inverse" className="text-base">
-              {t('menuAdmin.add')}
-            </Text>
-          </Pressable>
-        }
-      />
-
-      <View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 10 }}
-          accessibilityRole="radiogroup"
-        >
-          <Pill
-            label={t('orders.category.all')}
-            selected={chosen === 'all'}
-            onPress={() => setCategory('all')}
-          />
-          {categories.map((c) => (
-            <Pill
-              key={c.id}
-              label={localName(c)}
-              selected={chosen === c.id}
-              onPress={() => setCategory(c.id)}
-            />
-          ))}
-        </ScrollView>
-      </View>
-
-      <LinkCard
-        icon={Layers}
-        title={t('categories.manage')}
-        hint={t('categories.manageHint')}
-        onPress={() => router.push('/menu/categories')}
-      />
-      <LinkCard
-        icon={Sparkles}
-        title={t('menuAdmin.starter.open')}
-        hint={t('menuAdmin.starter.openHint')}
-        onPress={() => router.push('/menu/packs')}
-      />
-
-      {query.isError ? (
-        <View className="flex-1 items-center justify-center gap-4 px-6">
-          <Text font="semibold" className="text-center text-lg">
-            {t('menuAdmin.loadFailed')} {t(errorMessageKey(query.error))}
-          </Text>
-          <View className="w-full">
-            <Button label={t('errors.retry')} icon={RefreshCw} onPress={() => void refetch()} />
-          </View>
-        </View>
-      ) : (
-        <FlatList
-          data={shown}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 24 }}
-          renderItem={({ item }) => (
-            <MenuRow
-              item={item}
-              onEdit={() => router.push({ pathname: '/menu/edit', params: { id: item.id } })}
-              onRemove={() => confirmRemove(item)}
-            />
-          )}
-          ListEmptyComponent={
-            <Text tone="muted" className="pt-8 text-center text-lg">
-              {t('menuAdmin.empty')}
-            </Text>
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <ScreenHeader
+          title={t('menuAdmin.title')}
+          subtitle={t('menuAdmin.subtitle')}
+          onBack={goBack}
+          right={
+            <Pressable
+              onPress={() => router.push('/menu/edit')}
+              accessibilityRole="button"
+              accessibilityLabel={t('menuAdmin.addTitle')}
+              className="h-11 flex-row items-center gap-1 rounded-[22px] bg-primary pl-3 pr-4 active:opacity-80"
+            >
+              <Plus size={20} color={colors.surface} strokeWidth={2.8} />
+              <Text font="bold" tone="inverse" className="text-base">
+                {t('menuAdmin.add')}
+              </Text>
+            </Pressable>
           }
         />
-      )}
 
-      <ErrorDialog
-        visible={remove.isError}
-        title={t('menuAdmin.removeFailedTitle')}
-        message={t(errorMessageKey(remove.error))}
-        actionLabel={t('errors.retry')}
-        onClose={remove.reset}
-      />
-    </SafeAreaView>
+        <View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 10 }}
+            accessibilityRole="radiogroup"
+          >
+            <Pill
+              label={t('orders.category.all')}
+              selected={chosen === 'all'}
+              onPress={() => setCategory('all')}
+            />
+            {categories.map((c) => (
+              <Pill
+                key={c.id}
+                label={localName(c)}
+                selected={chosen === c.id}
+                onPress={() => setCategory(c.id)}
+              />
+            ))}
+          </ScrollView>
+        </View>
+
+        <LinkCard
+          icon={Layers}
+          title={t('categories.manage')}
+          hint={t('categories.manageHint')}
+          onPress={() => router.push('/menu/categories')}
+        />
+        <LinkCard
+          icon={Sparkles}
+          title={t('menuAdmin.starter.open')}
+          hint={t('menuAdmin.starter.openHint')}
+          onPress={() => router.push('/menu/packs')}
+        />
+
+        {query.isError ? (
+          <View className="flex-1 items-center justify-center gap-4 px-6">
+            <Text font="semibold" className="text-center text-lg">
+              {t('menuAdmin.loadFailed')} {t(errorMessageKey(query.error))}
+            </Text>
+            <View className="w-full">
+              <PrimaryButton
+                label={t('errors.retry')}
+                icon={RefreshCw}
+                onPress={() => void refetch()}
+              />
+            </View>
+          </View>
+        ) : (
+          <FlatList
+            data={shown}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+            renderItem={({ item, index }) => (
+              <MenuRow
+                position={
+                  shown.length === 1
+                    ? 'single'
+                    : index === 0
+                      ? 'first'
+                      : index === shown.length - 1
+                        ? 'last'
+                        : 'middle'
+                }
+                item={item}
+                onEdit={() => router.push({ pathname: '/menu/edit', params: { id: item.id } })}
+                onRemove={() => confirmRemove(item)}
+              />
+            )}
+            ListEmptyComponent={
+              <Text tone="muted" className="pt-8 text-center text-lg">
+                {t('menuAdmin.empty')}
+              </Text>
+            }
+          />
+        )}
+
+        <ErrorDialog
+          visible={remove.isError}
+          title={t('menuAdmin.removeFailedTitle')}
+          message={t(errorMessageKey(remove.error))}
+          actionLabel={t('errors.retry')}
+          onClose={remove.reset}
+        />
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

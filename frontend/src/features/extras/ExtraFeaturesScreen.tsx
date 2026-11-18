@@ -17,6 +17,7 @@ import { useFeatures } from '@/store/features';
 import { useBrandColors } from '@/store/theme';
 
 import { CostKindsCard } from './CostKindsCard';
+import { GlassCard, ScreenBg } from '@/ui/glass';
 
 function FeatureRow({
   icon: Icon,
@@ -35,7 +36,7 @@ function FeatureRow({
 }) {
   const brand = useBrandColors();
   return (
-    <View className="flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface px-3 py-3">
+    <GlassCard className="flex-row items-center gap-3 px-3 py-3">
       <View className="h-11 w-11 items-center justify-center rounded-[12px] bg-primaryTile">
         <Icon size={22} color={brand.primary} strokeWidth={2.2} />
       </View>
@@ -50,7 +51,7 @@ function FeatureRow({
       <View className={disabled ? 'opacity-50' : ''} pointerEvents={disabled ? 'none' : 'auto'}>
         <Switch value={value} onValueChange={onChange} accessibilityLabel={title} />
       </View>
-    </View>
+    </GlassCard>
   );
 }
 
@@ -77,52 +78,54 @@ export default function ExtraFeaturesScreen() {
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/profile'));
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader title={t('extras.title')} subtitle={t('extras.subtitle')} onBack={goBack} />
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 10 }}>
-        <FeatureRow
-          icon={NotebookPen}
-          title={t('extras.buyList')}
-          hint={t('extras.buyListHint')}
-          value={features.featureBuyList}
-          disabled={change.isPending}
-          onChange={(value) => change.mutate({ featureBuyList: value })}
-        />
-        <FeatureRow
-          icon={Wallet}
-          title={t('extras.moneyOut')}
-          hint={t('extras.moneyOutHint')}
-          value={features.featureMoneyOut}
-          disabled={change.isPending}
-          onChange={(value) => change.mutate({ featureMoneyOut: value })}
-        />
-        {features.featureMoneyOut ? <CostKindsCard /> : null}
-        <FeatureRow
-          icon={ChartColumn}
-          title={t('reportsHub.access.title')}
-          hint={t('reportsHub.access.body')}
-          value={access.data?.managerCanSeeReports ?? false}
-          disabled={!access.data || changeAccess.isPending}
-          onChange={(value) => changeAccess.mutate(value)}
-        />
-        <View className="flex-row items-start gap-2 px-1 pt-1">
-          <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
-          <Text tone="muted" className="flex-1 text-sm leading-5">
-            {t('extras.hiddenNote')}
-          </Text>
-        </View>
-      </ScrollView>
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <ScreenHeader title={t('extras.title')} subtitle={t('extras.subtitle')} onBack={goBack} />
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, gap: 10 }}>
+          <FeatureRow
+            icon={NotebookPen}
+            title={t('extras.buyList')}
+            hint={t('extras.buyListHint')}
+            value={features.featureBuyList}
+            disabled={change.isPending}
+            onChange={(value) => change.mutate({ featureBuyList: value })}
+          />
+          <FeatureRow
+            icon={Wallet}
+            title={t('extras.moneyOut')}
+            hint={t('extras.moneyOutHint')}
+            value={features.featureMoneyOut}
+            disabled={change.isPending}
+            onChange={(value) => change.mutate({ featureMoneyOut: value })}
+          />
+          {features.featureMoneyOut ? <CostKindsCard /> : null}
+          <FeatureRow
+            icon={ChartColumn}
+            title={t('reportsHub.access.title')}
+            hint={t('reportsHub.access.body')}
+            value={access.data?.managerCanSeeReports ?? false}
+            disabled={!access.data || changeAccess.isPending}
+            onChange={(value) => changeAccess.mutate(value)}
+          />
+          <View className="flex-row items-start gap-2 px-1 pt-1">
+            <Info size={18} color={brand.primaryText} strokeWidth={2.2} />
+            <Text tone="muted" className="flex-1 text-sm leading-5">
+              {t('extras.hiddenNote')}
+            </Text>
+          </View>
+        </ScrollView>
 
-      <ErrorDialog
-        visible={change.isError || changeAccess.isError}
-        title={t('extras.saveFailedTitle')}
-        message={t(errorMessageKey(change.error ?? changeAccess.error))}
-        actionLabel={t('errors.retry')}
-        onClose={() => {
-          change.reset();
-          changeAccess.reset();
-        }}
-      />
-    </SafeAreaView>
+        <ErrorDialog
+          visible={change.isError || changeAccess.isError}
+          title={t('extras.saveFailedTitle')}
+          message={t(errorMessageKey(change.error ?? changeAccess.error))}
+          actionLabel={t('errors.retry')}
+          onClose={() => {
+            change.reset();
+            changeAccess.reset();
+          }}
+        />
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

@@ -25,9 +25,9 @@ export function StatusPill({ status, label, className = 'self-end' }: StatusPill
   const { bg, fg, icon: Icon } = config[status];
 
   return (
-    <View className={`flex-row items-center gap-1 rounded-[14px] py-[3px] pl-2 pr-2.5 ${bg} ${className}`}>
-      <Icon size={14} color={fg} strokeWidth={2.6} />
-      <Text font="bold" className="text-sm" style={{ color: fg }}>
+    <View className={`h-6 flex-row items-center gap-1 rounded-[12px] px-[9px] ${bg} ${className}`}>
+      <Icon size={12} color={fg} strokeWidth={2.8} />
+      <Text font="bold" className="text-[13px]" style={{ color: fg }}>
         {label ?? t(`status.${status}`)}
       </Text>
     </View>

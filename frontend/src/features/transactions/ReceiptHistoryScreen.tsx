@@ -26,6 +26,7 @@ import {
 import { colors } from '@/theme/tokens';
 
 import { FailedCheckRow } from './FailedCheckRow';
+import { GlassCard, HeroCard, ScreenBg } from '@/ui/glass';
 
 function VerifiedRow({ check, showDate }: { check: VerifiedCheck; showDate: boolean }) {
   const { t } = useTranslation();
@@ -33,10 +34,10 @@ function VerifiedRow({ check, showDate }: { check: VerifiedCheck; showDate: bool
     ? `${formatDay(check.createdAt, false)}, ${formatTime(check.createdAt)}`
     : formatTime(check.createdAt);
   return (
-    <View
+    <GlassCard
       accessible
       accessibilityLabel={`${check.reference}, ${t('history.receipts.verifiedTag')}, ${check.checkedBy}, ${when}`}
-      className="flex-row items-center gap-3 rounded-[18px] border-[1.5px] border-border bg-surface p-3"
+      className="flex-row items-center gap-3 p-3"
     >
       <View className="h-12 w-12 items-center justify-center rounded-[14px] bg-successBg">
         <CircleCheck size={24} color={colors.successFg} strokeWidth={2.2} />
@@ -58,7 +59,7 @@ function VerifiedRow({ check, showDate }: { check: VerifiedCheck; showDate: bool
           {t('history.receipts.verifiedTag')}
         </Text>
       </View>
-    </View>
+    </GlassCard>
   );
 }
 
@@ -131,12 +132,12 @@ export default function ReceiptHistoryScreen() {
           />
         ))}
       </ScrollView>
-      <View className="mx-4 rounded-card bg-primary px-5 py-3">
+      <HeroCard className="mx-4 px-5 py-3">
         <Text font="semibold" tone="inverse" className="text-[15px]">
           {t('history.receipts.summary', { count: verifiedList.length })}
         </Text>
         <MoneyText value={total} tone="inverse" className="text-[32px]" numberOfLines={1} />
-      </View>
+      </HeroCard>
       <View className="flex-row gap-2 px-4" accessibilityRole="radiogroup">
         <Pill
           label={t('history.receipts.all', { count: verifiedList.length + failedList.length })}
@@ -169,25 +170,27 @@ export default function ReceiptHistoryScreen() {
   );
 
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-background">
-      <ScreenHeader title={t('transactions.title')} onBack={() => router.navigate('/home')} />
-      <FlatList
-        data={entries}
-        keyExtractor={(entry) => `${entry.kind}-${entry.check.id}`}
-        ListHeaderComponent={header}
-        contentContainerStyle={{ paddingBottom: 16 }}
-        ItemSeparatorComponent={() => <View className="h-2" />}
-        renderItem={({ item }) => (
-          <View className="px-4">
-            {item.kind === 'verified' ? (
-              <VerifiedRow check={item.check} showDate={showDate} />
-            ) : (
-              <FailedCheckRow check={item.check} showDate={showDate} />
-            )}
-          </View>
-        )}
-        ListEmptyComponent={empty}
-      />
-    </SafeAreaView>
+    <ScreenBg>
+      <SafeAreaView edges={['top']} className="flex-1">
+        <ScreenHeader title={t('transactions.title')} onBack={() => router.navigate('/home')} />
+        <FlatList
+          data={entries}
+          keyExtractor={(entry) => `${entry.kind}-${entry.check.id}`}
+          ListHeaderComponent={header}
+          contentContainerStyle={{ paddingBottom: 16 }}
+          ItemSeparatorComponent={() => <View className="h-2" />}
+          renderItem={({ item }) => (
+            <View className="px-4">
+              {item.kind === 'verified' ? (
+                <VerifiedRow check={item.check} showDate={showDate} />
+              ) : (
+                <FailedCheckRow check={item.check} showDate={showDate} />
+              )}
+            </View>
+          )}
+          ListEmptyComponent={empty}
+        />
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

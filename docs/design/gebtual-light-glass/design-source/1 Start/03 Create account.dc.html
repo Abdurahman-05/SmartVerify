@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Create account</title>
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F1F2}
+button,input{font-family:'DM Sans',sans-serif}
+input::placeholder{color:#6B6268}
+[data-theme=forest]{--p:#0D4A36;--pt:#0D6B47;--tint:#E6F2EC;--tile:#DDEFE6}
+[data-theme=ocean]{--p:#0B3D6B;--pt:#0B5CA8;--tint:#E5F0FA;--tile:#D6E7F7}
+[data-theme=royal]{--p:#3F2A7A;--pt:#5B3FB0;--tint:#EEEAF8;--tile:#E0D9F2}
+[data-theme=teal]{--p:#0B4F55;--pt:#0E7480;--tint:#E3F2F3;--tile:#D2EAEC}
+[data-theme=slate]{--p:#26323F;--pt:#3D5A80;--tint:#E8EDF2;--tile:#DAE3EC}
+[data-theme=rose]{--p:#9D174D;--pt:#BE185D;--tint:#FDF0F5;--tile:#FADCE8}
+[data-theme=berry]{--p:#6B1F5E;--pt:#8E2B7C;--tint:#F7ECF5;--tile:#EFD8EB}
+.scr{width:390px;height:844px;box-sizing:border-box;position:relative;overflow:hidden;color:#1E1A1C;font-family:'DM Sans',sans-serif;background:radial-gradient(circle at 6% 4%,var(--tile) 0%,rgba(255,255,255,0) 46%),radial-gradient(circle at 100% 34%,#FFE7AE 0%,rgba(255,231,174,0) 36%),radial-gradient(circle at 22% 100%,var(--tile) 0%,rgba(255,255,255,0) 50%),var(--tint)}
+.g{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.95);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 1px 0 #fff,0 10px 26px rgba(30,20,25,.08);border-radius:20px}
+.h1{margin:0;font-family:Sora,sans-serif;font-size:24px;font-weight:700;line-height:1.2}
+.sub{font-size:14px;color:#5E5559}
+.lk{color:var(--pt);font-size:15px;font-weight:700;text-decoration:none}
+.ib{width:44px;height:44px;border-radius:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;color:#1E1A1C}
+.btn{width:100%;height:58px;border:0;border-radius:16px;background:var(--p);color:#fff;font-size:17px;font-weight:700;cursor:pointer;box-shadow:0 10px 22px rgba(30,20,25,.18)}
+.fl{display:block;font-size:14px;font-weight:700;margin-bottom:6px}
+.fld{height:54px;border-radius:16px;display:flex;align-items:center;gap:10px;padding:0 14px}
+.fld input{flex:1;height:48px;border:0;background:transparent;font-size:17px;color:#1E1A1C;outline:none;padding:0;min-width:0}
+</style>
+</helmet>
+<div class="scr" data-theme="{{theme}}">
+<div style="display:flex;flex-direction:column;gap:14px;padding:16px 20px 24px;height:100%;box-sizing:border-box">
+
+<div style="display:flex;align-items:center;gap:10px">
+<button class="g ib" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+<div style="flex:1"><h1 class="h1">Create account</h1><div class="sub">Step 1 of 2</div></div>
+</div>
+<div style="display:flex;gap:6px"><span style="flex:1;height:6px;border-radius:3px;background:var(--p)"></span><span style="flex:1;height:6px;border-radius:3px;background:rgba(0,0,0,.1)"></span></div>
+
+<section class="g" style="padding:18px 16px;display:flex;flex-direction:column;gap:14px">
+<div><label class="fl" for="fn">Full name</label><div class="g fld"><input id="fn" placeholder="Your full name"></div></div>
+<div><label class="fl" for="bn">Business name</label><div class="g fld"><input id="bn" placeholder="e.g. Bole Fresh Mart PLC"></div></div>
+<div><label class="fl" for="ph">Phone number</label><div class="g fld"><span style="font-size:17px;font-weight:700;color:#5E5559">+251</span><span style="width:1px;height:24px;background:rgba(0,0,0,.12)"></span><input id="ph" placeholder="9XX XXX XXX" inputmode="tel"></div></div>
+<div><label class="fl" for="pn">PIN (4 digits)</label><div class="g fld"><input id="pn" type="password" placeholder="Choose 4 digits" inputmode="numeric"></div></div>
+<label style="display:flex;align-items:center;gap:10px;font-size:15px;min-height:44px"><input type="checkbox" style="width:22px;height:22px;accent-color:var(--p)">I agree to the&#160;<a class="lk" href="#">Terms &amp; Privacy</a></label>
+</section>
+
+<div style="flex-grow:1"></div>
+<button class="btn">Continue</button>
+<div style="text-align:center;font-size:15px;color:#5E5559">Already have an account? <a class="lk" href="#">Sign in</a></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["forest","ocean","royal","teal","slate","rose","berry"],"default":"rose"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return { theme: this.props.theme ?? 'rose' }; }
+}
+</script>
+</body>
+</html>

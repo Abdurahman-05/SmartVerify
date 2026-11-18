@@ -24,11 +24,14 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
     >
       <Pressable
         className="flex-1"
-        style={{ backgroundColor: 'rgba(20,32,27,0.62)' }}
+        style={{ backgroundColor: 'rgba(30,26,28,0.45)' }}
         onPress={onClose}
         accessibilityLabel={t('verify.scan.close')}
       />
-      <SafeAreaView edges={['bottom']} className="rounded-t-[28px] bg-surface">
+      <SafeAreaView
+        edges={['bottom']}
+        className="rounded-t-[28px] border border-white bg-[#FBF7F9]"
+      >
         <View className="gap-3.5 px-4 pb-4 pt-6">{children}</View>
       </SafeAreaView>
     </Modal>

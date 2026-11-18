@@ -1,0 +1,382 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-14T10:40:00Z"
+  },
+  "title": "Gebtual light glass redesign",
+  "launch": {
+    "view": "canvas",
+    "page": "owner"
+  },
+  "pages": [
+    {
+      "id": "start",
+      "name": "1 Start"
+    },
+    {
+      "id": "owner",
+      "name": "2 Owner & manager"
+    },
+    {
+      "id": "verify",
+      "name": "3 Bills & verify"
+    },
+    {
+      "id": "waiter",
+      "name": "4 Waiter"
+    },
+    {
+      "id": "chef",
+      "name": "5 Chef"
+    },
+    {
+      "id": "records",
+      "name": "6 History & alerts"
+    },
+    {
+      "id": "settings",
+      "name": "7 Profile & settings"
+    }
+  ],
+  "boards": {
+    "1 Start/01 Splash.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "start",
+      "title": "Splash"
+    },
+    "1 Start/02 Sign in.dc.html": {
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "start",
+      "title": "Sign in"
+    },
+    "1 Start/03 Create account.dc.html": {
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "start",
+      "title": "Create account"
+    },
+    "1 Start/04 Choose color theme.dc.html": {
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "start",
+      "title": "Choose color theme",
+      "is_interactive": true
+    },
+    "1 Start/05 Choose plan.dc.html": {
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "start",
+      "title": "Choose plan"
+    },
+    "2 Owner & manager/01 Home (owner).dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "owner",
+      "title": "Home (owner)"
+    },
+    "2 Owner & manager/02 Overview.dc.html": {
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "owner",
+      "title": "Overview"
+    },
+    "2 Owner & manager/03 Money flow.dc.html": {
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "owner",
+      "title": "Money flow"
+    },
+    "2 Owner & manager/04 Add money paid out.dc.html": {
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "owner",
+      "title": "Add money paid out"
+    },
+    "2 Owner & manager/05 Buy list.dc.html": {
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "owner",
+      "title": "Buy list"
+    },
+    "2 Owner & manager/06 Tips by waiter.dc.html": {
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "owner",
+      "title": "Tips by waiter"
+    },
+    "2 Owner & manager/07 Reports.dc.html": {
+      "x": 2820,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "owner",
+      "title": "Reports"
+    },
+    "3 Bills & verify/01 Open bills.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "verify",
+      "title": "Open bills"
+    },
+    "3 Bills & verify/02 Table bill.dc.html": {
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "verify",
+      "title": "Table bill"
+    },
+    "3 Bills & verify/03 Verify payment (bill).dc.html": {
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "verify",
+      "title": "Verify payment (bill)"
+    },
+    "3 Bills & verify/04 Check payment 1 bank.dc.html": {
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "verify",
+      "title": "Check payment 1: bank"
+    },
+    "3 Bills & verify/05 Check payment 2 receipt.dc.html": {
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "verify",
+      "title": "Check payment 2: receipt"
+    },
+    "3 Bills & verify/06 Checking payment.dc.html": {
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "verify",
+      "title": "Checking payment"
+    },
+    "3 Bills & verify/07 Result verified.dc.html": {
+      "x": 2820,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "verify",
+      "title": "Result: verified"
+    },
+    "3 Bills & verify/08 Result not matching.dc.html": {
+      "x": 3290,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "verify",
+      "title": "Result: not matching"
+    },
+    "3 Bills & verify/09 Cash payment.dc.html": {
+      "x": 3760,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "verify",
+      "title": "Cash payment"
+    },
+    "4 Waiter/01 New order.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "waiter",
+      "title": "New order"
+    },
+    "4 Waiter/02 Order sent.dc.html": {
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "waiter",
+      "title": "Order sent"
+    },
+    "4 Waiter/03 Activity.dc.html": {
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "waiter",
+      "title": "Activity"
+    },
+    "4 Waiter/04 My tips.dc.html": {
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "waiter",
+      "title": "My tips"
+    },
+    "5 Chef/01 Kitchen.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "chef",
+      "title": "Kitchen"
+    },
+    "5 Chef/02 Kitchen order.dc.html": {
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "chef",
+      "title": "Kitchen order"
+    },
+    "5 Chef/03 Finished items.dc.html": {
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "chef",
+      "title": "Finished items"
+    },
+    "6 History & alerts/01 Transactions.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "records",
+      "title": "Transactions"
+    },
+    "6 History & alerts/02 Transaction details.dc.html": {
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "records",
+      "title": "Transaction details"
+    },
+    "6 History & alerts/03 Alerts.dc.html": {
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "records",
+      "title": "Alerts"
+    },
+    "7 Profile & settings/01 Profile.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "settings",
+      "title": "Profile"
+    },
+    "7 Profile & settings/02 Bank accounts.dc.html": {
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "settings",
+      "title": "Bank accounts"
+    },
+    "7 Profile & settings/03 Subscription.dc.html": {
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "settings",
+      "title": "Subscription"
+    },
+    "7 Profile & settings/04 Staff.dc.html": {
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "settings",
+      "title": "Staff"
+    },
+    "7 Profile & settings/05 Menu.dc.html": {
+      "x": 1880,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "settings",
+      "title": "Menu"
+    },
+    "7 Profile & settings/06 Tables.dc.html": {
+      "x": 2350,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "page": "settings",
+      "title": "Tables"
+    }
+  },
+  "order": [
+    "Splash.dc.html",
+    "SignIn.dc.html",
+    "CreateAccount.dc.html",
+    "FirstTheme.dc.html",
+    "ChoosePlan.dc.html",
+    "Main.dc.html",
+    "Overview.dc.html",
+    "MoneyFlow.dc.html",
+    "Expenses.dc.html",
+    "BuyList.dc.html",
+    "TipsAdmin.dc.html",
+    "Reports.dc.html",
+    "OpenBills.dc.html",
+    "TableBill.dc.html",
+    "VerifyRestaurant.dc.html",
+    "PickBank.dc.html",
+    "ReceiptGuide.dc.html",
+    "Checking.dc.html",
+    "ResultOk.dc.html",
+    "ResultBad.dc.html",
+    "CashPayment.dc.html",
+    "NewOrder.dc.html",
+    "OrderSent.dc.html",
+    "Activity.dc.html",
+    "MyTips.dc.html",
+    "Kitchen.dc.html",
+    "KitchenOrder.dc.html",
+    "Finished.dc.html",
+    "Transactions.dc.html",
+    "TransactionDetails.dc.html",
+    "Notifications.dc.html",
+    "Profile.dc.html",
+    "BankAccounts.dc.html",
+    "Subscription.dc.html",
+    "Staff.dc.html",
+    "MenuAdmin.dc.html",
+    "Tables.dc.html"
+  ],
+  "notes": {},
+  "designSystems": []
+}

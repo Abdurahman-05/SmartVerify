@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Open bills</title>
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F1F2}
+button{font-family:'DM Sans',sans-serif}
+[data-theme=forest]{--p:#0D4A36;--pt:#0D6B47;--tint:#E6F2EC;--tile:#DDEFE6}
+[data-theme=ocean]{--p:#0B3D6B;--pt:#0B5CA8;--tint:#E5F0FA;--tile:#D6E7F7}
+[data-theme=royal]{--p:#3F2A7A;--pt:#5B3FB0;--tint:#EEEAF8;--tile:#E0D9F2}
+[data-theme=teal]{--p:#0B4F55;--pt:#0E7480;--tint:#E3F2F3;--tile:#D2EAEC}
+[data-theme=slate]{--p:#26323F;--pt:#3D5A80;--tint:#E8EDF2;--tile:#DAE3EC}
+[data-theme=rose]{--p:#9D174D;--pt:#BE185D;--tint:#FDF0F5;--tile:#FADCE8}
+[data-theme=berry]{--p:#6B1F5E;--pt:#8E2B7C;--tint:#F7ECF5;--tile:#EFD8EB}
+.scr{width:390px;height:844px;box-sizing:border-box;position:relative;overflow:hidden;color:#1E1A1C;font-family:'DM Sans',sans-serif;background:radial-gradient(circle at 6% 4%,var(--tile) 0%,rgba(255,255,255,0) 46%),radial-gradient(circle at 100% 34%,#FFE7AE 0%,rgba(255,231,174,0) 36%),radial-gradient(circle at 22% 100%,var(--tile) 0%,rgba(255,255,255,0) 50%),var(--tint)}
+.in{display:flex;flex-direction:column;gap:12px;padding:16px 16px 0}
+.g{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.95);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 1px 0 #fff,0 10px 26px rgba(30,20,25,.08);border-radius:20px}
+.h1{margin:0;font-family:Sora,sans-serif;font-size:24px;font-weight:700;line-height:1.2}
+.sub{font-size:14px;color:#5E5559}
+.num{font-family:Sora,sans-serif;font-weight:700}
+.seg{display:flex;padding:4px;border-radius:16px;gap:4px}
+.seg button{flex:1;height:46px;border:0;border-radius:12px;background:transparent;font-size:15px;font-weight:700;cursor:pointer;color:#1E1A1C}
+.seg button.on{background:var(--p);color:#fff}
+.bill{border-radius:20px;padding:12px;cursor:pointer;text-align:left;color:#1E1A1C;display:flex;flex-direction:column;gap:6px;min-height:132px;width:100%}
+.tn{font-size:12px;font-weight:700;color:#5E5559;letter-spacing:.06em}
+.tag{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:13px;font-size:13px;font-weight:700;white-space:nowrap;align-self:flex-start}
+.nav{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);padding:8px;border-radius:40px;display:flex;align-items:center;gap:10px}
+.nb{width:52px;height:52px;border-radius:26px;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;position:relative;color:#1E1A1C}
+.nb.on{background:var(--p);color:#fff;box-shadow:0 8px 18px rgba(30,20,25,.25)}
+.bd{position:absolute;top:-2px;right:-2px;min-width:20px;height:20px;border-radius:10px;background:#D9342B;border:2px solid #fff;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:0 4px}
+</style>
+</helmet>
+<div class="scr" data-theme="{{theme}}">
+<div class="in">
+<div><h1 class="h1">Open bills</h1><div class="sub">Tables that have not paid yet</div></div>
+<div class="g seg"><button class="on">My tables · 3</button><button>All tables · 5</button></div>
+
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+<button class="g bill" style="border:2px solid var(--p)"><span class="tn">TABLE</span><span class="num" style="font-size:30px;line-height:1">12</span><span class="num" style="font-size:18px;color:var(--pt)">940 ETB</span><span class="sub">2 guests · ordered 11:05</span><span class="tag" style="background:#DDF3E8;color:#0B5A38"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Served</span></button>
+<button class="g bill"><span class="tn">TABLE</span><span class="num" style="font-size:30px;line-height:1">4</span><span class="num" style="font-size:18px;color:var(--pt)">1,320 ETB</span><span class="sub">4 guests · ordered 11:40</span><span class="tag" style="background:#FFF0C2;color:#6B4B00">In kitchen</span></button>
+<button class="g bill"><span class="tn">TAKEAWAY</span><span class="num" style="font-size:30px;line-height:1">#18</span><span class="num" style="font-size:18px;color:var(--pt)">410 ETB</span><span class="sub">Mulu T. · 11:52</span><span class="tag" style="background:#FFF0C2;color:#6B4B00">In kitchen</span></button>
+<button class="g bill"><span class="tn">DELIVERY</span><span class="num" style="font-size:30px;line-height:1">#7</span><span class="num" style="font-size:18px;color:var(--pt)">1,110 ETB</span><span class="sub">Bole · 12:01</span><span class="tag" style="background:#DDF3E8;color:#0B5A38"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Served</span></button>
+</div>
+
+<button class="g" style="height:52px;border-radius:16px;color:var(--pt);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></svg>Verify without an order</button>
+<div class="sub" style="text-align:center;padding:0 10px">Every order is saved here with its table, so the price is ready when the customer wants to pay.</div>
+</div>
+
+<nav class="g nav" aria-label="Main">
+<button class="nb" aria-label="Home"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7v9H4z"/></svg></button>
+<button class="nb on" aria-label="Verify" aria-current="page"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></button>
+<button class="nb" aria-label="History"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
+<button class="nb" aria-label="Alerts, 1 new"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/></svg><span class="bd">1</span></button>
+<button class="nb" aria-label="Profile"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></button>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["forest","ocean","royal","teal","slate","rose","berry"],"default":"rose"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return { theme: this.props.theme ?? 'rose' }; }
+}
+</script>
+</body>
+</html>

@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Keyboard, View } from 'react-native';
 import { z } from 'zod';
 
-import { Button } from '@/components/ui/Button';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { FormScreen } from '@/components/ui/FormScreen';
 import { Input } from '@/components/ui/Input';
@@ -35,6 +34,7 @@ import { useRoleLabel, useWorkersOnly } from './roleLabel';
 import { isStaffLimit, StaffLimitSheet } from './StaffLimitSheet';
 
 import { ActivePill, RolePill } from './StaffScreen';
+import { GlassCard, PrimaryButton, SecondaryButton } from '@/ui/glass';
 
 const STAFF_PIN_DIGITS = 4;
 
@@ -233,7 +233,7 @@ function StaffForm({ member }: { member: StaffMember }) {
           </View>
 
           {role === 'waiter' && !workersOnly ? (
-            <View className="mx-4 mt-3 rounded-[20px] border-[1.5px] border-border bg-surface px-4 py-0.5">
+            <GlassCard className="mx-4 mt-3 px-4 py-0.5">
               <Text font="bold" tone="muted" className="pt-2.5 text-[15px]">
                 {t('staff.permissions')}
               </Text>
@@ -266,7 +266,7 @@ function StaffForm({ member }: { member: StaffMember }) {
                   />
                 )}
               />
-            </View>
+            </GlassCard>
           ) : null}
 
           <View className="gap-2.5 px-4 pt-4">
@@ -281,7 +281,7 @@ function StaffForm({ member }: { member: StaffMember }) {
                 </Text>
               </View>
             ) : null}
-            <Button
+            <PrimaryButton
               label={t('common.save')}
               icon={Save}
               disabled={save.isPending}
@@ -292,7 +292,7 @@ function StaffForm({ member }: { member: StaffMember }) {
             />
           </View>
 
-          <View className="mx-4 mt-5 gap-2.5 rounded-[20px] border-[1.5px] border-border bg-surface p-4">
+          <GlassCard className="mx-4 mt-5 gap-2.5 p-4">
             <Text font="bold" className="text-[17px]">
               {t('staff.resetTitle')}
             </Text>
@@ -329,10 +329,9 @@ function StaffForm({ member }: { member: StaffMember }) {
             />
             <View className="flex-row gap-2">
               <View className="flex-1">
-                <Button
+                <SecondaryButton
                   label={t('staff.generatePin')}
                   icon={Shuffle}
-                  variant="outline"
                   size="md"
                   onPress={() => {
                     setResetDone(null);
@@ -342,7 +341,7 @@ function StaffForm({ member }: { member: StaffMember }) {
                 />
               </View>
               <View className="flex-1">
-                <Button
+                <PrimaryButton
                   label={t('staff.resetAction')}
                   icon={KeyRound}
                   size="md"
@@ -351,16 +350,21 @@ function StaffForm({ member }: { member: StaffMember }) {
                 />
               </View>
             </View>
-          </View>
+          </GlassCard>
 
           <View className="px-4 pb-6 pt-5">
-            <Button
-              label={t(member.active ? 'staff.deactivate' : 'staff.activate')}
-              icon={Power}
-              variant={member.active ? 'outline' : 'primary'}
-              disabled={toggle.isPending}
-              onPress={confirmToggle}
-            />
+            {/* Style only: deactivating is the quieter, second-style action. */}
+            {(() => {
+              const ToggleButton = member.active ? SecondaryButton : PrimaryButton;
+              return (
+                <ToggleButton
+                  label={t(member.active ? 'staff.deactivate' : 'staff.activate')}
+                  icon={Power}
+                  disabled={toggle.isPending}
+                  onPress={confirmToggle}
+                />
+              );
+            })()}
           </View>
         </>
       )}

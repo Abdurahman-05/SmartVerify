@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
-import { Button } from '@/components/ui/Button';
 import { Text } from '@/components/ui/Text';
 import { getBusinessProfile, updateBusinessProfile } from '@/lib/business';
 import { errorMessageKey } from '@/lib/errors';
@@ -12,6 +11,7 @@ import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
 import { detectLocation } from './detectLocation';
+import { GlassCard, PrimaryButton, SecondaryButton } from '@/ui/glass';
 
 /** "Later" hides the card until the app is opened again. */
 let skippedThisRun = false;
@@ -54,7 +54,7 @@ export function LocationPrompt() {
   if (!isOwner || hidden || !profile.data || profile.data.latitude !== null) return null;
 
   return (
-    <View className="mx-4 mb-3 gap-3 rounded-card border border-border bg-surface p-4">
+    <GlassCard className="mx-4 mb-3 gap-3 p-4">
       <View className="flex-row items-center gap-3">
         <MapPin size={24} color={colors.primary} strokeWidth={2.2} />
         <Text font="semibold" className="flex-1 text-[15px]">
@@ -68,9 +68,8 @@ export function LocationPrompt() {
       ) : null}
       <View className="flex-row gap-2">
         <View className="flex-1">
-          <Button
+          <SecondaryButton
             label={t('business.locationPrompt.later')}
-            variant="outline"
             size="md"
             onPress={() => {
               skippedThisRun = true;
@@ -79,7 +78,7 @@ export function LocationPrompt() {
           />
         </View>
         <View className="flex-1">
-          <Button
+          <PrimaryButton
             label={
               save.isPending
                 ? t('business.locationPrompt.detecting')
@@ -92,6 +91,6 @@ export function LocationPrompt() {
           />
         </View>
       </View>
-    </View>
+    </GlassCard>
   );
 }

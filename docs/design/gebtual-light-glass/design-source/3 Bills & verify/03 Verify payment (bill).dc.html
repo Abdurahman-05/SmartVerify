@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Verify payment</title>
+<script src="../support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'DM Sans',sans-serif;background:#F4F1F2}
+button,input{font-family:'DM Sans',sans-serif}
+[data-theme=forest]{--p:#0D4A36;--pt:#0D6B47;--tint:#E6F2EC;--tile:#DDEFE6}
+[data-theme=ocean]{--p:#0B3D6B;--pt:#0B5CA8;--tint:#E5F0FA;--tile:#D6E7F7}
+[data-theme=royal]{--p:#3F2A7A;--pt:#5B3FB0;--tint:#EEEAF8;--tile:#E0D9F2}
+[data-theme=teal]{--p:#0B4F55;--pt:#0E7480;--tint:#E3F2F3;--tile:#D2EAEC}
+[data-theme=slate]{--p:#26323F;--pt:#3D5A80;--tint:#E8EDF2;--tile:#DAE3EC}
+[data-theme=rose]{--p:#9D174D;--pt:#BE185D;--tint:#FDF0F5;--tile:#FADCE8}
+[data-theme=berry]{--p:#6B1F5E;--pt:#8E2B7C;--tint:#F7ECF5;--tile:#EFD8EB}
+.scr{width:390px;height:844px;box-sizing:border-box;position:relative;overflow:hidden;color:#1E1A1C;font-family:'DM Sans',sans-serif;background:radial-gradient(circle at 6% 4%,var(--tile) 0%,rgba(255,255,255,0) 46%),radial-gradient(circle at 100% 34%,#FFE7AE 0%,rgba(255,231,174,0) 36%),radial-gradient(circle at 22% 100%,var(--tile) 0%,rgba(255,255,255,0) 50%),var(--tint)}
+.in{display:flex;flex-direction:column;gap:12px;padding:16px;height:100%;box-sizing:border-box}
+.g{background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.95);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);box-shadow:inset 0 1px 0 #fff,0 10px 26px rgba(30,20,25,.08);border-radius:20px}
+.h1{margin:0;font-family:Sora,sans-serif;font-size:24px;font-weight:700;line-height:1.2}
+.sub{font-size:14px;color:#5E5559}
+.h2{margin:0 0 8px;font-size:15px;font-weight:700}
+.num{font-family:Sora,sans-serif;font-weight:700}
+.ib{width:44px;height:44px;border-radius:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;color:#1E1A1C}
+.seg{display:flex;padding:4px;border-radius:16px;gap:4px}
+.seg button{flex:1;height:48px;border:0;border-radius:12px;background:transparent;font-size:16px;font-weight:700;cursor:pointer;color:#1E1A1C}
+.seg button.on{background:var(--p);color:#fff}
+.fld{height:60px;border-radius:16px;display:flex;align-items:center;gap:10px;padding:0 14px}
+.fld input{flex:1;height:54px;border:0;background:transparent;font-family:Sora,sans-serif;font-size:24px;font-weight:700;color:#1E1A1C;outline:none;padding:0;min-width:0}
+.ln{display:flex;align-items:center;padding:8px 0;font-size:15px}
+.btn{width:100%;height:58px;border:0;border-radius:16px;background:var(--p);color:#fff;font-size:17px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 10px 22px rgba(30,20,25,.18)}
+</style>
+</helmet>
+<div class="scr" data-theme="{{theme}}">
+<div class="in">
+<div style="display:flex;align-items:center;gap:10px">
+<button class="g ib" aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+<div><h1 class="h1">Verify payment</h1><div class="sub">Table 12</div></div>
+</div>
+
+<section class="g" style="padding:14px 16px"><h2 class="h2">1. How is the customer paying?</h2><div class="g seg"><button>Bank only</button><button class="on">Cash + Bank</button></div></section>
+
+<section class="g" style="padding:14px 16px;display:flex;align-items:center;gap:10px">
+<div style="flex:1"><div style="font-size:15px;font-weight:700">2. Total bill</div><div class="sub">From the order · locked</div></div>
+<div class="num" style="font-size:22px">940 <span style="font-size:14px">ETB</span></div>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5E5559" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+</section>
+
+<section class="g" style="padding:14px 16px"><label class="h2" for="cg" style="display:block">3. Cash the customer gave</label><div class="g fld" style="border:2px solid var(--p)"><input id="cg" value="400" inputmode="numeric"><span style="font-weight:700;color:#5E5559">ETB</span></div></section>
+
+<section class="g" style="padding:8px 16px">
+<div class="ln"><span style="flex:1;color:#5E5559">Total bill</span><span class="num">940</span></div>
+<div class="ln"><span style="flex:1;color:#5E5559">Cash received</span><span class="num">− 400</span></div>
+<div class="ln" style="border-top:1px dashed rgba(0,0,0,.15);padding-top:10px"><span style="flex:1;font-weight:700">Customer must pay by bank</span><span class="num" style="font-size:22px;color:var(--p)">540</span></div>
+</section>
+
+<button class="g" style="height:52px;border-radius:16px;cursor:pointer;display:flex;align-items:center;gap:10px;padding:0 14px;color:#1E1A1C;font-size:15px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg><span style="flex:1;text-align:left">Receiving account <b>CBE ••••4521</b></span><span style="color:var(--pt);font-weight:700">Change</span></button>
+
+<div style="flex-grow:1"></div>
+<button class="btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>Check payment · 540 ETB</button>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["forest","ocean","royal","teal","slate","rose","berry"],"default":"rose"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() { return { theme: this.props.theme ?? 'rose' }; }
+}
+</script>
+</body>
+</html>

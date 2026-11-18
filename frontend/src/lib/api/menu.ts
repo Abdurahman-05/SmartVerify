@@ -18,6 +18,8 @@ export type MenuAdminItem = BaseItem & {
   categoryId?: string;
   categoryName?: string;
   categoryNameAm?: string | null;
+  /** The starter-pack item it came from (its photo); null when added by hand. */
+  catalogKey?: string | null;
 };
 export type MenuItemInput = BaseInput & { categoryId?: string };
 export type MenuItemChanges = BaseChanges & { categoryId?: string };
