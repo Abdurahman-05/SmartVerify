@@ -8,18 +8,17 @@ import { Alert, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BankBadge } from '@/components/ui/BankBadge';
-import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { MoneyText } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { errorMessageKey } from '@/lib/errors';
-import { readReceipt } from '@/lib/mock/receipt';
 import { readReference, receiptLinkFromQr } from '@/lib/verification';
 
 import { findPayerBank, onReceipt, type PayerBank } from './payerBanks';
 import { checkingRoute, useReceiptFlow } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
+import { GlassCard, PrimaryButton, ScreenBg, SecondaryButton } from '@/ui/glass';
 
 const CORNER = 34;
 
@@ -182,63 +181,56 @@ export default function ReadReceiptScreen() {
     }
   };
 
-  // Other banks: FAKE reading for now.
+  // Other banks have no reader yet: nothing is made up; the person types the receipt's details.
   const read = () => {
-    setReading(true);
-    readReceipt(bank.fields)
-      .then((found) => {
-        setFound(found);
-        router.replace('/verify-bank/found');
-      })
-      .catch(failed);
+    setFound({});
+    router.replace('/verify-bank/found');
   };
-  // CBE and telebirr pictures are read by the server; other banks keep the fake reading.
+  // These banks' pictures are read by the server.
   const cbe = ['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR'].includes(bank.code);
 
   const names = onReceipt(bank).map((f) => t(`verifyBank.short.${f.key}`));
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader
-        title={t('verifyBank.readReceipt')}
-        subtitle={t('verifyBank.stepOf', { step: 2, name: t('verifyBank.steps.receipt') })}
-        onBack={goBack}
-      />
-
-      <View
-        className="mx-4 mt-1 flex-row items-center gap-2.5 rounded-[18px] border-[1.5px] border-border bg-surface px-3 py-2"
-        accessible
-      >
-        <BankBadge code={bank.code} size={40} />
-        <Text font="bold" className="flex-1 text-[17px]" numberOfLines={1}>
-          {bank.shortName}
-        </Text>
-        <MoneyText value={amount} className="text-xl" />
-      </View>
-
-      <View className="flex-1 items-center justify-center gap-4 px-6">
-        <SampleReceipt bank={bank} />
-        <Text font="bold" className="text-center text-[17px]">
-          {t('verifyBank.read.keepInFrame', {
-            things: names.join(` ${t('verifyBank.and')} `),
-          })}
-        </Text>
-      </View>
-
-      <View className="gap-2.5 px-4 pb-6 pt-2">
-        <Button
-          label={t('verifyBank.read.photo')}
-          icon={Camera}
-          onPress={cbe ? () => void readCbe('camera') : read}
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <ScreenHeader
+          title={t('verifyBank.readReceipt')}
+          subtitle={t('verifyBank.stepOf', { step: 2, name: t('verifyBank.steps.receipt') })}
+          onBack={goBack}
         />
-        <Button
-          label={t('verifyBank.read.screenshot')}
-          icon={ImageIcon}
-          variant="outline"
-          size="md"
-          onPress={cbe ? () => void readCbe('library') : read}
-        />
-      </View>
-    </SafeAreaView>
+
+        <GlassCard className="mx-4 mt-1 flex-row items-center gap-2.5 px-3 py-2" accessible>
+          <BankBadge code={bank.code} size={40} />
+          <Text font="bold" className="flex-1 text-[17px]" numberOfLines={1}>
+            {bank.shortName}
+          </Text>
+          <MoneyText value={amount} className="text-xl" />
+        </GlassCard>
+
+        <View className="flex-1 items-center justify-center gap-4 px-6">
+          <SampleReceipt bank={bank} />
+          <Text font="bold" className="text-center text-[17px]">
+            {t('verifyBank.read.keepInFrame', {
+              things: names.join(` ${t('verifyBank.and')} `),
+            })}
+          </Text>
+        </View>
+
+        <View className="gap-2.5 px-4 pb-6 pt-2">
+          <PrimaryButton
+            label={t('verifyBank.read.photo')}
+            icon={Camera}
+            onPress={cbe ? () => void readCbe('camera') : read}
+          />
+          <SecondaryButton
+            label={t('verifyBank.read.screenshot')}
+            icon={ImageIcon}
+            size="md"
+            onPress={cbe ? () => void readCbe('library') : read}
+          />
+        </View>
+      </SafeAreaView>
+    </ScreenBg>
   );
 }
