@@ -1,22 +1,16 @@
-import { Image } from 'expo-image';
 import { View } from 'react-native';
 
-const mark = require('../../../assets/images/logo-mark.png') as number;
+import { GebtualLogo } from './GebtualLogo';
 
 interface BrandMarkProps {
   size?: number;
 }
 
-/** The ገ logo with its yellow check, on a tile in the chosen theme colour. */
+/** The Gebtual logo in the theme colours, no tile. `size` is the logo height-ish box. */
 export function BrandMark({ size = 44 }: BrandMarkProps) {
   return (
-    <View
-      className="overflow-hidden bg-primary"
-      style={{ width: size, height: size, borderRadius: size * 0.3 }}
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-    >
-      <Image source={mark} style={{ width: size, height: size }} contentFit="cover" />
+    <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <GebtualLogo width={Math.round(size * 1.4)} variant="theme" />
     </View>
   );
 }

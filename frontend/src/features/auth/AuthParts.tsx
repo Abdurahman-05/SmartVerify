@@ -1,10 +1,10 @@
 import { BlurView } from 'expo-blur';
-import { Image } from 'expo-image';
 import { Lock } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
+import { GebtualLogo } from '@/components/ui/GebtualLogo';
 import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
 import { shade } from '@/ui/glass';
@@ -27,9 +27,7 @@ export function useAuthColors() {
   };
 }
 
-const glyph = require('../../../assets/images/auth/logo-glyph.png') as number;
-
-/** 84 px theme gradient tile with the ገ glyph (the glyph image includes the ✓ badge). */
+/** 84 px theme tile with the white Gebtual logo. */
 export function AuthLogo() {
   const c = useAuthColors();
   return (
@@ -42,7 +40,7 @@ export function AuthLogo() {
       ]}
     >
       <View style={[styles.logo, { backgroundColor: c.deep }]}>
-        <Image source={glyph} style={{ width: 70, height: 70 }} contentFit="contain" />
+        <GebtualLogo width={62} variant="onDark" />
       </View>
     </View>
   );

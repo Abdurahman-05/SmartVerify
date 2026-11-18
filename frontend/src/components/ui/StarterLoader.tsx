@@ -1,4 +1,3 @@
-import { Image } from 'expo-image';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import Animated, {
@@ -12,11 +11,11 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { GebtualLogo } from './GebtualLogo';
 import { alpha, useGlass } from './glassTokens';
 import { Text } from './Text';
 
 // The ገ with its ✓ badge (the image includes the badge).
-const glyph = require('../../../assets/images/auth/logo-glyph.png') as number;
 
 // Colours follow the chosen theme (orange by default).
 const TEXT = '#1E1A1C';
@@ -75,7 +74,7 @@ function LogoLoader({ still }: { still: boolean }) {
             { backgroundColor: g.primaryDeep },
           ]}
         >
-          <Image source={glyph} style={{ width: 82, height: 82 }} contentFit="contain" />
+          <GebtualLogo width={62} variant="onDark" />
         </View>
       </Animated.View>
     </View>
