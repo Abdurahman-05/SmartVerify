@@ -1,6 +1,6 @@
 # One address for everything, with automatic HTTPS (Let's Encrypt, renewed by Caddy):
 #   /api/…, /docs → the API      everything else → the admin website (static files)
-{$SITE_ADDRESS} {
+{$SITE_ADDRESS}, api.gebtual.com.et {
 	encode gzip
 
 	# Receipt pictures (base64) are up to ~8 MB.
