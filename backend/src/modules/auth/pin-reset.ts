@@ -1,11 +1,12 @@
-import { createHash, randomInt } from 'node:crypto';
+import { createHash, randomInt, timingSafeEqual } from 'node:crypto';
 
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 
 import { emailProvider, sendEmail } from '../../services/email.js';
+import { hashPin } from '../../services/pin-hasher.js';
 import { AppError } from '../../shared/errors/app-error.js';
 
-import { CODE_TTL_MS, MAX_CODES_PER_HOUR, RESEND_AFTER_MS } from './email-code.js';
+import { CODE_TTL_MS, MAX_CODES_PER_HOUR, MAX_TRIES, RESEND_AFTER_MS } from './email-code.js';
 
 /**
  * Reset codes live in the EmailCode table next to sign-up codes, hashed with their own prefix so
@@ -91,6 +92,68 @@ export function createPinReset(app: FastifyInstance) {
         throw new AppError('EMAIL_NOT_SENT');
       }
       return answer;
+    },
+
+    /**
+     * Sets a new PIN with the newest unused code for the email. Expired, used-up (5 wrong tries)
+     * or missing codes are WRONG_CODE; a right code is spent at once and every session ends.
+     * newPin must have the role's length (owner 6, manager 4), checked only after the code is
+     * right and without spending it.
+     */
+    async reset(email: string, code: string, newPin: string) {
+      const row = await prisma.emailCode.findFirst({
+        where: { email, usedAt: null, verifiedAt: null },
+        orderBy: { createdAt: 'desc' },
+      });
+      if (!row || row.expiresAt.getTime() <= Date.now()) {
+        throw new AppError('WRONG_CODE', { reason: 'expired' });
+      }
+      if (row.attempts >= MAX_TRIES) {
+        throw new AppError('WRONG_CODE', { reason: 'tooManyTries', triesLeft: 0 });
+      }
+      const expected = resetCodeHash(email, code);
+      const right =
+        row.codeHash.length === expected.length &&
+        timingSafeEqual(Buffer.from(row.codeHash), Buffer.from(expected));
+      if (!right) {
+        const updated = await prisma.emailCode.update({
+          where: { id: row.id },
+          data: { attempts: { increment: 1 } },
+        });
+        const triesLeft = Math.max(MAX_TRIES - updated.attempts, 0);
+        throw new AppError('WRONG_CODE', {
+          reason: triesLeft === 0 ? 'tooManyTries' : 'wrong',
+          triesLeft,
+        });
+      }
+
+      const user = await prisma.user.findUnique({
+        where: { email },
+        select: { id: true, membership: { select: { role: true, active: true } } },
+      });
+      const role = user?.membership?.active ? user.membership.role : null;
+      if (!user || (role !== 'owner' && role !== 'manager')) {
+        throw new AppError('WRONG_CODE', { reason: 'expired' });
+      }
+      const length = role === 'owner' ? 6 : 4;
+      if (!new RegExp(`^\\d{${length}}$`).test(newPin)) {
+        throw new AppError('VALIDATION_ERROR', { reason: 'pinLength', length });
+      }
+
+      const pinHash = await hashPin(newPin);
+      await prisma.$transaction(async (tx) => {
+        // Spent once, even if two resets arrive together.
+        const claimed = await tx.emailCode.updateMany({
+          where: { id: row.id, usedAt: null },
+          data: { usedAt: new Date() },
+        });
+        if (claimed.count === 0) throw new AppError('WRONG_CODE', { reason: 'expired' });
+        await tx.user.update({ where: { id: user.id }, data: { pinHash, pinIsTemporary: false } });
+        await tx.session.updateMany({
+          where: { userId: user.id, revokedAt: null },
+          data: { revokedAt: new Date() },
+        });
+      });
     },
   };
 }

@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Mail } from 'lucide-react-native';
 import { Controller, useForm, useWatch } from 'react-hook-form';
@@ -24,6 +24,7 @@ import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
 import { belongsToOtherApp, isNormalApp } from '@/lib/variant';
 import { signInWithEmail } from '@/services/authService';
 import { homeRouteFor, useSession } from '@/store/session';
+import { colors } from '@/theme/tokens';
 import { PrimaryButton } from '@/ui/glass';
 
 import {
@@ -47,6 +48,7 @@ export default function SignInScreen() {
   const auth = useAuthColors();
   const { t } = useTranslation();
   const router = useRouter();
+  const { notice } = useLocalSearchParams<{ notice?: string }>();
   const startSession = useSession((s) => s.signIn);
   const [showPin, setShowPin] = useState(false);
   const phoneFull = useFullFieldFeedback(PHONE_DIGITS);
@@ -106,6 +108,16 @@ export default function SignInScreen() {
           <AuthSubtitle text={t('auth.signInSubtitle')} />
 
           <AuthCard>
+            {notice === 'pinReset' ? (
+              <Text
+                font="semibold"
+                className="text-[15px]"
+                style={{ color: colors.successFg }}
+                accessibilityRole="alert"
+              >
+                {t('pin.reset.done')}
+              </Text>
+            ) : null}
             <Segmented
               options={[
                 { value: 'owner', label: t('auth.ownerTab') },

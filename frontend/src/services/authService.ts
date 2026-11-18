@@ -67,6 +67,40 @@ export async function requestPinReset(input: PinResetInput): Promise<void> {
   await api('/auth/forgot-pin', { method: 'POST', body: { email: input.value } });
 }
 
+/** New PIN has the wrong length for the account (owner 6, manager 4). */
+export class PinLengthError extends Error {
+  constructor(readonly length: number) {
+    super('PIN_LENGTH');
+  }
+}
+
+/**
+ * Sets a new PIN with the emailed reset code (POST /auth/reset-pin). Every session is signed
+ * out. Wrong, expired or used codes throw InvalidCodeError.
+ */
+export async function resetPin(email: string, code: string, newPin: string): Promise<void> {
+  if (USE_MOCK_AUTH) {
+    await wait();
+    if (code !== STUB_EMAIL_CODE) throw new InvalidCodeError();
+    return;
+  }
+  try {
+    await api('/auth/reset-pin', { method: 'POST', body: { email, code, newPin } });
+  } catch (error) {
+    if (error instanceof ApiError && error.code === 'WRONG_CODE') {
+      const reason = error.details?.reason;
+      throw new InvalidCodeError(
+        reason === 'expired' || reason === 'tooManyTries' ? reason : 'wrong'
+      );
+    }
+    if (error instanceof ApiError && error.details?.reason === 'pinLength') {
+      const length = error.details.length;
+      throw new PinLengthError(typeof length === 'number' ? length : 6);
+    }
+    throw error;
+  }
+}
+
 export interface EmailCodeSent {
   /** Seconds before another code can be asked for. */
   resendInSeconds: number;

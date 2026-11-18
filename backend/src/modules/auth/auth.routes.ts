@@ -182,6 +182,38 @@ export const publicAuthRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (request) => pinReset.send(request.body.email, request.log)
   );
+
+  app.post(
+    '/auth/reset-pin',
+    {
+      config: { rateLimit: { max: 20, timeWindow: '15 minutes' } },
+      schema: {
+        tags: ['auth'],
+        description:
+          'Forgot PIN, step 2: the code from the email and a new PIN (owner 6 digits, manager 4). ' +
+          'The code works once, for 10 minutes; five wrong tries end it (send a new one). On ' +
+          'success every session is signed out: sign in with the new PIN.',
+        body: z.object({
+          email: emailSchema,
+          code: z.string().regex(/^\d{6}$/),
+          newPin: z.string().regex(/^\d{4,6}$/),
+        }),
+        response: {
+          204: z.null(),
+          400: errorResponseSchema.describe('VALIDATION_ERROR (details.reason pinLength, length)'),
+          401: errorResponseSchema.describe(
+            'WRONG_CODE (details.reason wrong | expired | tooManyTries, details.triesLeft)'
+          ),
+          429: errorResponseSchema.describe('RATE_LIMITED'),
+        },
+      },
+    },
+    async (request, reply) => {
+      const { email, code, newPin } = request.body;
+      await pinReset.reset(email, code, newPin);
+      return reply.status(204).send(null);
+    }
+  );
 };
 
 /** Authenticated routes: sign-out, current session and PIN change. */

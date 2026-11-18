@@ -60,10 +60,17 @@ export default function ForgotPinScreen() {
     }
     setError(undefined);
     setSentTo(null);
-    const shown = byEmail ? value.trim().toLowerCase() : `+251 ${formatPhone(value)}`;
+    const email = value.trim().toLowerCase();
+    const shown = byEmail ? email : `+251 ${formatPhone(value)}`;
     reset.mutate(
-      { kind: byEmail ? 'owner' : 'staff', value: byEmail ? value.trim().toLowerCase() : value },
-      { onSuccess: () => setSentTo(shown) }
+      { kind: byEmail ? 'owner' : 'staff', value: byEmail ? email : value },
+      {
+        onSuccess: () => {
+          setSentTo(shown);
+          // Step 2: the code from the email and the new PIN.
+          if (byEmail) router.push({ pathname: '/reset-pin', params: { email } });
+        },
+      }
     );
   };
   const brand = useBrandColors();

@@ -1088,6 +1088,18 @@
       "send": "Send reset code",
       "sent": "Code sent to {{value}}"
     },
+    "reset": {
+      "title": "Reset PIN",
+      "subtitle": "Enter the code we emailed to {{email}}",
+      "code": "6-digit code",
+      "codeLength": "Enter the 6-digit code from the email.",
+      "pinHint": "Owner 6 digits, manager 4",
+      "wrong": "That code is not right. Try again.",
+      "expired": "This code has expired or was already used.",
+      "tooManyTries": "Too many wrong tries. This code no longer works.",
+      "sendNew": "Send a new code",
+      "done": "Your PIN was changed. Sign in with your new PIN."
+    },
     "forcedSubtitle": "Choose your own PIN to continue",
     "forcedNote": "Your PIN was set by your manager. Choose a new PIN that only you know. Enter the PIN you were given as the current PIN."
   },
