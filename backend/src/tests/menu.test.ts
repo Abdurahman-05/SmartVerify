@@ -58,6 +58,7 @@ describe('menu', () => {
       categoryName: 'Food',
       categoryNameAm: null,
       groupName: null,
+      catalogKey: null,
       active: false,
       sortOrder: 0,
     });
