@@ -833,7 +833,9 @@
   "help": {
     "title": "Help",
     "contactTitle": "Contact support",
-    "contactBody": "Our support team will help you with payments, bank accounts, and your plan. Contact details are coming soon."
+    "contactBody": "Our support team will help you with payments, bank accounts, and your plan.",
+    "call": "Call {{phone}}",
+    "telegram": "Message on Telegram"
   },
   "staff": {
     "title": "Staff",

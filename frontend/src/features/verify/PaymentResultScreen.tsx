@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { ResultBadge } from '@/components/ui/ResultBadge';
 import { Text } from '@/components/ui/Text';
 import { errorMessageKey } from '@/lib/errors';
+import { telegramSupport } from '@/lib/support';
 import { formatDateTime } from '@/lib/format';
 import { isNormalApp } from '@/lib/variant';
 import { keepTip } from '@/lib/verification';
@@ -19,28 +20,32 @@ import { colors } from '@/theme/tokens';
 
 import { useReceiptFlow } from './receiptFlow';
 import { useVerifyFlow, type VerificationResult } from './verifyFlow';
+import { GlassCard, SecondaryButton } from '@/ui/glass';
 
 interface Row {
   label: string;
   value: string;
 }
 
+/** Design `.r` rows in a glass card: muted label left, bold value right, hairlines between. */
 export function DetailsCard({ rows }: { rows: Row[] }) {
   return (
-    <View className="mt-8 rounded-[20px] border border-border bg-surface px-5 py-1">
+    <GlassCard className="mt-3 px-4 py-1.5">
       {rows.map((row, i) => (
         <View
           key={row.label}
           accessible
-          className={`flex-row items-center justify-between gap-4 py-4 ${i < rows.length - 1 ? 'border-b border-divider' : ''}`}
+          className={`flex-row items-center justify-between gap-2.5 py-[9px] ${i ? 'border-t border-black/[0.07]' : ''}`}
         >
-          <Text className="text-sm text-navInactive">{row.label}</Text>
-          <Text font="semibold" className="flex-1 text-right text-[15px]">
+          <Text tone="muted" className="text-[15px]">
+            {row.label}
+          </Text>
+          <Text font="bold" className="flex-1 text-right text-[15px]">
             {row.value}
           </Text>
         </View>
       ))}
-    </View>
+    </GlassCard>
   );
 }
 
@@ -139,9 +144,8 @@ function TipChoice({ reference, extraEtb }: { reference: string; extraEtb: numbe
             disabled={save.isPending}
             onPress={() => save.mutate(true)}
           />
-          <Button
+          <SecondaryButton
             label={t('verify.result.gaveBack')}
-            variant="secondary"
             size="md"
             disabled={save.isPending}
             onPress={() => save.mutate(false)}
@@ -226,12 +230,7 @@ function ResultView({ result }: { result: VerificationResult }) {
           {success ? (
             <>
               <Button label={t('verify.result.done')} variant="success" onPress={done} />
-              <Button
-                label={t('verify.result.share')}
-                variant="secondary"
-                size="md"
-                onPress={shareReceipt}
-              />
+              <SecondaryButton label={t('verify.result.share')} size="md" onPress={shareReceipt} />
             </>
           ) : (
             <>
@@ -244,12 +243,10 @@ function ResultView({ result }: { result: VerificationResult }) {
                   router.replace('/verify-bank');
                 }}
               />
-              <Button
+              <SecondaryButton
                 label={t('verify.result.contactSupport')}
-                variant="secondary"
                 size="md"
-                disabled
-                onPress={() => {}}
+                onPress={telegramSupport}
               />
             </>
           )}

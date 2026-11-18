@@ -8,7 +8,6 @@ import { Alert, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
-import { Button } from '@/components/ui/Button';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { NoConnection } from '@/components/ui/NoConnection';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
@@ -22,6 +21,7 @@ import { useSession } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 import { isNormalApp } from '@/lib/variant';
+import { GlassCard, HeroCard, PrimaryButton, ScreenBg, SecondaryButton } from '@/ui/glass';
 
 type Row = PaymentsReport['rows'][number];
 
@@ -59,11 +59,11 @@ function MethodCard({ row, onPress }: { row: Row; onPress: () => void }) {
   const Icon = methodIcon[row.method];
   const name = t(methodKey(row.method));
   return (
-    <Pressable
+    <GlassCard
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`${t('history.report.open', { method: name })}. ${formatMoney(row.totalEtb)}, ${t('history.report.payments', { count: row.count, share: row.share })}`}
-      className="rounded-[18px] border-[1.5px] border-border bg-surface px-3.5 py-3 active:bg-background"
+      className="px-3.5 py-3"
     >
       <View className="flex-row items-center gap-3">
         <View className="h-11 w-11 items-center justify-center rounded-[12px] bg-primaryTile">
@@ -88,7 +88,7 @@ function MethodCard({ row, onPress }: { row: Row; onPress: () => void }) {
       <View className="mt-2.5 h-2.5 overflow-hidden rounded-full bg-neutralBg">
         <View className="h-full bg-primary" style={{ width: `${row.share}%` }} />
       </View>
-    </Pressable>
+    </GlassCard>
   );
 }
 
@@ -157,97 +157,97 @@ export default function ReportScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScreenHeader title={t('history.report.title')} onBack={goBack} />
+    <ScreenBg>
+      <SafeAreaView className="flex-1">
+        <ScreenHeader title={t('history.report.title')} onBack={goBack} />
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="max-h-14 flex-grow-0"
-        contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 10 }}
-        accessibilityRole="radiogroup"
-      >
-        {periods.map((p) => (
-          <PeriodChip
-            key={p}
-            label={t(`period.${p}`)}
-            selected={period === p}
-            onPress={() => setPeriod(p)}
-          />
-        ))}
-        <PeriodChip label={t('period.custom')} selected={false} disabled onPress={() => {}} />
-      </ScrollView>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="max-h-14 flex-grow-0"
+          contentContainerStyle={{ gap: 8, paddingHorizontal: 16, paddingBottom: 10 }}
+          accessibilityRole="radiogroup"
+        >
+          {periods.map((p) => (
+            <PeriodChip
+              key={p}
+              label={t(`period.${p}`)}
+              selected={period === p}
+              onPress={() => setPeriod(p)}
+            />
+          ))}
+        </ScrollView>
 
-      {query.isPending ? (
-        <LoadingView />
-      ) : !report ? (
-        <Text font="semibold" className="px-6 pt-10 text-center text-lg">
-          {t(errorMessageKey(query.error))}
-        </Text>
-      ) : (
-        <>
-          <ScrollView
-            contentContainerStyle={{ paddingBottom: 12 }}
-            showsVerticalScrollIndicator={false}
-          >
-            <View className="mx-4 rounded-card bg-primary px-5 py-3.5">
-              <Text font="semibold" tone="inverse" className="text-[15px]">
-                {t('history.report.totalAll', { count: report.count })}
-              </Text>
-              <MoneyText
-                value={report.totalEtb}
-                tone="inverse"
-                className="text-[34px]"
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              />
-              {isNormalApp ? null : (
-                <Text font="semibold" tone="inverse" className="text-sm opacity-90">
-                  {t('history.report.tips', { amount: formatMoney(report.tipsEtb, false) })}
+        {query.isPending ? (
+          <LoadingView />
+        ) : !report ? (
+          <Text font="semibold" className="px-6 pt-10 text-center text-lg">
+            {t(errorMessageKey(query.error))}
+          </Text>
+        ) : (
+          <>
+            <ScrollView
+              contentContainerStyle={{ paddingBottom: 12 }}
+              showsVerticalScrollIndicator={false}
+            >
+              <HeroCard className="mx-4 px-5 py-3.5">
+                <Text font="semibold" tone="inverse" className="text-[15px]">
+                  {t('history.report.totalAll', { count: report.count })}
                 </Text>
-              )}
-            </View>
-
-            <Text font="heading" className="px-4 pb-2 pt-3.5 text-lg" accessibilityRole="header">
-              {t('history.report.byMethod')}
-            </Text>
-            <View className="gap-2 px-4">
-              {report.rows.map((row) => (
-                <MethodCard
-                  key={row.method}
-                  row={row}
-                  onPress={() =>
-                    router.navigate({
-                      pathname: '/transactions',
-                      params: { method: row.method, period },
-                    })
-                  }
+                <MoneyText
+                  value={report.totalEtb}
+                  tone="inverse"
+                  className="text-[34px]"
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
                 />
-              ))}
-            </View>
-          </ScrollView>
+                {isNormalApp ? null : (
+                  <Text font="semibold" tone="inverse" className="text-sm opacity-90">
+                    {t('history.report.tips', { amount: formatMoney(report.tipsEtb, false) })}
+                  </Text>
+                )}
+              </HeroCard>
 
-          <View className="flex-row gap-2.5 px-4 py-2.5">
-            <View className="flex-1">
-              <Button
-                label={t('report.downloadPdf')}
-                size="md"
-                disabled={downloading}
-                onPress={() => download('pdf')}
-              />
+              <Text font="heading" className="px-4 pb-2 pt-3.5 text-lg" accessibilityRole="header">
+                {t('history.report.byMethod')}
+              </Text>
+              <View className="gap-2 px-4">
+                {report.rows.map((row) => (
+                  <MethodCard
+                    key={row.method}
+                    row={row}
+                    onPress={() =>
+                      router.navigate({
+                        pathname: '/transactions',
+                        params: { method: row.method, period },
+                      })
+                    }
+                  />
+                ))}
+              </View>
+            </ScrollView>
+
+            <View className="flex-row gap-2.5 px-4 py-2.5">
+              <View className="flex-1">
+                <PrimaryButton
+                  label={t('report.downloadPdf')}
+                  size="md"
+                  disabled={downloading}
+                  onPress={() => download('pdf')}
+                />
+              </View>
+              <View className="flex-1">
+                <SecondaryButton
+                  label={t('report.downloadCsv')}
+                  size="md"
+                  disabled={downloading}
+                  onPress={() => download('csv')}
+                />
+              </View>
             </View>
-            <View className="flex-1">
-              <Button
-                label={t('report.downloadCsv')}
-                variant="outline"
-                size="md"
-                disabled={downloading}
-                onPress={() => download('csv')}
-              />
-            </View>
-          </View>
-        </>
-      )}
-    </SafeAreaView>
+          </>
+        )}
+      </SafeAreaView>
+    </ScreenBg>
   );
 }

@@ -92,8 +92,6 @@ export default function AppLayout() {
         <Stack.Screen name="verify-restaurant/index" />
         <Stack.Screen name="verify-restaurant/checking" options={{ gestureEnabled: false }} />
         <Stack.Screen name="verify-restaurant/result" options={{ gestureEnabled: false }} />
-        <Stack.Screen name="chef" />
-        <Stack.Screen name="kitchen/index" />
         <Stack.Screen name="help" />
         <Stack.Screen name="staff/index" />
         <Stack.Screen name="staff/add" />
@@ -114,7 +112,6 @@ export default function AppLayout() {
         <Stack.Screen name="verify-tips" />
         <Stack.Screen name="change-pin" />
         <Stack.Screen name="extra-features" />
-        <Stack.Screen name="finished" />
         <Stack.Screen name="verify/qr-result" />
       </Stack>
       {/* Over everything while locked (passcode / fingerprint). */}

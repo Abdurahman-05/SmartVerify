@@ -6,7 +6,7 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BottomSheet } from '@/components/ui/BottomSheet';
-import { Button } from '@/components/ui/Button';
+import { CheckingView } from '@/components/ui/CheckingView';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { NoConnection } from '@/components/ui/NoConnection';
@@ -14,6 +14,7 @@ import { ResultBadge } from '@/components/ui/ResultBadge';
 import { Text } from '@/components/ui/Text';
 import { usePaymentBill } from '@/features/bills/usePaymentBill';
 import { newIdempotencyKey } from '@/lib/api/idempotency';
+import { telegramSupport } from '@/lib/support';
 import type { ExtraChoice } from '@/lib/api/payments';
 import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { checkReceipt, type CbeMismatch, type CbeUnable } from '@/lib/verification';
@@ -21,7 +22,9 @@ import { colors } from '@/theme/tokens';
 
 import { DetailsCard } from './PaymentResultScreen';
 import { settlePayment, useRestaurantPay } from './restaurantFlow';
+import { useReceiptFlow } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
+import { PrimaryButton, resultPalette, ScreenBg, SecondaryButton } from '@/ui/glass';
 
 type Failure =
   | { kind: 'network' }
@@ -63,6 +66,7 @@ export default function RestaurantCheckingScreen() {
   const billId = useRestaurantPay((s) => s.billId);
   const { bill, pending } = usePaymentBill(billId);
   const { account, amount, qrData } = useVerifyFlow();
+  const bankCode = useReceiptFlow((s) => s.bankCode);
   const [failure, setFailure] = useState<Failure | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -146,38 +150,39 @@ export default function RestaurantCheckingScreen() {
   if (extra) {
     const extraEtb = extra.amount - amount;
     return (
-      <SafeAreaView className="flex-1 bg-background">
-        <BottomSheet visible onClose={() => {}}>
-          <View className="items-center gap-2">
-            <View className="h-16 w-16 items-center justify-center rounded-full bg-tipBg">
-              <HandCoins size={32} color={colors.warnFg} strokeWidth={2.2} />
+      <ScreenBg>
+        <SafeAreaView className="flex-1">
+          <BottomSheet visible onClose={() => {}}>
+            <View className="items-center gap-2">
+              <View className="h-16 w-16 items-center justify-center rounded-full bg-tipBg">
+                <HandCoins size={32} color={colors.warnFg} strokeWidth={2.2} />
+              </View>
+              <Text font="heading" className="text-center text-[22px]" accessibilityRole="header">
+                {t('verifyBank.extra.title')}
+              </Text>
+              <MoneyText value={extraEtb} className="text-4xl" />
+              <Text tone="muted" className="text-center text-base">
+                {t('verifyBank.extra.body', {
+                  received: formatMoney(extra.amount),
+                  bill: formatMoney(amount),
+                  name: bill.waiterName,
+                })}
+              </Text>
             </View>
-            <Text font="heading" className="text-center text-[22px]" accessibilityRole="header">
-              {t('verifyBank.extra.title')}
-            </Text>
-            <MoneyText value={extraEtb} className="text-4xl" />
-            <Text tone="muted" className="text-center text-base">
-              {t('verifyBank.extra.body', {
-                received: formatMoney(extra.amount),
-                bill: formatMoney(amount),
-                name: bill.waiterName,
-              })}
-            </Text>
-          </View>
-          <Button
-            label={t('verifyBank.extra.keepTip')}
-            icon={HandCoins}
-            onPress={() => settleWith(extra, 'tip')}
-          />
-          <Button
-            label={t('verifyBank.extra.giveBack')}
-            icon={Banknote}
-            variant="outline"
-            size="md"
-            onPress={() => settleWith(extra, 'giveback')}
-          />
-        </BottomSheet>
-      </SafeAreaView>
+            <PrimaryButton
+              label={t('verifyBank.extra.keepTip')}
+              icon={HandCoins}
+              onPress={() => settleWith(extra, 'tip')}
+            />
+            <SecondaryButton
+              label={t('verifyBank.extra.giveBack')}
+              icon={Banknote}
+              size="md"
+              onPress={() => settleWith(extra, 'giveback')}
+            />
+          </BottomSheet>
+        </SafeAreaView>
+      </ScreenBg>
     );
   }
 
@@ -211,73 +216,76 @@ export default function RestaurantCheckingScreen() {
         : [expected];
 
     return (
-      <SafeAreaView className="flex-1 bg-dangerSurface">
-        <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingHorizontal: 24,
-            paddingTop: 32,
-            paddingBottom: 32,
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          <View className="items-center" accessibilityLiveRegion="assertive">
-            <ResultBadge success={false} />
-            <Text
-              font="heading"
-              className="mt-5 text-center text-[26px]"
-              accessibilityRole="header"
-            >
-              {title}
-            </Text>
-            <Text className="mt-2.5 max-w-[300px] text-center text-base leading-6 text-navInactive">
-              {body}
-            </Text>
-          </View>
+      <ScreenBg palette={resultPalette.bad}>
+        <SafeAreaView className="flex-1">
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingHorizontal: 16,
+              paddingTop: 28,
+              paddingBottom: 16,
+            }}
+            showsVerticalScrollIndicator={false}
+          >
+            <View className="items-center" accessibilityLiveRegion="assertive">
+              <ResultBadge success={false} />
+              <Text
+                font="heading"
+                className="mt-1 text-center text-[26px] leading-8 text-dangerFg"
+                accessibilityRole="header"
+              >
+                {title}
+              </Text>
+              <Text
+                tone="muted"
+                className="mt-1 max-w-[300px] text-center text-[15px] leading-[21px]"
+              >
+                {body}
+              </Text>
+            </View>
 
-          <DetailsCard rows={rows} />
+            <DetailsCard rows={rows} />
 
-          <View className="mt-4 flex-row items-start gap-2.5 px-1">
-            <CircleAlert size={18} color={colors.alert} strokeWidth={2} />
-            <Text className="flex-1 text-sm leading-5 text-navInactive">
-              {t('verifyBank.check.billOpen')}
-            </Text>
-          </View>
+            <View className="mt-3 flex-row items-start gap-2 px-1">
+              <CircleAlert size={18} color={colors.alert} strokeWidth={2} />
+              <Text tone="muted" className="flex-1 text-sm leading-5">
+                {t('verifyBank.check.billOpen')}
+              </Text>
+            </View>
 
-          <View className="min-h-6 flex-1" />
+            <View className="min-h-6 flex-1" />
 
-          <View className="gap-3">
-            <Button
-              label={t('verify.result.tryAgain')}
-              variant="danger"
-              onPress={failure.kind === 'mismatch' ? scanAgain : retry}
-            />
-            {failure.kind === 'unable' ? (
-              <Button
-                label={t('verifyBank.saveNotChecked')}
-                variant="secondary"
-                size="md"
-                onPress={saveNotChecked}
+            <View className="gap-3">
+              <PrimaryButton
+                label={t('verify.result.tryAgain')}
+                onPress={failure.kind === 'mismatch' ? scanAgain : retry}
               />
-            ) : (
-              <Button
-                label={t('verify.result.contactSupport')}
-                variant="secondary"
-                size="md"
-                disabled
-                onPress={() => {}}
-              />
-            )}
-          </View>
-        </ScrollView>
-      </SafeAreaView>
+              {failure.kind === 'unable' ? (
+                <SecondaryButton
+                  label={t('verifyBank.saveNotChecked')}
+                  size="md"
+                  onPress={saveNotChecked}
+                />
+              ) : (
+                <SecondaryButton
+                  label={t('verify.result.contactSupport')}
+                  size="md"
+                  onPress={telegramSupport}
+                />
+              )}
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </ScreenBg>
     );
   }
 
   return (
-    <LoadingView
+    <CheckingView
       title={t('verifyRestaurant.checking')}
       subtitle={t('verifyRestaurant.checkingSubtitle')}
+      amount={amount}
+      bankCode={bankCode}
     />
   );
 }

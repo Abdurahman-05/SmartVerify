@@ -19,6 +19,7 @@ import { usePaymentBill } from '@/features/bills/usePaymentBill';
 import type { Bill } from '@/features/bills/types';
 import { maskedNumberKey } from '@/features/bank-accounts/telebirr';
 import { formatTime } from '@/lib/format';
+import { shareReceipt } from '@/lib/support';
 import { colors } from '@/theme/tokens';
 import { resultPalette } from '@/ui/glass';
 
@@ -267,11 +268,15 @@ function ResultView({
           ) : (
             <>
               <PrimaryButton label={t('verifyRestaurant.done')} onPress={done} />
-              {/* TODO: share a receipt once the receipt format is decided. */}
               <GhostButton
                 label={t('verifyRestaurant.shareReceipt')}
                 icon={Share2}
-                onPress={() => {}}
+                onPress={() =>
+                  shareReceipt([
+                    `${t('brand.name')} · ${billLabel(t, bill)}`,
+                    ...[...amountRows, ...detailRows].map((r) => `${r.label}: ${r.value}`),
+                  ])
+                }
               />
             </>
           )}

@@ -3,7 +3,7 @@ import { useFocusEffect } from 'expo-router';
 import { CircleCheck, ListChecks, Plus, Send, Trash2 } from 'lucide-react-native';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Keyboard, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Alert, Keyboard, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
@@ -88,6 +88,7 @@ function ItemLine({
 }
 
 function FinishedItems() {
+  const g = useGlass();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const myName = useSession((s) => s.user?.displayName);
@@ -227,6 +228,10 @@ function FinishedItems() {
                 ))}
               </GlassCard>
             </>
+          ) : null}
+
+          {open.isPending ? (
+            <ActivityIndicator color={g.primaryDeep} accessibilityLabel={t('loading.label')} />
           ) : null}
 
           {open.isError && !open.data ? (
