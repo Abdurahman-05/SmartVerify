@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
 import {
   Armchair,
+  FileText,
   Fingerprint,
   Lock,
   Timer,
@@ -12,6 +13,7 @@ import {
   LifeBuoy,
   LogOut,
   MapPin,
+  ShieldCheck,
   SlidersHorizontal,
   Star,
   Store,
@@ -24,6 +26,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { ListRow } from '@/components/ui/ListRow';
+import { openLegal } from '@/lib/legal';
 import { Switch } from '@/components/ui/Switch';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
@@ -97,7 +100,7 @@ function Group({ label, children }: { label: string; children: ReactNode }) {
 }
 
 export default function ProfileScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const user = useSession((s) => s.user);
   const userId = user?.userId ?? '';
@@ -241,6 +244,16 @@ export default function ProfileScreen() {
               icon={LifeBuoy}
               label={t('profile.help')}
               onPress={() => router.push('/help')}
+            />
+            <ListRow
+              icon={FileText}
+              label={t('profile.terms')}
+              onPress={() => openLegal('terms', i18n.language)}
+            />
+            <ListRow
+              icon={ShieldCheck}
+              label={t('profile.privacy')}
+              onPress={() => openLegal('privacy', i18n.language)}
             />
             {/* Sign out: the design's red row at the end of the list. */}
             <Pressable

@@ -46,9 +46,8 @@
     "businessNamePlaceholder": "e.g. Bole Fresh Mart PLC",
     "newPin": "PIN ({{count}} digits)",
     "newPinPlaceholder": "Choose {{count}} digits",
-    "agreePrefix": "I agree to the ",
-    "agreeLink": "Terms & Privacy",
-    "agreeSuffix": "",
+    "agreePrefix": "By continuing you agree to the ",
+    "agreeSuffix": ".",
     "haveAccount": "Already have an account?",
     "errors": {
       "phone": "Enter 9 digits starting with 9 or 7",
@@ -84,7 +83,10 @@
       "notVerified": "Please verify your email first.",
       "notSent": "We could not send the email. Please try again in a moment.",
       "devCode": "Test server: your code is {{code}}"
-    }
+    },
+    "agreeTerms": "Terms",
+    "agreeAnd": " and ",
+    "agreePrivacy": "Privacy Policy"
   },
   "plan": {
     "normalFeatures": "Verify Payment · Transactions · Reports",
@@ -828,7 +830,9 @@
     "fees": "Fees & delivery",
     "changePin": "Change PIN",
     "groupBusiness": "Business",
-    "groupApp": "App"
+    "groupApp": "App",
+    "terms": "Terms",
+    "privacy": "Privacy policy"
   },
   "help": {
     "title": "Help",

@@ -90,7 +90,9 @@
       "soon": "በቅርቡ",
       "signOut": "ውጣ",
       "nightMode": "የሌሊት ገጽታ",
-      "dayMode": "የቀን ገጽታ"
+      "dayMode": "የቀን ገጽታ",
+      "terms": "ውሎች",
+      "privacy": "የግላዊነት ፖሊሲ"
     },
     "roles": {
       "super_admin": "ዋና አስተዳዳሪ"

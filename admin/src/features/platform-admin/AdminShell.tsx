@@ -22,6 +22,7 @@ import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { Text } from '@/components/ui/Text';
 import { adminSignOut, getAdminProfile, getDashboard, hasAdminToken } from '@/lib/admin';
 import { ApiError } from '@/lib/api/client';
+import { openLegal } from '@/lib/legal';
 import { useColorMode } from '@/theme/colorMode';
 import { colors } from '@/theme/tokens';
 import { wordmarkStyle } from '@/theme/wordmark';
@@ -84,7 +85,7 @@ function BrandMark({ compact }: { compact?: boolean }) {
  * it (max 1280 wide, centred). Phones: a top bar and a menu that scrolls sideways.
  */
 export function AdminShell({ children }: { children: ReactNode }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const queryClient = useQueryClient();
@@ -159,6 +160,20 @@ export function AdminShell({ children }: { children: ReactNode }) {
     <ScrollView className="flex-1" contentContainerClassName="items-center">
       <View className={`w-full max-w-[1280px] gap-7 ${wide ? 'px-10 py-9' : 'px-4 py-5'}`}>
         {children}
+        <View className="flex-row flex-wrap gap-x-6 border-t-[1.5px] border-border pt-2">
+          {(['terms', 'privacy'] as const).map((key) => (
+            <Pressable
+              key={key}
+              onPress={() => openLegal(key, i18n.language)}
+              accessibilityRole="link"
+              className="min-h-11 justify-center"
+            >
+              <Text tone="muted" className="text-sm underline">
+                {t(`platformAdmin.nav.${key}`)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
       </View>
     </ScrollView>
   );

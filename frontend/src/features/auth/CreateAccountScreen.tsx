@@ -18,6 +18,7 @@ import { Text } from '@/components/ui/Text';
 import { useFullFieldFeedback } from '@/hooks/useFullFieldFeedback';
 import type { createAccount } from '@/lib/auth';
 import { errorMessageKey } from '@/lib/errors';
+import { openLegal } from '@/lib/legal';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
 import { holdSignup, sendEmailCode } from '@/services/authService';
 
@@ -39,7 +40,7 @@ import { GlassCard, PrimaryButton } from '@/ui/glass';
 
 export default function CreateAccountScreen() {
   const auth = useAuthColors();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const [showPin, setShowPin] = useState(false);
   const phoneFull = useFullFieldFeedback(PHONE_DIGITS);
@@ -263,12 +264,28 @@ export default function CreateAccountScreen() {
                       <Checkbox
                         checked={field.value}
                         onChange={field.onChange}
-                        accessibilityLabel={`${t('auth.agreePrefix')}${t('auth.agreeLink')}${t('auth.agreeSuffix')}`}
+                        accessibilityLabel={`${t('auth.agreePrefix')}${t('auth.agreeTerms')}${t('auth.agreeAnd')}${t('auth.agreePrivacy')}${t('auth.agreeSuffix')}`}
                       >
                         <Text className="text-[15px]">
                           {t('auth.agreePrefix')}
-                          <Text font="bold" className="text-[15px]" style={{ color: auth.pt }}>
-                            {t('auth.agreeLink')}
+                          <Text
+                            font="bold"
+                            className="text-[15px]"
+                            style={{ color: auth.pt }}
+                            accessibilityRole="link"
+                            onPress={() => openLegal('terms', i18n.language)}
+                          >
+                            {t('auth.agreeTerms')}
+                          </Text>
+                          {t('auth.agreeAnd')}
+                          <Text
+                            font="bold"
+                            className="text-[15px]"
+                            style={{ color: auth.pt }}
+                            accessibilityRole="link"
+                            onPress={() => openLegal('privacy', i18n.language)}
+                          >
+                            {t('auth.agreePrivacy')}
                           </Text>
                           {t('auth.agreeSuffix')}
                         </Text>

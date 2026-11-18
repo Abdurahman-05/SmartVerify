@@ -90,7 +90,9 @@
       "soon": "Soon",
       "signOut": "Sign out",
       "nightMode": "Night mode",
-      "dayMode": "Day mode"
+      "dayMode": "Day mode",
+      "terms": "Terms",
+      "privacy": "Privacy policy"
     },
     "roles": {
       "super_admin": "Super admin"

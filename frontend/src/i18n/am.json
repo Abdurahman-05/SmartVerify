@@ -46,9 +46,8 @@
     "businessNamePlaceholder": "ለምሳሌ፦ ቦሌ ፍሬሽ ማርት",
     "newPin": "PIN ({{count}} አሃዝ)",
     "newPinPlaceholder": "{{count}} አሃዝ ይምረጡ",
-    "agreePrefix": "",
-    "agreeLink": "ውሎችንና ግላዊነትን",
-    "agreeSuffix": " እቀበላለሁ",
+    "agreePrefix": "በመቀጠል ",
+    "agreeSuffix": " መቀበልዎን ያረጋግጣሉ።",
     "haveAccount": "መለያ አለዎት?",
     "errors": {
       "phone": "በ9 ወይም በ7 የሚጀምር 9 አሃዝ ያስገቡ",
@@ -84,7 +83,10 @@
       "notVerified": "እባክዎ መጀመሪያ ኢሜይልዎን ያረጋግጡ።",
       "notSent": "ኢሜይሉን መላክ አልቻልንም። እባክዎ ትንሽ ቆይተው ይሞክሩ።",
       "devCode": "የሙከራ ሰርቨር፡ ኮድዎ {{code}} ነው"
-    }
+    },
+    "agreeTerms": "ውሎችን",
+    "agreeAnd": " እና ",
+    "agreePrivacy": "የግላዊነት ፖሊሲን"
   },
   "plan": {
     "normalFeatures": "ክፍያ ማረጋገጥ · ግብይቶች · ሪፖርቶች",
@@ -828,7 +830,9 @@
     "fees": "ክፍያዎች እና ማድረሻ",
     "changePin": "PIN ቀይር",
     "groupBusiness": "ንግድ",
-    "groupApp": "መተግበሪያ"
+    "groupApp": "መተግበሪያ",
+    "terms": "ውሎች",
+    "privacy": "የግላዊነት ፖሊሲ"
   },
   "help": {
     "title": "እገዛ",

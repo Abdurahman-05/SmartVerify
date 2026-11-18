@@ -26,6 +26,7 @@ import { reportRoutes } from './modules/reports/reports.routes.js';
 import { menuRoutes } from './modules/menu/menu.routes.js';
 import { staffRoutes } from './modules/staff/staff.routes.js';
 import { notificationRoutes } from './modules/notifications/notification.routes.js';
+import { legalRoutes } from './modules/legal/legal.routes.js';
 import { orderRoutes } from './modules/orders/order.routes.js';
 import { subscriptionRoutes } from './modules/subscriptions/subscription.routes.js';
 import { tableRoutes } from './modules/tables/table.routes.js';
@@ -100,6 +101,8 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
   await app.register(prismaPlugin, { databaseUrl: env.DATABASE_URL });
   await app.register(authPlugin);
   await app.register(swaggerPlugin);
+  // Public Terms and Privacy Policy pages (GET /terms, /privacy and the /am versions).
+  await app.register(legalRoutes);
 
   await app.register(
     async (api) => {
