@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 
-import { Prisma } from '../../generated/prisma/client.js';
+import { Prisma, type Role } from '../../generated/prisma/client.js';
 import type { AuthContext } from '../../plugins/auth.js';
 import { hashPin, verifyAgainstDummy, verifyPin } from '../../services/pin-hasher.js';
 import { hashSessionToken, newSessionToken } from '../../services/session-token.js';
@@ -24,6 +24,13 @@ export interface RegisterInput {
 
 export interface SignInInput {
   phone: string;
+  pin: string;
+  rememberMe: boolean;
+}
+
+export interface EmailSignInInput {
+  /** Lower case (the route trims and lower-cases it). */
+  email: string;
   pin: string;
   rememberMe: boolean;
 }
@@ -104,20 +111,15 @@ export function createAuthService(app: FastifyInstance) {
 
     /** Owner or active staff. Every failure looks the same to the caller. */
     async signIn(input: SignInInput) {
-      const user = await prisma.user.findUnique({
-        where: { phone: input.phone },
-        include: { membership: { include: { business: true } } },
-      });
-      if (!user) {
-        await verifyAgainstDummy(input.pin);
-        throw new AppError('WRONG_CREDENTIALS');
-      }
-      const pinOk = await verifyPin(user.pinHash, input.pin);
-      const member = user.membership;
-      if (!pinOk || !member || !member.active || member.business.deactivatedAt) {
-        throw new AppError('WRONG_CREDENTIALS');
-      }
-      return openSession(user.id, member.id, input.rememberMe);
+      return checkPinAndOpen({ phone: input.phone }, input.pin, input.rememberMe);
+    },
+
+    /** Owner or manager by email (only they have one). Same token and user as phone sign-in. */
+    async signInWithEmail(input: EmailSignInInput) {
+      return checkPinAndOpen({ email: input.email }, input.pin, input.rememberMe, [
+        'owner',
+        'manager',
+      ]);
     },
 
     async signOut(sessionId: string) {
@@ -148,4 +150,33 @@ export function createAuthService(app: FastifyInstance) {
       ]);
     },
   };
+
+  /** Every failure (unknown user, wrong PIN, inactive member or business) looks the same. */
+  async function checkPinAndOpen(
+    where: { phone: string } | { email: string },
+    pin: string,
+    rememberMe: boolean,
+    roles?: readonly Role[]
+  ) {
+    const user = await prisma.user.findUnique({
+      where,
+      include: { membership: { include: { business: true } } },
+    });
+    if (!user) {
+      await verifyAgainstDummy(pin);
+      throw new AppError('WRONG_CREDENTIALS');
+    }
+    const pinOk = await verifyPin(user.pinHash, pin);
+    const member = user.membership;
+    if (
+      !pinOk ||
+      !member ||
+      !member.active ||
+      member.business.deactivatedAt ||
+      (roles && !roles.includes(member.role))
+    ) {
+      throw new AppError('WRONG_CREDENTIALS');
+    }
+    return openSession(user.id, member.id, rememberMe);
+  }
 }

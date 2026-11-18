@@ -20,6 +20,17 @@ export async function signIn(input: SignInInput): Promise<SessionUser> {
   return res.user;
 }
 
+/** POST /auth/sign-in-email. Owner or manager with email + PIN; same token and user as sign-in. */
+export async function signInWithEmail(input: {
+  email: string;
+  pin: string;
+  rememberMe: boolean;
+}): Promise<SessionUser> {
+  const res = await api<AuthResponse>('/auth/sign-in-email', { method: 'POST', body: input });
+  await saveToken(res.token, input.rememberMe);
+  return res.user;
+}
+
 /** POST /auth/register. Creates the owner and business (no plan yet). The new session is remembered. */
 export async function createAccount(input: RegisterInput): Promise<SessionUser> {
   const res = await api<AuthResponse>('/auth/register', { method: 'POST', body: input });

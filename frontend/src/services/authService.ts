@@ -1,7 +1,9 @@
 import { addStaff } from '@/lib/staff';
 import type { NewStaffInput, StaffMember } from '@/lib/mock/staffAdmin';
+import { signInWithEmail as realSignInWithEmail } from '@/lib/api/auth';
 import { ApiError, api } from '@/lib/api/client';
-import { USE_MOCK_AUTH, type RegisterInput } from '@/lib/auth';
+import { signIn, USE_MOCK_AUTH, type RegisterInput } from '@/lib/auth';
+import { useStaff } from '@/features/staff/store';
 import type { SessionUser } from '@/store/session';
 
 // Frontend only: the backend for these calls is not ready. Each function waits 600 ms and returns
@@ -29,17 +31,16 @@ export interface OwnerSignInInput {
   rememberMe: boolean;
 }
 
-/** Owner or manager sign-in with email + PIN. TODO: connect API (POST /auth/login-email). */
+/**
+ * Owner or manager sign-in with email + PIN (POST /auth/sign-in-email). The user (and its plan)
+ * comes from the server. The offline mock has no emails: it signs in the mock owner by PIN.
+ */
 export async function signInWithEmail(input: OwnerSignInInput): Promise<SessionUser> {
-  await wait();
-  return {
-    userId: 'stub-owner',
-    displayName: input.email.split('@')[0] ?? 'Owner',
-    businessName: 'Abebe Coffee',
-    role: 'owner',
-    plan: 'restaurant',
-    subscription: null,
-  };
+  if (USE_MOCK_AUTH) {
+    const { owner } = useStaff.getState();
+    return signIn({ phone: owner.phone, pin: input.pin, rememberMe: input.rememberMe });
+  }
+  return realSignInWithEmail(input);
 }
 
 export interface PinResetInput {

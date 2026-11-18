@@ -129,6 +129,36 @@ export const publicAuthRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (request) => auth.signIn(request.body)
   );
+
+  app.post(
+    '/auth/sign-in-email',
+    {
+      config: {
+        rateLimit: {
+          max: SIGN_IN_MAX_ATTEMPTS,
+          timeWindow: SIGN_IN_WINDOW,
+          keyGenerator: (request) => {
+            const email = (request.body as { email?: unknown } | undefined)?.email;
+            const key = typeof email === 'string' ? email.trim().toLowerCase() : '';
+            return `sign-in-email:${request.ip}:${key}`;
+          },
+        },
+      },
+      schema: {
+        tags: ['auth'],
+        description:
+          'Owner or manager sign-in with email + PIN. Same token and user as /auth/sign-in. ' +
+          'Every failure (unknown email, wrong PIN, staff role, inactive) is WRONG_CREDENTIALS.',
+        body: z.object({
+          email: emailSchema,
+          pin: anyPinSchema,
+          rememberMe: z.boolean().default(false),
+        }),
+        response: { 200: authResponse, 401: errorResponseSchema, 429: errorResponseSchema },
+      },
+    },
+    async (request) => auth.signInWithEmail(request.body)
+  );
 };
 
 /** Authenticated routes: sign-out, current session and PIN change. */
