@@ -1,9 +1,12 @@
+import { randomInt } from 'node:crypto';
+
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { z } from 'zod';
 
 import { Prisma, type Role } from '../../generated/prisma/client.js';
 import type { AuthContext } from '../../plugins/auth.js';
 import { requireRoles } from '../../plugins/auth.js';
+import { emailProvider, sendEmail } from '../../services/email.js';
 import { hashPin, verifyPin } from '../../services/pin-hasher.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { errorResponseSchema, idParamSchema, phoneSchema } from '../../shared/schemas/common.js';
@@ -63,6 +66,29 @@ function view(row: MemberRow, auth: AuthContext) {
 
 const isUniqueViolation = (error: unknown) =>
   error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
+
+/** The manager's invite: who invited them, and the temporary PIN to sign in with by email. */
+function inviteEmail(name: string, businessName: string, pin: string) {
+  const subject = `You are invited to manage ${businessName} on Gebtual`;
+  const text =
+    `Hello ${name},\n\n${businessName} added you as a manager on Gebtual.\n` +
+    `Sign in with this email and the temporary PIN ${pin}. You will then choose your own PIN.\n\n` +
+    `${businessName} በGebtual ላይ እንደ ማኔጀር አክሎዎታል። በዚህ ኢሜይል እና ጊዜያዊ ፒን ${pin} ይግቡ፤ ` +
+    'ከዚያ የራስዎን ፒን ይመርጣሉ።';
+  const html =
+    '<div style="font-family:Arial,sans-serif;font-size:16px;color:#1E1A1C">' +
+    `<p>Hello ${escapeHtml(name)},</p>` +
+    `<p><b>${escapeHtml(businessName)}</b> added you as a manager on Gebtual.</p>` +
+    '<p>Sign in with this email and the temporary PIN:</p>' +
+    `<p style="font-size:32px;font-weight:bold;letter-spacing:6px;margin:16px 0">${pin}</p>` +
+    '<p>You will then choose your own PIN.</p>' +
+    `<p>${escapeHtml(businessName)} በGebtual ላይ እንደ ማኔጀር አክሎዎታል። በዚህ ኢሜይል እና ጊዜያዊ ፒን ` +
+    `<b>${pin}</b> ይግቡ፤ ከዚያ የራስዎን ፒን ይመርጣሉ።</p>` +
+    '</div>';
+  return { subject, text, html };
+}
+
+const escapeHtml = (value: string) => value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
 /** Normal plan (and no plan yet): active workers besides the owner. Normal Multi: no limit. */
 export const NORMAL_STAFF_LIMIT = 2;
@@ -217,6 +243,127 @@ export const staffRoutes: FastifyPluginAsyncZod = async (app) => {
         if (isUniqueViolation(error)) throw new AppError('PHONE_TAKEN');
         throw error;
       }
+    }
+  );
+
+  app.post(
+    '/staff/invite',
+    {
+      config: { rateLimit: { max: 20, timeWindow: '1 hour' } },
+      preHandler: requireRoles('owner'),
+      schema: {
+        tags: ['staff'],
+        security,
+        description:
+          'Owner only (Restaurant plan): add a manager by email. A random temporary 4-digit PIN ' +
+          'is emailed to them; they sign in with email + that PIN and must choose their own. ' +
+          'Without an email provider (development only) the PIN is written to the server log. ' +
+          'Repeating the same invite within 10 minutes returns the manager it created.',
+        body: z.object({
+          name: z.string().trim().min(2).max(80),
+          email: z.string().trim().toLowerCase().pipe(z.email().max(254)),
+          phone: phoneSchema,
+        }),
+        response: {
+          201: staffSchema.extend({ email: z.string(), inviteSent: z.boolean() }),
+          400: errorResponseSchema.describe('VALIDATION_ERROR (workerOnly on Normal plans)'),
+          409: errorResponseSchema.describe('PHONE_TAKEN, EMAIL_TAKEN, STAFF_LIMIT'),
+          503: errorResponseSchema.describe('EMAIL_NOT_SENT (nothing was created)'),
+          ...errors,
+        },
+      },
+    },
+    async (request, reply) => {
+      const { auth, body } = request;
+      onlyWorkersOnNormal(auth, 'manager');
+      const provider = emailProvider(app.env);
+      if (!provider && app.env.NODE_ENV === 'production') throw new AppError('EMAIL_NOT_SENT');
+
+      const existing = await prisma.user.findFirst({
+        where: { OR: [{ email: body.email }, { phone: body.phone }] },
+        include: { membership: { select: memberSelect } },
+      });
+      if (existing) {
+        const member = existing.membership;
+        const sameRequest =
+          member &&
+          existing.email === body.email &&
+          existing.phone === body.phone &&
+          existing.name === body.name &&
+          member.role === 'manager' &&
+          member.createdById === auth.memberId &&
+          Date.now() - member.createdAt.getTime() < REPLAY_WINDOW_MS;
+        if (sameRequest) {
+          return reply
+            .status(201)
+            .send({ ...view(member, auth), email: body.email, inviteSent: true });
+        }
+        throw new AppError(existing.email === body.email ? 'EMAIL_TAKEN' : 'PHONE_TAKEN');
+      }
+
+      await roomForOneMore(auth);
+      const pin = String(randomInt(0, 10_000)).padStart(4, '0');
+      const pinHash = await hashPin(pin);
+      let created: MemberRow;
+      try {
+        created = await prisma.$transaction(async (tx) => {
+          const user = await tx.user.create({
+            data: {
+              name: body.name,
+              email: body.email,
+              phone: body.phone,
+              pinHash,
+              pinIsTemporary: true,
+            },
+          });
+          return tx.businessMember.create({
+            data: {
+              businessId: auth.businessId,
+              userId: user.id,
+              role: 'manager',
+              canChangeDeliveryFee: true,
+              canSeeReports: true,
+              createdById: auth.memberId,
+            },
+            select: memberSelect,
+          });
+        });
+      } catch (error) {
+        // The same email or phone was added at the same moment.
+        if (isUniqueViolation(error)) {
+          const target = JSON.stringify((error as Prisma.PrismaClientKnownRequestError).meta ?? {});
+          throw new AppError(target.includes('email') ? 'EMAIL_TAKEN' : 'PHONE_TAKEN');
+        }
+        throw error;
+      }
+
+      if (provider) {
+        const business = await prisma.business.findUniqueOrThrow({
+          where: { id: auth.businessId },
+          select: { name: true },
+        });
+        const sent = await sendEmail(app.env, request.log, {
+          to: body.email,
+          ...inviteEmail(body.name, business.name, pin),
+          idempotencyKey: `staff-invite/${created.id}`,
+        });
+        if (!sent) {
+          // Nothing half-made: the owner can simply try again.
+          await prisma.$transaction(async (tx) => {
+            const member = await tx.businessMember.delete({ where: { id: created.id } });
+            await tx.user.delete({ where: { id: member.userId } });
+          });
+          throw new AppError('EMAIL_NOT_SENT');
+        }
+      } else {
+        request.log.info(
+          { invitePin: pin },
+          'manager invite PIN (no email provider, development only)'
+        );
+      }
+      return reply
+        .status(201)
+        .send({ ...view(created, auth), email: body.email, inviteSent: true });
     }
   );
 

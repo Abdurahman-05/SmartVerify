@@ -1,4 +1,4 @@
-import { addStaff } from '@/lib/staff';
+import { addStaff, USE_MOCK_STAFF } from '@/lib/staff';
 import type { NewStaffInput, StaffMember } from '@/lib/mock/staffAdmin';
 import { signInWithEmail as realSignInWithEmail } from '@/lib/api/auth';
 import { ApiError, api } from '@/lib/api/client';
@@ -6,8 +6,8 @@ import { signIn, USE_MOCK_AUTH, type RegisterInput } from '@/lib/auth';
 import { useStaff } from '@/features/staff/store';
 import type { SessionUser } from '@/store/session';
 
-// Frontend only: the backend for these calls is not ready. Each function waits 600 ms and returns
-// mock data. TODO: connect API — replace the body of each function with its request.
+// Auth calls not covered by src/lib/auth. The offline mock path (USE_MOCK_AUTH / USE_MOCK_STAFF)
+// waits 600 ms and answers locally.
 
 const STUB_DELAY_MS = 600;
 const wait = () => new Promise<void>((resolve) => setTimeout(resolve, STUB_DELAY_MS));
@@ -50,9 +50,21 @@ export interface PinResetInput {
   value: string;
 }
 
-/** Sends a PIN reset code. TODO: connect API (POST /auth/forgot-pin). */
-export async function requestPinReset(_input: PinResetInput): Promise<void> {
-  await wait();
+/** Waiters and chefs have no email: their owner or manager sets a new PIN for them. */
+export class StaffResetByManagerError extends Error {
+  constructor() {
+    super('STAFF_RESET_BY_MANAGER');
+  }
+}
+
+/** Emails an owner or manager a PIN reset code (POST /auth/forgot-pin). */
+export async function requestPinReset(input: PinResetInput): Promise<void> {
+  if (input.kind === 'staff') throw new StaffResetByManagerError();
+  if (USE_MOCK_AUTH) {
+    await wait();
+    return;
+  }
+  await api('/auth/forgot-pin', { method: 'POST', body: { email: input.value } });
 }
 
 export interface EmailCodeSent {
@@ -114,8 +126,14 @@ export interface InviteManagerInput {
   phone: string;
 }
 
-/** Emails a manager an invite to set their own PIN. TODO: connect API (POST /staff/invite). */
+/**
+ * Owner only: creates a manager and emails them a temporary PIN for email sign-in
+ * (POST /staff/invite). EXPO_PUBLIC_USE_MOCK_STAFF=true keeps the offline mock.
+ */
 export async function inviteManager(input: InviteManagerInput): Promise<StaffMember> {
+  if (!USE_MOCK_STAFF) {
+    return api<StaffMember>('/staff/invite', { method: 'POST', body: input });
+  }
   await wait();
   return {
     id: `invite-${Date.now()}`,

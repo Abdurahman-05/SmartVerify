@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/Input';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Text } from '@/components/ui/Text';
 import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
-import { requestPinReset } from '@/services/authService';
+import { errorMessageKey } from '@/lib/errors';
+import { requestPinReset, StaffResetByManagerError } from '@/services/authService';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 import { GlassCard, PrimaryButton, ScreenBg } from '@/ui/glass';
@@ -58,6 +59,7 @@ export default function ForgotPinScreen() {
       return;
     }
     setError(undefined);
+    setSentTo(null);
     const shown = byEmail ? value.trim().toLowerCase() : `+251 ${formatPhone(value)}`;
     reset.mutate(
       { kind: byEmail ? 'owner' : 'staff', value: byEmail ? value.trim().toLowerCase() : value },
@@ -108,7 +110,20 @@ export default function ForgotPinScreen() {
                 error={error}
               />
             )}
-            {sentTo ? (
+            {reset.isError ? (
+              <Text
+                font="semibold"
+                className="text-[15px]"
+                style={{ color: colors.dangerFg }}
+                accessibilityRole="alert"
+              >
+                {t(
+                  reset.error instanceof StaffResetByManagerError
+                    ? 'pin.forgot.staffBody'
+                    : errorMessageKey(reset.error)
+                )}
+              </Text>
+            ) : sentTo ? (
               <Text font="semibold" className="text-[15px]" style={{ color: colors.successFg }}>
                 {t('pin.forgot.sent', { value: sentTo })}
               </Text>

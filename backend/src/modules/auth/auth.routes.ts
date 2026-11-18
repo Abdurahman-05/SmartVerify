@@ -10,6 +10,7 @@ import {
 
 import { createAuthService } from './auth.service.js';
 import { createEmailCodes } from './email-code.js';
+import { createPinReset } from './pin-reset.js';
 import { loadSessionUser, sessionUserSchema } from './session-user.js';
 
 const authResponse = z.object({
@@ -27,6 +28,7 @@ const SIGN_IN_WINDOW = '15 minutes';
 export const publicAuthRoutes: FastifyPluginAsyncZod = async (app) => {
   const auth = createAuthService(app);
   const codes = createEmailCodes(app);
+  const pinReset = createPinReset(app);
   const emailSchema = z.string().trim().toLowerCase().pipe(z.email().max(254));
 
   app.post(
@@ -158,6 +160,27 @@ export const publicAuthRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request) => auth.signInWithEmail(request.body)
+  );
+
+  app.post(
+    '/auth/forgot-pin',
+    {
+      config: { rateLimit: { max: 10, timeWindow: '1 hour' } },
+      schema: {
+        tags: ['auth'],
+        description:
+          'Owner or manager forgot their PIN: emails a 6-digit reset code (10 minutes). The ' +
+          'answer is the same whether or not the email has an account. Without an email ' +
+          'provider (development only) the code is written to the server log.',
+        body: z.object({ email: emailSchema }),
+        response: {
+          200: z.object({ resendInSeconds: z.number().int() }),
+          429: errorResponseSchema.describe('RATE_LIMITED'),
+          503: errorResponseSchema.describe('EMAIL_NOT_SENT'),
+        },
+      },
+    },
+    async (request) => pinReset.send(request.body.email, request.log)
   );
 };
 
