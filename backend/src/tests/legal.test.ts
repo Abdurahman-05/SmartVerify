@@ -7,7 +7,7 @@ beforeAll(async () => {
   app = await createTestApp({
     COMPANY_NAME: 'Test <Co>',
     SUPPORT_EMAIL: 'help@example.com',
-    SUPPORT_PHONE: '+251911000000',
+    SUPPORT_PHONE: '+251911000000, +251922000000',
   });
 });
 afterAll(async () => {
@@ -29,6 +29,8 @@ describe('Terms and Privacy pages', () => {
     expect(res.body).toContain('mailto:help@example.com');
     expect(res.body).toContain('Test &lt;Co&gt;');
     expect(res.body).toContain('/legal.css');
+    expect(res.body).toContain('tel:+251911000000');
+    expect(res.body).toContain('tel:+251922000000');
   });
 
   it('links between the pages and serves the shared CSS', async () => {

@@ -22,11 +22,19 @@ footer a{min-height:44px;display:inline-flex;align-items:center}
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-/** Contact line: the email and phone become links. */
+/** Contact line: the email and each phone (SUPPORT_PHONE may list several, comma-separated) become links. */
 function linkContact(text: string, c: Contact) {
-  return esc(text)
-    .replace(esc(c.email), `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`)
-    .replace(esc(c.phone), `<a href="tel:${esc(c.phone.replace(/\s/g, ''))}">${esc(c.phone)}</a>`);
+  let out = esc(text).replace(esc(c.email), `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`);
+  for (const phone of c.phone
+    .split(',')
+    .map((p) => p.trim())
+    .filter(Boolean)) {
+    out = out.replace(
+      esc(phone),
+      `<a href="tel:${esc(phone.replace(/\s/g, ''))}">${esc(phone)}</a>`
+    );
+  }
+  return out;
 }
 
 function body(paragraphs: string[], c: Contact) {

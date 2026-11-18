@@ -25,6 +25,7 @@ export const menuItemSelect = {
   categoryId: true,
   itemCategory: { select: { name: true, nameAm: true } },
   groupName: true,
+  catalogKey: true,
   active: true,
   sortOrder: true,
 } as const;

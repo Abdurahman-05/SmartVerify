@@ -94,9 +94,10 @@ const schema = z.object({
   RESEND_API_KEY: z.string().min(10).optional(),
   SES_REGION: z.string().min(3).default('eu-north-1'),
   /** Shown on the public Terms and Privacy pages. */
-  COMPANY_NAME: z.string().min(1).default('Gebtual'),
+  COMPANY_NAME: z.string().min(1).default('Gebtual Tech Solution'),
   SUPPORT_EMAIL: z.string().min(3).default('support@gebtual.com.et'),
-  SUPPORT_PHONE: z.string().min(3).default('+251900000000'),
+  /** One number, or several separated by commas. */
+  SUPPORT_PHONE: z.string().min(3).default('+251829277776, +25178287776'),
   EMAIL_FROM: z.string().min(3).default('Gebtual <no-reply@gebtual.com.et>'),
 });
 

@@ -42,6 +42,10 @@ const menuItemSchema = z.object({
   categoryName: z.string().describe('The category the owner put it in, e.g. "Hot drinks"'),
   categoryNameAm: z.string().nullable(),
   groupName: z.string().nullable().describe('Section shown to users, e.g. "Meat & Tibs"'),
+  catalogKey: z
+    .string()
+    .nullable()
+    .describe('Starter-pack item it came from (the app shows its photo); null = added by hand'),
   active: z.boolean().describe('false = "Finished today": hidden from New order'),
   sortOrder: z.number().int(),
 });
