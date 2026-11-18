@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import Animated, {
-  Easing,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -11,75 +10,14 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { GebtualLogo } from './GebtualLogo';
-import { alpha, useGlass } from './glassTokens';
+import { useGlass } from './glassTokens';
+import { LogoLoader } from './LogoLoader';
 import { Text } from './Text';
-
-// The ገ with its ✓ badge (the image includes the badge).
 
 // Colours follow the chosen theme (orange by default).
 const TEXT = '#1E1A1C';
 const SUB = '#5E5559';
-const LOGO = 112;
-const RING_INSET = 14;
-
-/** Logo circle that pulses 1 → 1.05 → 1 every 1.6 s, with a spinning ring around it. */
-function LogoLoader({ still }: { still: boolean }) {
-  const g = useGlass();
-  const scale = useSharedValue(1);
-  const turn = useSharedValue(0);
-  useEffect(() => {
-    if (still) return;
-    scale.value = withRepeat(
-      withSequence(
-        withTiming(1.05, { duration: 800, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 800, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1
-    );
-    turn.value = withRepeat(withTiming(360, { duration: 1100, easing: Easing.linear }), -1);
-  }, [still, scale, turn]);
-  const pulse = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const spin = useAnimatedStyle(() => ({ transform: [{ rotate: `${turn.value}deg` }] }));
-  const ring = LOGO + RING_INSET * 2;
-  return (
-    <View style={{ width: LOGO, height: LOGO, alignItems: 'center', justifyContent: 'center' }}>
-      <Animated.View
-        style={[
-          {
-            position: 'absolute',
-            top: -RING_INSET,
-            left: -RING_INSET,
-            width: ring,
-            height: ring,
-            borderRadius: ring / 2,
-            borderWidth: 5,
-            borderColor: alpha(g.primaryDeep, 0.15),
-            borderTopColor: g.primaryDeep,
-            borderRightColor: g.primary2,
-          },
-          spin,
-        ]}
-      />
-      <Animated.View style={pulse}>
-        <View
-          style={[
-            {
-              width: LOGO,
-              height: LOGO,
-              borderRadius: LOGO / 2,
-              alignItems: 'center',
-              justifyContent: 'center',
-            },
-            { backgroundColor: g.primaryDeep },
-          ]}
-        >
-          <GebtualLogo width={62} variant="onDark" />
-        </View>
-      </Animated.View>
-    </View>
-  );
-}
+const LOGO_WIDTH = 180;
 
 /** One 12 px dot bouncing up 12 px every 1 s; each starts 150 ms after the one before. */
 function Dot({ index, still, color }: { index: number; still: boolean; color: string }) {
@@ -103,7 +41,7 @@ function Dot({ index, still, color }: { index: number; still: boolean; color: st
 }
 
 /**
- * The starter loader (app start and every loading page): pulsing logo with a spinning ring,
+ * The starter loader (app start): the logo drawing itself on (same loader as every loading page),
  * a title whose last word is orange, a short line and three bouncing dots. Reduce motion = still.
  */
 export function StarterLoader({ title, subtitle }: { title: string; subtitle: string }) {
@@ -118,7 +56,7 @@ export function StarterLoader({ title, subtitle }: { title: string; subtitle: st
       accessibilityRole="progressbar"
       accessibilityLabel={title}
     >
-      <LogoLoader still={still} />
+      <LogoLoader size={LOGO_WIDTH} />
       <View style={{ alignItems: 'center', gap: 4, paddingHorizontal: 24 }}>
         <Text font="heading" className="text-center text-[22px]" style={{ color: TEXT }}>
           {head}
