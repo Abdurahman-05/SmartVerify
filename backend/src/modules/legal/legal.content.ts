@@ -92,6 +92,12 @@ export function sections(kind: Kind, lang: Lang, c: Contact): Section[] {
           ],
         },
         {
+          h: 'Support chat on Telegram',
+          p: [
+            'If you write to our support bot on Telegram, our support team reads your messages, your Telegram name and username, and any pictures you send, only to answer you. Telegram handles these chats under its own privacy policy, and they are not end-to-end encrypted. Never send your PIN or password in a support chat. Receipt pictures can show account numbers, so send them only when we ask.',
+          ],
+        },
+        {
           h: 'How long we keep it, and deleting your data',
           p: [
             'We keep your data while your account is active. To delete your account and data, email us at the address below from your account email. We delete it within 30 days.',
@@ -161,6 +167,12 @@ export function sections(kind: Kind, lang: Lang, c: Contact): Section[] {
           h: 'ከማን ጋር እናጋራለን',
           p: [
             'መተግበሪያውን ለማስኬድ ከሚያስፈልጉ አገልግሎት ሰጪዎች ጋር ብቻ፦ ማስተናገጃ (hosting)፣ ኢሜይል፣ ካርታ፣ እና የባንክ ወይም የቴሌብር ማረጋገጫ። መረጃዎን ፈጽሞ አንሸጥም።',
+          ],
+        },
+        {
+          h: 'በቴሌግራም የድጋፍ ውይይት',
+          p: [
+            'በቴሌግራም ለድጋፍ ቦታችን ቢጽፉ፣ የድጋፍ ቡድናችን መልዕክቶችዎን፣ የቴሌግራም ስምዎንና የተጠቃሚ ስምዎን እንዲሁም የሚልኳቸውን ፎቶዎች የሚያነበው እርስዎን ለመመለስ ብቻ ነው። እነዚህ ውይይቶች በቴሌግራም የራሱ የግላዊነት ፖሊሲ የሚተዳደሩ ሲሆን፣ ከጫፍ እስከ ጫፍ የተመሰጠሩ አይደሉም። ፒንዎን ወይም የይለፍ ቃልዎን በድጋፍ ውይይት በጭራሽ አይላኩ። የደረሰኝ ፎቶ የሂሳብ ቁጥር ሊያሳይ ስለሚችል፣ ስንጠይቅ ብቻ ይላኩ።',
           ],
         },
         {

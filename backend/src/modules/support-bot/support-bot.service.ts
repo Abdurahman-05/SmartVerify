@@ -40,6 +40,10 @@ const lastAck = new Map<number, number>();
 export const welcome = (c: SupportBotConfig) =>
   `Hello! This is ${c.company} support. Write your question here (you can send a picture too) and our team will answer you in this chat.\n\n` +
   `ሰላም! ይህ የ${c.company} የደንበኛ ድጋፍ ነው። ጥያቄዎን እዚህ ይጻፉ (ፎቶም መላክ ይችላሉ)፤ ቡድናችን በዚሁ ቻት ይመልስልዎታል።\n\n` +
+  `Please do not send your PIN or password here.
+ፒንዎን ወይም የይለፍ ቃልዎን እዚህ አይላኩ።
+
+` +
   `${c.email} · ${c.phone}`;
 
 export const received =
