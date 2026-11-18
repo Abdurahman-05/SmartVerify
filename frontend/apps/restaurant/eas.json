@@ -10,14 +10,14 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://51-21-74-119.sslip.io/api/v1"
+        "EXPO_PUBLIC_API_URL": "https://api.gebtual.com.et/api/v1"
       },
       "environment": "preview"
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://51-21-74-119.sslip.io/api/v1"
+        "EXPO_PUBLIC_API_URL": "https://api.gebtual.com.et/api/v1"
       },
       "environment": "production"
     }
