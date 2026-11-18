@@ -20,6 +20,7 @@
     "test": "vitest run",
     "admin:create": "tsx src/scripts/create-admin.ts",
     "admin:reset-password": "tsx src/scripts/reset-admin-password.ts",
+    "support-bot:webhook": "tsx src/scripts/set-support-webhook.ts",
     "seed:demo": "tsx src/scripts/seed-demo.ts",
     "seed:activity": "tsx src/scripts/seed-activity.ts"
   },

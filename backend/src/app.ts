@@ -26,6 +26,7 @@ import { reportRoutes } from './modules/reports/reports.routes.js';
 import { menuRoutes } from './modules/menu/menu.routes.js';
 import { staffRoutes } from './modules/staff/staff.routes.js';
 import { notificationRoutes } from './modules/notifications/notification.routes.js';
+import { supportBotRoutes } from './modules/support-bot/support-bot.routes.js';
 import { legalRoutes } from './modules/legal/legal.routes.js';
 import { orderRoutes } from './modules/orders/order.routes.js';
 import { subscriptionRoutes } from './modules/subscriptions/subscription.routes.js';
@@ -128,6 +129,8 @@ export async function buildApp({ env, logger }: BuildAppOptions) {
       );
 
       await api.register(publicAuthRoutes);
+      // Telegram support bot webhook (public, protected by a secret header).
+      await api.register(supportBotRoutes);
       // The Smart Verify team's admin: its own accounts and sessions (not business tokens).
       await api.register(adminRoutes);
       await api.register(adminConsoleRoutes);

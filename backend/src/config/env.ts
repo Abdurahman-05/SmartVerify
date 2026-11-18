@@ -46,6 +46,16 @@ const schema = z.object({
   /** Alerts to the team (a Telegram bot and the chat it posts to). */
   TELEGRAM_BOT_TOKEN: z.string().min(20).optional(),
   TELEGRAM_CHAT_ID: z.string().min(1).optional(),
+  /**
+   * Support bot (@gebtual_support_bot): its own token from @BotFather, the team group it relays to
+   * (the bot must be a member), and the secret Telegram sends back with every webhook call.
+   */
+  SUPPORT_BOT_TOKEN: z.string().min(20).optional(),
+  SUPPORT_CHAT_ID: z.string().min(1).optional(),
+  SUPPORT_WEBHOOK_SECRET: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{16,256}$/)
+    .optional(),
   WEB_ORIGINS: z.string().default('http://localhost:8082'),
   /**
    * Proxies in front of the API that add X-Forwarded-For (production: CloudFront + nginx = 2), so

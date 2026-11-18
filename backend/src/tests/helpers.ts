@@ -28,6 +28,9 @@ export async function createTestApp(envOverrides: Record<string, string> = {}) {
     // A fixed test key (never the real one).
     TELEGRAM_BOT_TOKEN: undefined,
     TELEGRAM_CHAT_ID: undefined,
+    SUPPORT_BOT_TOKEN: undefined,
+    SUPPORT_CHAT_ID: undefined,
+    SUPPORT_WEBHOOK_SECRET: undefined,
     // The developer's .env may turn this off to try production locally; tests pick per test.
     ALLOW_UNVERIFIED_BANK_PAYMENTS: undefined,
     // Real receipt fetching through the relay is never part of a test.
