@@ -153,6 +153,24 @@ export function cbeBirrLinkOf(text: string): string | null {
   return m ? `https://cbepay1.cbe.com.et/aureceipt?TID=${m[1]?.toUpperCase()}&PH=${m[2]}` : null;
 }
 
+/** A phone as CBE Birr's link wants it: 2519xxxxxxxx (digits only), or null when not a phone. */
+export function cbeBirrPhoneOf(text: string): string | null {
+  const d = text.replace(/\D/g, '');
+  const intl = /^0[79]\d{8}$/.test(d) ? `251${d.slice(1)}` : d;
+  return /^251[79]\d{8}$/.test(intl) ? intl : null;
+}
+
+/** The CBE Birr receipt link from the typed Transaction ID and phone. */
+export const cbeBirrReceiptLink = (tid: string, phone: string) =>
+  `https://cbepay1.cbe.com.et/aureceipt?TID=${tid}&PH=${phone}`;
+
+/** TID and PH from a full CBE Birr link (pasted SMS or QR text), or null. */
+export function cbeBirrPartsOf(text: string): { tid: string; phone: string } | null {
+  const link = cbeBirrLinkOf(text);
+  const m = link ? /TID=([A-Z0-9]+)&PH=(\d+)/.exec(link) : null;
+  return m?.[1] && m[2] ? { tid: m[1], phone: m[2] } : null;
+}
+
 /** Dashen's receipt QR hides the FT Ref: 16 bytes XOR this fixed key (worked out from real QRs). */
 const DASHEN_QR_KEY = 'a6ad5615fdcc45f1bc8ec322c3db1943';
 

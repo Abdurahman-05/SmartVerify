@@ -1216,7 +1216,7 @@
     "awashLabel": "Awash (customer paid with Awash)",
     "awashHelp": "Paste the link from the Awash SMS",
     "cbeBirrHelp": "Paste the whole CBE Birr SMS (the invoice link is found inside)",
-    "pasteSms": "Paste SMS",
+    "cbeBirr": { "tid": "Transaction ID", "phone": "Phone number" },
     "otherBank": "Other bank",
     "notSupportedTitle": "We can’t check this bank yet",
     "notSupportedBody": "Only the banks on the list can be checked.",

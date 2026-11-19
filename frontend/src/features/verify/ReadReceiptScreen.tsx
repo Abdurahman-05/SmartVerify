@@ -147,6 +147,12 @@ export default function ReadReceiptScreen() {
         router.replace(checkingRoute(useReceiptFlow.getState().mode));
         return;
       }
+      // CBE Birr: only a QR in the picture can be read (no Gemini); otherwise it is typed.
+      if (bank.code === 'CBB') {
+        setReading(false);
+        Alert.alert(t('common.error'), t('verifyBank.scan.notFound'));
+        return;
+      }
       // The server reads the picture (Gemini) and filters the bank's number: CBE FT reference or
       // telebirr transaction number. The confirm page shows it (or asks for it) and the rest.
       if (!asset.base64) throw new Error('no image data');
@@ -188,7 +194,7 @@ export default function ReadReceiptScreen() {
     router.replace('/verify-bank/found');
   };
   // These banks' pictures are read by the server.
-  const cbe = ['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR', 'AWA'].includes(bank.code);
+  const cbe = ['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR', 'AWA', 'CBB'].includes(bank.code);
 
   const names = onReceipt(bank).map((f) => t(`verifyBank.short.${f.key}`));
 

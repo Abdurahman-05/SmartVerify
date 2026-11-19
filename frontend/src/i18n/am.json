@@ -1216,7 +1216,7 @@
     "awashLabel": "አዋሽ (ደንበኛው በአዋሽ ከፍሏል)",
     "awashHelp": "ከአዋሽ ኤስኤምኤስ ያለውን ሊንክ ይለጥፉ",
     "cbeBirrHelp": "ሙሉውን የCBE Birr ኤስኤምኤስ ይለጥፉ (ሊንኩ ከውስጡ ይገኛል)",
-    "pasteSms": "ኤስኤምኤስ ለጥፍ",
+    "cbeBirr": { "tid": "የግብይት መታወቂያ", "phone": "ስልክ ቁጥር" },
     "otherBank": "ሌላ ባንክ",
     "notSupportedTitle": "ይህን ባንክ ገና ማረጋገጥ አንችልም",
     "notSupportedBody": "ማረጋገጥ የሚቻለው በዝርዝሩ ላይ ያሉትን ባንኮች ብቻ ነው።",

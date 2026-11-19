@@ -1,11 +1,5 @@
 import { Redirect, useRouter } from 'expo-router';
-import {
-  ArrowRight,
-  ChevronLeft,
-  ClipboardPaste,
-  Image as ImageIcon,
-  ScanLine,
-} from 'lucide-react-native';
+import { ArrowRight, ChevronLeft, Image as ImageIcon, ScanLine } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -27,10 +21,12 @@ import { formatMoney } from '@/components/ui/MoneyText';
 import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { Text } from '@/components/ui/Text';
 import { TopBar } from '@/components/ui/TopBar';
+import { cbeBirrPartsOf, cbeBirrPhoneOf, cbeBirrReceiptLink } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
+import { PrimaryButton } from '@/ui/glass';
 
 import { findPayerBank, onReceipt, type ReceiptField } from './payerBanks';
-import { useReceiptFlow } from './receiptFlow';
+import { checkingRoute, useReceiptFlow } from './receiptFlow';
 import { useVerifyFlow } from './verifyFlow';
 import { VerifySteps } from './VerifySteps';
 
@@ -79,6 +75,64 @@ function WhitePill({
   );
 }
 
+/** The "— OR TYPE IT —" divider. */
+function OrTypeIt() {
+  const { t } = useTranslation();
+  return (
+    <View className="flex-row items-center gap-3 py-1">
+      <View className="h-px flex-1 bg-black/10" />
+      <Text
+        font="bold"
+        className="text-[13px] uppercase tracking-[0.6px]"
+        style={{ color: colors.muted }}
+      >
+        {t('verifyBank.orTypeIt')}
+      </Text>
+      <View className="h-px flex-1 bg-black/10" />
+    </View>
+  );
+}
+
+/** A white pill text field, like the one for typing a receipt reference. */
+function TypedInput({
+  value,
+  onChange,
+  placeholder,
+  label,
+  capitalize,
+  keyboardType,
+}: {
+  value: string;
+  onChange: (text: string) => void;
+  placeholder: string;
+  label: string;
+  capitalize?: boolean;
+  keyboardType?: 'phone-pad';
+}) {
+  return (
+    <View
+      className="h-14 justify-center rounded-[28px] px-5"
+      style={{
+        backgroundColor: 'rgba(255,255,255,0.85)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.95)',
+      }}
+    >
+      <TextInput
+        value={value}
+        onChangeText={onChange}
+        autoCapitalize={capitalize ? 'characters' : 'none'}
+        autoCorrect={false}
+        keyboardType={keyboardType}
+        placeholder={placeholder}
+        placeholderTextColor={colors.placeholder}
+        accessibilityLabel={label}
+        className="h-full font-heading text-lg text-text"
+      />
+    </View>
+  );
+}
+
 /** Step 2: what to find on this bank's receipt, and the ways to read it (or type it). */
 export default function ReceiptGuideScreen() {
   const { t } = useTranslation();
@@ -88,6 +142,9 @@ export default function ReceiptGuideScreen() {
   const bank = findPayerBank(useReceiptFlow((s) => s.bankCode));
   const setFound = useReceiptFlow((s) => s.setFound);
   const [typed, setTyped] = useState('');
+  const [tid, setTid] = useState('');
+  const [phone, setPhone] = useState('');
+  const setQrData = useVerifyFlow((s) => s.setQrData);
 
   if (!bank || amount <= 0) return <Redirect href="/verify-bank" />;
 
@@ -103,6 +160,15 @@ export default function ReceiptGuideScreen() {
     if (!first || !value) return;
     setFound({ [first.key]: value });
     router.push('/verify-bank/found');
+  };
+
+  // CBE Birr: both the Transaction ID and a real phone number, then the link is built.
+  const birrPhone = cbeBirrPhoneOf(phone);
+  const birrReady = tid.length >= 8 && birrPhone !== null;
+  const checkBirr = () => {
+    if (!birrReady || !birrPhone) return;
+    setQrData(cbeBirrReceiptLink(tid, birrPhone));
+    router.replace(checkingRoute(useReceiptFlow.getState().mode));
   };
 
   return (
@@ -185,38 +251,55 @@ export default function ReceiptGuideScreen() {
             </HeroCard>
 
             {bank.hasQr ? (
-              bank.noPicture ? (
-                // CBE Birr: the SMS is pasted on the next page; no picture is read.
-                <GhostButton
-                  label={t('verifyBank.pasteSms')}
-                  icon={ClipboardPaste}
-                  onPress={() => {
-                    setFound({});
-                    router.push('/verify-bank/found');
-                  }}
-                />
-              ) : (
-                <GhostButton
-                  label={t('verifyBank.readScreenshot')}
-                  icon={ImageIcon}
-                  onPress={() => router.push('/verify-bank/read')}
-                />
-              )
+              <GhostButton
+                label={t('verifyBank.readScreenshot')}
+                icon={ImageIcon}
+                onPress={() => router.push('/verify-bank/read')}
+              />
             ) : null}
 
-            {first && !bank.noPicture ? (
+            {bank.code === 'CBB' ? (
               <>
-                <View className="flex-row items-center gap-3 py-1">
-                  <View className="h-px flex-1 bg-black/10" />
-                  <Text
-                    font="bold"
-                    className="text-[13px] uppercase tracking-[0.6px]"
-                    style={{ color: colors.muted }}
-                  >
-                    {t('verifyBank.orTypeIt')}
-                  </Text>
-                  <View className="h-px flex-1 bg-black/10" />
-                </View>
+                <OrTypeIt />
+                {/* CBE Birr: the link is built from the Transaction ID and the payer's phone. */}
+                <Text font="bold" className="px-1 text-sm" style={{ color: colors.muted }}>
+                  {t('verifyBank.cbeBirr.tid')}
+                </Text>
+                <TypedInput
+                  value={tid}
+                  onChange={(text) => {
+                    // A whole link or SMS pasted here fills both fields.
+                    const parts = cbeBirrPartsOf(text);
+                    if (parts) {
+                      setTid(parts.tid);
+                      setPhone(parts.phone);
+                    } else setTid(text.replace(/\s/g, '').toUpperCase().slice(0, 16));
+                  }}
+                  placeholder="DKJ2D8B6ZW"
+                  label={t('verifyBank.cbeBirr.tid')}
+                  capitalize
+                />
+                <Text font="bold" className="px-1 text-sm" style={{ color: colors.muted }}>
+                  {t('verifyBank.cbeBirr.phone')}
+                </Text>
+                <TypedInput
+                  value={phone}
+                  onChange={(text) => setPhone(text.replace(/[^\d+]/g, '').slice(0, 13))}
+                  placeholder="09xxxxxxxx"
+                  label={t('verifyBank.cbeBirr.phone')}
+                  keyboardType="phone-pad"
+                />
+                <PrimaryButton
+                  label={t('verifyBank.found.check', { amount: formatMoney(amount) })}
+                  disabled={!birrReady}
+                  onPress={checkBirr}
+                />
+              </>
+            ) : null}
+
+            {first && bank.code !== 'CBB' ? (
+              <>
+                <OrTypeIt />
                 <Text font="bold" className="px-1 text-sm" style={{ color: colors.muted }}>
                   {t(`verifyBank.fields.${first.key}`)}
                 </Text>

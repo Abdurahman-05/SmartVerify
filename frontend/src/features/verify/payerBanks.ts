@@ -38,8 +38,6 @@ export interface PayerBank {
   /** No receipt picture: the user pastes the SMS or link (help text = helpKey). */
   pasteOnly?: boolean;
   helpKey?: string;
-  /** No receipt picture can be read: scan the QR or paste the SMS (no screenshot button). */
-  noPicture?: boolean;
   fields: ReceiptField[];
   /** Reads the fields from the receipt QR, or null when the QR is not this bank's receipt. */
   parseQr: (data: string) => Partial<Record<ReceiptField['key'], string>> | null;
@@ -234,7 +232,6 @@ export const payerBanks: PayerBank[] = [
     // Two ways in: the QR on the success screen, or the whole SMS pasted (the invoice link is
     // found inside). The server reads the receipt PDF behind the link; no picture is read.
     hasQr: true,
-    noPicture: true,
     helpKey: 'verifyBank.cbeBirrHelp',
     fields: [
       {
