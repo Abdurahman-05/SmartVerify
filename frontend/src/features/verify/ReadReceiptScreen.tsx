@@ -147,12 +147,6 @@ export default function ReadReceiptScreen() {
         router.replace(checkingRoute(useReceiptFlow.getState().mode));
         return;
       }
-      // CBE Birr: only a QR in the picture can be read (no Gemini); otherwise it is typed.
-      if (bank.code === 'CBB') {
-        setReading(false);
-        Alert.alert(t('common.error'), t('verifyBank.scan.notFound'));
-        return;
-      }
       // The server reads the picture (Gemini) and filters the bank's number: CBE FT reference or
       // telebirr transaction number. The confirm page shows it (or asks for it) and the rest.
       if (!asset.base64) throw new Error('no image data');
@@ -164,7 +158,8 @@ export default function ReadReceiptScreen() {
           bank.code === 'EBR' ||
           bank.code === 'DAS' ||
           bank.code === 'BOA' ||
-          bank.code === 'AWA'
+          bank.code === 'AWA' ||
+          bank.code === 'CBB'
           ? bank.code
           : 'CBE'
       );
@@ -176,7 +171,7 @@ export default function ReadReceiptScreen() {
           ? {}
           : tel
             ? { transactionNumber: reference }
-            : bank.code === 'EBR' || bank.code === 'AWA'
+            : bank.code === 'EBR' || bank.code === 'AWA' || bank.code === 'CBB'
               ? { receiptLink: reference }
               : boaId
                 ? { reference: boaId[1], senderLast5: boaId[2] }

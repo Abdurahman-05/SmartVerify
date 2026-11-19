@@ -1,6 +1,12 @@
 import { z } from 'zod';
 
-import { detectBank, findAwashLink, findReference, type PictureBank } from './ocr.js';
+import {
+  detectBank,
+  findAwashLink,
+  findCbeBirrPictureLink,
+  findReference,
+  type PictureBank,
+} from './ocr.js';
 
 const API = 'https://generativelanguage.googleapis.com/v1beta/models';
 /** Then Tesseract takes over, so the user never waits too long. */
@@ -43,6 +49,12 @@ const WHAT: Record<PictureBank, string> = {
     'the "Receipt Link" of the newest (bottom-most) message exactly as printed, e.g. ' +
     'https://awashpay.awashbank.com:8225/-2KK18G2CLN-6HVCHX; join the link if it is wrapped ' +
     'over lines, without spaces; null if no such link is shown',
+  CBB:
+    'from CBE Birr (sender "CBEBirr"), an SMS (several messages may show) or an app screen. ' +
+    'transactionId: the invoice link of the newest (bottom-most) message exactly as printed ' +
+    '("For invoice https://cbepay1.cbe.com.et/aureceipt?TID=DKJ21VTI2J2&PH=0977770578"); join ' +
+    'the link if it is wrapped over lines, without spaces; NOT the shorturl.at feedback link; ' +
+    'null if no such link is shown',
   DAS:
     'from Dashen Bank (Dashen Super App or receipt). transactionId: the "FT Ref" / ' +
     '"Transaction Reference" exactly as printed, e.g. C65WDTI262870002 (not the longer ' +
@@ -54,7 +66,7 @@ const promptFor = (bank: PictureBank | 'AUTO') =>
   (bank === 'AUTO'
     ? 'from one of these: ' +
       (Object.keys(WHAT) as PictureBank[]).map((b) => `${b} = a receipt ${WHAT[b]}`).join('; ') +
-      '. bank: which one it is (CBE, TEL, DAS, BOA, MPE, EBR or AWA), or null if none. transactionId: as ' +
+      '. bank: which one it is (CBE, TEL, DAS, BOA, MPE, EBR, AWA or CBB), or null if none. transactionId: as ' +
       'described for that bank, or null.'
     : `${WHAT[bank]}, or null.`) +
   ' Read it and return JSON only. amount: the transferred amount as ' +
@@ -78,6 +90,7 @@ export class GeminiError extends Error {}
 function bankReference(bank: PictureBank, id: string): string | null {
   const value = id.trim().toUpperCase();
   if (bank === 'AWA') return findAwashLink(id);
+  if (bank === 'CBB') return findCbeBirrPictureLink(id);
   if (bank === 'EBR') {
     return /^[a-z0-9]{2,30}\/[A-Za-z0-9_-]{16,64}$/.test(id.trim()) ? id.trim() : null;
   }
@@ -161,7 +174,8 @@ export async function readWithGemini(
           said === 'BOA' ||
           said === 'MPE' ||
           said === 'EBR' ||
-          said === 'AWA'
+          said === 'AWA' ||
+          said === 'CBB'
         ? said
         : detectBank(parsed.fullText);
   return {

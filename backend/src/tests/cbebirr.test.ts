@@ -10,6 +10,7 @@ import {
   ReceiptFetchError,
   type FetchedReceipt,
 } from '../modules/verification/fetch-receipt.js';
+import { detectBank, findCbeBirrPictureLink, findReference } from '../modules/verification/ocr.js';
 import { findCbeBirrLink } from '../modules/verification/verification.service.js';
 import {
   createRestaurant,
@@ -129,6 +130,28 @@ describe('reading the CBE Birr link', () => {
     ]) {
       expect(findCbeBirrLink(bad), bad).toBeNull();
     }
+  });
+
+  it('reads the link from a picture of the SMS, wrapped over lines (local phone format)', () => {
+    // As on a real screenshot: the link wraps after the host and after "&", and the SMS also
+    // holds a feedback short link and the older message above.
+    const screen = [
+      'Txn ID DKJ81VTHBRM. Your balance is 100.00Br.. Thank you!',
+      'Txn ID DKJ21AAA2J2,FT26323AAAAA.Your CBEBirr account balance is 90.00Br. ' +
+        'For your feedback please click the link https://shorturl.at/gy3A0 For invoice ' +
+        'https://cbepay1.cbe.com.et',
+      '/aureceipt?TID=DKJ21AAA2J2&',
+      'PH=0900000111',
+      '2: ethio telecom',
+    ].join('\n');
+    const link = 'https://cbepay1.cbe.com.et/aureceipt?TID=DKJ21AAA2J2&PH=0900000111';
+    expect(findCbeBirrPictureLink(screen)).toBe(link);
+    expect(findReference('CBB', screen)).toBe(link);
+    // The sender is CBEBirr, not telebirr, although the phone says "ethio telecom".
+    expect(detectBank(screen)).toBe('CBB');
+    // The server accepts that link as it is.
+    expect(findCbeBirrLink(link)?.href).toBe(link);
+    expect(findCbeBirrPictureLink('For invoice https://shorturl.at/gy3A0')).toBeNull();
   });
 
   it('reads every field of the (masked) PDF text', () => {

@@ -25,7 +25,7 @@ export const getFailedChecks: typeof real.getFailedChecks = USE_MOCK_VERIFICATIO
   : real.getFailedChecks;
 // The offline mock does not know Awash pictures: it answers as for CBE.
 export const readReference: typeof real.readReference = USE_MOCK_VERIFICATION
-  ? (image, bank) => mock.readReference(image, bank === 'AWA' ? 'CBE' : bank)
+  ? (image, bank) => mock.readReference(image, bank === 'AWA' || bank === 'CBB' ? 'CBE' : bank)
   : real.readReference;
 export const compareReading = USE_MOCK_VERIFICATION ? mock.compareReading : real.compareReading;
 

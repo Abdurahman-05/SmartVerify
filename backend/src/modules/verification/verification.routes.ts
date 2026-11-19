@@ -557,7 +557,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         body: z.object({
           image: z.string().min(16).max(9_000_000).describe('PNG / JPEG / WebP, base64'),
           bank: z
-            .enum(['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR', 'AWA', 'AUTO'])
+            .enum(['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR', 'AWA', 'CBB', 'AUTO'])
             .default('CBE')
             .describe(
               'Whose receipt: CBE (FT reference), TEL (telebirr number), DAS (Dashen FT Ref), ' +
@@ -567,7 +567,7 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
         response: {
           200: z.object({
             bank: z
-              .enum(['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR', 'AWA'])
+              .enum(['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR', 'AWA', 'CBB'])
               .nullable()
               .describe('The bank asked for, or (AUTO) the one found; null: none of these'),
             reference: z.string().nullable(),
