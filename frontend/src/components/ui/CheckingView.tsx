@@ -1,4 +1,4 @@
-import { Check, ShieldCheck } from 'lucide-react-native';
+import { Check } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -8,7 +8,6 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
-  withSequence,
   withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,6 +17,7 @@ import { colors } from '@/theme/tokens';
 
 import { BankBadge } from './BankBadge';
 import { GlassCard } from './GlassCard';
+import { LogoLoader } from './LogoLoader';
 import { alpha, useGlass } from './glassTokens';
 import { formatMoney } from './MoneyText';
 import { ScreenBackground } from './ScreenBackground';
@@ -25,8 +25,6 @@ import { Text } from './Text';
 
 // Design: docs/design/owner/verify-handoff/screens/14-checking.png
 const DONE = '#22C55E';
-const RING = 170;
-const CIRCLE = 100;
 
 /** A turning ring: coloured on the top and right; still when the phone asks for less motion. */
 function Spinner({
@@ -68,36 +66,10 @@ function Spinner({
   );
 }
 
-/** Soft halo behind the circle that breathes in and out (none with reduce motion). */
-function Pulse({ color }: { color: string }) {
-  const reduced = useReducedMotion();
-  const scale = useSharedValue(1);
-  useEffect(() => {
-    if (reduced) return;
-    scale.value = withRepeat(
-      withSequence(
-        withTiming(1.08, { duration: 900, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 900, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1
-    );
-    return () => cancelAnimation(scale);
-  }, [reduced, scale]);
-  const style = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  return (
-    <Animated.View
-      style={[
-        { position: 'absolute', width: 140, height: 140, borderRadius: 70, backgroundColor: color },
-        style,
-      ]}
-    />
-  );
-}
-
 type StepState = 'done' | 'active' | 'todo';
 
 /**
- * Checking payment: deep theme circle with a shield, a turning ring and a soft pulse; the amount
+ * Checking payment: the animated Gebtual G logo; the amount
  * being checked with the bank; and the steps (scanned ✓, asking the bank …, comparing ○).
  */
 export function CheckingView({
@@ -127,33 +99,8 @@ export function CheckingView({
           accessibilityLiveRegion="polite"
           accessibilityLabel={`${title}. ${subtitle}`}
         >
-          <View
-            style={{ width: RING, height: RING, alignItems: 'center', justifyContent: 'center' }}
-          >
-            <Pulse color={alpha(g.primary, 0.18)} />
-            <View className="absolute">
-              <Spinner
-                size={RING}
-                width={5}
-                color={g.primary}
-                track="rgba(255,255,255,0.7)"
-                duration={1200}
-              />
-            </View>
-            <View
-              style={{
-                width: CIRCLE,
-                height: CIRCLE,
-                borderRadius: CIRCLE / 2,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: g.primaryDeep,
-                boxShadow: `0 14px 28px ${alpha(g.primary, 0.3)}`,
-              }}
-            >
-              <ShieldCheck size={46} color="#FFFFFF" strokeWidth={2} />
-            </View>
-          </View>
+          {/* The animated Gebtual G, drawn on in a loop, instead of a shield in a ring. */}
+          <LogoLoader size={150} />
 
           <View className="items-center">
             <Text font="heading" className="text-center text-[28px] leading-[34px]">
