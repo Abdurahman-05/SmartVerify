@@ -210,7 +210,6 @@ export function telebirrNumberFromQr(text: string): string | null {
  */
 export function receiptLinkFromQr(bankCode: string, data: string): string | null {
   if (bankCode === 'CBE') return isCbeReceiptLink(data) ? data.trim() : null;
-  if (bankCode === 'AWA') return awashLinkOf(data);
   if (bankCode === 'CBB') return cbeBirrLinkOf(data);
   if (bankCode === 'TEL') {
     const number = telebirrNumberFromQr(data) ?? telebirrNumberOf(data);
