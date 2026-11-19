@@ -391,8 +391,8 @@ const CBEBIRR_PATH = '/aureceipt';
 const CBEBIRR_TID = /^[A-Z0-9]{8,16}$/;
 /** The payer's phone, as in the SMS. Only used to rebuild the link; never stored or logged. */
 const CBEBIRR_PH = /^\d{9,15}$/;
-/** The receipt is a small PDF: 8 s and 2 MB at most. */
-const CBEBIRR_FETCH = { timeoutMs: 8_000, maxBytes: 2 * 1024 * 1024 };
+/** The receipt PDF (~0.5 MB) is slow to download from CBE (10-30 s seen): 22 s and 2 MB at most. */
+const CBEBIRR_FETCH = { timeoutMs: 22_000, maxBytes: 2 * 1024 * 1024 };
 
 /** The pasted CBE Birr SMS or scanned QR text (the link is found inside). */
 export const CBEBIRR_TEXT = /^[\s\S]{10,2000}$/;

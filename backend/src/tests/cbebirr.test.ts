@@ -223,7 +223,7 @@ describe('POST /verify/cbebirr', () => {
     expect(url?.href).toBe(LINK);
     expect(options).toMatchObject({
       tlsStrict: true,
-      timeoutMs: 8000,
+      timeoutMs: 22_000,
       maxBytes: 2 * 1024 * 1024,
     });
 
