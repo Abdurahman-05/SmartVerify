@@ -285,6 +285,22 @@ function receiverCheck(
     const name = matches.some((a) => sameName(receipt.receiverName, nameOf(a)));
     return { account, name: !account || name, shown: printed.slice(-4), match: pick(matches) };
   }
+  if (receipt.transfer === 'telebirr_bank') {
+    // Telebirr to a bank: the receipt's receiver name is the bank's name, so only the full
+    // account number counts, at the printed bank when we know it.
+    const dest = receipt.destinationAccount;
+    const bank = receipt.destinationBank ?? '';
+    const matches = input.accounts.filter(
+      (a) =>
+        a.bankCode !== 'TEL' && (bank === '' || a.bankCode === bank) && a.accountNumber === dest
+    );
+    return {
+      account: dest.length >= 8 && matches.length > 0,
+      name: true,
+      shown: dest.slice(-4),
+      match: pick(matches, false),
+    };
+  }
   if (receipt.transfer === 'wallet_to_bank') {
     const dest = receipt.destinationAccount;
     const matches = input.accounts.filter((a) => a.bankCode !== 'TEL' && a.accountNumber === dest);
@@ -361,6 +377,7 @@ export function explainComparison(receipt: ParsedReceipt, input: CompareInput) {
   const otherBank = receipt.transfer === 'other_bank';
   const wallet = receipt.transfer === 'wallet';
   const walletToBank = receipt.transfer === 'wallet_to_bank';
+  const telebirrBank = receipt.transfer === 'telebirr_bank';
   const ebirrBank = receipt.transfer === 'ebirr_bank';
   const ebirrWallet = receipt.transfer === 'ebirr_wallet';
   const masked = receipt.transfer === 'masked_account';
@@ -369,8 +386,13 @@ export function explainComparison(receipt: ParsedReceipt, input: CompareInput) {
     return list.length ? list.join(', ') : 'none saved';
   };
   const nameLine = `receiver name matches the saved holder name ${receiver.account ? mark(receiver.name) : '(skipped)'}`;
-  const receiverLines =
-    receipt.transfer === 'cbebirr'
+  const receiverLines = telebirrBank
+    ? [
+        `Telebirr -> bank: account ...${receiver.shown} in our bank accounts ` +
+          `[${ours((a) => a.bankCode !== 'TEL' && (!receipt.destinationBank || a.bankCode === receipt.destinationBank))}] ${mark(receiver.account)}`,
+        'receiver name on this receipt is the bank (name check skipped)',
+      ]
+    : receipt.transfer === 'cbebirr'
       ? [
           receiver.by === 'name'
             ? `CBE Birr: no account on the receipt, matched BY NAME ONLY against our ` +

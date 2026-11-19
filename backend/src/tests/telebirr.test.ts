@@ -135,7 +135,7 @@ describe('POST /verify/telebirr', () => {
     }
   });
 
-  it('telebirr to a bank: our full account number and holder name; the bank name is ignored', async () => {
+  it('telebirr to a bank: only the account number (and bank) count, not any name', async () => {
     fetchMock.mockResolvedValueOnce(page(TO_BANK));
     expect(
       (
@@ -149,6 +149,25 @@ describe('POST /verify/telebirr', () => {
         await verify({ transactionNumber: 'DJE7SF7UOX', expectedAmountEtb: 20 }, r.manager.token)
       ).json()
     ).toMatchObject({ status: 'not_matching', reasons: ['WRONG_RECEIVER'] });
+  });
+
+  it('telebirr to a bank: another or no holder name still verifies; another bank does not', async () => {
+    const check = async (swaps: [string, string][]) => {
+      fetchMock.mockResolvedValueOnce(page(TO_BANK, swaps));
+      return (
+        await verify({ transactionNumber: 'DJE7SF7UOX', expectedAmountEtb: 20 }, r.manager.token)
+      ).json();
+    };
+    // The receipt's name is the bank's; the name after the account number does not matter.
+    expect(await check([['ABEBE COFFEE BEKELE', 'FAHMI ABDI AREBO']])).toMatchObject({
+      status: 'verified',
+    });
+    expect(await check([['   ABEBE COFFEE BEKELE', '']])).toMatchObject({ status: 'verified' });
+    // The same number at a bank that is not ours is another account.
+    expect(await check([['Commercial Bank of Ethiopia', 'Dashen Bank']])).toMatchObject({
+      status: 'not_matching',
+      reasons: ['WRONG_RECEIVER'],
+    });
   });
 
   it('an unknown number is NOT_FOUND (saved as a failed try); a bad number is refused', async () => {

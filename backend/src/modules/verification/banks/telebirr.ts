@@ -1,3 +1,4 @@
+import { awashBankCode } from './awash.js';
 import type { ParsedReceipt, ReceiptParser } from './types.js';
 
 /** Addis Ababa is UTC+3 all year (no daylight saving). */
@@ -85,7 +86,7 @@ export const TELEBIRR_NOT_FOUND = /This request is not correct/i;
  * Telebirr receipt page (transactioninfo.ethiotelecom.et/receipt/<number>), as checked against
  * real ones. Wallet to wallet: the credited party is the receiver (name + phone masked to first
  * and last 4 digits). Wallet to bank: the credited party is the bank; the real destination is
- * the "Bank account number" row (full number + holder name).
+ * the "Bank account number" row (full number); it alone is checked, not any name.
  */
 export const telebirrParser: ReceiptParser = {
   parse(html) {
@@ -103,8 +104,9 @@ export const telebirrParser: ReceiptParser = {
     if (!/^[A-Z0-9]{10}$/.test(reference) || !date || !amount?.[1] || !status) return null;
     if (!payerName || !creditedName) return null;
 
-    // "1000529213267 ABDURHAMAN ELIYAS MUHAMED" on transfers to a bank.
-    const bankRow = /^(\d{8,16})\s+(.+)$/.exec(get('bank account number'));
+    // "1000529213267 ABDURHAMAN ELIYAS MUHAMED" on transfers to a bank (the holder name may be
+    // missing: the receipt's own receiver name is then the bank's name, not a person).
+    const bankRow = /^(\d{8,16})(?:\s+(.+))?$/.exec(get('bank account number'));
     const toBank = Boolean(bankRow);
     const value = Number(amount[1].replace(/,/g, ''));
     if (!Number.isFinite(value)) return null;
@@ -112,16 +114,18 @@ export const telebirrParser: ReceiptParser = {
     return {
       payerName,
       payerAccount,
-      receiverName: toBank ? (bankRow?.[2] ?? '').trim() : creditedName,
+      receiverName: toBank ? (bankRow?.[2] ?? creditedName).trim() : creditedName,
       receiverAccount: toBank ? (bankRow?.[1] ?? '') : creditedAccount,
       amountEtb: Math.floor(value),
       currency: 'ETB',
       date,
       reference,
       status,
-      transfer: toBank ? 'wallet_to_bank' : 'wallet',
+      transfer: toBank ? 'telebirr_bank' : 'wallet',
       reason: get('payment reason'),
       destinationAccount: toBank ? (bankRow?.[1] ?? '') : '',
+      // The credited party is the receiving bank ("Commercial Bank of Ethiopia").
+      ...(toBank && { destinationBank: awashBankCode(creditedName) }),
     } satisfies ParsedReceipt;
   },
 };

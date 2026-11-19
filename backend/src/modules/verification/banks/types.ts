@@ -17,7 +17,9 @@ export interface ParsedReceipt {
    * cbe = CBE to CBE (receiver name and account last 4 are real). other_bank = CBE to another
    * bank: the receiver is CBE's inter-bank account, the real destination is in the reason.
    * wallet = Telebirr to Telebirr (receiver name + phone masked to first and last 4 digits).
-   * wallet_to_bank = Telebirr to a bank account (full account number + holder name).
+   * telebirr_bank = Telebirr to a bank account: the receipt's receiver name is the BANK's name,
+   * so only the account number (+ the bank, when known) is checked; destinationBank = our bank code.
+   * wallet_to_bank = (M-PESA, BOA) wallet to a bank account (full account number + holder name).
    * ebirr_bank = eBirr to a bank account (account printed 231****31, no holder name).
    * ebirr_wallet = eBirr to a wallet (name and full phone from the payment reason).
    * awash = Awash sender's receipt: beneficiary account (full or masked) + name, and the
@@ -31,6 +33,7 @@ export interface ParsedReceipt {
     | 'other_bank'
     | 'wallet'
     | 'wallet_to_bank'
+    | 'telebirr_bank'
     | 'masked_account'
     | 'ebirr_bank'
     | 'ebirr_wallet';
