@@ -5,6 +5,7 @@ import { AppState, Pressable, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BrandMark } from '@/components/ui/BrandMark';
+import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { Text } from '@/components/ui/Text';
 import { askBiometric, checkPasscode, MAX_TRIES, useAppLock } from '@/lib/appLock';
 import { useSession } from '@/store/session';
@@ -76,7 +77,8 @@ function LockScreen() {
 
   const left = MAX_TRIES - tries;
   return (
-    <View className="absolute inset-0 bg-background">
+    // The same theme background as the other pages (it follows the chosen theme colour).
+    <ScreenBackground style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}>
       <SafeAreaView className="flex-1 justify-center gap-6 px-6">
         <View className="items-center gap-2">
           <BrandMark size={48} />
@@ -110,6 +112,6 @@ function LockScreen() {
           </Text>
         </Pressable>
       </SafeAreaView>
-    </View>
+    </ScreenBackground>
   );
 }
