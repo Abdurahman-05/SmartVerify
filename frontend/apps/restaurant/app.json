@@ -18,7 +18,9 @@
         "monochromeImage": "../../assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "permissions": ["android.permission.CAMERA"]
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "output": "static",
@@ -67,12 +69,16 @@
       "reactCompiler": true
     },
     "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "95b55aec-d9a3-460a-92ec-c3486c711060"
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
       },
-      "appVariant": "restaurant"
+      "appVariant": "restaurant",
+      "eas": {
+        "projectId": "71724222-4d7f-4723-ad7e-c977c7d9613c"
+      }
     },
-    "owner": "abdu-sala"
+    "owner": "sala189"
   }
 }

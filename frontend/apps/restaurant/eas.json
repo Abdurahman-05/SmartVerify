@@ -20,6 +20,15 @@
         "EXPO_PUBLIC_API_URL": "https://api.gebtual.com.et/api/v1"
       },
       "environment": "production"
+    },
+    "release-apk": {
+      "extends": "production",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.gebtual.com.et/api/v1"
+      }
     }
   }
 }
