@@ -157,7 +157,8 @@ export default function ReadReceiptScreen() {
           bank.code === 'MPE' ||
           bank.code === 'EBR' ||
           bank.code === 'DAS' ||
-          bank.code === 'BOA'
+          bank.code === 'BOA' ||
+          bank.code === 'AWA'
           ? bank.code
           : 'CBE'
       );
@@ -169,7 +170,7 @@ export default function ReadReceiptScreen() {
           ? {}
           : tel
             ? { transactionNumber: reference }
-            : bank.code === 'EBR'
+            : bank.code === 'EBR' || bank.code === 'AWA'
               ? { receiptLink: reference }
               : boaId
                 ? { reference: boaId[1], senderLast5: boaId[2] }
@@ -187,7 +188,7 @@ export default function ReadReceiptScreen() {
     router.replace('/verify-bank/found');
   };
   // These banks' pictures are read by the server.
-  const cbe = ['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR'].includes(bank.code);
+  const cbe = ['CBE', 'TEL', 'DAS', 'BOA', 'MPE', 'EBR', 'AWA'].includes(bank.code);
 
   const names = onReceipt(bank).map((f) => t(`verifyBank.short.${f.key}`));
 

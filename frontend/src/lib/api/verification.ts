@@ -68,7 +68,7 @@ export const getFailedChecks = (period: ListPeriod, day?: string) =>
  */
 export const readReference = (
   imageBase64: string,
-  bank: 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'MPE' | 'EBR' = 'CBE'
+  bank: 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'MPE' | 'EBR' | 'AWA' = 'CBE'
 ) =>
   api<{ reference: string | null; text: string; source: 'gemini' | 'ocr' }>(
     '/verify/read-reference',

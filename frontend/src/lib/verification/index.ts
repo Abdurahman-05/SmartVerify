@@ -21,7 +21,10 @@ export const verifyAwash = USE_MOCK_VERIFICATION ? mock.verifyCbe : real.verifyA
 export const getFailedChecks: typeof real.getFailedChecks = USE_MOCK_VERIFICATION
   ? (period) => mock.getFailedChecks(period === 'all' ? '30d' : period)
   : real.getFailedChecks;
-export const readReference = USE_MOCK_VERIFICATION ? mock.readReference : real.readReference;
+// The offline mock does not know Awash pictures: it answers as for CBE.
+export const readReference: typeof real.readReference = USE_MOCK_VERIFICATION
+  ? (image, bank) => mock.readReference(image, bank === 'AWA' ? 'CBE' : bank)
+  : real.readReference;
 export const compareReading = USE_MOCK_VERIFICATION ? mock.compareReading : real.compareReading;
 
 export const failedChecksKey = (period: ListPeriod, day?: string) =>
@@ -191,6 +194,7 @@ export function telebirrNumberFromQr(text: string): string | null {
  */
 export function receiptLinkFromQr(bankCode: string, data: string): string | null {
   if (bankCode === 'CBE') return isCbeReceiptLink(data) ? data.trim() : null;
+  if (bankCode === 'AWA') return awashLinkOf(data);
   if (bankCode === 'TEL') {
     const number = telebirrNumberFromQr(data) ?? telebirrNumberOf(data);
     return number ? telebirrReceiptLink(number) : null;

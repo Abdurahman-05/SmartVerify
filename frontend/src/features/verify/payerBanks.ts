@@ -205,10 +205,11 @@ export const payerBanks: PayerBank[] = [
     code: 'AWA',
     name: 'Awash Bank',
     shortName: 'Awash',
-    // The customer paid from Awash: the SMS has a receipt link; it is pasted, never read from
-    // a picture. The money can have gone to our account at any bank.
+    // The customer paid from Awash; the money can have gone to our account at any bank. The
+    // receipt link is read from a photo / screenshot of the SMS, or from the QR on the receipt
+    // page; when it cannot be read, the link is pasted (help text).
     labelKey: 'verifyBank.awashLabel',
-    pasteOnly: true,
+    hasQr: true,
     helpKey: 'verifyBank.awashHelp',
     fields: [
       {
@@ -221,7 +222,11 @@ export const payerBanks: PayerBank[] = [
         valid: (v) => awashLinkOf(v) === v,
       },
     ],
-    parseQr: () => null,
+    // The QR on the Awash receipt page is the receipt link itself.
+    parseQr: (data) => {
+      const link = awashLinkOf(data);
+      return link ? { receiptLink: link } : null;
+    },
   },
   // Only banks the server can check. Others (Zemen, CBE Birr, Wegagen…) go through
   // "Other bank", which says they cannot be checked yet, instead of failing after the photo.

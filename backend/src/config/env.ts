@@ -89,6 +89,7 @@ const schema = z.object({
   GEMINI_API_KEY_BOA: z.string().min(10).optional(),
   GEMINI_API_KEY_MPE: z.string().min(10).optional(),
   GEMINI_API_KEY_EBR: z.string().min(10).optional(),
+  GEMINI_API_KEY_AWA: z.string().min(10).optional(),
   /** Gemini model for reading pictures: fast and accurate on receipts (change when retired). */
   GEMINI_MODEL: z.string().min(1).default('gemini-3.5-flash-lite'),
   /** DEVELOPMENT: Unlimited-OCR's OpenAI-compatible API (vLLM/Ollama), e.g. http://host:8000/v1. */
@@ -128,7 +129,7 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
 /** The Gemini key for this bank's pictures: its own key if set, else the shared GEMINI_API_KEY. */
 export function geminiKeyFor(
   env: Env,
-  bank: 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'MPE' | 'EBR' | 'AUTO'
+  bank: 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'MPE' | 'EBR' | 'AWA' | 'AUTO'
 ): string | undefined {
   // AUTO (bank not known yet) uses the main key.
   return (bank === 'AUTO' ? undefined : env[`GEMINI_API_KEY_${bank}`]) ?? env.GEMINI_API_KEY;

@@ -98,7 +98,7 @@ export function findBoaReference(text: string): string | null {
   return fromLink?.[1] ?? findCbeReference(text);
 }
 
-export type PictureBank = 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'MPE' | 'EBR';
+export type PictureBank = 'CBE' | 'TEL' | 'DAS' | 'BOA' | 'MPE' | 'EBR' | 'AWA';
 
 /** Words that only one bank's receipts carry, strongest first. */
 const BANK_WORDS: [PictureBank, RegExp][] = [
@@ -108,6 +108,8 @@ const BANK_WORDS: [PictureBank, RegExp][] = [
   ['TEL', /transactioninfo\.ethiotelecom|telebirr|ethio\s*telecom|ቴሌብር/i],
   ['DAS', /dashen|superapp|receipts\.dashenbanksc|ዳሽን/i],
   ['BOA', /abyssinia|bankofabyssinia|\bBoA\b|አቢሲኒያ/i],
+  // Before CBE: an Awash transfer to CBE names "Commercial Bank of Ethiopia" too.
+  ['AWA', /awashpay|nurturing\s+like\s+the\s+river|አዋሽ\s*ባንክ/i],
   ['CBE', /commercial\s*bank\s*of\s*ethiopia|cbe\.com\.et|\bCBE\b|ኢትዮጵያ\s*ንግድ\s*ባንክ/i],
 ];
 
@@ -140,16 +142,33 @@ export function findEbirrReference(text: string): string | null {
   return m?.[1] && m[2] ? `${m[1].toLowerCase()}/${m[2]}` : null;
 }
 
+/**
+ * The Awash receipt link in a picture of the SMS ("Receipt Link: https://awashpay.awashbank.com:
+ * 8225/-2KK18G2CLN-6HVCHX", wrapped over lines), as the full link. An SMS screenshot often shows
+ * several messages: the last link is the newest payment.
+ */
+export function findAwashLink(text: string): string | null {
+  const links = [
+    ...text.matchAll(
+      /awashpay\s*\.\s*awashbank\s*\.\s*com\s*:\s*8225\s*\/\s*(-\s*[A-Z0-9]{8,12}\s*-\s*[A-Z0-9]{4,8})(?![A-Z0-9])/gi
+    ),
+  ];
+  const token = links.at(-1)?.[1]?.replace(/\s/g, '').toUpperCase();
+  return token ? `https://awashpay.awashbank.com:8225/${token}` : null;
+}
+
 /** The reference to look for in a picture of this bank's receipt. */
 export const findReference = (bank: PictureBank, text: string) =>
-  bank === 'EBR'
-    ? findEbirrReference(text)
-    : bank === 'MPE'
-      ? findMpesaNumber(text)
-      : bank === 'TEL'
-        ? findTelebirrNumber(text)
-        : bank === 'DAS'
-          ? findDashenReference(text)
-          : bank === 'BOA'
-            ? findBoaReference(text)
-            : findCbeReference(text);
+  bank === 'AWA'
+    ? findAwashLink(text)
+    : bank === 'EBR'
+      ? findEbirrReference(text)
+      : bank === 'MPE'
+        ? findMpesaNumber(text)
+        : bank === 'TEL'
+          ? findTelebirrNumber(text)
+          : bank === 'DAS'
+            ? findDashenReference(text)
+            : bank === 'BOA'
+              ? findBoaReference(text)
+              : findCbeReference(text);

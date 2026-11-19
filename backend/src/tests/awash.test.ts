@@ -8,6 +8,7 @@ import {
   ReceiptFetchError,
   type FetchedReceipt,
 } from '../modules/verification/fetch-receipt.js';
+import { detectBank, findAwashLink, findReference } from '../modules/verification/ocr.js';
 import { findAwashToken } from '../modules/verification/verification.service.js';
 import {
   createRestaurant,
@@ -73,6 +74,20 @@ describe('reading the Awash receipt', () => {
     expect(
       findAwashToken('https://awashpay.awashbank.com:8225/awashbirrpro/receipts/x')
     ).toBeNull();
+  });
+
+  it('reads the link from a picture of the SMS: the newest message, wrapped lines joined', () => {
+    // Two messages on screen (as in a real screenshot), the link wrapped after the port.
+    const screen =
+      'Receipt Link: https://awashpay.awashbank.com:\n8225/-2KK18G2CEV-6HVCBO. Contact Center 8980.\n' +
+      'Dear Customer , You have transferred to other bank ETB 13 To 1000123456789 In Commercial ' +
+      'Bank of Ethiopia ... Receipt Link: https://awashpay.awashbank.com:\n8225/-2KK18G2AAA-6HVAAA.';
+    expect(findAwashLink(screen)).toBe(LINK);
+    expect(findReference('AWA', screen)).toBe(LINK);
+    expect(detectBank(screen)).toBe('AWA');
+    expect(findAwashLink('Receipt Link: https://shorturl.at/WISQB')).toBeNull();
+    // A CBE receipt is still CBE.
+    expect(detectBank('Commercial Bank of Ethiopia Transaction ID FT26286JZH4B')).toBe('CBE');
   });
 
   it('reads every field of the (masked) page', () => {

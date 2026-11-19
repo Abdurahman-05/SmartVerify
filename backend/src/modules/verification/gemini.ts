@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { detectBank, findReference, type PictureBank } from './ocr.js';
+import { detectBank, findAwashLink, findReference, type PictureBank } from './ocr.js';
 
 const API = 'https://generativelanguage.googleapis.com/v1beta/models';
 /** Then Tesseract takes over, so the user never waits too long. */
@@ -38,6 +38,11 @@ const WHAT: Record<PictureBank, string> = {
     'cs.bankofabyssinia.com/slip/?trx= link is shown, the full trx value (e.g. ' +
     'FT26238SRG1T10431); otherwise the Transaction Reference: FT followed by 10 letters or ' +
     'digits, e.g. FT26286NDBY5',
+  AWA:
+    'from Awash Bank, an SMS (several messages may show) or the receipt page. transactionId: ' +
+    'the "Receipt Link" of the newest (bottom-most) message exactly as printed, e.g. ' +
+    'https://awashpay.awashbank.com:8225/-2KK18G2CLN-6HVCHX; join the link if it is wrapped ' +
+    'over lines, without spaces; null if no such link is shown',
   DAS:
     'from Dashen Bank (Dashen Super App or receipt). transactionId: the "FT Ref" / ' +
     '"Transaction Reference" exactly as printed, e.g. C65WDTI262870002 (not the longer ' +
@@ -49,7 +54,7 @@ const promptFor = (bank: PictureBank | 'AUTO') =>
   (bank === 'AUTO'
     ? 'from one of these: ' +
       (Object.keys(WHAT) as PictureBank[]).map((b) => `${b} = a receipt ${WHAT[b]}`).join('; ') +
-      '. bank: which one it is (CBE, TEL, DAS, BOA, MPE or EBR), or null if none. transactionId: as ' +
+      '. bank: which one it is (CBE, TEL, DAS, BOA, MPE, EBR or AWA), or null if none. transactionId: as ' +
       'described for that bank, or null.'
     : `${WHAT[bank]}, or null.`) +
   ' Read it and return JSON only. amount: the transferred amount as ' +
@@ -72,6 +77,7 @@ export class GeminiError extends Error {}
 /** Gemini's own transactionId, kept only if it has the bank's exact format. */
 function bankReference(bank: PictureBank, id: string): string | null {
   const value = id.trim().toUpperCase();
+  if (bank === 'AWA') return findAwashLink(id);
   if (bank === 'EBR') {
     return /^[a-z0-9]{2,30}\/[A-Za-z0-9_-]{16,64}$/.test(id.trim()) ? id.trim() : null;
   }
@@ -154,7 +160,8 @@ export async function readWithGemini(
           said === 'DAS' ||
           said === 'BOA' ||
           said === 'MPE' ||
-          said === 'EBR'
+          said === 'EBR' ||
+          said === 'AWA'
         ? said
         : detectBank(parsed.fullText);
   return {

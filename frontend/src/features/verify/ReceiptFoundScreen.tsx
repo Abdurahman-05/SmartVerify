@@ -155,7 +155,8 @@ export default function ReceiptFoundScreen() {
       />
 
       <View className="gap-4 px-4 pt-3">
-        {bank.helpKey ? (
+        {/* Only when the picture did not give everything (the person pastes the rest). */}
+        {bank.helpKey && bank.fields.some((f) => !found[f.key]) ? (
           <Text tone="muted" className="text-base">
             {t(bank.helpKey)}
           </Text>
