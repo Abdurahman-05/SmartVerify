@@ -534,7 +534,7 @@
     "emptyCart": "Add items to send an order.",
     "confirmQuestion": "Is this the right table?",
     "total": "Total",
-    "yesSend": "YES, SEND TO TABLE {{number}}",
+    "yesSend": "YES, SEND TO KITCHEN",
     "noChange": "NO, CHANGE TABLE",
     "customerName": "Customer name",
     "customerNamePlaceholder": "e.g. Mulu T.",
