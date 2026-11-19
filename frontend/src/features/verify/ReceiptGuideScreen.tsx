@@ -1,5 +1,11 @@
 import { Redirect, useRouter } from 'expo-router';
-import { ArrowRight, ChevronLeft, Image as ImageIcon, ScanLine } from 'lucide-react-native';
+import {
+  ArrowRight,
+  ChevronLeft,
+  ClipboardPaste,
+  Image as ImageIcon,
+  ScanLine,
+} from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -179,14 +185,26 @@ export default function ReceiptGuideScreen() {
             </HeroCard>
 
             {bank.hasQr ? (
-              <GhostButton
-                label={t('verifyBank.readScreenshot')}
-                icon={ImageIcon}
-                onPress={() => router.push('/verify-bank/read')}
-              />
+              bank.noPicture ? (
+                // CBE Birr: the SMS is pasted on the next page; no picture is read.
+                <GhostButton
+                  label={t('verifyBank.pasteSms')}
+                  icon={ClipboardPaste}
+                  onPress={() => {
+                    setFound({});
+                    router.push('/verify-bank/found');
+                  }}
+                />
+              ) : (
+                <GhostButton
+                  label={t('verifyBank.readScreenshot')}
+                  icon={ImageIcon}
+                  onPress={() => router.push('/verify-bank/read')}
+                />
+              )
             ) : null}
 
-            {first ? (
+            {first && !bank.noPicture ? (
               <>
                 <View className="flex-row items-center gap-3 py-1">
                   <View className="h-px flex-1 bg-black/10" />

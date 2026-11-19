@@ -352,6 +352,8 @@ model Transaction {
   bill           Bill?              @relation(fields: [billId], references: [id], onDelete: Restrict)
   /// Bank reference, e.g. "FT1234567890". null while pending without one.
   reference      String?
+  /// A second reference of the same payment (CBE Birr: the CBE FT reference), for duplicates.
+  altReference   String?
   payerName      String?
   /// Name registered on the receiving account at the bank (for nameMismatch).
   registeredName String?
@@ -375,6 +377,7 @@ model Transaction {
   @@index([businessId, createdAt])
   @@index([businessId, bankAccountId, createdAt])
   @@index([billId])
+  @@index([altReference])
 }
 
 // ─── Restaurant Plus ───────────────────────────────────────────────────────

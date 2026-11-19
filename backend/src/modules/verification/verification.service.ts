@@ -8,6 +8,7 @@ import type { PrismaClient } from '../../generated/prisma/client.js';
 import { AppError } from '../../shared/errors/app-error.js';
 import { AWASH_NOT_FOUND, awashParser } from './banks/awash.js';
 import { cbeParser } from './banks/cbe.js';
+import { cbeBirrParser } from './banks/cbebirr.js';
 import { BOA_NOT_FOUND, boaParser } from './banks/boa.js';
 import { dashenParser } from './banks/dashen.js';
 import { EBIRR_NOT_FOUND, ebirrParser } from './banks/ebirr.js';
@@ -384,6 +385,98 @@ export function findAwashToken(text: string): string | null {
   return null;
 }
 
+/** CBE Birr receipt link: https://cbepay1.cbe.com.et/aureceipt?TID=DKJ21VTI2J2&PH=2519XXXXXXXX */
+const CBEBIRR_HOST = 'cbepay1.cbe.com.et';
+const CBEBIRR_PATH = '/aureceipt';
+const CBEBIRR_TID = /^[A-Z0-9]{8,16}$/;
+/** The payer's phone, as in the SMS. Only used to rebuild the link; never stored or logged. */
+const CBEBIRR_PH = /^\d{9,15}$/;
+/** The receipt is a small PDF: 8 s and 2 MB at most. */
+const CBEBIRR_FETCH = { timeoutMs: 8_000, maxBytes: 2 * 1024 * 1024 };
+
+/** The pasted CBE Birr SMS or scanned QR text (the link is found inside). */
+export const CBEBIRR_TEXT = /^[\s\S]{10,2000}$/;
+
+/**
+ * The receipt link from the pasted CBE Birr SMS or the scanned QR text (SSRF guard). Only https,
+ * host cbepay1.cbe.com.et, path /aureceipt, exactly the parameters TID and PH, no user, port or
+ * fragment; the link is rebuilt from the two values, so nothing else can ride along. Else null.
+ */
+export function findCbeBirrLink(text: string): URL | null {
+  for (const [candidate] of text.matchAll(/https?:\/\/[^\s<>"']+/gi)) {
+    let url: URL;
+    try {
+      // The SMS may end the link with a full stop.
+      url = new URL(candidate.replace(/[.,;:)\]]+$/, ''));
+    } catch {
+      continue;
+    }
+    const keys = [...url.searchParams.keys()].sort().join(',');
+    const tid = url.searchParams.get('TID')?.toUpperCase() ?? '';
+    const ph = url.searchParams.get('PH') ?? '';
+    if (
+      url.protocol !== 'https:' ||
+      url.username ||
+      url.password ||
+      url.hostname !== CBEBIRR_HOST ||
+      url.port ||
+      url.pathname !== CBEBIRR_PATH ||
+      url.hash ||
+      keys !== 'PH,TID' ||
+      !CBEBIRR_TID.test(tid) ||
+      !CBEBIRR_PH.test(ph)
+    ) {
+      continue;
+    }
+    return new URL(`https://${CBEBIRR_HOST}${CBEBIRR_PATH}?TID=${tid}&PH=${ph}`);
+  }
+  return null;
+}
+
+/**
+ * The receipt text, only from a real PDF: the content type says PDF AND the bytes start with %PDF
+ * (an HTML shell or an error page answers 200 too). Read from memory; nothing is written to disk.
+ */
+async function cbeBirrText(fetched: FetchedReceipt): Promise<string | null> {
+  if (!fetched.contentType.startsWith('application/pdf')) return null;
+  if (fetched.body.subarray(0, 4).toString('latin1') !== '%PDF') return null;
+  return pdfText(fetched.body);
+}
+
+/**
+ * Fetches the CBE Birr receipt PDF behind the SMS / QR link and checks it. Only the fetched PDF
+ * is trusted, never the pasted text. The link, the phone in it and the PDF are not kept or logged.
+ */
+export async function verifyCbeBirr(
+  prisma: PrismaClient,
+  env: Env,
+  businessId: string,
+  text: string,
+  expectedAmountEtb: number,
+  log?: Pick<FastifyBaseLogger, 'info'>,
+  now = new Date(),
+  /** Check against these accounts instead of the business's (subscription payments). */
+  receiver?: { accounts: OwnAccount[]; name: string; maxAgeHours?: number }
+): Promise<VerifyResponse> {
+  const url = findCbeBirrLink(text);
+  if (!url) throw new AppError('INVALID_URL');
+  return checkReceipt({
+    prisma,
+    env,
+    businessId,
+    source: { url, headers: { 'user-agent': 'SmartVerify/1.0', accept: 'application/pdf' } },
+    tlsStrict: true,
+    fetch: CBEBIRR_FETCH,
+    parser: cbeBirrParser,
+    bank: 'CBE Birr',
+    expectedAmountEtb,
+    log,
+    now,
+    toText: cbeBirrText,
+    receiver,
+  });
+}
+
 /** Fetches the Awash sender's receipt behind the SMS link and checks it like the other banks. */
 export async function verifyAwash(
   prisma: PrismaClient,
@@ -588,6 +681,8 @@ async function checkReceipt(input: {
     receiverName: receipt.receiverName,
     date: receipt.date.toISOString(),
     ...(result.accountId && { bankAccountId: result.accountId }),
+    ...(receipt.altReference && { altReference: receipt.altReference }),
+    ...(result.matchedBy && { matchedBy: result.matchedBy }),
   };
 }
 

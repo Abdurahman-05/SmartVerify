@@ -1,4 +1,4 @@
-import { awashLinkOf } from '@/lib/verification';
+import { awashLinkOf, cbeBirrLinkOf } from '@/lib/verification';
 
 /** One thing to find on the customer's receipt (or in its QR). */
 export interface ReceiptField {
@@ -38,12 +38,16 @@ export interface PayerBank {
   /** No receipt picture: the user pastes the SMS or link (help text = helpKey). */
   pasteOnly?: boolean;
   helpKey?: string;
+  /** No receipt picture can be read: scan the QR or paste the SMS (no screenshot button). */
+  noPicture?: boolean;
   fields: ReceiptField[];
   /** Reads the fields from the receipt QR, or null when the QR is not this bank's receipt. */
   parseQr: (data: string) => Partial<Record<ReceiptField['key'], string>> | null;
 }
 
 const AWASH_SAMPLE_LINK = 'https://awashpay.awashbank.com:8225/-2KK18G2CLN-6HVCHX';
+
+const CBEBIRR_SAMPLE_LINK = 'https://cbepay1.cbe.com.et/aureceipt?TID=DKJ21VTI2J2&PH=251900000000';
 
 const upper = (v: string) => v.replace(/\s/g, '').toUpperCase();
 const digits = (v: string) => v.replace(/\D/g, '');
@@ -228,7 +232,32 @@ export const payerBanks: PayerBank[] = [
       return link ? { receiptLink: link } : null;
     },
   },
-  // Only banks the server can check. Others (Zemen, CBE Birr, Wegagen…) go through
+  {
+    code: 'CBB',
+    name: 'CBE Birr',
+    shortName: 'CBE Birr',
+    // Two ways in: the QR on the success screen, or the whole SMS pasted (the invoice link is
+    // found inside). The server reads the receipt PDF behind the link; no picture is read.
+    hasQr: true,
+    noPicture: true,
+    helpKey: 'verifyBank.cbeBirrHelp',
+    fields: [
+      {
+        key: 'receiptLink',
+        input: 'text',
+        // A pasted SMS is long: room for it, then only the link is kept.
+        length: 1000,
+        sample: CBEBIRR_SAMPLE_LINK,
+        normalize: (v) => cbeBirrLinkOf(v) ?? v.trim(),
+        valid: (v) => cbeBirrLinkOf(v) === v,
+      },
+    ],
+    parseQr: (data) => {
+      const link = cbeBirrLinkOf(data);
+      return link ? { receiptLink: link } : null;
+    },
+  },
+  // Only banks the server can check. Others (Zemen, Wegagen…) go through
   // "Other bank", which says they cannot be checked yet, instead of failing after the photo.
 ];
 

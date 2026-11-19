@@ -36,6 +36,7 @@ import {
   listFailedChecks,
   AWASH_TEXT,
   BOA_RECEIPT_ID,
+  CBEBIRR_TEXT,
   DASHEN_REFERENCE,
   EBIRR_REFERENCE,
   MPESA_NUMBER,
@@ -43,6 +44,7 @@ import {
   verifyAwash,
   verifyBoa,
   verifyCbe,
+  verifyCbeBirr,
   verifyDashen,
   verifyEbirr,
   verifyMpesa,
@@ -323,6 +325,26 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
       'masked) at the printed Beneficiary Bank, the Beneficiary name matches its holder; ' +
       'amount ≥ expected; "Transaction Successful"; not too old. The Transaction ID with the ' +
       'link token counts once (DUPLICATE). An unknown token gives NOT_FOUND.',
+  });
+
+  referenceCheck({
+    path: '/verify/cbebirr',
+    bankCode: 'CBB',
+    field: 'text',
+    format: CBEBIRR_TEXT,
+    caseSensitive: true,
+    verify: verifyCbeBirr,
+    description:
+      'Reads the CBE Birr receipt PDF behind the invoice link in the CBE Birr SMS (paste the ' +
+      'SMS) or in its QR (send the scanned text): only ' +
+      'https://cbepay1.cbe.com.et/aureceipt?TID=…&PH=… is fetched, anything else is ' +
+      'INVALID_URL. Only the fetched PDF is trusted, never the pasted text; an answer that ' +
+      'is not a PDF is unable_to_verify. Receiver: the credit account (first/last 4 digits ' +
+      'shown) is one of their CBE accounts and the receiver name matches its holder; if the ' +
+      'PDF shows no account, the name alone decides (matchedBy: name). Amount ≥ expected; ' +
+      'status Completed; not too old. The CBE Birr number (DKJ…) and the CBE FT reference ' +
+      'each count once, also against /verify/cbe (DUPLICATE). Nothing of the receipt is kept ' +
+      'but the two IDs, amount, time and result.',
   });
 
   referenceCheck({

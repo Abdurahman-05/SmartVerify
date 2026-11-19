@@ -18,6 +18,8 @@ export const verifyDashen = USE_MOCK_VERIFICATION ? mock.verifyDashen : real.ver
 export const verifyBoa = USE_MOCK_VERIFICATION ? mock.verifyBoa : real.verifyBoa;
 // The offline mock has no Awash check: it answers like its other banks (paid exactly).
 export const verifyAwash = USE_MOCK_VERIFICATION ? mock.verifyCbe : real.verifyAwash;
+// The offline mock has no CBE Birr check either: it answers like its other banks.
+export const verifyCbeBirr = USE_MOCK_VERIFICATION ? mock.verifyCbe : real.verifyCbeBirr;
 export const getFailedChecks: typeof real.getFailedChecks = USE_MOCK_VERIFICATION
   ? (period) => mock.getFailedChecks(period === 'all' ? '30d' : period)
   : real.getFailedChecks;
@@ -63,6 +65,8 @@ export async function checkReceipt(
   if (dashen) return verifyDashen(dashen, expectedAmountEtb, billId);
   const boa = boaReceiptIdOf(qrData);
   if (boa) return verifyBoa(boa, expectedAmountEtb, billId);
+  const cbeBirr = cbeBirrLinkOf(qrData);
+  if (cbeBirr) return verifyCbeBirr(cbeBirr, expectedAmountEtb, billId);
   const awash = awashLinkOf(qrData);
   if (awash && awash === qrData.trim()) return verifyAwash(awash, expectedAmountEtb, billId);
   if (isCbeReceiptLink(qrData)) return verifyCbe(qrData, expectedAmountEtb, billId);
@@ -137,6 +141,18 @@ export function awashLinkOf(text: string): string | null {
   return token ? `https://awashpay.awashbank.com:8225/${token.toUpperCase()}` : null;
 }
 
+/**
+ * The CBE Birr receipt link (https://cbepay1.cbe.com.et/aureceipt?TID=DKJ…&PH=…) found in a
+ * pasted SMS or a scanned QR, or null. The server checks it again strictly before fetching.
+ */
+export function cbeBirrLinkOf(text: string): string | null {
+  const m =
+    /https:\/\/cbepay1\.cbe\.com\.et\/aureceipt\?TID=([A-Z0-9]{8,16})&PH=(\d{9,15})(?![A-Z0-9])/i.exec(
+      text
+    );
+  return m ? `https://cbepay1.cbe.com.et/aureceipt?TID=${m[1]?.toUpperCase()}&PH=${m[2]}` : null;
+}
+
 /** Dashen's receipt QR hides the FT Ref: 16 bytes XOR this fixed key (worked out from real QRs). */
 const DASHEN_QR_KEY = 'a6ad5615fdcc45f1bc8ec322c3db1943';
 
@@ -195,6 +211,7 @@ export function telebirrNumberFromQr(text: string): string | null {
 export function receiptLinkFromQr(bankCode: string, data: string): string | null {
   if (bankCode === 'CBE') return isCbeReceiptLink(data) ? data.trim() : null;
   if (bankCode === 'AWA') return awashLinkOf(data);
+  if (bankCode === 'CBB') return cbeBirrLinkOf(data);
   if (bankCode === 'TEL') {
     const number = telebirrNumberFromQr(data) ?? telebirrNumberOf(data);
     return number ? telebirrReceiptLink(number) : null;

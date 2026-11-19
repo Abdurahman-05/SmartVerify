@@ -10,6 +10,8 @@ export interface ParsedReceipt {
   currency: string;
   date: Date;
   reference: string;
+  /** A second ID of the same payment (CBE Birr: the CBE core FT reference), for duplicates. */
+  altReference?: string;
   status: string;
   /**
    * cbe = CBE to CBE (receiver name and account last 4 are real). other_bank = CBE to another
@@ -20,9 +22,11 @@ export interface ParsedReceipt {
    * ebirr_wallet = eBirr to a wallet (name and full phone from the payment reason).
    * awash = Awash sender's receipt: beneficiary account (full or masked) + name, and the
    * receiving bank as our bank code in destinationBank.
+   * cbebirr = CBE Birr receipt PDF: credit account masked (first/last 4, may be absent) + name.
    */
   transfer:
     | 'awash'
+    | 'cbebirr'
     | 'cbe'
     | 'other_bank'
     | 'wallet'

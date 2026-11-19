@@ -27,6 +27,14 @@ export const verifiedSchema = z.object({
   receiverName: z.string(),
   date: z.string().describe('Payment time from the receipt (ISO)'),
   bankAccountId: z.string().optional().describe('The saved account the money went to'),
+  altReference: z
+    .string()
+    .optional()
+    .describe('CBE Birr: the CBE FT reference of the same payment (a duplicate key too)'),
+  matchedBy: z
+    .enum(['account', 'name'])
+    .optional()
+    .describe('CBE Birr: name = the receipt shows no account, so only the holder name matched'),
 });
 
 export const notMatchingSchema = z.object({

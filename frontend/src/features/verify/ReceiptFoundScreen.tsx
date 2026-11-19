@@ -13,6 +13,7 @@ import {
   cbeReceiptLink,
   ebirrReceiptLink,
   awashLinkOf,
+  cbeBirrLinkOf,
   mpesaReceiptLink,
   dashenReceiptLink,
   telebirrReceiptLink,
@@ -137,7 +138,9 @@ export default function ReceiptFoundScreen() {
                   ? boaReceiptLink(values['reference'] ?? '', values['senderLast5'] ?? '')
                   : bank.code === 'AWA'
                     ? (awashLinkOf(values['receiptLink'] ?? '') ?? '')
-                    : JSON.stringify({ bank: bank.code, ...values })
+                    : bank.code === 'CBB'
+                      ? (cbeBirrLinkOf(values['receiptLink'] ?? '') ?? '')
+                      : JSON.stringify({ bank: bank.code, ...values })
     );
     router.replace(checkingRoute(useReceiptFlow.getState().mode));
   };

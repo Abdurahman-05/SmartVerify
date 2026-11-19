@@ -9,6 +9,9 @@ import type { VerifyResponse } from './verification.schemas.js';
 /** Checks (verified and failed) older than this are deleted every day. */
 export const KEEP_CHECKS_MONTHS = 4;
 
+/** Bank code of CBE Birr receipts. */
+const CBE_BIRR = 'CBB';
+
 const isUniqueViolation = (error: unknown) =>
   error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
 
@@ -37,6 +40,10 @@ export async function recordCheck(
     return result;
   }
 
+  // The same payment can come through two providers (CBE Birr and CBE share the FT reference).
+  const crossed = await findCrossDuplicate(prisma, input.bankCode, result);
+  if (crossed) return duplicateOf(prisma, input, result, crossed);
+
   try {
     await prisma.transaction.create({
       data: {
@@ -46,6 +53,7 @@ export async function recordCheck(
         bankCode: input.bankCode,
         bankAccountId: result.bankAccountId ?? null,
         reference: result.reference,
+        altReference: result.altReference ?? null,
         payerName: result.payerName,
         expectedAmount: input.expectedAmountEtb,
         receivedAmount: result.amountEtb,
@@ -80,6 +88,50 @@ export async function recordCheck(
     where: { bankCode: input.bankCode, reference: result.reference, status: 'verified' },
     select: { billId: true, businessId: true, createdAt: true },
   });
+  return duplicateOf(prisma, input, result, first);
+}
+
+type FirstUse = { billId: string | null; businessId: string; createdAt: Date };
+type CheckInput = Parameters<typeof recordCheck>[1];
+
+/**
+ * An earlier verified payment with the same FT reference through the OTHER provider: CBE Birr
+ * receipts carry the CBE FT reference (altReference), the CBE receipt's own reference is it.
+ */
+async function findCrossDuplicate(
+  prisma: PrismaClient,
+  bankCode: string,
+  result: Extract<VerifyResponse, { status: 'verified' }>
+): Promise<FirstUse | null> {
+  const select = { billId: true, businessId: true, createdAt: true };
+  if (bankCode === CBE_BIRR && result.altReference) {
+    return prisma.transaction.findFirst({
+      where: {
+        status: 'verified',
+        OR: [
+          { bankCode: 'CBE', reference: result.altReference },
+          { bankCode: CBE_BIRR, altReference: result.altReference },
+        ],
+      },
+      select,
+    });
+  }
+  if (bankCode === 'CBE') {
+    return prisma.transaction.findFirst({
+      where: { status: 'verified', bankCode: CBE_BIRR, altReference: result.reference },
+      select,
+    });
+  }
+  return null;
+}
+
+/** The answer for a receipt that was already used (`first`: its first use, when still saved). */
+async function duplicateOf(
+  prisma: PrismaClient,
+  input: CheckInput,
+  result: Extract<VerifyResponse, { status: 'verified' }>,
+  first: FirstUse | null
+): Promise<VerifyResponse> {
   // Checking the same bill again (e.g. the answer was lost) is not a second use.
   if (
     first &&

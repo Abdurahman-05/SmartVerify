@@ -152,6 +152,17 @@ export const verifyAwash = (link: string, expectedAmountEtb: number, billId?: st
     timeoutMs: 25_000,
   });
 
+/**
+ * POST /verify/cbebirr — the server reads the CBE Birr receipt PDF behind the SMS / QR link. Only
+ * the PDF counts; the link carries the payer's phone, which the server never stores or logs.
+ */
+export const verifyCbeBirr = (link: string, expectedAmountEtb: number, billId?: string) =>
+  api<CbeCheck>('/verify/cbebirr', {
+    method: 'POST',
+    body: { text: link, expectedAmountEtb, ...(billId && { billId }) },
+    timeoutMs: 25_000,
+  });
+
 /** POST /verify/boa — the server reads the BOA receipt (FT reference + sender's last 5). */
 export const verifyBoa = (receiptId: string, expectedAmountEtb: number, billId?: string) =>
   api<CbeCheck>('/verify/boa', {

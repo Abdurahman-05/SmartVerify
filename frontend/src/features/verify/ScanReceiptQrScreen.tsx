@@ -65,8 +65,8 @@ export default function ScanReceiptQrScreen() {
   const handleScanned = ({ data }: BarcodeScanningResult) => {
     if (locked) return;
     setLocked(true);
-    // CBE, telebirr, Dashen and Awash: the QR gives the receipt link (decoded here, no OCR).
-    if (!['CBE', 'TEL', 'DAS', 'AWA'].includes(bank.code)) {
+    // CBE, telebirr, Dashen, Awash and CBE Birr: the QR gives the receipt link (decoded here, no OCR).
+    if (!['CBE', 'TEL', 'DAS', 'AWA', 'CBB'].includes(bank.code)) {
       router.push({ pathname: '/verify/qr-result', params: { text: data } });
       return;
     }

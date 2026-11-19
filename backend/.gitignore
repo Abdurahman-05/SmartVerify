@@ -6,3 +6,6 @@ src/generated/
 
 # Real Awash receipt samples (personal data): never committed.
 test/fixtures/awash/
+
+# CBE Birr receipt samples (personal data): never committed.
+test/fixtures/cbebirr/
