@@ -140,10 +140,10 @@ function SentView({ order }: { order: Order }) {
             style={{ borderRadius: 24, paddingVertical: 16, paddingHorizontal: 20 }}
             className="flex-row items-center"
           >
-            <Text font="bold" tone="inverse" className="flex-1 text-[15px] uppercase tracking-wider">
+            <Text font="bold" tone="inverse" className="flex-1 text-base uppercase tracking-wider">
               {t('orders.total')}
             </Text>
-            <Text font="heading" tone="inverse" className="text-2xl">
+            <Text font="heading" tone="inverse" className="text-base">
               {formatMoney(order.foodTotalEtb + (deliveryFee ?? 0))}
             </Text>
           </HeroCard>
