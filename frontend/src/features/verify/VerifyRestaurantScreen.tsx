@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   Landmark,
   Lock,
+  Plus,
   ShieldCheck,
   Wallet,
   type LucideIcon,
@@ -34,6 +35,7 @@ import { newIdempotencyKey } from '@/lib/api/idempotency';
 import { errorMessageKey } from '@/lib/errors';
 import { parseAmountInput } from '@/lib/format';
 import { getBankAccounts } from '@/lib/bankAccounts';
+import { useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
 import { billLabel } from './billLabel';
@@ -57,6 +59,8 @@ export default function VerifyRestaurantScreen() {
   const [settleKey] = useState(newIdempotencyKey);
   const { account: chosenAccount, setAccount, setAmount } = useVerifyFlow();
   const [accountSheet, setAccountSheet] = useState(false);
+  // Only the owner can add bank accounts; others are told to ask.
+  const isOwner = useSession((s) => s.user?.role === 'owner');
   const {
     data: accounts,
     isError: accountsFailed,
@@ -79,10 +83,28 @@ export default function VerifyRestaurantScreen() {
   const cash = cashFor(pay.method, pay.cash);
   const cashTooMuch = pay.method === 'cash+bank' && cash >= bill.total;
   const toScan = Math.max(bill.total - cash - pay.bankReceived, 0);
-  const canGo = Boolean(account) && !cashTooMuch && bill.status === 'open';
+  // Not blocked by a missing account: pressing explains what to do instead of doing nothing.
+  const canGo = !cashTooMuch && bill.status === 'open';
+
+  const addAccount = () => router.push('/add-bank-account');
+  const noAccountMessage = t(
+    isOwner ? 'bankAccounts.noAccountsVerify' : 'bankAccounts.noAccountsAskOwner'
+  );
 
   const proceed = () => {
-    if (!account) return;
+    if (!account) {
+      Alert.alert(
+        t('bankAccounts.noAccountsTitle'),
+        noAccountMessage,
+        isOwner
+          ? [
+              { text: t('common.cancel'), style: 'cancel' },
+              { text: t('bankAccounts.addAccount'), onPress: addAccount },
+            ]
+          : undefined
+      );
+      return;
+    }
     setAccount(account);
     if (toScan === 0) {
       // Earlier scans already cover the bill: just close it.
@@ -245,8 +267,20 @@ export default function VerifyRestaurantScreen() {
                   {t('verifyRestaurant.change')}
                 </Text>
               </GlassCard>
-            ) : null}
-
+            ) : (
+              <View className="gap-3 rounded-[18px] border-2 border-dashed border-borderStrong bg-surface p-4">
+                <Text tone="muted" className="text-base">
+                  {noAccountMessage}
+                </Text>
+                {isOwner ? (
+                  <PrimaryButton
+                    label={t('bankAccounts.addAccount')}
+                    icon={Plus}
+                    onPress={addAccount}
+                  />
+                ) : null}
+              </View>
+            )}
           </ScrollView>
 
           <StickyFooter>
