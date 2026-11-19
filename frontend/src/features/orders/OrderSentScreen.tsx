@@ -151,7 +151,7 @@ function SentView({ order }: { order: Order }) {
 
         <StickyFooter>
           <PrimaryButton label={t('orders.newOrder')} onPress={() => router.replace('/orders')} />
-          <GhostButton label={t('orders.goHome')} onPress={() => router.dismissTo('/bills')} />
+          <GhostButton label={t('orders.goHome')} onPress={() => router.push('/bills')} />
         </StickyFooter>
       </SafeAreaView>
     </ScreenBg>

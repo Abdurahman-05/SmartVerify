@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useBackFallback } from '@/hooks/useBackFallback';
 import { BankBadge } from '@/components/ui/BankBadge';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useGlass } from '@/components/ui/glassTokens';
@@ -52,6 +53,7 @@ export default function VerifyRestaurantScreen() {
   const { t } = useTranslation();
   const g = useGlass();
   const router = useRouter();
+  useBackFallback('/bills');
   const { billId } = useLocalSearchParams<{ billId: string }>();
   const { bill, pending } = usePaymentBill(billId);
   const pay = useRestaurantPay();

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useBackFallback } from '@/hooks/useBackFallback';
 import { ErrorDialog } from '@/components/ui/ErrorDialog';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useGlass } from '@/components/ui/glassTokens';
@@ -60,6 +61,7 @@ export default function CashPaymentScreen() {
   const { t } = useTranslation();
   const g = useGlass();
   const router = useRouter();
+  useBackFallback('/bills');
   const { id } = useLocalSearchParams<{ id: string }>();
   const { bill, pending } = usePaymentBill(id);
   const [submitted, setSubmitted] = useState(false);

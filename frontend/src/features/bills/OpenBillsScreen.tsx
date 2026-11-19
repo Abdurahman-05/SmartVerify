@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { FlatList, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useBackFallback } from '@/hooks/useBackFallback';
 import { GhostButton } from '@/components/ui/GhostButton';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useGlass } from '@/components/ui/glassTokens';
@@ -139,6 +140,7 @@ function BillCard({ bill, onPress }: { bill: Bill; onPress: () => void }) {
 export default function OpenBillsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  useBackFallback('/home');
   // Waiters start on their own tables (they can look at the others); owner and manager look
   // after every table, so they start on All.
   const isWaiter = useSession((s) => s.user?.role === 'waiter');

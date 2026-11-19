@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useBackFallback } from '@/hooks/useBackFallback';
 import { LoadingView } from '@/components/ui/LoadingView';
 import { formatMoney, MoneyText } from '@/components/ui/MoneyText';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
@@ -35,6 +36,7 @@ export default function CashSavedScreen() {
   const brand = useBrandColors();
   const { t } = useTranslation();
   const router = useRouter();
+  useBackFallback('/bills');
   const { id } = useLocalSearchParams<{ id: string }>();
   const { bill, pending } = usePaymentBill(id);
   const payment = usePayments((s) =>

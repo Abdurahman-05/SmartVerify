@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useBackFallback } from '@/hooks/useBackFallback';
 import { useBrandColors } from '@/store/theme';
 import { colors } from '@/theme/tokens';
 import { LoadingView } from '@/components/ui/LoadingView';
@@ -445,6 +446,7 @@ function OrderBlock({
 export default function TableBillScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  useBackFallback('/bills');
   const { id } = useLocalSearchParams<{ id: string }>();
   const query = useQuery({ queryKey: billKey(id), queryFn: () => getBill(id) });
   const { refetch } = query;
