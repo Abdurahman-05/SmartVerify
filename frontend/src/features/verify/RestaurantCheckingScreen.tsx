@@ -20,6 +20,7 @@ import { errorMessageKey, isNetworkError } from '@/lib/errors';
 import { checkReceipt, type CbeMismatch, type CbeUnable } from '@/lib/verification';
 import { colors } from '@/theme/tokens';
 
+import { findPayerBank } from './payerBanks';
 import { DetailsCard } from './PaymentResultScreen';
 import { settlePayment, useRestaurantPay } from './restaurantFlow';
 import { useReceiptFlow } from './receiptFlow';
@@ -117,7 +118,9 @@ export default function RestaurantCheckingScreen() {
     setFailure(null);
     setAttempt((n) => n + 1);
   };
-  const scanAgain = () => router.replace('/verify-bank/scan');
+  // Awash has no QR or picture: back to its paste field.
+  const scanAgain = () =>
+    router.replace(findPayerBank(bankCode)?.pasteOnly ? '/verify-bank/found' : '/verify-bank/scan');
   // Records the amount without a check (the bank could not answer).
   // TODO(backend): send it as "not checked" once the server has that status.
   const saveNotChecked = () => {
