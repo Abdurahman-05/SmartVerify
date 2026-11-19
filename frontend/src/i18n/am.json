@@ -1215,6 +1215,8 @@
     "payByBank": "በባንክ ክፍያ",
     "otherBanks": "ሌሎች ባንኮች",
     "canCheck": "ማረጋገጥ ይቻላል",
+    "awashLabel": "አዋሽ (ደንበኛው በአዋሽ ከፍሏል)",
+    "awashHelp": "ከአዋሽ ኤስኤምኤስ ያለውን ሊንክ ይለጥፉ",
     "otherBank": "ሌላ ባንክ",
     "notSupportedTitle": "ይህን ባንክ ገና ማረጋገጥ አንችልም",
     "notSupportedBody": "ማረጋገጥ የሚቻለው በዝርዝሩ ላይ ያሉትን ባንኮች ብቻ ነው።",

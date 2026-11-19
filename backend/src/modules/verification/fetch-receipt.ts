@@ -23,6 +23,8 @@ export interface FetchOptions {
   headers?: Record<string, string>;
   /** Go through this HTTP proxy (CONNECT tunnel, so the page stays encrypted end to end). */
   proxy?: URL;
+  /** Follow a redirect only to the same host AND port (sites on a non-standard port). */
+  samePort?: boolean;
 }
 
 const MAX_REDIRECTS = 3;
@@ -137,7 +139,12 @@ export function fetchReceipt(url: URL, options: FetchOptions): Promise<FetchedRe
           } catch {
             return reject(new ReceiptFetchError('UNREACHABLE'));
           }
-          if (next.protocol !== 'https:' || next.hostname !== url.hostname || redirectsLeft <= 0) {
+          if (
+            next.protocol !== 'https:' ||
+            next.hostname !== url.hostname ||
+            (options.samePort && next.port !== url.port) ||
+            redirectsLeft <= 0
+          ) {
             return reject(new ReceiptFetchError('UNREACHABLE'));
           }
           return get(next, redirectsLeft - 1).then(resolve, reject);

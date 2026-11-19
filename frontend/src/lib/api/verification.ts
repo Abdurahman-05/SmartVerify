@@ -144,6 +144,14 @@ export const verifyDashen = (reference: string, expectedAmountEtb: number, billI
     timeoutMs: 25_000,
   });
 
+/** POST /verify/awash — the server reads the Awash receipt behind the SMS link and compares it. */
+export const verifyAwash = (link: string, expectedAmountEtb: number, billId?: string) =>
+  api<CbeCheck>('/verify/awash', {
+    method: 'POST',
+    body: { text: link, expectedAmountEtb, ...(billId && { billId }) },
+    timeoutMs: 25_000,
+  });
+
 /** POST /verify/boa — the server reads the BOA receipt (FT reference + sender's last 5). */
 export const verifyBoa = (receiptId: string, expectedAmountEtb: number, billId?: string) =>
   api<CbeCheck>('/verify/boa', {

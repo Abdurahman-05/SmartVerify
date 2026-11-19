@@ -3,3 +3,6 @@ dist/
 .env
 src/generated/
 .cache/
+
+# Real Awash receipt samples (personal data): never committed.
+test/fixtures/awash/

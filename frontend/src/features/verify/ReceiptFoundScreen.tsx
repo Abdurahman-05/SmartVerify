@@ -12,6 +12,7 @@ import {
   boaReceiptLink,
   cbeReceiptLink,
   ebirrReceiptLink,
+  awashLinkOf,
   mpesaReceiptLink,
   dashenReceiptLink,
   telebirrReceiptLink,
@@ -54,8 +55,12 @@ function MissingValue({
 }) {
   const { t } = useTranslation();
   const label = t('verifyBank.found.typeIt', { field: t(`verifyBank.short.${field.key}`) });
+  // A pasted SMS or link (Awash): long text, kept as typed, smaller font.
+  const pasted = (field.length ?? 0) > 40;
   const wrong =
-    value.length > 0 && !field.valid(value) && value.length >= (field.last ?? field.length ?? 8);
+    value.length > 0 &&
+    !field.valid(value) &&
+    value.length >= (pasted ? 8 : (field.last ?? field.length ?? 8));
   return (
     <View className="gap-1.5">
       <View className="flex-row items-center gap-1.5">
@@ -73,19 +78,19 @@ function MissingValue({
           value={value}
           onChangeText={(text) => onChange(field.normalize(text).slice(0, field.length ?? 20))}
           keyboardType={field.input === 'digits' ? 'number-pad' : 'default'}
-          autoCapitalize="characters"
+          autoCapitalize={pasted ? 'none' : 'characters'}
           autoCorrect={false}
           maxLength={field.length ?? 20}
           placeholder={
             field.last
               ? t('verifyBank.found.fullAccount')
-              : field.length
+              : field.length && !pasted
                 ? t('verifyBank.found.digits', { count: field.length })
                 : t('verifyBank.found.typeHere')
           }
           placeholderTextColor={colors.placeholder}
           accessibilityLabel={label}
-          className="font-heading text-[28px] text-text"
+          className={`font-heading text-text ${pasted ? 'text-base' : 'text-[28px]'}`}
         />
       </View>
       {wrong ? (
@@ -130,7 +135,9 @@ export default function ReceiptFoundScreen() {
                 ? dashenReceiptLink(values['reference'] ?? '')
                 : bank.code === 'BOA'
                   ? boaReceiptLink(values['reference'] ?? '', values['senderLast5'] ?? '')
-                  : JSON.stringify({ bank: bank.code, ...values })
+                  : bank.code === 'AWA'
+                    ? (awashLinkOf(values['receiptLink'] ?? '') ?? '')
+                    : JSON.stringify({ bank: bank.code, ...values })
     );
     router.replace(checkingRoute(useReceiptFlow.getState().mode));
   };
@@ -140,10 +147,19 @@ export default function ReceiptFoundScreen() {
       <ScreenHeader
         title={t('verifyBank.found.title')}
         subtitle={`${bank.shortName} · ${formatMoney(amount)}`}
-        onBack={() => (router.canGoBack() ? router.back() : router.replace('/verify-bank/receipt'))}
+        onBack={() =>
+          router.canGoBack()
+            ? router.back()
+            : router.replace(bank.pasteOnly ? '/verify-bank' : '/verify-bank/receipt')
+        }
       />
 
       <View className="gap-4 px-4 pt-3">
+        {bank.helpKey ? (
+          <Text tone="muted" className="text-base">
+            {t(bank.helpKey)}
+          </Text>
+        ) : null}
         {bank.fields.map((field) =>
           found[field.key] ? (
             <FoundValue key={field.key} field={field} value={found[field.key] ?? ''} />
@@ -166,12 +182,14 @@ export default function ReceiptFoundScreen() {
           disabled={!ready}
           onPress={check}
         />
-        <SecondaryButton
-          label={t('verifyBank.found.readAgain')}
-          icon={RotateCcw}
-          size="md"
-          onPress={() => router.replace('/verify-bank/read')}
-        />
+        {bank.pasteOnly ? null : (
+          <SecondaryButton
+            label={t('verifyBank.found.readAgain')}
+            icon={RotateCcw}
+            size="md"
+            onPress={() => router.replace('/verify-bank/read')}
+          />
+        )}
       </View>
     </FormScreen>
   );

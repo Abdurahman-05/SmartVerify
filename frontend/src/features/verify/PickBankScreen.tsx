@@ -31,7 +31,7 @@ function BigBankButton({ bank, onPress }: { bank: PayerBank; onPress: () => void
   return (
     <GlassCard
       onPress={onPress}
-      accessibilityLabel={`${bank.name}, ${t('verifyBank.canCheck')}`}
+      accessibilityLabel={`${bank.labelKey ? t(bank.labelKey) : bank.name}, ${t('verifyBank.canCheck')}`}
       containerStyle={{ flex: 1 }}
       style={{ alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 16 }}
     >
@@ -58,14 +58,14 @@ function BankRow({
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${bank.name}, ${t('verifyBank.canCheck')}`}
+      accessibilityLabel={`${bank.labelKey ? t(bank.labelKey) : bank.name}, ${t('verifyBank.canCheck')}`}
       className={`min-h-[60px] flex-row items-center gap-3 active:opacity-70 ${
         first ? '' : 'border-t border-black/[0.07]'
       }`}
     >
       <BankBadge code={bank.code} size={40} />
       <Text font="bold" className="flex-1 text-base" numberOfLines={2}>
-        {bank.name}
+        {bank.labelKey ? t(bank.labelKey) : bank.name}
       </Text>
       <View className="h-7 flex-row items-center gap-1 rounded-[14px] bg-successBg px-2.5">
         <Check size={13} color={colors.successFg} strokeWidth={2.8} />
@@ -96,7 +96,8 @@ export default function PickBankScreen() {
   const goBack = () => (router.canGoBack() ? router.back() : router.replace(startRoute(mode)));
   const pick = (bank: PayerBank) => {
     setBank(bank.code);
-    router.push('/verify-bank/receipt');
+    // Awash: the link is pasted from the SMS, no receipt picture.
+    router.push(bank.pasteOnly ? '/verify-bank/found' : '/verify-bank/receipt');
   };
 
   // Records the bank money without a check (the customer's bank cannot be checked yet).

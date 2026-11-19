@@ -34,11 +34,13 @@ import {
 } from './ocr.js';
 import {
   listFailedChecks,
+  AWASH_TEXT,
   BOA_RECEIPT_ID,
   DASHEN_REFERENCE,
   EBIRR_REFERENCE,
   MPESA_NUMBER,
   TELEBIRR_NUMBER,
+  verifyAwash,
   verifyBoa,
   verifyCbe,
   verifyDashen,
@@ -171,7 +173,8 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
   const referenceCheck = (config: {
     path: string;
     bankCode: string;
-    field: 'transactionNumber' | 'reference';
+    /** text: the pasted SMS or link (Awash), searched for the receipt link. */
+    field: 'transactionNumber' | 'reference' | 'text';
     format: RegExp;
     /** Keep the letters as typed (eBirr's token), instead of upper-casing. */
     caseSensitive?: boolean;
@@ -303,6 +306,23 @@ export const verificationRoutes: FastifyPluginAsyncZod = async (app) => {
       "fits one of the business's accounts (a Dashen one when sent to Dashen) and the receiver " +
       'name matches its holder; transaction amount ≥ expected; not too old. The page only ' +
       'exists for completed transfers; an unknown FT Ref gives NOT_FOUND.',
+  });
+
+  referenceCheck({
+    path: '/verify/awash',
+    bankCode: 'AWA',
+    field: 'text',
+    format: AWASH_TEXT,
+    caseSensitive: true,
+    verify: verifyAwash,
+    description:
+      'Reads the Awash sender receipt behind the "Receipt Link" in the Awash SMS (paste the SMS ' +
+      'or the link; only https://awashpay.awashbank.com:8225/<token> is fetched, anything else ' +
+      "is INVALID_URL). The customer paid from Awash to one of the business's accounts at any " +
+      'bank: the Beneficiary Account is that account (in full, or first/last digits when ' +
+      'masked) at the printed Beneficiary Bank, the Beneficiary name matches its holder; ' +
+      'amount ≥ expected; "Transaction Successful"; not too old. The Transaction ID with the ' +
+      'link token counts once (DUPLICATE). An unknown token gives NOT_FOUND.',
   });
 
   referenceCheck({

@@ -6,6 +6,7 @@ import type { FastifyBaseLogger } from 'fastify';
 import type { Env } from '../../config/env.js';
 import type { PrismaClient } from '../../generated/prisma/client.js';
 import { AppError } from '../../shared/errors/app-error.js';
+import { AWASH_NOT_FOUND, awashParser } from './banks/awash.js';
 import { cbeParser } from './banks/cbe.js';
 import { BOA_NOT_FOUND, boaParser } from './banks/boa.js';
 import { dashenParser } from './banks/dashen.js';
@@ -343,6 +344,84 @@ export async function verifyBoa(
   });
 }
 
+/** Awash receipt link: https://awashpay.awashbank.com:8225/-2KK18G2CLN-6HVCHX (from the SMS). */
+const AWASH_HOST = 'awashpay.awashbank.com';
+const AWASH_PORT = '8225';
+const AWASH_TOKEN = /^\/(-[A-Z0-9]{8,12}-[A-Z0-9]{4,8})$/;
+/** The Awash page is small: 8 s and 1 MB at most. */
+const AWASH_FETCH = { timeoutMs: 8_000, maxBytes: 1024 * 1024 };
+
+/** The pasted Awash SMS or link (the link is found inside). */
+export const AWASH_TEXT = /^[\s\S]{10,2000}$/;
+
+/**
+ * The receipt token from the pasted Awash SMS or link. Only https, host awashpay.awashbank.com,
+ * port 8225, a path shaped like the real token, no user, query or fragment (SSRF); else null.
+ */
+export function findAwashToken(text: string): string | null {
+  for (const [candidate] of text.matchAll(/https?:\/\/[^\s<>"']+/gi)) {
+    let url: URL;
+    try {
+      // The SMS ends the link with a full stop.
+      url = new URL(candidate.replace(/[.,;:)\]]+$/, ''));
+    } catch {
+      continue;
+    }
+    if (
+      url.protocol !== 'https:' ||
+      url.username ||
+      url.password ||
+      url.hostname !== AWASH_HOST ||
+      url.port !== AWASH_PORT ||
+      url.search ||
+      url.hash
+    ) {
+      continue;
+    }
+    const token = AWASH_TOKEN.exec(url.pathname)?.[1];
+    if (token) return token;
+  }
+  return null;
+}
+
+/** Fetches the Awash sender's receipt behind the SMS link and checks it like the other banks. */
+export async function verifyAwash(
+  prisma: PrismaClient,
+  env: Env,
+  businessId: string,
+  text: string,
+  expectedAmountEtb: number,
+  log?: Pick<FastifyBaseLogger, 'info'>,
+  now = new Date(),
+  /** Check against these accounts instead of the business's (subscription payments). */
+  receiver?: { accounts: OwnAccount[]; name: string; maxAgeHours?: number }
+): Promise<VerifyResponse> {
+  const token = findAwashToken(text);
+  if (!token) throw new AppError('INVALID_URL');
+  return checkReceipt({
+    prisma,
+    env,
+    businessId,
+    source: {
+      url: new URL(`https://${AWASH_HOST}:${AWASH_PORT}/${token}`),
+      headers: { 'user-agent': 'SmartVerify/1.0' },
+    },
+    tlsStrict: true,
+    fetch: { ...AWASH_FETCH, samePort: true },
+    parser: awashParser,
+    bank: 'Awash',
+    expectedAmountEtb,
+    log,
+    now,
+    html: true,
+    // Awash answers 200 "Receipt not found" for an unknown token.
+    isNotFound: (page) => AWASH_NOT_FOUND.test(page) && page.length < 500,
+    // A receipt counts once: its Transaction ID together with the link token.
+    referenceSuffix: `/${token}`,
+    receiver,
+  });
+}
+
 /** Fetch → read → compare with the business's accounts → log why. Same for every bank. */
 async function checkReceipt(input: {
   prisma: PrismaClient;
@@ -362,6 +441,10 @@ async function checkReceipt(input: {
   toText?: (fetched: FetchedReceipt) => Promise<string | null>;
   /** Check against these accounts instead of the business's (e.g. Smart Verify's own). */
   receiver?: { accounts: OwnAccount[]; name: string; maxAgeHours?: number };
+  /** Other limits than FETCH; samePort: redirects only to the same host and port. */
+  fetch?: { timeoutMs: number; maxBytes: number; samePort?: boolean };
+  /** Added to the receipt's reference (the duplicate key), e.g. the link token. */
+  referenceSuffix?: string;
 }): Promise<VerifyResponse> {
   const { prisma, env, businessId, source, tlsStrict, parser, bank, expectedAmountEtb, log, now } =
     input;
@@ -396,7 +479,7 @@ async function checkReceipt(input: {
       const proxy =
         env.RECEIPT_PROXY_URL && ethiopiaOnly ? new URL(env.RECEIPT_PROXY_URL) : undefined;
       fetched = await fetchReceipt(source.url, {
-        ...FETCH,
+        ...(input.fetch ?? FETCH),
         tlsStrict,
         headers: source.headers,
         proxy,
@@ -430,7 +513,11 @@ async function checkReceipt(input: {
     );
     return { status: 'unable_to_verify', reason: 'NOT_FOUND' };
   }
-  const receipt = text ? parser.parse(text) : null;
+  const parsed = text ? parser.parse(text) : null;
+  const receipt =
+    parsed && input.referenceSuffix
+      ? { ...parsed, reference: `${parsed.reference}${input.referenceSuffix}` }
+      : parsed;
   if (!receipt) {
     log?.info(
       {

@@ -18,8 +18,11 @@ export interface ParsedReceipt {
    * wallet_to_bank = Telebirr to a bank account (full account number + holder name).
    * ebirr_bank = eBirr to a bank account (account printed 231****31, no holder name).
    * ebirr_wallet = eBirr to a wallet (name and full phone from the payment reason).
+   * awash = Awash sender's receipt: beneficiary account (full or masked) + name, and the
+   * receiving bank as our bank code in destinationBank.
    */
   transfer:
+    | 'awash'
     | 'cbe'
     | 'other_bank'
     | 'wallet'

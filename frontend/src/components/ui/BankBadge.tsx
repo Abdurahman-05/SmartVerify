@@ -30,6 +30,7 @@ const LOGOS: Record<string, number> = {
   BOA: require('../../../assets/images/banks/boa.jpg') as number,
   EBR: require('../../../assets/images/banks/ebirr.jpg') as number,
   MPE: require('../../../assets/images/banks/m-pesa.png') as number,
+  AWA: require('../../../assets/images/banks/awash.png') as number,
 };
 
 /** Bank logo; banks without a logo get the deep theme colour with white initials. */

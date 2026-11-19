@@ -16,6 +16,8 @@ export const verifyMpesa = USE_MOCK_VERIFICATION ? mock.verifyMpesa : real.verif
 export const verifyEbirr = USE_MOCK_VERIFICATION ? mock.verifyEbirr : real.verifyEbirr;
 export const verifyDashen = USE_MOCK_VERIFICATION ? mock.verifyDashen : real.verifyDashen;
 export const verifyBoa = USE_MOCK_VERIFICATION ? mock.verifyBoa : real.verifyBoa;
+// The offline mock has no Awash check: it answers like its other banks (paid exactly).
+export const verifyAwash = USE_MOCK_VERIFICATION ? mock.verifyCbe : real.verifyAwash;
 export const getFailedChecks: typeof real.getFailedChecks = USE_MOCK_VERIFICATION
   ? (period) => mock.getFailedChecks(period === 'all' ? '30d' : period)
   : real.getFailedChecks;
@@ -58,6 +60,8 @@ export async function checkReceipt(
   if (dashen) return verifyDashen(dashen, expectedAmountEtb, billId);
   const boa = boaReceiptIdOf(qrData);
   if (boa) return verifyBoa(boa, expectedAmountEtb, billId);
+  const awash = awashLinkOf(qrData);
+  if (awash && awash === qrData.trim()) return verifyAwash(awash, expectedAmountEtb, billId);
   if (isCbeReceiptLink(qrData)) return verifyCbe(qrData, expectedAmountEtb, billId);
   return { status: 'unable_to_verify', reason: 'UNPARSEABLE' };
 }
@@ -117,6 +121,18 @@ export const boaReceiptIdOf = (text: string) =>
   /^https:\/\/cs\.bankofabyssinia\.com\/slip\/\?trx=(FT[A-Z0-9]{10}\d{5})$/.exec(
     text.trim()
   )?.[1] ?? null;
+
+/**
+ * The Awash receipt link (https://awashpay.awashbank.com:8225/-2KK18G2CLN-6HVCHX) found in a
+ * pasted SMS or link, or null. The server checks it again strictly before fetching.
+ */
+export function awashLinkOf(text: string): string | null {
+  const token =
+    /https:\/\/awashpay\.awashbank\.com:8225\/(-[A-Z0-9]{8,12}-[A-Z0-9]{4,8})(?![A-Z0-9-])/i.exec(
+      text
+    )?.[1];
+  return token ? `https://awashpay.awashbank.com:8225/${token.toUpperCase()}` : null;
+}
 
 /** Dashen's receipt QR hides the FT Ref: 16 bytes XOR this fixed key (worked out from real QRs). */
 const DASHEN_QR_KEY = 'a6ad5615fdcc45f1bc8ec322c3db1943';

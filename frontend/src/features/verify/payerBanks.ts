@@ -1,3 +1,5 @@
+import { awashLinkOf } from '@/lib/verification';
+
 /** One thing to find on the customer's receipt (or in its QR). */
 export interface ReceiptField {
   key: 'reference' | 'senderAccount' | 'senderLast5' | 'transactionNumber' | 'receiptLink';
@@ -31,10 +33,17 @@ export interface PayerBank {
   mostUsed?: boolean;
   /** Its receipts carry a QR with the receipt link (CBE). Telebirr's do not. */
   hasQr?: boolean;
+  /** i18n key of the tile label, when the bank name alone is not enough. */
+  labelKey?: string;
+  /** No receipt picture: the user pastes the SMS or link (help text = helpKey). */
+  pasteOnly?: boolean;
+  helpKey?: string;
   fields: ReceiptField[];
   /** Reads the fields from the receipt QR, or null when the QR is not this bank's receipt. */
   parseQr: (data: string) => Partial<Record<ReceiptField['key'], string>> | null;
 }
+
+const AWASH_SAMPLE_LINK = 'https://awashpay.awashbank.com:8225/-2KK18G2CLN-6HVCHX';
 
 const upper = (v: string) => v.replace(/\s/g, '').toUpperCase();
 const digits = (v: string) => v.replace(/\D/g, '');
@@ -192,7 +201,29 @@ export const payerBanks: PayerBank[] = [
     ],
     parseQr: () => null,
   },
-  // Only banks the server can check. Others (Awash, Zemen, CBE Birr, Wegagen…) go through
+  {
+    code: 'AWA',
+    name: 'Awash Bank',
+    shortName: 'Awash',
+    // The customer paid from Awash: the SMS has a receipt link; it is pasted, never read from
+    // a picture. The money can have gone to our account at any bank.
+    labelKey: 'verifyBank.awashLabel',
+    pasteOnly: true,
+    helpKey: 'verifyBank.awashHelp',
+    fields: [
+      {
+        key: 'receiptLink',
+        input: 'text',
+        // A pasted SMS is long: room for it, then only the link is kept.
+        length: 1000,
+        sample: AWASH_SAMPLE_LINK,
+        normalize: (v) => awashLinkOf(v) ?? v.trim(),
+        valid: (v) => awashLinkOf(v) === v,
+      },
+    ],
+    parseQr: () => null,
+  },
+  // Only banks the server can check. Others (Zemen, CBE Birr, Wegagen…) go through
   // "Other bank", which says they cannot be checked yet, instead of failing after the photo.
 ];
 
