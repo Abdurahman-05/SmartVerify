@@ -5,7 +5,6 @@ import type { Bill } from '@/features/bills/types';
 import { usePayments } from '@/features/payments/store';
 import type { ExtraChoice } from '@/lib/api/payments';
 import { payBill, USE_MOCK_BILLS } from '@/lib/bills';
-import type { BankCheckSimulation } from '@/lib/mock/verify';
 import { refreshAfterPayment } from '@/lib/queryClient';
 
 import { calcPayment, type PaymentCalc } from './calcPayment';
@@ -28,12 +27,10 @@ interface RestaurantPayState {
   cash: number;
   /** Bank money already received for this bill across scans (short payments). */
   bankReceived: number;
-  simulate: BankCheckSimulation;
   outcome: PaymentOutcome | null;
   start: (billId: string) => void;
   setMethod: (method: RestaurantMethod) => void;
   setCash: (cash: number) => void;
-  setSimulate: (simulate: BankCheckSimulation) => void;
   reset: () => void;
 }
 
@@ -42,7 +39,6 @@ const initial = {
   method: 'bank' as RestaurantMethod,
   cash: 0,
   bankReceived: 0,
-  simulate: 'exact' as BankCheckSimulation,
   outcome: null,
 };
 
@@ -51,7 +47,6 @@ export const useRestaurantPay = create<RestaurantPayState>((set) => ({
   start: (billId) => set({ ...initial, billId }),
   setMethod: (method) => set({ method }),
   setCash: (cash) => set({ cash }),
-  setSimulate: (simulate) => set({ simulate }),
   reset: () => set(initial),
 }));
 

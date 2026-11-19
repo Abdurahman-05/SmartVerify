@@ -32,14 +32,8 @@ import { maskedNumberKey } from '@/features/bank-accounts/telebirr';
 import { usePaymentBill } from '@/features/bills/usePaymentBill';
 import { newIdempotencyKey } from '@/lib/api/idempotency';
 import { errorMessageKey } from '@/lib/errors';
-import { Pill } from '@/features/orders/Pill';
 import { parseAmountInput } from '@/lib/format';
 import { getBankAccounts } from '@/lib/bankAccounts';
-import {
-  SIMULATED_OVER_ETB,
-  SIMULATED_SHORT_ETB,
-  type BankCheckSimulation,
-} from '@/lib/mock/verify';
 import { colors } from '@/theme/tokens';
 
 import { billLabel } from './billLabel';
@@ -103,12 +97,6 @@ export default function VerifyRestaurantScreen() {
     useReceiptFlow.getState().setMode('restaurant');
     router.push('/verify-bank');
   };
-
-  const simulations: { value: BankCheckSimulation; label: string }[] = [
-    { value: 'exact', label: t('verifyRestaurant.devExact') },
-    { value: 'over', label: t('verifyRestaurant.devOver', { amount: SIMULATED_OVER_ETB }) },
-    { value: 'short', label: t('verifyRestaurant.devShort', { amount: SIMULATED_SHORT_ETB }) },
-  ];
 
   return (
     <ScreenBackground>
@@ -259,23 +247,6 @@ export default function VerifyRestaurantScreen() {
               </GlassCard>
             ) : null}
 
-            {__DEV__ ? (
-              <View className="gap-1.5 rounded-input border-2 border-dashed border-amber p-2.5">
-                <Text font="bold" tone="muted" className="text-sm">
-                  {t('verifyRestaurant.devSimulate')}
-                </Text>
-                <View className="flex-row flex-wrap gap-2">
-                  {simulations.map((s) => (
-                    <Pill
-                      key={s.value}
-                      label={s.label}
-                      selected={pay.simulate === s.value}
-                      onPress={() => pay.setSimulate(s.value)}
-                    />
-                  ))}
-                </View>
-              </View>
-            ) : null}
           </ScrollView>
 
           <StickyFooter>
