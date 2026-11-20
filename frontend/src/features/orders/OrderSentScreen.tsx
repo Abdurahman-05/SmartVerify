@@ -158,7 +158,7 @@ function SentView({ order }: { order: Order }) {
             label={t('orders.newOrder')}
             onPress={() => router.dismissTo(isWaiter ? '/new-order' : '/orders')}
           />
-          <GhostButton label={t('orders.goHome')} onPress={() => router.push('/bills')} />
+          <GhostButton label={t('orders.goHome')} onPress={() => router.navigate('/bills')} />
         </StickyFooter>
       </SafeAreaView>
     </ScreenBg>
