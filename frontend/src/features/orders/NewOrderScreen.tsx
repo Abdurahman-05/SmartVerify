@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
+
+import { useBackFallback } from '@/hooks/useBackFallback';
 import { X, Search, ChevronDown, MapPin, Send } from 'lucide-react-native';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -61,7 +63,10 @@ const kitchenNotes: OrderNote[] = ['noOnion', 'lessSpicy', 'rush', 'takeaway'];
 type Sheet = 'table' | 'confirm' | 'area' | null;
 
 /** addTo: a bill id — the items go on that open bill (no table or customer to choose). */
-export default function NewOrderScreen({ addTo }: { addTo?: string } = {}) {
+export default function NewOrderScreen({
+  addTo,
+  backable,
+}: { addTo?: string; backable?: boolean } = {}) {
   const brand = useBrandColors();
   const g = useGlass();
   const { t, i18n } = useTranslation();
@@ -69,6 +74,12 @@ export default function NewOrderScreen({ addTo }: { addTo?: string } = {}) {
   const queryClient = useQueryClient();
   const waiterName = useSession((s) => s.user?.displayName ?? '');
   const waiterId = useSession((s) => s.user?.userId ?? '');
+  // As a tab (waiters) this is a home page: nothing to go back to. Opened on top of Home
+  // (`backable`) or to add to a bill, it has a back arrow, and the phone's Back never exits.
+  const isWaiter = useSession((s) => s.user?.role === 'waiter' && s.user.plan === 'restaurant');
+  const homeRoute = isWaiter ? '/new-order' : '/home';
+  const goBack = () => (router.canGoBack() ? router.back() : router.replace(homeRoute));
+  useBackFallback(backable || addTo ? homeRoute : null);
 
   const [type, setType] = useState<OrderType>('dineIn');
   const [table, setTable] = useState<Table | null>(null);
@@ -100,7 +111,12 @@ export default function NewOrderScreen({ addTo }: { addTo?: string } = {}) {
     mutationFn: (input: SendOrderInput) => sendOrder(input, orderKey),
     onSuccess: (order) => {
       void queryClient.invalidateQueries({ queryKey: tablesKey });
-      router.replace({ pathname: '/order-sent', params: { id: order.id } });
+      // Pushed, so Back from "Sent" returns to the tabs (never an empty stack); the form is
+      // emptied for the next order.
+      setCart({});
+      setNotes([]);
+      setTable(null);
+      router.push({ pathname: '/order-sent', params: { id: order.id } });
     },
     onError: (error) => {
       toastIfNetworkError(error);
@@ -258,7 +274,7 @@ export default function NewOrderScreen({ addTo }: { addTo?: string } = {}) {
           <ScreenHeader
             title={addTo ? t('bills.addMore') : t('orders.title')}
             subtitle={t('orders.waiter', { name: waiterName })}
-            onBack={addTo ? () => router.back() : undefined}
+            onBack={addTo || backable ? goBack : undefined}
             right={
               <View
                 className="h-14 w-14 items-center justify-center rounded-full"

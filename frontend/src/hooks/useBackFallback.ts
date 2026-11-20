@@ -7,10 +7,11 @@ import { BackHandler } from 'react-native';
  * opened by a replace, a push notification or a reset), go to `fallback` instead of leaving the
  * app. With a previous screen, Back works as usual (one step).
  */
-export function useBackFallback(fallback: Href) {
+export function useBackFallback(fallback: Href | null) {
   const router = useRouter();
   useFocusEffect(
     useCallback(() => {
+      if (fallback === null) return undefined;
       const sub = BackHandler.addEventListener('hardwareBackPress', () => {
         if (router.canGoBack()) return false;
         router.replace(fallback);

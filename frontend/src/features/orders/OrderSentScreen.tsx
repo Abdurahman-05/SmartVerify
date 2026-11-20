@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useBackFallback } from '@/hooks/useBackFallback';
+import { useSession } from '@/store/session';
 import { GhostButton } from '@/components/ui/GhostButton';
 import { useGlass } from '@/components/ui/glassTokens';
 import { StickyFooter } from '@/components/ui/StickyFooter';
@@ -57,6 +59,8 @@ function SentMark() {
 function SentView({ order }: { order: Order }) {
   const { t } = useTranslation();
   const router = useRouter();
+  const isWaiter = useSession((s) => s.user?.role === 'waiter' && s.user.plan === 'restaurant');
+  useBackFallback(isWaiter ? '/new-order' : '/home');
   const g = useGlass();
   const target = useTargetLabel(order);
   const deliveryFee = order.target.type === 'delivery' ? order.target.deliveryFeeEtb : null;
@@ -150,7 +154,10 @@ function SentView({ order }: { order: Order }) {
         </ScrollView>
 
         <StickyFooter>
-          <PrimaryButton label={t('orders.newOrder')} onPress={() => router.replace('/orders')} />
+          <PrimaryButton
+            label={t('orders.newOrder')}
+            onPress={() => router.dismissTo(isWaiter ? '/new-order' : '/orders')}
+          />
           <GhostButton label={t('orders.goHome')} onPress={() => router.push('/bills')} />
         </StickyFooter>
       </SafeAreaView>
