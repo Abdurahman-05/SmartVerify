@@ -138,6 +138,8 @@ export default function TabsLayout() {
               tabBarBadge: unread > 0 ? (unread > 99 ? '99+' : unread) : undefined,
             }}
           />
+          {/* Open bills: a page inside the tabs (so the nav stays), not a tab button itself. */}
+          <Tabs.Screen name="bills" options={{ title: t('bills.title'), href: null }} />
           <Tabs.Screen
             name="profile"
             options={{ title: t('nav.profile'), tabBarIcon: ProfileIcon }}
