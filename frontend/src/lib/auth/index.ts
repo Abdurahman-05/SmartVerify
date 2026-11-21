@@ -13,6 +13,9 @@ export const signIn = USE_MOCK_AUTH ? mock.signIn : real.signIn;
 export const createAccount: (input: real.RegisterInput) => Promise<SessionUser> = USE_MOCK_AUTH
   ? mock.createAccount
   : real.createAccount;
+// Shop app sign-up (no email); the mock has none to ask for, so it is the same call.
+export const createShopAccount: (input: mock.CreateAccountInput) => Promise<SessionUser> =
+  USE_MOCK_AUTH ? mock.createAccount : real.createShopAccount;
 // The mock keeps no token: sign-out is local only and there is no session to restore at start.
 export const signOut: () => Promise<void> = USE_MOCK_AUTH ? async () => {} : real.signOut;
 export const getMe: () => Promise<SessionUser | null> = USE_MOCK_AUTH

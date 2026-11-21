@@ -1,1 +1,1 @@
-export { default } from '@/features/auth/CreateAccountScreen';
+export { default } from '@/features/auth/ShopCreateAccountScreen';

@@ -38,6 +38,13 @@ export async function createAccount(input: RegisterInput): Promise<SessionUser> 
   return res.user;
 }
 
+/** POST /auth/register-shop. Shop owner: name, shop name, phone and a 4-digit PIN; no email. */
+export async function createShopAccount(input: CreateAccountInput): Promise<SessionUser> {
+  const res = await api<AuthResponse>('/auth/register-shop', { method: 'POST', body: input });
+  await saveToken(res.token, true);
+  return res.user;
+}
+
 /** POST /auth/change-pin — needs the current PIN. Other devices are signed out. */
 export async function changePin(currentPin: string, newPin: string): Promise<void> {
   await api('/auth/change-pin', { method: 'POST', body: { currentPin, newPin } });

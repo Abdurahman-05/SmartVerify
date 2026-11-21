@@ -26,7 +26,8 @@ import { Text } from '@/components/ui/Text';
 import { useBrandColors } from '@/store/theme';
 import { ApiError } from '@/lib/api/client';
 import { errorMessageKey } from '@/lib/errors';
-import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
+import { digitsOnly, formatPhone, localPhoneDigits, PHONE_DIGITS } from '@/lib/format';
+import { isNormalApp } from '@/lib/variant';
 import { randomPin, staffKey, type StaffRole } from '@/lib/staff';
 import { createStaff, inviteManager } from '@/services/authService';
 import { useSession } from '@/store/session';
@@ -38,7 +39,7 @@ import { isStaffLimit, StaffLimitSheet } from './StaffLimitSheet';
 import { GlassCard, PrimaryButton, SecondaryButton } from '@/ui/glass';
 
 /** Waiters and chefs get a PIN of 4 to 6 digits from the owner or manager. */
-const STAFF_PIN_MAX = 6;
+const STAFF_PIN_MAX = isNormalApp ? 4 : 6;
 
 const schema = z
   .object({
@@ -56,8 +57,12 @@ const schema = z
       if (!z.email().max(254).safeParse(v.email.trim()).success) {
         ctx.addIssue({ code: 'custom', path: ['email'], message: 'auth.errors.email' });
       }
-    } else if (!/^\d{4,6}$/.test(v.pin)) {
-      ctx.addIssue({ code: 'custom', path: ['pin'], message: 'staff.errors.pin' });
+    } else if (!(isNormalApp ? /^\d{4}$/ : /^\d{4,6}$/).test(v.pin)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['pin'],
+        message: isNormalApp ? 'staff.errors.pin4' : 'staff.errors.pin',
+      });
     }
   });
 
@@ -276,10 +281,14 @@ export default function AddStaffScreen() {
               prefix="+251"
               placeholder={t('auth.phonePlaceholder')}
               value={formatPhone(field.value)}
-              onChangeText={(text) => field.onChange(digitsOnly(text, PHONE_DIGITS))}
+              onChangeText={(text) =>
+                field.onChange(
+                  isNormalApp ? localPhoneDigits(text) : digitsOnly(text, PHONE_DIGITS)
+                )
+              }
               onBlur={field.onBlur}
               keyboardType="number-pad"
-              maxLength={11}
+              maxLength={isNormalApp ? 16 : 11}
               error={err(errors.phone?.message)}
             />
           )}
@@ -299,7 +308,7 @@ export default function AddStaffScreen() {
               name="pin"
               render={({ field }) => (
                 <Input
-                  label={t('staff.pin')}
+                  label={t(isNormalApp ? 'staff.pin4' : 'staff.pin')}
                   placeholder={t('staff.pinPlaceholder')}
                   value={field.value}
                   onChangeText={(text) => field.onChange(digitsOnly(text, STAFF_PIN_MAX))}

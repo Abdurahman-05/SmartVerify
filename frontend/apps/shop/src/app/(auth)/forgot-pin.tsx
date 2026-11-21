@@ -1,1 +1,1 @@
-export { default } from '@/features/auth/ForgotPinScreen';
+export { default } from '@/features/auth/ShopForgotPinScreen';

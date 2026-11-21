@@ -20,7 +20,7 @@ import { Text } from '@/components/ui/Text';
 import { useFullFieldFeedback } from '@/hooks/useFullFieldFeedback';
 import { signIn, signOut } from '@/lib/auth';
 import { errorMessageKey } from '@/lib/errors';
-import { digitsOnly, formatPhone, PHONE_DIGITS } from '@/lib/format';
+import { digitsOnly, formatPhone, localPhoneDigits, PHONE_DIGITS } from '@/lib/format';
 import { belongsToOtherApp, isNormalApp } from '@/lib/variant';
 import { signInWithEmail } from '@/services/authService';
 import { homeRouteFor, useSession } from '@/store/session';
@@ -61,7 +61,14 @@ export default function SignInScreen() {
     formState: { errors },
   } = useForm<SignInFormValues>({
     resolver: zodResolver(signInFormSchema),
-    defaultValues: { mode: 'owner', email: '', phone: '', pin: '', rememberMe: true },
+    // Shop app: phone + PIN only (the form's "staff" mode), no email and no tabs.
+    defaultValues: {
+      mode: isNormalApp ? 'staff' : 'owner',
+      email: '',
+      phone: '',
+      pin: '',
+      rememberMe: true,
+    },
   });
   const mode = useWatch({ control, name: 'mode' });
 
@@ -118,17 +125,19 @@ export default function SignInScreen() {
                 {t('pin.reset.done')}
               </Text>
             ) : null}
-            <Segmented
-              options={[
-                { value: 'owner', label: t('auth.ownerTab') },
-                { value: 'staff', label: t('auth.staffTab') },
-              ]}
-              value={mode}
-              onChange={(next) => {
-                setValue('mode', next);
-                clearErrors();
-              }}
-            />
+            {isNormalApp ? null : (
+              <Segmented
+                options={[
+                  { value: 'owner', label: t('auth.ownerTab') },
+                  { value: 'staff', label: t('auth.staffTab') },
+                ]}
+                value={mode}
+                onChange={(next) => {
+                  setValue('mode', next);
+                  clearErrors();
+                }}
+              />
+            )}
 
             {mode === 'owner' ? (
               <Controller
@@ -167,13 +176,17 @@ export default function SignInScreen() {
                       prefix="+251"
                       placeholder={t('auth.phonePlaceholder')}
                       value={formatPhone(field.value)}
-                      onChangeText={(text) => field.onChange(phoneFull.limit(text, field.value))}
+                      onChangeText={(text) =>
+                        field.onChange(
+                          phoneFull.limit(isNormalApp ? localPhoneDigits(text) : text, field.value)
+                        )
+                      }
                       onBlur={field.onBlur}
                       keyboardType="number-pad"
                       textContentType="telephoneNumber"
                       autoComplete="tel"
                       // "912 345 678" is 11 characters; one more lets an extra digit reach `limit`.
-                      maxLength={12}
+                      maxLength={isNormalApp ? 16 : 12}
                       error={errorText(errors.phone?.message)}
                     />
                   </Animated.View>

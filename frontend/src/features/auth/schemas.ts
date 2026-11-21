@@ -4,6 +4,9 @@ import { z } from 'zod';
 export const PIN_LENGTH = 6;
 export const STAFF_PIN_LENGTH = 4;
 
+/** Shop app: the owner chooses a 4-digit PIN (the restaurant owner's has 6). */
+export const SHOP_PIN_LENGTH = 4;
+
 const phone = z.string().regex(/^[79]\d{8}$/, 'auth.errors.phone');
 const pin = z.string().regex(new RegExp(`^\\d{${PIN_LENGTH}}$`), 'auth.errors.pin');
 
@@ -51,6 +54,16 @@ export const createAccountSchema = z.object({
   pin,
   acceptTerms: z.boolean().refine((v) => v, 'auth.errors.terms'),
 });
+
+/** Shop app sign-up: no email. The phone is the 9 digits after +251. */
+export const createShopAccountSchema = z.object({
+  fullName: z.string().trim().min(2, 'auth.errors.fullName'),
+  businessName: z.string().trim().min(2, 'auth.errors.shopName'),
+  phone: z.string().regex(/^[79]\d{8}$/, 'auth.errors.phoneShop'),
+  pin: z.string().regex(new RegExp(`^\\d{${SHOP_PIN_LENGTH}}$`), 'auth.errors.pin'),
+  acceptTerms: z.boolean().refine((v) => v, 'auth.errors.terms'),
+});
+export type CreateShopAccountValues = z.infer<typeof createShopAccountSchema>;
 
 export type SignInValues = z.infer<typeof signInSchema>;
 export type SignInFormValues = z.infer<typeof signInFormSchema>;
