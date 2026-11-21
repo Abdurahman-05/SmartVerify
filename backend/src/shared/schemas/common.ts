@@ -4,6 +4,8 @@ import { z } from 'zod';
 export const phoneSchema = z.string().regex(/^[79]\d{8}$/);
 /** Owner PIN, chosen at Create Account. */
 export const ownerPinSchema = z.string().regex(/^\d{6}$/);
+/** Staff PIN, and the Shop app owner's PIN: 4 digits. */
+export const staffPinSchema = z.string().regex(/^\d{4}$/);
 /** Sign-in accepts the owner's 6-digit or a staff member's 4-digit PIN. */
 export const anyPinSchema = z.string().regex(/^\d{4,6}$/);
 

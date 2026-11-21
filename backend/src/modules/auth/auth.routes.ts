@@ -6,6 +6,7 @@ import {
   errorResponseSchema,
   ownerPinSchema,
   phoneSchema,
+  staffPinSchema,
 } from '../../shared/schemas/common.js';
 
 import { createAuthService } from './auth.service.js';
@@ -104,6 +105,31 @@ export const publicAuthRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (request, reply) => reply.status(201).send(await auth.register(request.body))
+  );
+
+  app.post(
+    '/auth/register-shop',
+    {
+      config: { rateLimit: { max: REGISTER_MAX_PER_HOUR, timeWindow: '1 hour' } },
+      schema: {
+        tags: ['auth'],
+        description:
+          'Shop app sign-up: name, shop name, phone and a 4-digit PIN. No email and no code ' +
+          '(TODO: SMS code). Same session answer as /auth/register.',
+        body: z.object({
+          fullName: z.string().trim().min(2).max(80),
+          businessName: z.string().trim().min(2).max(120),
+          phone: phoneSchema,
+          pin: staffPinSchema,
+        }),
+        response: {
+          201: authResponse,
+          409: errorResponseSchema.describe('PHONE_TAKEN'),
+          429: errorResponseSchema,
+        },
+      },
+    },
+    async (request, reply) => reply.status(201).send(await auth.registerShop(request.body))
   );
 
   app.post(

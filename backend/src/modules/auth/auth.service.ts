@@ -22,6 +22,19 @@ export interface RegisterInput {
   pin: string;
 }
 
+/** Shop sign-up: phone + PIN only, no email. TODO: confirm the phone with an SMS code. */
+export interface RegisterShopInput {
+  fullName: string;
+  businessName: string;
+  phone: string;
+  /** 4 digits. */
+  pin: string;
+}
+
+/** Shop accounts lock after this many wrong PINs in a row, whatever the device. */
+const PIN_MAX_FAILS = 5;
+const PIN_LOCK_MS = 15 * 60_000;
+
 export interface SignInInput {
   phone: string;
   pin: string;
@@ -109,6 +122,31 @@ export function createAuthService(app: FastifyInstance) {
       }
     },
 
+    /** Shop owner: no email, no code. Creates the owner, the business (no plan yet) and the membership. */
+    async registerShop(input: RegisterShopInput) {
+      if (await prisma.user.findUnique({ where: { phone: input.phone } })) {
+        throw new AppError('PHONE_TAKEN');
+      }
+      const pinHash = await hashPin(input.pin);
+      try {
+        const member = await prisma.$transaction(async (tx) => {
+          const user = await tx.user.create({
+            data: { name: input.fullName, phone: input.phone, pinHash },
+          });
+          const business = await tx.business.create({
+            data: { name: input.businessName, ownerId: user.id },
+          });
+          return tx.businessMember.create({
+            data: { businessId: business.id, userId: user.id, role: 'owner' },
+          });
+        });
+        return openSession(member.userId, member.id, true);
+      } catch (error) {
+        if (isUniqueViolation(error)) throw new AppError('PHONE_TAKEN');
+        throw error;
+      }
+    },
+
     /** Owner or active staff. Every failure looks the same to the caller. */
     async signIn(input: SignInInput) {
       return checkPinAndOpen({ phone: input.phone }, input.pin, input.rememberMe);
@@ -131,13 +169,14 @@ export function createAuthService(app: FastifyInstance) {
      * (owner 6, staff 4). Other devices are signed out; this one stays signed in.
      */
     async changePin(auth: AuthContext, currentPin: string, newPin: string) {
-      const length = auth.role === 'owner' ? 6 : 4;
+      const user = await prisma.user.findUniqueOrThrow({ where: { id: auth.userId } });
+      // A shop owner (no email) has a 4-digit PIN like staff; a restaurant owner has 6.
+      const length = auth.role === 'owner' && user.email ? 6 : 4;
       if (!new RegExp(`^\\d{${length}}$`).test(newPin)) {
         throw new AppError('VALIDATION_ERROR', { reason: 'pinLength', length });
       }
       if (newPin === currentPin) throw new AppError('VALIDATION_ERROR', { reason: 'samePin' });
 
-      const user = await prisma.user.findUniqueOrThrow({ where: { id: auth.userId } });
       if (!(await verifyPin(user.pinHash, currentPin))) throw new AppError('WRONG_CREDENTIALS');
 
       const pinHash = await hashPin(newPin);
@@ -166,8 +205,31 @@ export function createAuthService(app: FastifyInstance) {
       await verifyAgainstDummy(pin);
       throw new AppError('WRONG_CREDENTIALS');
     }
-    const pinOk = await verifyPin(user.pinHash, pin);
     const member = user.membership;
+    // Shop accounts (a shop owner without email, or anyone in a Normal-plan business) are locked
+    // for 15 minutes after 5 wrong PINs in a row. Restaurant accounts keep the IP limit only.
+    const shopAccount =
+      !!member &&
+      (member.business.plan === 'normal' ||
+        member.business.plan === 'normal_multi' ||
+        (member.role === 'owner' && !user.email));
+    if (shopAccount && user.pinLockedUntil && user.pinLockedUntil > new Date()) {
+      throw new AppError('RATE_LIMITED');
+    }
+    const pinOk = await verifyPin(user.pinHash, pin);
+    if (shopAccount) {
+      const fails = pinOk ? 0 : user.failedPinAttempts + 1;
+      const lock = !pinOk && fails >= PIN_MAX_FAILS;
+      if (pinOk ? user.failedPinAttempts > 0 : true) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            failedPinAttempts: lock ? 0 : fails,
+            pinLockedUntil: lock ? new Date(Date.now() + PIN_LOCK_MS) : null,
+          },
+        });
+      }
+    }
     if (
       !pinOk ||
       !member ||
