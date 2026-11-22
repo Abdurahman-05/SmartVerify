@@ -12,8 +12,8 @@ import { AppError } from '../../shared/errors/app-error.js';
 import { errorResponseSchema, idParamSchema, phoneSchema } from '../../shared/schemas/common.js';
 
 const staffRoleSchema = z.enum(['manager', 'waiter', 'chef']);
-/** Staff PINs have 4 digits (the owner's has 6). */
-const staffPinSchema = z.string().regex(/^\d{4}$/);
+/** Staff PINs have 4 digits (the Restaurant app) or 6 (the Shop app); the owner's has 6. */
+const staffPinSchema = z.string().regex(/^(\d{4}|\d{6})$/);
 
 const staffSchema = z.object({
   id: z.string().describe('The membership id: use it in /staff/:id'),

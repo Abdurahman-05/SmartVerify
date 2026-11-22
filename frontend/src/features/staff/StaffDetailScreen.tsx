@@ -18,6 +18,7 @@ import { Text } from '@/components/ui/Text';
 import { Pill } from '@/features/orders/Pill';
 import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly, formatPhone } from '@/lib/format';
+import { isNormalApp } from '@/lib/variant';
 import {
   getStaff,
   randomPin,
@@ -36,7 +37,7 @@ import { isStaffLimit, StaffLimitSheet } from './StaffLimitSheet';
 import { ActivePill, RolePill } from './StaffScreen';
 import { GlassCard, PrimaryButton, SecondaryButton } from '@/ui/glass';
 
-const STAFF_PIN_DIGITS = 4;
+const STAFF_PIN_DIGITS = isNormalApp ? 6 : 4;
 
 const schema = z.object({
   name: z.string().trim().min(2, 'staff.errors.name'),
@@ -316,7 +317,7 @@ function StaffForm({ member }: { member: StaffMember }) {
               </View>
             ) : null}
             <Input
-              label={t('staff.newTempPin')}
+              label={t(isNormalApp ? 'staff.newTempPin6' : 'staff.newTempPin')}
               placeholder={t('staff.pinPlaceholder')}
               value={pin}
               onChangeText={(text) => {
@@ -325,7 +326,9 @@ function StaffForm({ member }: { member: StaffMember }) {
               }}
               keyboardType="number-pad"
               maxLength={STAFF_PIN_DIGITS}
-              error={pinError ? t('staff.errors.pin') : undefined}
+              error={
+                pinError ? t(isNormalApp ? 'staff.errors.pin6' : 'staff.errors.pin') : undefined
+              }
             />
             <View className="flex-row gap-2">
               <View className="flex-1">
@@ -336,7 +339,7 @@ function StaffForm({ member }: { member: StaffMember }) {
                   onPress={() => {
                     setResetDone(null);
                     setPinError(false);
-                    setPin(randomPin());
+                    setPin(randomPin(STAFF_PIN_DIGITS));
                   }}
                 />
               </View>

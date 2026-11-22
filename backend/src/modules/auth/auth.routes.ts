@@ -6,7 +6,6 @@ import {
   errorResponseSchema,
   ownerPinSchema,
   phoneSchema,
-  staffPinSchema,
 } from '../../shared/schemas/common.js';
 
 import { createAuthService } from './auth.service.js';
@@ -114,13 +113,13 @@ export const publicAuthRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: {
         tags: ['auth'],
         description:
-          'Shop app sign-up: name, shop name, phone and a 4-digit PIN. No email and no code ' +
+          'Shop app sign-up: name, shop name, phone and a 6-digit PIN. No email and no code ' +
           '(TODO: SMS code). Same session answer as /auth/register.',
         body: z.object({
           fullName: z.string().trim().min(2).max(80),
           businessName: z.string().trim().min(2).max(120),
           phone: phoneSchema,
-          pin: staffPinSchema,
+          pin: ownerPinSchema,
         }),
         response: {
           201: authResponse,

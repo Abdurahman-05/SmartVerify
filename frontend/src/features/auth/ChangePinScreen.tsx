@@ -14,6 +14,7 @@ import { ApiError } from '@/lib/api/client';
 import { changePin } from '@/lib/auth';
 import { errorMessageKey } from '@/lib/errors';
 import { digitsOnly } from '@/lib/format';
+import { isNormalApp } from '@/lib/variant';
 import { homeRouteFor, useSession } from '@/store/session';
 import { colors } from '@/theme/tokens';
 
@@ -32,7 +33,7 @@ export default function ChangePinScreen() {
   const role = user?.role;
   // Signed in with a PIN the owner or manager set: choosing a new one is required, not optional.
   const forced = Boolean(user?.pinIsTemporary);
-  const length = role === 'owner' ? PIN_LENGTH : STAFF_PIN_LENGTH;
+  const length = role === 'owner' || isNormalApp ? PIN_LENGTH : STAFF_PIN_LENGTH;
   const [values, setValues] = useState<Record<Field, string>>({ current: '', next: '', again: '' });
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [show, setShow] = useState(false);

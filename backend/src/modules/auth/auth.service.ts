@@ -27,7 +27,7 @@ export interface RegisterShopInput {
   fullName: string;
   businessName: string;
   phone: string;
-  /** 4 digits. */
+  /** 6 digits. */
   pin: string;
 }
 
@@ -170,9 +170,9 @@ export function createAuthService(app: FastifyInstance) {
      */
     async changePin(auth: AuthContext, currentPin: string, newPin: string) {
       const user = await prisma.user.findUniqueOrThrow({ where: { id: auth.userId } });
-      // A shop owner (no email) has a 4-digit PIN like staff; a restaurant owner has 6.
-      const length = auth.role === 'owner' && user.email ? 6 : 4;
-      if (!new RegExp(`^\\d{${length}}$`).test(newPin)) {
+      // The owner has 6 digits; staff 4 (Restaurant app) or 6 (Shop app).
+      const length = auth.role === 'owner' ? 6 : 4;
+      if (!(auth.role === 'owner' ? /^\d{6}$/ : /^(\d{4}|\d{6})$/).test(newPin)) {
         throw new AppError('VALIDATION_ERROR', { reason: 'pinLength', length });
       }
       if (newPin === currentPin) throw new AppError('VALIDATION_ERROR', { reason: 'samePin' });

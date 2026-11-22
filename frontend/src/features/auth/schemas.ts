@@ -4,8 +4,8 @@ import { z } from 'zod';
 export const PIN_LENGTH = 6;
 export const STAFF_PIN_LENGTH = 4;
 
-/** Shop app: the owner chooses a 4-digit PIN (the restaurant owner's has 6). */
-export const SHOP_PIN_LENGTH = 4;
+/** Shop app: owner and staff PINs have 6 digits. */
+export const SHOP_PIN_LENGTH = 6;
 
 const phone = z.string().regex(/^[79]\d{8}$/, 'auth.errors.phone');
 const pin = z.string().regex(new RegExp(`^\\d{${PIN_LENGTH}}$`), 'auth.errors.pin');

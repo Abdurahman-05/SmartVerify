@@ -13,10 +13,10 @@ export const resetStaffPin = USE_MOCK_STAFF ? mock.resetStaffPin : real.resetSta
 
 export const staffKey = ['staff'] as const;
 
-/** A random 4-digit PIN to offer when the owner does not want to think of one. */
-export function randomPin(): string {
+/** A random PIN (4 digits; the Shop app asks for 6) to offer when the owner does not want to think of one. */
+export function randomPin(digits = 4): string {
   const values = new Uint32Array(1);
   if (globalThis.crypto?.getRandomValues) globalThis.crypto.getRandomValues(values);
   else values[0] = Math.floor(Math.random() * 0xffffffff);
-  return String(values[0] % 10000).padStart(4, '0');
+  return String(values[0] % 10 ** digits).padStart(digits, '0');
 }

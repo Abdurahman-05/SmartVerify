@@ -39,7 +39,7 @@ import { isStaffLimit, StaffLimitSheet } from './StaffLimitSheet';
 import { GlassCard, PrimaryButton, SecondaryButton } from '@/ui/glass';
 
 /** Waiters and chefs get a PIN of 4 to 6 digits from the owner or manager. */
-const STAFF_PIN_MAX = isNormalApp ? 4 : 6;
+const STAFF_PIN_MAX = 6;
 
 const schema = z
   .object({
@@ -57,11 +57,11 @@ const schema = z
       if (!z.email().max(254).safeParse(v.email.trim()).success) {
         ctx.addIssue({ code: 'custom', path: ['email'], message: 'auth.errors.email' });
       }
-    } else if (!(isNormalApp ? /^\d{4}$/ : /^\d{4,6}$/).test(v.pin)) {
+    } else if (!(isNormalApp ? /^\d{6}$/ : /^\d{4,6}$/).test(v.pin)) {
       ctx.addIssue({
         code: 'custom',
         path: ['pin'],
-        message: isNormalApp ? 'staff.errors.pin4' : 'staff.errors.pin',
+        message: isNormalApp ? 'staff.errors.pin6' : 'staff.errors.pin',
       });
     }
   });
@@ -308,7 +308,7 @@ export default function AddStaffScreen() {
               name="pin"
               render={({ field }) => (
                 <Input
-                  label={t(isNormalApp ? 'staff.pin4' : 'staff.pin')}
+                  label={t(isNormalApp ? 'staff.pin6' : 'staff.pin')}
                   placeholder={t('staff.pinPlaceholder')}
                   value={field.value}
                   onChangeText={(text) => field.onChange(digitsOnly(text, STAFF_PIN_MAX))}
@@ -329,7 +329,9 @@ export default function AddStaffScreen() {
               label={t('staff.generatePin')}
               icon={Shuffle}
               size="md"
-              onPress={() => setValue('pin', randomPin(), { shouldValidate: true })}
+              onPress={() =>
+                setValue('pin', randomPin(isNormalApp ? 6 : 4), { shouldValidate: true })
+              }
             />
           </View>
         )}

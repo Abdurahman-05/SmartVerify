@@ -19,24 +19,24 @@ const shop = {
   fullName: 'Abebe Kebede',
   businessName: 'Bole Mart',
   phone: '912345678',
-  pin: '1234',
+  pin: '123456',
 };
 
-describe('shop sign-up (phone + 4-digit PIN, no email)', () => {
+describe('shop sign-up (phone + 6-digit PIN, no email)', () => {
   it('creates the owner without an email, then signs in by phone', async () => {
     const res = await post('/auth/register-shop', shop);
     expect(res.statusCode).toBe(201);
     const user = await app.prisma.user.findUniqueOrThrow({ where: { phone: shop.phone } });
     expect(user.email).toBeNull();
-    expect(user.pinHash).not.toContain('1234');
-    const again = await post('/auth/sign-in', { phone: shop.phone, pin: '1234' });
+    expect(user.pinHash).not.toContain('123456');
+    const again = await post('/auth/sign-in', { phone: shop.phone, pin: '123456' });
     expect(again.statusCode).toBe(200);
   });
 
-  it('refuses a taken phone and a 6-digit PIN', async () => {
+  it('refuses a taken phone and a 4-digit PIN', async () => {
     await post('/auth/register-shop', shop);
     expect((await post('/auth/register-shop', shop)).statusCode).toBe(409);
-    const six = await post('/auth/register-shop', { ...shop, phone: '922222222', pin: '123456' });
+    const six = await post('/auth/register-shop', { ...shop, phone: '922222222', pin: '1234' });
     expect(six.statusCode).toBe(400);
   });
 
@@ -46,7 +46,7 @@ describe('shop sign-up (phone + 4-digit PIN, no email)', () => {
     const read = () => app.prisma.user.findUniqueOrThrow({ where: { phone } });
     for (let i = 0; i < 2; i++) await post('/auth/sign-in', { phone, pin: '9999' });
     expect((await read()).failedPinAttempts).toBe(2);
-    expect((await post('/auth/sign-in', { phone, pin: '1234' })).statusCode).toBe(200);
+    expect((await post('/auth/sign-in', { phone, pin: '123456' })).statusCode).toBe(200);
     expect((await read()).failedPinAttempts).toBe(0);
     // Five in a row: the account is locked (the sixth call would also meet the IP limit, so the
     // lock itself is read from the database).
