@@ -150,7 +150,12 @@ export default function ChoosePlanScreen() {
 
   const { prices } = planPrices;
   const normalPrice = prices.normal[period];
-  const chosenPrice = chosen === 'restaurant' ? prices.restaurant : normalPrice;
+  const chosenPrice =
+    chosen === 'restaurant'
+      ? prices.restaurant
+      : chosen === 'normal_multi'
+        ? prices.normalMulti
+        : normalPrice;
   const featureText = 'text-[13px] text-[#3E3539]';
 
   return (
@@ -244,6 +249,21 @@ export default function ChoosePlanScreen() {
               >
                 <Text className={featureText}>{t('plan.normalFeatures')}</Text>
               </PlanRow>
+
+              {/* Normal Multi: Shop app only, any number of phones, monthly only. */}
+              {isNormalApp ? (
+                <PlanRow
+                  name={t('plans.normal_multi')}
+                  priceEtb={prices.normalMulti}
+                  unit={t('plan.perMonthShort')}
+                  selected={chosen === 'normal_multi'}
+                  color={brand.primaryDeep}
+                  onPress={() => setChosen('normal_multi')}
+                >
+                  <Text className={featureText}>{t('plan.normalFeatures')}</Text>
+                  <Text className={featureText}>{t('subscription.anyDevices')}</Text>
+                </PlanRow>
+              ) : null}
 
               <PrimaryButton
                 accent
