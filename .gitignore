@@ -3,3 +3,6 @@
 .env
 
 .deploy-*.tar.gz
+
+# Shop environment IDs
+deploy/shop/config.env
