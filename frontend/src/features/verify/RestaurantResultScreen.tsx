@@ -15,6 +15,7 @@ import { ResultBadge } from '@/components/ui/ResultBadge';
 import { ScreenBackground } from '@/components/ui/ScreenBackground';
 import { StickyFooter } from '@/components/ui/StickyFooter';
 import { Text } from '@/components/ui/Text';
+import { useSession } from '@/store/session';
 import { usePaymentBill } from '@/features/bills/usePaymentBill';
 import type { Bill } from '@/features/bills/types';
 import { maskedNumberKey } from '@/features/bank-accounts/telebirr';
@@ -88,12 +89,14 @@ function ResultView({
   const router = useRouter();
   const short = outcome.status === 'short';
   const isCashBank = outcome.method === 'cash+bank';
+  // A restaurant waiter's open bills is their Verify tab (the nav stays).
+  const isWaiter = useSession((s) => s.user?.role === 'waiter' && s.user.plan === 'restaurant');
   const m = (v: number) => formatMoney(v, false);
 
   const done = () => {
     useRestaurantPay.getState().reset();
     useVerifyFlow.getState().finish();
-    router.dismissTo('/bills');
+    router.dismissTo(isWaiter ? '/pay' : '/bills');
   };
 
   const scanAgain = () => {
