@@ -9,7 +9,7 @@ import { listenToPushes, registerForPush } from '@/lib/push';
 import { belongsToOtherApp } from '@/lib/variant';
 import { useFeatures } from '@/store/features';
 import { targetOf } from '@/features/notifications/target';
-import { useSession, type Role } from '@/store/session';
+import { homeRouteFor, useSession, type Role } from '@/store/session';
 import { useBrandColors } from '@/store/theme';
 
 const ownerOnly: Role[] = ['owner'];
@@ -63,7 +63,8 @@ export default function AppLayout() {
   const allowed = guardedRoles[first];
   const blocked = !!role && !!allowed && !allowed.includes(role);
   useEffect(() => {
-    if (blocked) router.replace('/');
+    // Straight to that role's own home (not through the splash screen).
+    if (blocked) router.replace(homeRouteFor(useSession.getState().user));
   }, [blocked, router]);
   if (wrongApp) return <WrongAppScreen />;
   if (blocked) return null;
