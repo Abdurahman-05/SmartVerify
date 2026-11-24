@@ -43,6 +43,8 @@ export default function CashSavedScreen() {
     [...s.payments].reverse().find((p) => p.billId === id && p.method === 'cash')
   );
   const recordedBy = useSession((s) => s.user?.displayName ?? '');
+  // A restaurant waiter's open bills is their Verify tab (the nav stays).
+  const isWaiter = useSession((s) => s.user?.role === 'waiter' && s.user.plan === 'restaurant');
 
   if (pending) return <LoadingView />;
   if (!bill || !payment) return <Redirect href="/bills" />;
@@ -110,7 +112,7 @@ export default function CashSavedScreen() {
                 ])
               }
             />
-            <PrimaryButton label={t('cash.done')} onPress={() => router.dismissTo('/bills')} />
+            <PrimaryButton label={t('cash.done')} onPress={() => router.dismissTo(isWaiter ? '/pay' : '/bills')} />
           </View>
         </ScrollView>
       </SafeAreaView>
