@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import { Redirect, useRouter } from 'expo-router';
 import { Bell, Lock, ShieldCheck } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ActionTile } from '@/components/ui/ActionTile';
@@ -19,6 +19,7 @@ import { billsKey, getBills } from '@/lib/bills';
 import { getPaymentsSummary, paymentsKey, paymentsSummaryKey, syncPayments } from '@/lib/history';
 import { useSession, type Plan, type SessionUser } from '@/store/session';
 import { colors } from '@/theme/tokens';
+import { isNormalApp } from '@/lib/variant';
 import { AccessBanner } from '@/features/business/AccessBanner';
 import { LocationPrompt } from '@/features/business/LocationPrompt';
 
@@ -33,6 +34,10 @@ const TAG_YELLOW = '#FACC15';
 function HomeHeader({ user }: { user: SessionUser }) {
   const { t } = useTranslation();
   const g = useGlass();
+  const router = useRouter();
+  // The bell and the avatar open their pages in the Restaurant app (the Shop app is unchanged).
+  const open = (href: '/notifications' | '/profile') =>
+    isNormalApp ? undefined : () => router.navigate(href);
   const hello =
     user.role === 'manager'
       ? t('home.hi', { name: user.displayName })
@@ -58,14 +63,21 @@ function HomeHeader({ user }: { user: SessionUser }) {
         </Text>
       </View>
       <View className="flex-row items-center gap-2">
-        <GlassCard radius={22} accessibilityLabel={t('home.notifications')}>
+        <GlassCard
+          radius={22}
+          onPress={open('/notifications')}
+          accessibilityLabel={t('home.notifications')}
+        >
           <View className="h-11 w-11 items-center justify-center">
             <Bell size={20} color={colors.text} strokeWidth={2} />
             <View className="absolute right-[9px] top-2 h-[9px] w-[9px] rounded-full bg-alert" />
           </View>
         </GlassCard>
-        <View
-          accessible
+        <Pressable
+          onPress={open('/profile')}
+          disabled={isNormalApp}
+          hitSlop={4}
+          accessibilityRole={isNormalApp ? undefined : 'button'}
           accessibilityLabel={t('home.profile')}
           className="h-11 w-11 items-center justify-center rounded-full"
           style={{ backgroundColor: g.primaryDeep }}
@@ -73,7 +85,7 @@ function HomeHeader({ user }: { user: SessionUser }) {
           <Text font="bold" tone="inverse" className="text-lg">
             {user.displayName.charAt(0).toUpperCase()}
           </Text>
-        </View>
+        </Pressable>
       </View>
     </View>
   );
@@ -297,7 +309,13 @@ export default function HomeScreen() {
               height={60}
               label={t('home.verifyPayment')}
               icon={ShieldCheck}
-              onPress={() => router.push(user.plan === 'restaurant' ? '/bills' : '/verify')}
+              onPress={() => {
+                if (user.plan !== 'restaurant') router.push('/verify');
+                // With the count tag: exactly those waiting tables. Otherwise every open bill.
+                else if (tablesWaiting)
+                  router.push({ pathname: '/bills', params: { only: 'tables' } });
+                else router.push('/bills');
+              }}
               trailing={
                 user.plan === 'restaurant' && tablesWaiting ? (
                   <View

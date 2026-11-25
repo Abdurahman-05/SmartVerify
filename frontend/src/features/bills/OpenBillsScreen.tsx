@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import {
   Armchair,
   Bike,
@@ -147,6 +147,8 @@ export default function OpenBillsScreen() {
   const [scope, setScope] = useState<'mine' | 'all'>(isWaiter ? 'mine' : 'all');
   const [searching, setSearching] = useState(false);
   const [search, setSearch] = useState('');
+  // Home's "N tables waiting" button lists only the dine-in tables.
+  const { only } = useLocalSearchParams<{ only?: string }>();
 
   const query = useQuery({
     queryKey: billsKey(scope),
@@ -164,7 +166,8 @@ export default function OpenBillsScreen() {
   if (query.isError && !query.data && isNetworkError(query.error)) {
     return <NoConnection onRetry={() => void refetch()} />;
   }
-  const all = query.data ?? [];
+  const bills = query.data ?? [];
+  const all = only === 'tables' ? bills.filter((b) => b.type === 'dine') : bills;
   // Search by table number, order number, customer name or area.
   const term = search.trim().toLowerCase();
   const shown = term
