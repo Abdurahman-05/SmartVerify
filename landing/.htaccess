@@ -1,0 +1,13 @@
+# gebtual.com.et on the Tele Plesk hosting (httpdocs). Does not affect relay.php.
+AddType application/vnd.android.package-archive .apk
+
+<IfModule mod_deflate.c>
+	AddOutputFilterByType DEFLATE text/html
+</IfModule>
+
+# www → the bare domain
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteCond %{HTTP_HOST} ^www\.gebtual\.com\.et$ [NC]
+	RewriteRule ^ https://gebtual.com.et%{REQUEST_URI} [R=301,L]
+</IfModule>

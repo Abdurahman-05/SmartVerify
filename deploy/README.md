@@ -54,3 +54,44 @@ docker compose --env-file /opt/smartverify/.env.compose start api
 ```
 
 (The server itself may only write backups, not read them; restore from a downloaded copy.)
+
+## Landing page (gebtual.com.et)
+
+One static file, `landing/index.html`, on the Ethio Telecom Plesk hosting (not the AWS server;
+`api.gebtual.com.et` stays on AWS). The web root `httpdocs/` also holds `relay.php`: keep it.
+
+From the repo root (Git Bash):
+
+```sh
+sh deploy/landing.sh                      # page only
+sh deploy/landing.sh path/to/app.apk      # page + https://gebtual.com.et/download/gebtual.apk
+```
+
+No reload is needed. If `scp` is refused, upload `landing/index.html` and `landing/.htaccess` to
+`httpdocs/` in Plesk → Files, and the app to `httpdocs/download/gebtual.apk`.
+
+To turn the download buttons on, set `DOWNLOAD_URL = "/download/gebtual.apk";` at the bottom of
+`landing/index.html` after the app is uploaded, then deploy again.
+
+One-time setup:
+
+- Before the first upload, look in `httpdocs/`: the script replaces `index.html` and `.htaccess`.
+  If an `.htaccess` is already there, merge its lines into `landing/.htaccess` first.
+- Plesk → SSL/TLS Certificates → Let's Encrypt: reissue with "www.gebtual.com.et" included
+  (HTTPS is renewed automatically).
+- Plesk → Hosting Settings: "Preferred domain" = `gebtual.com.et` (301 from www), and keep the
+  HTTP → HTTPS redirect on.
+
+DNS (Ethio Telecom Hosting Portal → DNS, both already set): `A @ → 213.55.96.150` and
+`A www → 213.55.96.150`. Leave `api`, MX and TXT records as they are.
+
+Check after deploying:
+
+```sh
+curl -I https://gebtual.com.et/                       # 200
+curl -I https://www.gebtual.com.et/                   # 301 to https://gebtual.com.et/
+curl -I https://gebtual.com.et/download/gebtual.apk   # Content-Type: application/vnd.android.package-archive
+```
+
+If the app's Content-Type is wrong, nginx is serving it directly: in Plesk → Apache & nginx
+Settings, remove `apk` from the files nginx serves, or add the type under "MIME types".
