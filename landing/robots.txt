@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /relay.php
+
+Sitemap: https://gebtual.com.et/sitemap.xml

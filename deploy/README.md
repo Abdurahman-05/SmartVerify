@@ -57,7 +57,7 @@ docker compose --env-file /opt/smartverify/.env.compose start api
 
 ## Landing page (gebtual.com.et)
 
-One static file, `landing/index.html`, on the Ethio Telecom Plesk hosting (not the AWS server;
+One static page, `landing/index.html` (plus icon, logo, `robots.txt`, `sitemap.xml`), on the Ethio Telecom Plesk hosting (not the AWS server;
 `api.gebtual.com.et` stays on AWS). The web root `httpdocs/` also holds `relay.php`: keep it.
 
 From the repo root (Git Bash):
@@ -67,12 +67,11 @@ sh deploy/landing.sh                      # page only
 sh deploy/landing.sh path/to/app.apk      # page + https://gebtual.com.et/download/gebtual.apk
 ```
 
-No reload is needed. The Tele hosting closes `scp` connections, so upload `index.html`, `.htaccess`
-and `favicon.ico` from `landing/` to `httpdocs/` in Plesk → Files, and the app to
-`httpdocs/download/gebtual.apk`.
+No reload is needed. The Tele hosting closes `scp` connections, so upload the files in `landing/`
+to `httpdocs/` in Plesk → Files.
 
-To turn the download buttons on, set `DOWNLOAD_URL = "/download/gebtual.apk";` at the bottom of
-`landing/index.html` after the app is uploaded, then deploy again.
+The download buttons use `DOWNLOAD_URL` at the bottom of `landing/index.html` (APKPure; the same
+link is in the page's `ld+json` block). Change `lastmod` in `sitemap.xml` after content changes.
 
 One-time setup:
 
