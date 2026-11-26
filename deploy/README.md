@@ -67,15 +67,16 @@ sh deploy/landing.sh                      # page only
 sh deploy/landing.sh path/to/app.apk      # page + https://gebtual.com.et/download/gebtual.apk
 ```
 
-No reload is needed. If `scp` is refused, upload `landing/index.html` and `landing/.htaccess` to
-`httpdocs/` in Plesk → Files, and the app to `httpdocs/download/gebtual.apk`.
+No reload is needed. The Tele hosting closes `scp` connections, so upload `index.html`, `.htaccess`
+and `favicon.ico` from `landing/` to `httpdocs/` in Plesk → Files, and the app to
+`httpdocs/download/gebtual.apk`.
 
 To turn the download buttons on, set `DOWNLOAD_URL = "/download/gebtual.apk";` at the bottom of
 `landing/index.html` after the app is uploaded, then deploy again.
 
 One-time setup:
 
-- Before the first upload, look in `httpdocs/`: the script replaces `index.html` and `.htaccess`.
+- Before the first upload, look in `httpdocs/`: the upload replaces `index.html`, `.htaccess` and `favicon.ico`.
   If an `.htaccess` is already there, merge its lines into `landing/.htaccess` first.
 - Plesk → SSL/TLS Certificates → Let's Encrypt: reissue with "www.gebtual.com.et" included
   (HTTPS is renewed automatically).
