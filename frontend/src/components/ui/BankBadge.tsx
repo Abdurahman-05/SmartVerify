@@ -24,7 +24,7 @@ const INITIALS: Record<string, string> = {
 /** Real logos of the banks we have one for (assets/images/banks). */
 const LOGOS: Record<string, number> = {
   CBE: require('../../../assets/images/banks/cbe.jpg') as number,
-  CBB: require('../../../assets/images/banks/cbe-birr.jpg') as number,
+  CBB: require('../../../assets/images/banks/cbe-birr.png') as number,
   TEL: require('../../../assets/images/banks/telebirr.webp') as number,
   DAS: require('../../../assets/images/banks/dashen.png') as number,
   BOA: require('../../../assets/images/banks/boa.jpg') as number,
