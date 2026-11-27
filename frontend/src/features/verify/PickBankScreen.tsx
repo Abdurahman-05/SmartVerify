@@ -29,17 +29,19 @@ import { PrimaryButton, SecondaryButton } from '@/ui/glass';
 function BigBankButton({ bank, onPress }: { bank: PayerBank; onPress: () => void }) {
   const { t } = useTranslation();
   return (
-    <GlassCard
-      onPress={onPress}
-      accessibilityLabel={`${bank.labelKey ? t(bank.labelKey) : bank.name}, ${t('verifyBank.canCheck')}`}
-      containerStyle={{ flex: 1 }}
-      style={{ alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 16 }}
-    >
-      <BankBadge code={bank.code} size={64} />
-      <Text font="bold" className="text-base" numberOfLines={1}>
-        {bank.shortName}
-      </Text>
-    </GlassCard>
+    // The wrapper takes the equal share of the row; a flex on the pressable card is not applied.
+    <View className="flex-1">
+      <GlassCard
+        onPress={onPress}
+        accessibilityLabel={`${bank.labelKey ? t(bank.labelKey) : bank.name}, ${t('verifyBank.canCheck')}`}
+        style={{ alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 16 }}
+      >
+        <BankBadge code={bank.code} size={64} />
+        <Text font="bold" className="text-base" numberOfLines={1}>
+          {bank.shortName}
+        </Text>
+      </GlassCard>
+    </View>
   );
 }
 
