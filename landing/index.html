@@ -119,19 +119,16 @@ footer nav{padding:0;gap:20px}
 <p data-en="Android app (APK). Your phone may ask you to allow installs from this source. The iPhone version is not available yet." data-am="የአንድሮይድ መተግበሪያ (APK)። ስልክዎ ከዚህ ምንጭ መጫንን እንዲፈቅዱ ሊጠይቅ ይችላል። የiPhone ስሪት ገና አልተገኘም።">Android app (APK). Your phone may ask you to allow installs from this source. The iPhone version is not available yet.</p>
 <a class="btn" data-dl id="dlmain" href="#download"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg><span data-en="Download for Android" data-am="ለአንድሮይድ አውርድ">Download for Android</span></a></div></section>
 </main>
-<footer><span>© Gebtual</span><nav><a id="privacy" href="#"><span data-en="Privacy" data-am="የግላዊነት ፖሊሲ">Privacy</span></a><a href="mailto:support@gebtual.com.et">support@gebtual.com.et</a></nav></footer>
+<footer><span>© Gebtual</span><nav><a href="mailto:support@gebtual.com.et">support@gebtual.com.et</a></nav></footer>
 </div></div>
 <script>
 /* Paste your download link here (APKPure page or the APK file address). */
 var DOWNLOAD_URL = "";
-var API = "https://api.gebtual.com.et";
 function setLang(l){
   document.documentElement.lang = l;
   document.querySelectorAll("[data-am]").forEach(function(el){ el.textContent = l === "am" ? el.getAttribute("data-am") : el.getAttribute("data-en"); });
   document.getElementById("en").setAttribute("aria-pressed", l === "en");
   document.getElementById("am").setAttribute("aria-pressed", l === "am");
-  var s = l === "am" ? "/am" : "";
-  document.getElementById("privacy").href = API + "/privacy" + s;
   try { localStorage.setItem("gebtual-lang", l); } catch (e) {}
 }
 document.getElementById("en").onclick = function(){ setLang("en"); };
