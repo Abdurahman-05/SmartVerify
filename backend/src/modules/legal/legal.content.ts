@@ -16,8 +16,8 @@ export interface Section {
 }
 
 export const LAST_UPDATED: Record<Lang, string> = {
-  en: '18 November 2026',
-  am: 'ኅዳር 9 ቀን 2019 ዓ.ም.',
+  en: '28 November 2026',
+  am: 'ኅዳር 19 ቀን 2019 ዓ.ም.',
 };
 
 export const UI: Record<
@@ -50,7 +50,7 @@ export function sections(kind: Kind, lang: Lang, c: Contact): Section[] {
         {
           h: 'About this policy',
           p: [
-            `ገብቷል (Gebtual / Smart Verify) is a mobile app that helps Ethiopian restaurants and shops check bank and Telebirr payments and run orders, bills and reports. It is run by ${c.company}. This policy explains what we collect, why, and your choices.`,
+            `ገብቷል (Gebtual / Smart Verify) is a mobile app that helps Ethiopian shops and businesses check bank and Telebirr payments and see reports. It is run by ${c.company}. This policy explains what we collect, why, and your choices.`,
           ],
         },
         {
@@ -60,7 +60,7 @@ export function sections(kind: Kind, lang: Lang, c: Contact): Section[] {
             '- Staff names and phone numbers.',
             '- PINs. We store only a hashed form, never the PIN itself.',
             '- Business name and location (address and GPS point).',
-            '- Orders, bills and tips, and expenses and purchases you record.',
+            '- Business records you enter, such as sales, expenses and purchases.',
             '- Bank account names and numbers you add so payments can be checked.',
             '- Payment references and receipt photos you submit for checking.',
             '- Your device push token, so we can send notifications.',
@@ -71,7 +71,7 @@ export function sections(kind: Kind, lang: Lang, c: Contact): Section[] {
           h: 'Why we use it',
           p: [
             '- To verify payments.',
-            '- To run orders and reports for your business.',
+            '- To run records and reports for your business.',
             '- To send notifications.',
             '- For subscription billing.',
             '- For support.',
@@ -82,7 +82,7 @@ export function sections(kind: Kind, lang: Lang, c: Contact): Section[] {
           p: [
             '- Location: to set your business location. Optional.',
             '- Camera and photos: to read payment receipts.',
-            '- Notifications: to tell you about payments and orders.',
+            '- Notifications: to tell you about payments and your business activity.',
           ],
         },
         {
@@ -128,7 +128,7 @@ export function sections(kind: Kind, lang: Lang, c: Contact): Section[] {
         {
           h: 'ስለዚህ ፖሊሲ',
           p: [
-            `ገብቷል (Gebtual / Smart Verify) የኢትዮጵያ ምግብ ቤቶችና ሱቆች የባንክና የቴሌብር ክፍያዎችን እንዲያረጋግጡ፣ ትዕዛዞችን፣ ሂሳቦችንና ሪፖርቶችን እንዲያስተዳድሩ የሚረዳ የሞባይል መተግበሪያ ነው። የሚያስተዳድረው ${c.company} ነው። ይህ ፖሊሲ ምን እንደምንሰበስብ፣ ለምን እንደሆነና ምርጫዎ ምን እንደሆነ ያብራራል።`,
+            `ገብቷል (Gebtual / Smart Verify) የኢትዮጵያ ሱቆችና ንግዶች የባንክና የቴሌብር ክፍያዎችን እንዲያረጋግጡ እና ሪፖርቶችን እንዲያዩ የሚረዳ የሞባይል መተግበሪያ ነው። የሚያስተዳድረው ${c.company} ነው። ይህ ፖሊሲ ምን እንደምንሰበስብ፣ ለምን እንደሆነና ምርጫዎ ምን እንደሆነ ያብራራል።`,
           ],
         },
         {
@@ -138,7 +138,7 @@ export function sections(kind: Kind, lang: Lang, c: Contact): Section[] {
             '- የሠራተኞች ስምና ስልክ ቁጥር።',
             '- ፒን። የምናስቀምጠው የተመሰጠረ (hash) ቅጽ ብቻ ነው፤ ፒኑን ራሱ አናስቀምጥም።',
             '- የንግድ ስምና ቦታ (አድራሻና ጂፒኤስ)።',
-            '- የሚመዘግቧቸው ትዕዛዞች፣ ሂሳቦች፣ ቲፕ፣ ወጪዎችና ግዢዎች።',
+            '- የሚያስገቧቸው የንግድ መዝገቦች፣ ለምሳሌ ሽያጭ፣ ወጪዎችና ግዢዎች።',
             '- ክፍያ ለመፈተሽ የሚያስገቡት የባንክ ሂሳብ ስምና ቁጥር።',
             '- ለማረጋገጥ የሚያስገቡት የክፍያ ማጣቀሻና የደረሰኝ ፎቶ።',
             '- ማሳወቂያ ለመላክ የስልክዎ የማሳወቂያ ቶከን።',
@@ -149,7 +149,7 @@ export function sections(kind: Kind, lang: Lang, c: Contact): Section[] {
           h: 'ለምን እንጠቀምበታለን',
           p: [
             '- ክፍያዎችን ለማረጋገጥ።',
-            '- የንግድዎን ትዕዛዞችና ሪፖርቶች ለማስተዳደር።',
+            '- የንግድዎን መዝገቦችና ሪፖርቶች ለማስተዳደር።',
             '- ማሳወቂያ ለመላክ።',
             '- ለአባልነት ክፍያ።',
             '- ለድጋፍ።',
@@ -160,7 +160,7 @@ export function sections(kind: Kind, lang: Lang, c: Contact): Section[] {
           p: [
             '- ቦታ፦ የንግድዎን ቦታ ለማስቀመጥ። አማራጭ ነው።',
             '- ካሜራና ፎቶዎች፦ የክፍያ ደረሰኞችን ለማንበብ።',
-            '- ማሳወቂያዎች፦ ስለ ክፍያዎችና ትዕዛዞች ለማሳወቅ።',
+            '- ማሳወቂያዎች፦ ስለ ክፍያዎችና የንግድ እንቅስቃሴዎ ለማሳወቅ።',
           ],
         },
         {
@@ -210,13 +210,13 @@ export function sections(kind: Kind, lang: Lang, c: Contact): Section[] {
         {
           h: 'Who can use it',
           p: [
-            'The app is for restaurant and shop owners and their staff, aged 18 or over. The owner is responsible for the staff they add and for everything done in the business account.',
+            'The app is for shop and business owners and their staff, aged 18 or over. The owner is responsible for the staff they add and for everything done in the business account.',
           ],
         },
         {
           h: 'Plans, payment and renewal',
           p: [
-            'There are two plans: Normal Verify (payment verification) and Restaurant Plus (everything in Normal Verify, plus ordering, billing and admin). Prices are shown in the app in ETB.',
+            'Available plans and their prices are shown in the app in ETB.',
             'Subscriptions are paid in advance for the period shown and renew each period. If you do not pay by the due date, we may limit or suspend access until you do. Paid periods are not refunded unless the law requires it.',
           ],
         },
@@ -243,7 +243,7 @@ export function sections(kind: Kind, lang: Lang, c: Contact): Section[] {
         {
           h: 'Limit of liability',
           p: [
-            'The app is provided as is. To the extent the law allows, we are not liable for lost sales, unpaid orders, wrong or late verification results, or other indirect losses. Our total liability is limited to the amount you paid us in the 3 months before the claim.',
+            'The app is provided as is. To the extent the law allows, we are not liable for lost sales, unpaid purchases, wrong or late verification results, or other indirect losses. Our total liability is limited to the amount you paid us in the 3 months before the claim.',
           ],
         },
         { h: 'Governing law', p: ['These terms are governed by the laws of Ethiopia.'] },
@@ -266,13 +266,13 @@ export function sections(kind: Kind, lang: Lang, c: Contact): Section[] {
         {
           h: 'ማን ሊጠቀም ይችላል',
           p: [
-            'መተግበሪያው ዕድሜያቸው 18 እና ከዚያ በላይ ለሆኑ የምግብ ቤትና የሱቅ ባለቤቶችና ሠራተኞቻቸው ነው። ባለቤቱ ለሚጨምራቸው ሠራተኞችና በንግድ መለያው ለሚደረግ ማንኛውም ነገር ኃላፊነት አለበት።',
+            'መተግበሪያው ዕድሜያቸው 18 እና ከዚያ በላይ ለሆኑ የሱቅና የንግድ ባለቤቶችና ሠራተኞቻቸው ነው። ባለቤቱ ለሚጨምራቸው ሠራተኞችና በንግድ መለያው ለሚደረግ ማንኛውም ነገር ኃላፊነት አለበት።',
           ],
         },
         {
           h: 'እቅዶች፣ ክፍያና እድሳት',
           p: [
-            'ሁለት እቅዶች አሉ፦ Normal Verify (ክፍያ ማረጋገጥ) እና Restaurant Plus (ሁሉም የNormal Verify ነገሮች፣ ከዚያ በተጨማሪ ትዕዛዝ፣ ሂሳብ አከፋፈልና አስተዳደር)። ዋጋዎች በመተግበሪያው በብር ይታያሉ።',
+            'ያሉት እቅዶችና ዋጋዎቻቸው በመተግበሪያው በብር ይታያሉ።',
             'አባልነት ለሚታየው ጊዜ አስቀድሞ ይከፈላል፤ በየጊዜው ይታደሳል። እስከ ክፍያ ቀን ካልከፈሉ እስኪከፍሉ ድረስ መዳረሻን ልንገድብ ወይም ልናግድ እንችላለን። ሕግ ካልጠየቀ በስተቀር የተከፈለ ጊዜ አይመለስም።',
           ],
         },
@@ -299,7 +299,7 @@ export function sections(kind: Kind, lang: Lang, c: Contact): Section[] {
         {
           h: 'የኃላፊነት ገደብ',
           p: [
-            'መተግበሪያው እንዳለ ይቀርባል። ሕግ በፈቀደው መጠን ለጠፋ ሽያጭ፣ ላልተከፈለ ትዕዛዝ፣ ለተሳሳተ ወይም ለዘገየ የማረጋገጫ ውጤት ወይም ለሌሎች ቀጥተኛ ላልሆኑ ኪሳራዎች ኃላፊነት የለብንም። ጠቅላላ ኃላፊነታችን ከጥያቄው በፊት በነበሩት 3 ወራት ለእኛ በከፈሉት መጠን የተገደበ ነው።',
+            'መተግበሪያው እንዳለ ይቀርባል። ሕግ በፈቀደው መጠን ለጠፋ ሽያጭ፣ ላልተከፈለ ግዢ፣ ለተሳሳተ ወይም ለዘገየ የማረጋገጫ ውጤት ወይም ለሌሎች ቀጥተኛ ላልሆኑ ኪሳራዎች ኃላፊነት የለብንም። ጠቅላላ ኃላፊነታችን ከጥያቄው በፊት በነበሩት 3 ወራት ለእኛ በከፈሉት መጠን የተገደበ ነው።',
           ],
         },
         { h: 'የሚገዛ ሕግ', p: ['እነዚህ ውሎች በኢትዮጵያ ሕጎች ይገዛሉ።'] },
