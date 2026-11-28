@@ -70,8 +70,11 @@ sh deploy/landing.sh path/to/app.apk      # page + https://gebtual.com.et/downlo
 No reload is needed. The Tele hosting closes `scp` connections, so upload the files in `landing/`
 to `httpdocs/` in Plesk → Files.
 
-The download buttons use `DOWNLOAD_URL` at the bottom of `landing/index.html` (APKPure; the same
-link is in the page's `ld+json` block). Change `lastmod` in `sitemap.xml` after content changes.
+The home page is currently the shop page. The restaurant page is kept in `docs/landing/restaurant.html`
+(outside the uploaded folder); to bring it back, copy it over `landing/index.html`.
+
+The download buttons use `DOWNLOAD_URL` at the bottom of `landing/index.html` (empty for now, so they
+only scroll to the download section). Change `lastmod` in `sitemap.xml` after content changes.
 
 One-time setup:
 

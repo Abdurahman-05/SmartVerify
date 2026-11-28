@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gebtual (ገብቷል) – Verify Telebirr &amp; Bank Payments in Ethiopia</title>
+<link rel="icon" href="/favicon.ico?v=2">
+<link rel="apple-touch-icon" href="/logo.png">
+<meta name="description" content="Gebtual (ገብቷል) is an Android app for restaurants in Ethiopia: verify Telebirr and bank payment receipts, block fake receipts, take orders and see daily reports.">
+<link rel="canonical" href="https://gebtual.com.et/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gebtual">
+<meta property="og:url" content="https://gebtual.com.et/">
+<meta property="og:title" content="Gebtual (ገብቷል) – Verify Telebirr &amp; Bank Payments in Ethiopia">
+<meta property="og:description" content="Check Telebirr and bank payments for your restaurant, so your team never accepts a fake receipt.">
+<meta property="og:image" content="https://gebtual.com.et/logo.png">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="am_ET">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[
+{"@type":"Organization","@id":"https://gebtual.com.et/#org","name":"Gebtual","alternateName":"ገብቷል","url":"https://gebtual.com.et/","logo":"https://gebtual.com.et/logo.png","email":"support@gebtual.com.et"},
+{"@type":"WebSite","name":"Gebtual","alternateName":"ገብቷል","url":"https://gebtual.com.et/","publisher":{"@id":"https://gebtual.com.et/#org"}},
+{"@type":"MobileApplication","name":"Gebtual","alternateName":"ገብቷል","operatingSystem":"Android","applicationCategory":"BusinessApplication","description":"Verify Telebirr and bank payments, take restaurant orders and see daily reports.","downloadUrl":"https://d.apkpure.com/b/APK/com.gebtual.app?version=latest","publisher":{"@id":"https://gebtual.com.et/#org"}}
+]}
+</script>
+<meta name="theme-color" content="#C04B0F">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=DM+Sans:wght@400;500;700&family=Noto+Sans+Ethiopic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FFF4EB;--bg2:#FFE3CF;--text:#1E1A1C;--sub:#5E5559;--p:#EA580C;--p2:#F97316;--deep:#C04B0F;--glass:rgba(255,255,255,.62);--glass-b:rgba(255,255,255,.95);--line:rgba(30,26,28,.1);--ok-bg:#DCFCE7;--ok:#166534;--bad-bg:#FEE2E2;--bad:#B91C1C;--shadow:rgba(192,75,15,.16);--glow:#FF9A5C;--scr1:#FFEFE3;--scr2:#FFD9BD;--st:#1E1A1C;--ss:#5E5559;--sg:rgba(255,255,255,.75)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1A1210;--bg2:#2A1A12;--text:#F8EDE6;--sub:#CBB9AE;--glass:rgba(255,255,255,.06);--glass-b:rgba(255,255,255,.14);--line:rgba(255,255,255,.14);--ok-bg:rgba(34,197,94,.16);--ok:#86EFAC;--bad-bg:rgba(239,68,68,.16);--bad:#FCA5A5;--shadow:rgba(0,0,0,.4);--glow:#C04B0F;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1A1210;--bg2:#2A1A12;--text:#F8EDE6;--sub:#CBB9AE;--glass:rgba(255,255,255,.06);--glass-b:rgba(255,255,255,.14);--line:rgba(255,255,255,.14);--ok-bg:rgba(34,197,94,.16);--ok:#86EFAC;--bad-bg:rgba(239,68,68,.16);--bad:#FCA5A5;--shadow:rgba(0,0,0,.4);--glow:#C04B0F;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans','Noto Sans Ethiopic',system-ui,sans-serif;line-height:1.55;overflow-x:hidden}
+h1,h2,h3{font-family:Sora,'Noto Sans Ethiopic',sans-serif;margin:0;text-wrap:balance}
+p{margin:0}
+a{color:inherit}
+.page{position:relative;overflow:hidden;min-height:100vh}
+.b{position:absolute;border-radius:50%;pointer-events:none;filter:blur(8px)}
+.b1{width:520px;height:520px;top:-160px;right:-140px;background:radial-gradient(closest-side,var(--glow),transparent);opacity:.38}
+.b2{width:420px;height:420px;top:620px;left:-160px;background:radial-gradient(closest-side,#FACC15,transparent);opacity:.22}
+.b3{width:460px;height:460px;bottom:240px;right:-180px;background:radial-gradient(closest-side,var(--p),transparent);opacity:.2}
+.wrap{position:relative;max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+nav{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:18px}
+.brand{display:flex;align-items:center;gap:10px;font-family:Sora,'Noto Sans Ethiopic',sans-serif;font-weight:700;font-size:20px;text-decoration:none}
+.nr{display:flex;align-items:center;gap:10px}
+.lang{display:flex;height:40px;border:2px solid var(--deep);border-radius:22px;overflow:hidden}
+.lang button{border:0;padding:0 14px;font:700 15px 'DM Sans','Noto Sans Ethiopic',sans-serif;background:transparent;color:var(--text);cursor:pointer}
+.lang button[aria-pressed="true"]{background:var(--deep);color:#fff}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:0 26px;border-radius:27px;background:var(--deep);color:#fff;font-weight:700;font-size:17px;text-decoration:none;border:0;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 12px 24px var(--shadow)}
+.btn.sm{min-height:40px;padding:0 18px;font-size:15px}
+.btn.ghost{background:var(--glass);color:var(--text);border:1px solid var(--line);box-shadow:none;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.btn:focus-visible,.lang button:focus-visible,a:focus-visible{outline:3px solid var(--p2);outline-offset:3px}
+.hero{display:grid;gap:36px;align-items:center;padding-block:28px 56px}
+.hero h1{font-size:clamp(34px,7vw,60px);line-height:1.1;font-weight:700}
+.hl{color:var(--deep)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hl{color:var(--p2)}}
+:root[data-theme="dark"] .hl{color:var(--p2)}
+.lead{font-size:clamp(17px,2.4vw,20px);color:var(--sub);margin-top:16px;max-width:34em}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.note{margin-top:14px;font-size:14px;color:var(--sub)}
+.phonewrap{position:relative;display:flex;justify-content:center;padding:8px 0}
+.phone{width:264px;border-radius:42px;background:#2A1D18;padding:9px;box-shadow:0 30px 60px var(--shadow);animation:fl 5s ease-in-out infinite}
+.scr{border-radius:34px;aspect-ratio:9/18;background:linear-gradient(var(--scr1),var(--scr2));color:var(--st);padding:18px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;position:relative;overflow:hidden}
+.scr .tt{font:700 13px Sora,sans-serif;margin-top:6px}
+.ok{width:92px;height:92px;border-radius:50%;background:#DCFCE7;color:#166534;display:grid;place-items:center;margin-top:12px;box-shadow:0 0 0 10px rgba(22,101,52,.1)}
+.scr .v{font:700 26px Sora,'Noto Sans Ethiopic',sans-serif;color:#166534}
+.scr .amt{font:700 30px Sora,sans-serif}
+.rows{width:100%;background:var(--sg);border:1px solid rgba(255,255,255,.9);border-radius:18px;padding:4px 12px;margin-top:6px}
+.rows div{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:8px 0}
+.rows div+div{border-top:1px solid rgba(30,26,28,.08)}
+.rows span:first-child{color:var(--ss)}.rows span:last-child{font-weight:700;text-align:right}
+.done{margin-top:auto;width:100%;height:42px;border-radius:21px;background:#C04B0F;color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px}
+.chip{position:absolute;display:flex;align-items:center;gap:7px;padding:7px 11px;border-radius:14px;font-weight:700;font-size:12px;white-space:nowrap;background:var(--bad-bg);color:var(--bad);border:1px solid var(--line);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 10px 24px var(--shadow)}
+.chip.c1{right:calc(50% - 222px);top:92px;animation:fl 4s ease-in-out infinite .6s}
+.chip.c2{left:calc(50% - 222px);top:150px;background:var(--ok-bg);color:var(--ok);animation:fl 4.6s ease-in-out infinite 1.2s}
+@media (max-width:559px){.phonewrap{flex-direction:column;align-items:center;gap:12px}.chip{position:static;animation:none}}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+section{padding-block:36px}
+h2{font-size:clamp(26px,4.6vw,38px);line-height:1.15;margin-bottom:22px}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.card{background:var(--glass);border:1px solid var(--glass-b);border-radius:24px;padding:20px;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 14px 34px var(--shadow)}
+.card h3{font-size:18px;margin-bottom:4px}
+.card p{color:var(--sub);font-size:15.5px}
+.card.f,.card.s{display:flex;gap:16px;align-items:flex-start}
+.card>div{min-width:0}
+.ico,.n{flex:none;width:48px;height:48px;border-radius:16px;background:var(--deep);color:#fff;display:grid;place-items:center;font:700 20px Sora,sans-serif}
+.grid3{grid-template-columns:1fr}
+.plans{display:flex;gap:18px;align-items:flex-start}
+.dl{text-align:center;padding:36px 20px;margin-block:20px 40px}
+.dl h2{margin-bottom:10px}
+.dl p{color:var(--sub);max-width:32em;margin:0 auto 22px}
+.dl .btn{margin:0 auto}
+footer{padding-block:28px 40px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:14px 24px;justify-content:space-between;align-items:center;font-size:14px;color:var(--sub)}
+footer nav{padding:0;gap:20px}
+@media (min-width:860px){.hero{grid-template-columns:1.1fr .9fr;padding-block:48px 72px}.grid3{grid-template-columns:repeat(3,1fr)}.grid3.two{grid-template-columns:repeat(3,1fr)}section{padding-block:48px}}
+@media (max-width:430px){.brand{font-size:18px}.lang button{padding:0 11px}.btn.sm{padding:0 14px;font-size:14px}}
+@media (prefers-reduced-motion:reduce){.phone,.chip{animation:none}}
+</style>
+</head>
+<body id="top-body">
+<div class="page"><span class="b b1" aria-hidden="true"></span><span class="b b2" aria-hidden="true"></span><span class="b b3" aria-hidden="true"></span>
+<div class="wrap">
+<nav><a class="brand" href="#top"><svg class="" height="34" viewBox="0 0 930 505" role="img" aria-label="Gebtual" style="width:auto"><path d="M5.7 267.3L6.3 275.3L10.3 283.3L17.3 289.3L27.3 292.7L190.7 292.0L188.0 272.7L188.3 243.7L187.3 242.7L30.7 243.0L23.0 245.0L14.7 250.3L9.0 257.3ZM69.0 196.0L71.7 203.0L76.0 208.3L82.3 212.3L89.7 214.3L192.0 214.3L198.7 189.7L208.7 165.7L91.3 166.0L80.0 171.0L73.0 178.3L69.0 188.0Z" fill="var(--deep)"/><path d="M296.3 84.3L279.0 102.0L262.3 123.0L247.0 147.3L234.0 174.7L224.0 205.0L219.0 230.0L217.0 252.3L218.7 285.7L222.3 306.7L230.0 332.3L240.3 356.3L258.3 386.7L278.3 411.7L303.3 435.7L323.0 450.7L350.3 467.3L374.7 478.7L397.0 486.7L420.0 492.7L448.0 497.3L473.3 499.0L619.3 499.0L650.3 494.7L671.3 488.3L695.0 477.3L718.0 463.7L741.0 446.3L756.7 431.3L774.0 411.3L790.7 387.7L805.3 363.0L814.3 344.0L822.3 323.0L828.7 299.0L831.7 278.7L831.0 268.3L827.0 259.3L820.7 253.7L809.3 250.0L707.0 249.7L696.3 250.7L685.3 255.3L649.0 286.0L601.0 328.3L712.0 328.7L713.7 329.7L714.3 331.7L687.3 362.0L670.7 378.3L639.7 402.3L627.0 406.0L471.7 406.0L443.0 402.3L418.7 395.3L397.3 385.7L380.7 375.7L365.7 364.3L349.7 348.3L340.0 336.0L331.0 321.3L324.0 306.3L317.3 285.3L314.3 257.7L315.7 238.3L320.0 217.7L327.3 197.7L336.3 180.7L352.7 158.7L366.7 144.7L386.3 129.7L403.3 119.7L423.0 111.0L448.0 103.7L465.3 100.7L487.0 99.3L649.3 99.7L661.7 97.7L671.3 91.7L739.0 27.3L741.3 23.0L741.7 19.0L740.3 15.3L737.0 12.0L728.3 9.3L483.0 9.3L449.3 12.3L406.3 22.0L388.7 28.0L365.7 37.7L341.3 50.7L326.3 60.3Z" fill="var(--deep)" fill-rule="evenodd"/><path d="M923.0 81.0L899.0 82.3L869.0 86.0L821.7 95.3L789.3 104.3L764.0 113.0L719.3 131.3L691.0 145.3L666.3 159.0L620.7 188.0L570.7 225.0L540.3 250.0L517.3 270.7L511.3 270.3L458.0 217.3L446.7 211.0L437.7 207.7L417.7 204.0L394.0 204.0L366.0 209.7L353.0 214.7L352.7 216.0L490.0 355.3L498.0 360.0L507.7 362.7L515.0 363.0L525.3 361.0L537.0 354.7L605.0 290.3L660.7 241.0L708.3 202.3L752.0 169.7L799.0 138.7L834.0 118.7L868.3 101.7L887.7 93.3Z" fill="var(--p2)"/></svg><span data-en="Gebtual" data-am="ገብቷል">Gebtual</span></a>
+<div class="nr"><div class="lang" role="group" aria-label="Language"><button type="button" id="en" aria-pressed="true">EN</button><button type="button" id="am" aria-pressed="false">አማ</button></div><a class="btn sm" data-dl href="#download"><span data-en="Download" data-am="አውርድ">Download</span></a></div></nav>
+<main id="top">
+<div class="hero"><div>
+<h1><span data-en="Know every payment is " data-am="እያንዳንዱ ክፍያ ">Know every payment is </span><span class="hl"><span data-en="real." data-am="እውነተኛ መሆኑን ይወቁ።">real.</span></span></h1>
+<p class="lead" data-en="Gebtual checks bank and Telebirr payments for your restaurant, so your team never accepts a fake receipt." data-am="ገብቷል የምግብ ቤትዎን የባንክና የቴሌብር ክፍያዎች ያረጋግጣል፤ ቡድንዎ የሐሰት ደረሰኝ ፈጽሞ አይቀበልም።">Gebtual checks bank and Telebirr payments for your restaurant, so your team never accepts a fake receipt.</p>
+<div class="cta"><a class="btn" data-dl href="#download"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg><span data-en="Download for Android" data-am="ለአንድሮይድ አውርድ">Download for Android</span></a><a class="btn ghost" href="#how"><span data-en="How it works" data-am="እንዴት ይሰራል">How it works</span></a></div>
+<p class="note" data-en="Explore first, pay later." data-am="መጀመሪያ ይመልከቱ፣ በኋላ ይክፈሉ።">Explore first, pay later.</p>
+</div>
+<div class="phonewrap" aria-hidden="true"><div class="phone"><div class="scr">
+<div class="tt"><span data-en="Payment checked" data-am="ክፍያ ተረጋግጧል">Payment checked</span></div>
+<div class="ok"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+<div class="v">ገብቷል</div><div class="amt">1,250 ETB</div>
+<div class="rows"><div><span><span data-en="To" data-am="ወደ">To</span></span><span>CBE · Shewa</span></div><div><span><span data-en="Status" data-am="ሁኔታ">Status</span></span><span><span data-en="Verified" data-am="ተረጋግጧል">Verified</span></span></div><div><span><span data-en="Time" data-am="ሰዓት">Time</span></span><span>2:14 PM</span></div></div>
+<div class="done"><span data-en="Done" data-am="ተጠናቋል">Done</span></div></div></div>
+<div class="chip c1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg><span data-en="Fake receipt blocked" data-am="የሐሰት ደረሰኝ ታግዷል">Fake receipt blocked</span></div>
+<div class="chip c2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-en="Account matches" data-am="ሒሳብ ይመሳሰላል">Account matches</span></div></div></div>
+<section id="how"><h2><span data-en="How it works" data-am="እንዴት ይሰራል">How it works</span></h2><ul class="grid3"><li class="card s"><span class="n" aria-hidden="true">1</span><div><h3 data-en="Choose the bank" data-am="ባንኩን ይምረጡ">Choose the bank</h3><p data-en="Pick the bank or Telebirr the customer paid with." data-am="ደንበኛው የከፈለበትን ባንክ ወይም ቴሌብር ይምረጡ።">Pick the bank or Telebirr the customer paid with.</p></div></li><li class="card s"><span class="n" aria-hidden="true">2</span><div><h3 data-en="Scan the receipt or take a photo" data-am="ደረሰኙን ስካን ያድርጉ ወይም ፎቶ ያንሱ">Scan the receipt or take a photo</h3><p data-en="Scan the receipt, take a photo of it, or paste its link or reference number." data-am="ደረሰኙን ስካን ያድርጉ፣ ፎቶ ያንሱ ወይም ሊንኩን ወይም ማጣቀሻ ቁጥሩን ይለጥፉ።">Scan the receipt, take a photo of it, or paste its link or reference number.</p></div></li><li class="card s"><span class="n" aria-hidden="true">3</span><div><h3 data-en="See the result" data-am="ውጤቱን ይመልከቱ">See the result</h3><p data-en="Verified, wrong amount or not found. Checked against your accounts." data-am="ተረጋግጧል፣ የተሳሳተ መጠን ወይም አልተገኘም። ከሒሳቦችዎ ጋር ተነጻጽሮ።">Verified, wrong amount or not found. Checked against your accounts.</p></div></li></ul></section>
+<section><h2><span data-en="Built for a restaurant, not just a bank check" data-am="ለምግብ ቤት የተሠራ">Built for a restaurant, not just a bank check</span></h2><ul class="grid3"><li class="card f"><span class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4h6v3H9z"/><path d="M7 5.5H6a1 1 0 0 0-1 1V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6.5a1 1 0 0 0-1-1h-1"/><path d="M9 12h6M9 16h4"/></svg></span><div><h3 data-en="Waiter sends the order to the chef" data-am="አስተናጋጁ በapp ትእዛዝ ወደ ሼፉ ይልካል">Waiter sends the order to the chef</h3><p data-en="The waiter takes the customer's order and sends it from the app to the chef, with the table number. No paper slips, no running to the kitchen." data-am="አስተናጋጁ የደንበኛውን ትእዛዝ ተቀብሎ በመተግበሪያው ከጠረጴዛ ቁጥር ጋር ወደ ሼፉ ይልካል። ወረቀትም ሆነ ወደ ወጥ ቤት መሮጥ አያስፈልግም።">The waiter takes the customer's order and sends it from the app to the chef, with the table number. No paper slips, no running to the kitchen.</p></div></li><li class="card f"><span class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></span><div><h3 data-en="Chef sees the order and cooks" data-am="ሼፉ ትእዛዙን ከapp ላይ አይቶ ምግቡን ይሰራል">Chef sees the order and cooks</h3><p data-en="A new order shows on the chef's kitchen screen right away, so it is clear what to cook. When it is done, the chef marks it ready with one tap." data-am="አዲስ ትእዛዝ ሲገባ ሼፉ በወጥ ቤት ማያው ላይ ወዲያው ያየዋል፤ ምን መሥራት እንዳለበት ግልጽ ነው። ሲጨርስም ዝግጁ መሆኑን በአንድ ንክኪ ያመለክታል።">A new order shows on the chef's kitchen screen right away, so it is clear what to cook. When it is done, the chef marks it ready with one tap.</p></div></li><li class="card f"><span class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 14a4 4 0 1 1 1-7.9A4 4 0 0 1 16 6a4 4 0 0 1 1 8v5H7z"/><path d="M7 17h10"/></svg></span><div><h3 data-en="When the food is ready, the chef notifies the waiter" data-am="ምግቡ ሲደርስ ሼፉ ለአስተናጋጁ Notification ይልካል">When the food is ready, the chef notifies the waiter</h3><p data-en="The waiter gets a notification on their phone as soon as the food is ready, so it reaches the table while it is hot." data-am="ምግቡ ዝግጁ ሲሆን አስተናጋጁ በስልኩ ወዲያው Notification ይደርሰዋል፤ ምግቡ ሳይቀዘቅዝ ወደ ጠረጴዛው ይደርሳል።">The waiter gets a notification on their phone as soon as the food is ready, so it reaches the table while it is hot.</p></div></li><li class="card f"><span class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg></span><div><h3 data-en="The app adds up the bill, checks the transfer by QR code and records any tip" data-am="ደንበኛው ያዘዘውን ምግብ ሂሳብ ደምሮ ትራንስፈሩን በQR-code ያረጋግጣል። ቲፕ ካለ ይመዘግባል">The app adds up the bill, checks the transfer by QR code and records any tip</h3><p data-en="The app adds up the bill for what the customer ordered. When the customer pays by bank, scan the receipt QR code to check the transfer. Cash payments and tips are recorded. No more crowding around asking if it arrived, taking the customer's phone to the cashier, sending money to a waiter's account, writing tips on paper, or getting the bill wrong." data-am="መተግበሪያው ደንበኛው ያዘዘውን ምግብ ሂሳብ ይደምራል። ደንበኛው በባንክ ሲከፍል የደረሰኙን QR-code ስካን በማድረግ ትራንስፈሩን ያረጋግጣሉ። የካሽ ክፍያና ቲፕ ይመዘገባል። ገባ አልገባም እያሉ መጨናነቅ፣ የደንበኛን ስልክ ካሸር ጋር መውሰድ፣ በአስተናጋጅ አካውንት ብር ማስገባት፣ ቲፕ በወረቀት መመዝገብ፣ ሂሳብ መሳሳት ድሮ ቀረ።">The app adds up the bill for what the customer ordered. When the customer pays by bank, scan the receipt QR code to check the transfer. Cash payments and tips are recorded. No more crowding around asking if it arrived, taking the customer's phone to the cashier, sending money to a waiter's account, writing tips on paper, or getting the bill wrong.</p></div></li><li class="card f"><span class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></span><div><h3 data-en="Daily reports" data-am="የዕለት ሪፖርት">Daily reports</h3><p data-en="Sales, money out and your top sellers at a glance." data-am="ሽያጭ፣ ወጪና ምርጥ ሻጭ ምግቦች በአንድ እይታ።">Sales, money out and your top sellers at a glance.</p></div></li><li class="card f"><span class="ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.3-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.8c1.6.9 2.7 2.5 3 5.2"/></svg></span><div><h3 data-en="A role for each person" data-am="ለእያንዳንዱ ሰው ሚና">A role for each person</h3><p data-en="Owner, manager, waiter and chef each see only what they need." data-am="ባለቤት፣ ሥራ አስኪያጅ፣ አስተናጋጅና ምግብ አብሳይ የሚያስፈልጋቸውን ብቻ ያያሉ።">Owner, manager, waiter and chef each see only what they need.</p></div></li></ul></section>
+<section><div class="card plans"><svg style="flex:none;color:var(--deep)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg><div><h3 data-en="Plans for every size" data-am="ለእያንዳንዱ መጠን ዕቅዶች">Plans for every size</h3><p data-en="Normal Verify checks payments only. Restaurant Plus adds orders, kitchen, cash, tips and reports. Prices are shown in the app." data-am="Normal Verify ክፍያ ማረጋገጥ ብቻ ነው። Restaurant Plus ትዕዛዝ፣ ወጥ ቤት፣ ጥሬ ገንዘብ፣ ቲፕና ሪፖርት ይጨምራል። ዋጋው በመተግበሪያው ውስጥ ይታያል።">Normal Verify checks payments only. Restaurant Plus adds orders, kitchen, cash, tips and reports. Prices are shown in the app.</p></div></div></section>
+<section id="download"><div class="card dl"><svg class="" height="56" viewBox="0 0 930 505" role="img" aria-label="Gebtual" style="width:auto"><path d="M5.7 267.3L6.3 275.3L10.3 283.3L17.3 289.3L27.3 292.7L190.7 292.0L188.0 272.7L188.3 243.7L187.3 242.7L30.7 243.0L23.0 245.0L14.7 250.3L9.0 257.3ZM69.0 196.0L71.7 203.0L76.0 208.3L82.3 212.3L89.7 214.3L192.0 214.3L198.7 189.7L208.7 165.7L91.3 166.0L80.0 171.0L73.0 178.3L69.0 188.0Z" fill="var(--deep)"/><path d="M296.3 84.3L279.0 102.0L262.3 123.0L247.0 147.3L234.0 174.7L224.0 205.0L219.0 230.0L217.0 252.3L218.7 285.7L222.3 306.7L230.0 332.3L240.3 356.3L258.3 386.7L278.3 411.7L303.3 435.7L323.0 450.7L350.3 467.3L374.7 478.7L397.0 486.7L420.0 492.7L448.0 497.3L473.3 499.0L619.3 499.0L650.3 494.7L671.3 488.3L695.0 477.3L718.0 463.7L741.0 446.3L756.7 431.3L774.0 411.3L790.7 387.7L805.3 363.0L814.3 344.0L822.3 323.0L828.7 299.0L831.7 278.7L831.0 268.3L827.0 259.3L820.7 253.7L809.3 250.0L707.0 249.7L696.3 250.7L685.3 255.3L649.0 286.0L601.0 328.3L712.0 328.7L713.7 329.7L714.3 331.7L687.3 362.0L670.7 378.3L639.7 402.3L627.0 406.0L471.7 406.0L443.0 402.3L418.7 395.3L397.3 385.7L380.7 375.7L365.7 364.3L349.7 348.3L340.0 336.0L331.0 321.3L324.0 306.3L317.3 285.3L314.3 257.7L315.7 238.3L320.0 217.7L327.3 197.7L336.3 180.7L352.7 158.7L366.7 144.7L386.3 129.7L403.3 119.7L423.0 111.0L448.0 103.7L465.3 100.7L487.0 99.3L649.3 99.7L661.7 97.7L671.3 91.7L739.0 27.3L741.3 23.0L741.7 19.0L740.3 15.3L737.0 12.0L728.3 9.3L483.0 9.3L449.3 12.3L406.3 22.0L388.7 28.0L365.7 37.7L341.3 50.7L326.3 60.3Z" fill="var(--deep)" fill-rule="evenodd"/><path d="M923.0 81.0L899.0 82.3L869.0 86.0L821.7 95.3L789.3 104.3L764.0 113.0L719.3 131.3L691.0 145.3L666.3 159.0L620.7 188.0L570.7 225.0L540.3 250.0L517.3 270.7L511.3 270.3L458.0 217.3L446.7 211.0L437.7 207.7L417.7 204.0L394.0 204.0L366.0 209.7L353.0 214.7L352.7 216.0L490.0 355.3L498.0 360.0L507.7 362.7L515.0 363.0L525.3 361.0L537.0 354.7L605.0 290.3L660.7 241.0L708.3 202.3L752.0 169.7L799.0 138.7L834.0 118.7L868.3 101.7L887.7 93.3Z" fill="var(--p2)"/></svg><h2 style="margin-top:14px"><span data-en="Get Gebtual on your phone" data-am="ገብቷልን በስልክዎ ያግኙ">Get Gebtual on your phone</span></h2>
+<p data-en="Android app (APK). Your phone may ask you to allow installs from this source. The iPhone version is not available yet." data-am="የአንድሮይድ መተግበሪያ (APK)። ስልክዎ ከዚህ ምንጭ መጫንን እንዲፈቅዱ ሊጠይቅ ይችላል። የiPhone ስሪት ገና አልተገኘም።">Android app (APK). Your phone may ask you to allow installs from this source. The iPhone version is not available yet.</p>
+<a class="btn" data-dl id="dlmain" href="#download"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg><span data-en="Download for Android" data-am="ለአንድሮይድ አውርድ">Download for Android</span></a></div></section>
+</main>
+<footer><span>© Gebtual</span><nav><a id="terms" href="#"><span data-en="Terms" data-am="ደንቦች">Terms</span></a><a id="privacy" href="#"><span data-en="Privacy" data-am="የግላዊነት ፖሊሲ">Privacy</span></a><a href="mailto:support@gebtual.com.et">support@gebtual.com.et</a></nav></footer>
+</div></div>
+<script>
+/* Paste your download link here (APKPure page or the APK file address). */
+var DOWNLOAD_URL = "https://d.apkpure.com/b/APK/com.gebtual.app?version=latest";
+var API = "https://api.gebtual.com.et";
+function setLang(l){
+  document.documentElement.lang = l;
+  document.querySelectorAll("[data-am]").forEach(function(el){ el.textContent = l === "am" ? el.getAttribute("data-am") : el.getAttribute("data-en"); });
+  document.getElementById("en").setAttribute("aria-pressed", l === "en");
+  document.getElementById("am").setAttribute("aria-pressed", l === "am");
+  var s = l === "am" ? "/am" : "";
+  document.getElementById("terms").href = API + "/terms" + s;
+  document.getElementById("privacy").href = API + "/privacy" + s;
+  try { localStorage.setItem("gebtual-lang", l); } catch (e) {}
+}
+document.getElementById("en").onclick = function(){ setLang("en"); };
+document.getElementById("am").onclick = function(){ setLang("am"); };
+if (DOWNLOAD_URL) document.querySelectorAll("[data-dl]").forEach(function(a){ a.href = DOWNLOAD_URL; });
+var saved = null; try { saved = localStorage.getItem("gebtual-lang"); } catch (e) {}
+setLang(saved || ((navigator.language || "").indexOf("am") === 0 ? "am" : "en"));
+</script>
+</body>
+</html>
